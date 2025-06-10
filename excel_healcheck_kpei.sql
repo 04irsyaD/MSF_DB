@@ -356,12 +356,12 @@ Sub ColorCodeDiskUsageAndStatus(ws As Worksheet, row As Long)
                     usageValue = CDbl(numStr)
                     ' Color based on usage percentage
                     If usageValue >= 90 Then
-                        ws.Cells(row, col).Interior.Color = RGB(255, 0, 0)      ' Red for >= 90%
-                        ws.Cells(row, col).Font.Color = RGB(255, 255, 255)     ' White text
+                        ws.Cells(row, col).Interior.Color = RGB(255, 255, 255)    ' Red for >= 90%
+                             ' White text
                     ElseIf usageValue >= 80 Then
-                        ws.Cells(row, col).Interior.Color = RGB(255, 165, 0)   ' Orange for >= 80%
+                        ws.Cells(row, col).Interior.Color = RGB(255, 255, 255)   ' Orange for >= 80%
                     ElseIf usageValue >= 70 Then
-                        ws.Cells(row, col).Interior.Color = RGB(255, 255, 0)   ' Yellow for >= 70%
+                        ws.Cells(row, col).Interior.Color = RGB(255, 255, 255)   ' Yellow for >= 70%
                     End If
                 End If
             End If
@@ -376,9 +376,9 @@ Sub ColorCodeDiskUsageAndStatus(ws As Worksheet, row As Long)
                 ws.Cells(row, col).Interior.Color = RGB(255, 0, 0)         ' Red for Critical/Error
                 ws.Cells(row, col).Font.Color = RGB(255, 255, 255)        ' White text
             ElseIf InStr(cellValue, "WARNING") > 0 Or InStr(cellValue, "WARN") > 0 Then
-                ws.Cells(row, col).Interior.Color = RGB(255, 165, 0)      ' Orange for Warning
+                ws.Cells(row, col).Interior.Color = RGB(255, 0, 0)      ' Orange for Warning
             ElseIf InStr(cellValue, "OK") > 0 Or InStr(cellValue, "NORMAL") > 0 Or InStr(cellValue, "GOOD") > 0 Then
-                ws.Cells(row, col).Interior.Color = RGB(0, 255, 0)        ' Green for OK/Normal/Good
+                ws.Cells(row, col).Interior.Color = RGB(255, 255, 255)       ' Green for OK/Normal/Good
             End If
         End If
     Next col
