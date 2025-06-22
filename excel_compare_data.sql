@@ -5,5 +5,5 @@
 
 --/Query 2
 
-=IFERROR(INDEX(W$2:W$800, MATCH(I2, V$2:V$800, 0)), "")
+    =IFERROR(INDEX(W$2:W$800, MATCH(I2, V$2:V$800, 0)), "")
 
