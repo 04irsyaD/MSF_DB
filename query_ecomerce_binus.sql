@@ -294,3 +294,10 @@ CREATE TABLE public.shipment (
 	deleted_at timestamptz(6) NULL,
 	constraint shipment_pk PRIMARY KEY (id)
 );
+
+CREATE TABLE public.role_permission (
+	id serial4 NOT NULL,
+	role_id int4 NOT NULL,
+	permission_id int4 NOT NULL,
+    constraint role_permission_pk PRIMARY KEY (id)
+);
