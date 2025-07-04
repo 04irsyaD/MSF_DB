@@ -1,3 +1,15 @@
+-- check nama owner database
+
+
+
+ SELECT u.usename 
+ FROM pg_database d
+  JOIN pg_user u ON (d.datdba = u.usesysid)
+ WHERE d.datname = (SELECT current_database());
+
+
+
+-- rubah owner table
 
 DO $$
 DECLARE
