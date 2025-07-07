@@ -6,6 +6,11 @@ CREATE SEQUENCE public.code_inventaris_asset_seq
 	CACHE 1
 	NO CYCLE;
 
+--- update sequence
+SELECT setval('nama_sequence', 150);
+
+
+
 --funtions
 
 CREATE OR REPLACE FUNCTION public.f_add_sequence_t_code_inventaris_asset()
