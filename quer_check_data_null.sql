@@ -27,3 +27,15 @@ FROM pg_stat_user_tables
 WHERE schemaname = 'nama_schema'
 AND n_tup_ins = 0
 ORDER BY tablename;
+
+
+--- v2
+-- PostgreSQL
+SELECT 
+    t.table_name,
+    COALESCE(s.n_tup_ins, 0) as row_count
+FROM information_schema.tables t
+LEFT JOIN pg_stat_user_tables s ON t.table_name = s.relname
+WHERE t.table_schema = 'nama_schema'
+AND t.table_type = 'BASE TABLE'
+AND COALESCE(s.n_tup_ins, 0) = 0;
