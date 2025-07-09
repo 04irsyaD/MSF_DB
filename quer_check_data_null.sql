@@ -17,3 +17,13 @@ BEGIN
         RAISE NOTICE 'Table: %, Non-null count: %', rec.table_name, result_count;
     END LOOP;
 END $$;
+
+----- Query to check for tables with no rows in a specific schema
+SELECT 
+    schemaname,
+    tablename,
+    n_tup_ins as total_rows
+FROM pg_stat_user_tables 
+WHERE schemaname = 'nama_schema'
+AND n_tup_ins = 0
+ORDER BY tablename;
