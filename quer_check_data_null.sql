@@ -1,41 +1,44 @@
--- PostgreSQL stored procedure example
 DO $$
 DECLARE
-    rec RECORD;
-    sql_query TEXT;
-    result_count INTEGER;
+    r RECORD;
+    c RECORD;
+    v_sql TEXT;
+    has_null BOOLEAN;
 BEGIN
-    FOR rec IN 
-        SELECT table_name 
-        FROM information_schema.columns 
-        WHERE table_schema = 'nama_schema' 
-        AND column_name = 'nama_kolom'
+    FOR r IN
+        SELECT table_schema, table_name
+        FROM information_schema.tables
+        WHERE table_type = 'BASE TABLE'
+          AND table_schema NOT IN ('pg_catalog', 'information_schema')
     LOOP
-        sql_query := 'SELECT COUNT(*) FROM ' || rec.table_name || ' WHERE nama_kolom IS NOT NULL';
-        EXECUTE sql_query INTO result_count;
-        
-        RAISE NOTICE 'Table: %, Non-null count: %', rec.table_name, result_count;
+        has_null := FALSE;
+
+        -- Loop kolom untuk tabel tersebut
+        FOR c IN
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = r.table_schema
+              AND table_name = r.table_name
+        LOOP
+            v_sql := FORMAT(
+                'SELECT 1 FROM %I.%I WHERE %I IS NULL LIMIT 1',
+                r.table_schema, r.table_name, c.column_name
+            );
+
+            BEGIN
+                EXECUTE v_sql;
+                IF FOUND THEN
+                    has_null := TRUE;
+                    EXIT; -- satu kolom NULL cukup, lanjut ke tabel berikutnya
+                END IF;
+            EXCEPTION
+                WHEN OTHERS THEN
+                    CONTINUE; -- Lewati error
+            END;
+        END LOOP;
+
+        IF has_null THEN
+            RAISE NOTICE 'TABEL DENGAN DATA NULL: %.%', r.table_schema, r.table_name;
+        END IF;
     END LOOP;
 END $$;
-
------ Query to check for tables with no rows in a specific schema
-SELECT 
-    schemaname,
-    tablename,
-    n_tup_ins as total_rows
-FROM pg_stat_user_tables 
-WHERE schemaname = 'nama_schema'
-AND n_tup_ins = 0
-ORDER BY tablename;
-
-
---- v2
--- PostgreSQL
-SELECT 
-    t.table_name,
-    COALESCE(s.n_tup_ins, 0) as row_count
-FROM information_schema.tables t
-LEFT JOIN pg_stat_user_tables s ON t.table_name = s.relname
-WHERE t.table_schema = 'nama_schema'
-AND t.table_type = 'BASE TABLE'
-AND COALESCE(s.n_tup_ins, 0) = 0;
