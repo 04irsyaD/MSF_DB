@@ -29,6 +29,7 @@ BEGIN
         FROM information_schema.columns
         WHERE table_schema = 'public'
           AND data_type IN ('character varying', 'text', 'char')
+          AND table_name <> 'not-table'
     LOOP
         RAISE NOTICE 'Memproses: %.% (kolom: %)', r.table_schema, r.table_name, r.column_name;
 
