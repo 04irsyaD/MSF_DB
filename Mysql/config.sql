@@ -5,3 +5,10 @@ select @@global.sql_mode as global_sql_mode, @@session.sql_mode as session_sql_m
 
 --  mysqladmin flush-hosts
 FLUSH HOSTS;
+
+
+-- check for max connections
+SHOW VARIABLES LIKE 'max_connections';
+
+-- fix flush hosts
+SET GLOBAL max_connections = 500;
