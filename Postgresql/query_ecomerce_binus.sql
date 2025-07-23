@@ -13,7 +13,6 @@ CREATE TABLE public."user" (
 	CONSTRAINT user_pkey PRIMARY KEY (id)
 );
 
-
 CREATE TABLE public."role" (
 	id serial4 NOT NULL,
 	name varchar NOT NULL,
@@ -31,16 +30,25 @@ CREATE TABLE public.user_role (
 	id serial4 NOT NULL,
 	user_id uuid NOT NULL,
 	role_id int4 NOT null,
-	CONSTRAINT user_role_pkey PRIMARY KEY (id)
+	CONSTRAINT user_role_pkey PRIMARY KEY (id),
+	CONSTRAINT FK_role_user_id foreign key(user_id) REFERENCES "user"(id),
+	CONSTRAINT FK_user_role_id foreign key(role_id) REFERENCES "role"(id)
+	
 );
 
 
+CREATE TABLE public."module" (
+	id serial4 NOT NULL,
+	nama varchar NOT NULL,
+	CONSTRAINT module_pkey PRIMARY KEY (id)
+);
 
 CREATE TABLE public."permission" (
 	id serial4 NOT NULL,
 	module_id int4 NULL,
 	"permission" varchar NOT null,
-	CONSTRAINT permission_pkey PRIMARY KEY (id)
+	CONSTRAINT permission_pkey PRIMARY KEY (id),
+	CONSTRAINT FK_permission_module_id foreign key(module_id) REFERENCES "module"(id)
 );
 
 
@@ -66,15 +74,11 @@ CREATE TABLE public.menu (
 	is_has_child bool NULL,
 	is_active bool NULL,
 	"order" int4 NULL,
-	CONSTRAINT menu_pkey PRIMARY KEY (id)
+	CONSTRAINT menu_pkey PRIMARY KEY (id),
+	CONSTRAINT FK_menu_permission_id foreign key(permission_id) REFERENCES "permission"(id)
 );
 
 
-CREATE TABLE public."module" (
-	id serial4 NOT NULL,
-	nama varchar NOT NULL,
-	CONSTRAINT module_pkey PRIMARY KEY (id)
-);
 
 
 CREATE TABLE public.t_content_notification (
@@ -148,6 +152,7 @@ CREATE TABLE public.product (
 	deleted_at timestamptz(6) NULL,
 	constraint product_pk PRIMARY KEY (id)
 );
+
 
 CREATE TABLE public.wishlist (
 	id uuid NOT NULL,
