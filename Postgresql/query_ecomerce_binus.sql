@@ -13,6 +13,32 @@ CREATE TABLE public."user" (
 	CONSTRAINT user_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE public."user_provider" (
+	id serial4 NOT NULL,
+	provider_name varchar(150) NOT NULL,
+	is_active bool NULL,
+	created_at timestamptz NULL,
+	updated_at timestamptz NULL,
+	deleted_at timestamptz NULL,
+	CONSTRAINT user_provider PRIMARY KEY (id)
+);
+
+CREATE TABLE public."otp_tokenr" (
+	id uuid NOT NULL,
+	user_id uuid not null,
+	identifier varchar(250),
+	code varchar(500),
+	is_used bool default false not null,
+	is_active bool NULL,
+	expired_at timestamptz null,
+	created_at timestamptz NULL,
+	updated_at timestamptz NULL,
+	deleted_at timestamptz NULL,
+	CONSTRAINT user_provider PRIMARY KEY (id)
+);
+
+
+
 CREATE TABLE public."role" (
 	id serial4 NOT NULL,
 	name varchar NOT NULL,
@@ -146,7 +172,7 @@ CREATE TABLE public.product (
 	mercant_id uuid null,
 	is_active bool NULL,
 	created_by_id varchar(50) NULL,
-	updated_by_id varchar(50) NULL,
+	updated_by_id varchar(50) NULL,f
 	created_at varchar(50) NULL,
 	updated_at varchar(50) NULL,
 	deleted_at timestamptz(6) NULL,
