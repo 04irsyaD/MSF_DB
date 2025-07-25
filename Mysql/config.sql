@@ -11,4 +11,4 @@ FLUSH HOSTS;
 SHOW VARIABLES LIKE 'max_connections';
 
 -- fix flush hosts
-SET GLOBAL max_connections = 500;
+    SET GLOBAL max_connections = 500;
