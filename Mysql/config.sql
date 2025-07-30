@@ -12,3 +12,5 @@ SHOW VARIABLES LIKE 'max_connections';
 
 -- fix flush hosts
     SET GLOBAL max_connections = 500;
+
+SELECT VERSION()
