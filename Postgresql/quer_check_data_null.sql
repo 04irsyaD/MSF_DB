@@ -1,3 +1,5 @@
+-- Script untuk memeriksa tabel dan kolom yang memiliki data NULL di PostgreSQL
+
 DO $$
 DECLARE
     r RECORD;
