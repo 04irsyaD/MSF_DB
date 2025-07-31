@@ -14,3 +14,6 @@ SHOW VARIABLES LIKE 'max_connections';
     SET GLOBAL max_connections = 500;
 
 SELECT VERSION()
+
+-- fix mysql flush hosts
+SET GLOBAL max_connect_errors = 10000;
