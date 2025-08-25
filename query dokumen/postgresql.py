@@ -1,17 +1,18 @@
-import psycopg2
+from sqlalchemy import create_engine
 import pandas as pd
 from docx import Document
+import os
 
 # ==============================
-# 1. Koneksi ke Database
+# 1. Koneksi ke Database via SQLAlchemy
 # ==============================
-conn = psycopg2.connect(
-    host="localhost",
-    port="5414",
-    user="postgres",
-    password="1234",
-    dbname="erm"
-)
+username = "postgres"
+password = "1234"
+host = "localhost"
+port = "5414"
+database = "erm"
+
+engine = create_engine(f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}")
 
 # ==============================
 # 2. Ambil Metadata Tabel & Kolom
@@ -28,7 +29,7 @@ WHERE table_schema = 'public'
 ORDER BY table_name, ordinal_position;
 """
 
-df = pd.read_sql(query, conn)
+df = pd.read_sql(query, engine)
 
 # ==============================
 # 3. Buat Dokumen Word
@@ -38,7 +39,7 @@ doc.add_heading('📘 Dokumentasi Database', 0)
 
 # Ringkasan umum
 doc.add_heading('1. Ringkasan Umum', level=1)
-doc.add_paragraph("Nama Database : nama_database")
+doc.add_paragraph(f"Nama Database : {database}")
 doc.add_paragraph("Tujuan/Fungsi : ")
 doc.add_paragraph("Digunakan oleh Aplikasi : ")
 doc.add_paragraph("Environment : Development / Staging / Production")
@@ -47,7 +48,7 @@ doc.add_paragraph("Versi DBMS : PostgreSQL")
 # Arsitektur
 doc.add_heading('2. Arsitektur Database', level=1)
 doc.add_paragraph("Jenis Database : PostgreSQL")
-doc.add_paragraph("Versi DBMS : 15.x (contoh)")
+doc.add_paragraph("Versi DBMS : (isi sesuai server)")
 doc.add_paragraph("Topologi : Standalone / Replication / Cluster")
 doc.add_paragraph("Diagram Arsitektur : (tambahkan jika ada)")
 
@@ -66,10 +67,8 @@ for table in df['table_name'].unique():
     doc.add_heading(f"Tabel: {table}", level=2)
     doc.add_paragraph("Deskripsi: (isi deskripsi fungsi tabel ini)")
     
-    # Filter kolom per tabel
     subset = df[df['table_name'] == table]
     
-    # Buat tabel Word
     word_table = doc.add_table(rows=1, cols=5)
     hdr_cells = word_table.rows[0].cells
     hdr_cells[0].text = 'Nama Kolom'
@@ -84,10 +83,10 @@ for table in df['table_name'].unique():
         row_cells[1].text = str(row['data_type'])
         row_cells[2].text = str(row['is_nullable'])
         row_cells[3].text = str(row['column_default'])
-        row_cells[4].text = ""  # bisa diisi manual nanti
+        row_cells[4].text = ""  # isi manual nanti
 
 # ==============================
-# 5. Bagian Lain (Security, Backup, dll)
+# 5. Bagian Lain
 # ==============================
 doc.add_heading('5. Stored Procedure, Function, & Trigger', level=1)
 doc.add_paragraph("(Lengkapi manual sesuai kebutuhan)")
@@ -113,4 +112,5 @@ doc.add_paragraph("(Lengkapi link ke wiki/SOP internal)")
 output_file = "Dokumentasi_PostgreSQL.docx"
 doc.save(output_file)
 
-print(f"✅ Dokumentasi berhasil dibuat: {output_file}")
+# Tampilkan lokasi absolut file
+print(f"✅ Dokumentasi berhasil dibuat: {os.path.abspath(output_file)}")
