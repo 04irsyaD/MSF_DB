@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 import pandas as pd
 from docx import Document
+from docx.shared import Inches
+from graphviz import Digraph
 import os
 
 # ==============================
@@ -15,7 +17,7 @@ database = "erm"       # ganti dengan nama database kamu
 engine = create_engine(f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}")
 
 # ==============================
-# 2. Ambil Metadata Tabel & Kolom
+# 2. Ambil Metadata Tables & Columns
 # ==============================
 query_tables = """
 SELECT
@@ -36,7 +38,7 @@ ORDER BY c.table_name, c.ordinal_position;
 df_tables = pd.read_sql(query_tables, engine)
 
 # ==============================
-# 3. Ambil Metadata Functions
+# 3. Functions
 # ==============================
 query_functions = """
 SELECT 
@@ -54,7 +56,7 @@ ORDER BY n.nspname, p.proname;
 df_functions = pd.read_sql(query_functions, engine)
 
 # ==============================
-# 4. Ambil Metadata Triggers
+# 4. Triggers
 # ==============================
 query_triggers = """
 SELECT 
@@ -71,7 +73,7 @@ ORDER BY c.relname, t.tgname;
 df_triggers = pd.read_sql(query_triggers, engine)
 
 # ==============================
-# 5. Ambil Metadata Views
+# 5. Views
 # ==============================
 query_views = """
 SELECT 
@@ -84,7 +86,47 @@ ORDER BY table_name;
 df_views = pd.read_sql(query_views, engine)
 
 # ==============================
-# 6. Buat Dokumen Word
+# 6. Foreign Keys (Relasi)
+# ==============================
+query_fk = """
+SELECT
+    tc.table_name AS source_table,
+    kcu.column_name AS source_column,
+    ccu.table_name AS target_table,
+    ccu.column_name AS target_column,
+    tc.constraint_name
+FROM information_schema.table_constraints AS tc
+JOIN information_schema.key_column_usage AS kcu
+    ON tc.constraint_name = kcu.constraint_name
+   AND tc.table_schema = kcu.table_schema
+JOIN information_schema.constraint_column_usage AS ccu
+    ON ccu.constraint_name = tc.constraint_name
+   AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_schema = 'public';
+"""
+df_fk = pd.read_sql(query_fk, engine)
+
+# ==============================
+# 7. Buat ERD dengan Graphviz
+# ==============================
+dot = Digraph(comment="ERD PostgreSQL", format="png")
+dot.attr("node", shape="box")
+
+# Tambah node tabel
+for table in df_tables["table_name"].unique():
+    dot.node(table)
+
+# Tambah edge untuk relasi FK
+for _, row in df_fk.iterrows():
+    dot.edge(row["source_table"], row["target_table"], 
+             label=f"{row['source_column']} → {row['target_column']}")
+
+erd_file = "ERD_PostgreSQL.png"
+dot.render("ERD_PostgreSQL", format="png", cleanup=True)
+
+# ==============================
+# 8. Buat Dokumen Word
 # ==============================
 doc = Document()
 doc.add_heading('📘 Dokumentasi Database', 0)
@@ -102,16 +144,21 @@ doc.add_heading('2. Arsitektur Database', level=1)
 doc.add_paragraph("Jenis Database : PostgreSQL")
 doc.add_paragraph("Versi DBMS : (isi sesuai server)")
 doc.add_paragraph("Topologi : Standalone / Replication / Cluster")
-doc.add_paragraph("Diagram Arsitektur : (tambahkan jika ada)")
+doc.add_paragraph("Diagram Arsitektur :")
+
+# Sisipkan ERD
+if os.path.exists(erd_file):
+    doc.add_picture(erd_file, width=Inches(6))
+    doc.add_paragraph("Gambar: ERD hasil generate otomatis dari relasi PK-FK.")
 
 # Skema Database
 doc.add_heading('3. Skema Database', level=1)
 doc.add_paragraph("Nama Schema : public")
 doc.add_paragraph("Deskripsi : Schema utama aplikasi")
-doc.add_paragraph("ERD : (lampirkan diagram terpisah jika ada)")
+doc.add_paragraph("ERD : (lihat gambar di atas)")
 
 # ==============================
-# 7. Loop per Tabel
+# 9. Loop per Tabel
 # ==============================
 doc.add_heading('4. Tabel & Struktur Data', level=1)
 
@@ -141,10 +188,9 @@ for table in df_tables['table_name'].unique():
         row_cells[5].text = str(row.column_description) if row.column_description else ""
 
 # ==============================
-# 8. Functions
+# 10. Functions
 # ==============================
 doc.add_heading('5. Stored Functions / Procedures', level=1)
-
 if df_functions.empty:
     doc.add_paragraph("Tidak ada function / procedure user-defined.")
 else:
@@ -161,15 +207,13 @@ else:
         r[0].text = str(row['schema'])
         r[1].text = str(row['function_name'])
         r[2].text = str(row['return_type'])
-        r[3].text = ""
-        # r[3].text = str(row['arguments'])
+        r[3].text = str(row['arguments'])
         r[4].text = str(row['description']) if row['description'] else ""
 
 # ==============================
-# 9. Triggers
+# 11. Triggers
 # ==============================
 doc.add_heading('6. Triggers', level=1)
-
 if df_triggers.empty:
     doc.add_paragraph("Tidak ada trigger user-defined.")
 else:
@@ -186,10 +230,9 @@ else:
         r[2].text = str(row['definition'])
 
 # ==============================
-# 10. Views
+# 12. Views
 # ==============================
 doc.add_heading('7. Views', level=1)
-
 if df_views.empty:
     doc.add_paragraph("Tidak ada view user-defined.")
 else:
@@ -204,7 +247,7 @@ else:
         r[1].text = str(row['view_definition'])
 
 # ==============================
-# 11. Bagian Lain
+# 13. Bagian Lain
 # ==============================
 doc.add_heading('8. Security & User Access', level=1)
 doc.add_paragraph("(Lengkapi roles, user, policy security)")
@@ -222,9 +265,10 @@ doc.add_heading('12. Referensi & Catatan', level=1)
 doc.add_paragraph("(Lengkapi link ke wiki/SOP internal)")
 
 # ==============================
-# 12. Simpan Dokumen
+# 14. Simpan Dokumen
 # ==============================
 output_file = "Dokumentasi_PostgreSQL.docx"
 doc.save(output_file)
 
 print(f"✅ Dokumentasi berhasil dibuat: {os.path.abspath(output_file)}")
+print(f"✅ ERD berhasil dibuat: {os.path.abspath(erd_file)}")
