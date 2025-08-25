@@ -69,21 +69,24 @@ for table in df['table_name'].unique():
     
     subset = df[df['table_name'] == table]
     
-    word_table = doc.add_table(rows=1, cols=5)
+    word_table = doc.add_table(rows=1, cols=6)
+    word_table.style = 'Table Grid'
     hdr_cells = word_table.rows[0].cells
-    hdr_cells[0].text = 'Nama Kolom'
-    hdr_cells[1].text = 'Tipe Data'
-    hdr_cells[2].text = 'Null'
-    hdr_cells[3].text = 'Default'
-    hdr_cells[4].text = 'Deskripsi'
+    hdr_cells[0].text = 'NO'
+    hdr_cells[1].text = 'Nama Kolom'
+    hdr_cells[2].text = 'Tipe Data'
+    hdr_cells[3].text = 'Null'
+    hdr_cells[4].text = 'Default'
+    hdr_cells[5].text = 'Deskripsi'
 
-    for _, row in subset.iterrows():
+    for i, row in enumerate(subset.itertuples(), start=1):
         row_cells = word_table.add_row().cells
-        row_cells[0].text = str(row['column_name'])
-        row_cells[1].text = str(row['data_type'])
-        row_cells[2].text = str(row['is_nullable'])
-        row_cells[3].text = str(row['column_default'])
-        row_cells[4].text = ""  # isi manual nanti
+        row_cells[0].text = str(i)
+        row_cells[1].text = str(row.column_name)
+        row_cells[2].text = str(row.data_type)
+        row_cells[3].text = str(row.is_nullable)
+        row_cells[4].text = str(row.column_default)
+        row_cells[5].text = ""  # isi manual nanti
 
 # ==============================
 # 5. Bagian Lain
