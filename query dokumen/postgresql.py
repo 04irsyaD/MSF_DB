@@ -7,10 +7,10 @@ from docx import Document
 # ==============================
 conn = psycopg2.connect(
     host="localhost",
-    port="5432",
+    port="5414",
     user="postgres",
-    password="password",
-    dbname="nama_database"
+    password="1234",
+    dbname="erm"
 )
 
 # ==============================
