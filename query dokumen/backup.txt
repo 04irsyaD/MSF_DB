@@ -7,10 +7,10 @@ import os
 # 1. Koneksi Database
 # ==============================
 username = "postgres"     # ganti dengan username PostgreSQL kamu
-password = "1234"     # ganti dengan password PostgreSQL kamu
+password = "password"     # ganti dengan password PostgreSQL kamu
 host = "localhost"
-port = "5414"
-database = "erm"       # ganti dengan nama database kamu
+port = "5432"
+database = "namadb"       # ganti dengan nama database kamu
 
 engine = create_engine(f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}")
 
@@ -161,8 +161,7 @@ else:
         r[0].text = str(row['schema'])
         r[1].text = str(row['function_name'])
         r[2].text = str(row['return_type'])
-        r[3].text = ""
-        # r[3].text = str(row['arguments'])
+        r[3].text = str(row['arguments'])
         r[4].text = str(row['description']) if row['description'] else ""
 
 # ==============================
