@@ -1,0 +1,4 @@
+UPDATE child c
+SET is_active = p.is_active
+FROM parent p
+WHERE c.parent_id = p.id;
