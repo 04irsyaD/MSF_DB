@@ -26,12 +26,35 @@ SELECT
     c.data_type,
     c.is_nullable,
     c.column_default,
-    pgd.description AS column_description
+    pgd.description AS column_description,
+    CASE 
+        WHEN pk.column_name IS NOT NULL THEN 'PK'
+        WHEN fk.column_name IS NOT NULL THEN 'FK'
+        ELSE ''
+    END AS key_type
 FROM information_schema.columns c
 LEFT JOIN pg_catalog.pg_statio_all_tables as st
     ON c.table_schema = st.schemaname AND c.table_name = st.relname
 LEFT JOIN pg_catalog.pg_description pgd
     ON pgd.objoid = st.relid AND pgd.objsubid = c.ordinal_position
+LEFT JOIN (
+    SELECT kcu.table_name, kcu.column_name
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.key_column_usage kcu 
+        ON tc.constraint_name = kcu.constraint_name
+        AND tc.table_schema = kcu.table_schema
+    WHERE tc.constraint_type = 'PRIMARY KEY'
+      AND tc.table_schema = 'public'
+) pk ON c.table_name = pk.table_name AND c.column_name = pk.column_name
+LEFT JOIN (
+    SELECT kcu.table_name, kcu.column_name
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.key_column_usage kcu 
+        ON tc.constraint_name = kcu.constraint_name
+        AND tc.table_schema = kcu.table_schema
+    WHERE tc.constraint_type = 'FOREIGN KEY'
+      AND tc.table_schema = 'public'
+) fk ON c.table_name = fk.table_name AND c.column_name = fk.column_name
 WHERE c.table_schema = 'public'
 ORDER BY c.table_name, c.ordinal_position;
 """
@@ -108,22 +131,135 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
 df_fk = pd.read_sql(query_fk, engine)
 
 # ==============================
-# 7. Buat ERD dengan Graphviz
+# 7. Buat ERD dengan Graphviz - A4 OPTIMIZED
 # ==============================
+def create_table_html(table_name, columns_df):
+    """Create HTML table representation for Graphviz"""
+    table_columns = columns_df[columns_df['table_name'] == table_name]
+    
+    # Limit columns to prevent overflow (show max 8 columns)
+    max_columns = 8
+    show_more = len(table_columns) > max_columns
+    display_columns = table_columns.head(max_columns)
+    
+    html = f'''<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="2">
+        <TR><TD BGCOLOR="#2E75B6" ALIGN="CENTER"><FONT COLOR="white" POINT-SIZE="10"><B>{table_name}</B></FONT></TD></TR>'''
+    
+    for _, col in display_columns.iterrows():
+        # Truncate long data types
+        data_type = str(col['data_type'])[:15]
+        if len(str(col['data_type'])) > 15:
+            data_type += "..."
+            
+        # Color code based on key type
+        bgcolor = ""
+        if col['key_type'] == 'PK':
+            bgcolor = ' BGCOLOR="#FFD700"'  # Gold for Primary Key
+        elif col['key_type'] == 'FK':
+            bgcolor = ' BGCOLOR="#87CEEB"'  # Sky blue for Foreign Key
+            
+        # Create column row
+        key_indicator = f" [{col['key_type']}]" if col['key_type'] else ""
+        html += f'<TR><TD{bgcolor} ALIGN="LEFT"><FONT POINT-SIZE="9">{col["column_name"]}{key_indicator} : {data_type}</FONT></TD></TR>'
+    
+    if show_more:
+        remaining = len(table_columns) - max_columns
+        html += f'<TR><TD BGCOLOR="#F0F0F0" ALIGN="CENTER"><FONT POINT-SIZE="8"><I>... and {remaining} more columns</I></FONT></TD></TR>'
+    
+    html += '</TABLE>>'
+    return html
+
+# Create the ERD graph with A4 optimization
 dot = Digraph(comment="ERD PostgreSQL", format="png")
-dot.attr("node", shape="box")
 
-# Tambah node tabel
-for table in df_tables["table_name"].unique():
-    dot.node(table)
+# A4 size optimization settings
+dot.attr(size='11.7,8.3!')       # A4 landscape (width x height in inches)
+dot.attr(ratio='fill')           # Fill the specified size
+dot.attr(rankdir='TB')           # Top to Bottom layout
+dot.attr(ranksep='0.8')          # Space between table levels
+dot.attr(nodesep='0.6')          # Space between tables horizontally  
+dot.attr(margin='0.4')           # Margins around the diagram
+dot.attr(dpi='300')              # High resolution
+dot.attr(overlap='false')        # Prevent overlapping
+dot.attr(splines='ortho')        # Orthogonal edges (cleaner look)
 
-# Tambah edge untuk relasi FK
+# Node styling
+dot.attr('node', 
+         shape='plaintext',
+         fontname='Arial',
+         fontsize='10')
+
+# Edge styling
+dot.attr('edge', 
+         fontname='Arial',
+         fontsize='8',
+         color='#333333',
+         arrowsize='0.8')
+
+# Add table nodes with detailed information
+tables = df_tables["table_name"].unique()
+for table in tables:
+    table_html = create_table_html(table, df_tables)
+    dot.node(table, table_html)
+
+# Add relationships with better labels
 for _, row in df_fk.iterrows():
+    # Create cleaner relationship labels
+    label = f"{row['source_column']}"
     dot.edge(row["source_table"], row["target_table"], 
-             label=f"{row['source_column']} → {row['target_column']}")
+             label=label,
+             color='#666666',
+             fontcolor='#666666')
 
-erd_file = "ERD_PostgreSQL.png"
-dot.render("ERD_PostgreSQL", format="png", cleanup=True)
+# Render the ERD
+erd_file = "ERD_PostgreSQL_A4.png"
+dot.render("ERD_PostgreSQL_A4", format="png", cleanup=True)
+
+# Alternative: Create a simplified version for very large databases
+def create_simplified_erd():
+    """Create a simplified ERD showing only table names and relationships"""
+    dot_simple = Digraph(comment="ERD PostgreSQL Simplified", format="png")
+    
+    # A4 settings for simplified version
+    dot_simple.attr(size='11.7,8.3!')
+    dot_simple.attr(ratio='fill')
+    dot_simple.attr(rankdir='LR')     # Left to Right for better width usage
+    dot_simple.attr(ranksep='1.0')
+    dot_simple.attr(nodesep='0.8')
+    dot_simple.attr(margin='0.4')
+    dot_simple.attr(dpi='300')
+    
+    # Simple box styling
+    dot_simple.attr('node', 
+                   shape='box',
+                   style='filled',
+                   fillcolor='lightblue',
+                   fontname='Arial',
+                   fontsize='12')
+    
+    dot_simple.attr('edge',
+                   fontname='Arial',
+                   fontsize='10',
+                   arrowsize='1.0')
+    
+    # Add simple table nodes (just names)
+    for table in tables:
+        table_count = len(df_tables[df_tables['table_name'] == table])
+        dot_simple.node(table, f"{table}\\n({table_count} cols)")
+    
+    # Add relationships
+    for _, row in df_fk.iterrows():
+        dot_simple.edge(row["source_table"], row["target_table"])
+    
+    return dot_simple
+
+# Create simplified version if there are too many tables
+if len(tables) > 15:  # If more than 15 tables, create simplified version too
+    dot_simple = create_simplified_erd()
+    erd_simple_file = "ERD_PostgreSQL_Simple.png"
+    dot_simple.render("ERD_PostgreSQL_Simple", format="png", cleanup=True)
+    print(f"✅ Simplified ERD created: {os.path.abspath(erd_simple_file)}")
 
 # ==============================
 # 8. Buat Dokumen Word
@@ -148,8 +284,8 @@ doc.add_paragraph("Diagram Arsitektur :")
 
 # Sisipkan ERD
 if os.path.exists(erd_file):
-    doc.add_picture(erd_file, width=Inches(6))
-    doc.add_paragraph("Gambar: ERD hasil generate otomatis dari relasi PK-FK.")
+    doc.add_picture(erd_file, width=Inches(7))
+    doc.add_paragraph("Gambar: ERD hasil generate otomatis dengan detail kolom dan relasi PK-FK.")
 
 # Skema Database
 doc.add_heading('3. Skema Database', level=1)
@@ -168,24 +304,26 @@ for table in df_tables['table_name'].unique():
     
     subset = df_tables[df_tables['table_name'] == table]
     
-    word_table = doc.add_table(rows=1, cols=6)
+    word_table = doc.add_table(rows=1, cols=7)  # Added Key Type column
     word_table.style = 'Table Grid'
     hdr_cells = word_table.rows[0].cells
     hdr_cells[0].text = 'NO'
     hdr_cells[1].text = 'Nama Kolom'
     hdr_cells[2].text = 'Tipe Data'
-    hdr_cells[3].text = 'Null'
-    hdr_cells[4].text = 'Default'
-    hdr_cells[5].text = 'Deskripsi'
+    hdr_cells[3].text = 'Key'
+    hdr_cells[4].text = 'Null'
+    hdr_cells[5].text = 'Default'
+    hdr_cells[6].text = 'Deskripsi'
 
     for i, row in enumerate(subset.itertuples(), start=1):
         row_cells = word_table.add_row().cells
         row_cells[0].text = str(i)
         row_cells[1].text = str(row.column_name)
         row_cells[2].text = str(row.data_type)
-        row_cells[3].text = str(row.is_nullable)
-        row_cells[4].text = str(row.column_default)
-        row_cells[5].text = str(row.column_description) if row.column_description else ""
+        row_cells[3].text = str(row.key_type) if row.key_type else ""
+        row_cells[4].text = str(row.is_nullable)
+        row_cells[5].text = str(row.column_default)
+        row_cells[6].text = str(row.column_description) if row.column_description else ""
 
 # ==============================
 # 10. Functions
@@ -271,4 +409,6 @@ output_file = "Dokumentasi_PostgreSQL.docx"
 doc.save(output_file)
 
 print(f"✅ Dokumentasi berhasil dibuat: {os.path.abspath(output_file)}")
-print(f"✅ ERD berhasil dibuat: {os.path.abspath(erd_file)}")
+print(f"✅ ERD A4-optimized berhasil dibuat: {os.path.abspath(erd_file)}")
+print(f"📊 Total tabel: {len(tables)}")
+print(f"🔗 Total relasi: {len(df_fk)}")
