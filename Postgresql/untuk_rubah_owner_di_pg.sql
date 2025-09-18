@@ -24,3 +24,5 @@ BEGIN
         EXECUTE format('ALTER TABLE %I.%I OWNER TO plustixpostgre;', r.schemaname, r.tablename);
     END LOOP;
 END $$;
+
+//yrd
