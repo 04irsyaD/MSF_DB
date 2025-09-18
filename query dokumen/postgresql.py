@@ -259,9 +259,11 @@ doc.add_paragraph("Topologi : Standalone / Replication / Cluster")
 doc.add_paragraph("Diagram Arsitektur :")
 
 # Sisipkan ERD
-if os.path.exists(erd_file):
-    doc.add_picture(erd_file, width=Inches(7))
-    doc.add_paragraph("Gambar: ERD hasil generate otomatis dengan detail kolom dan relasi PK-FK.")
+if paginated_files:
+    for erd_file in paginated_files:
+        if os.path.exists(erd_file):
+            doc.add_picture(erd_file, width=Inches(7))
+            doc.add_paragraph(f"Gambar: {erd_file} hasil generate otomatis dengan detail kolom dan relasi PK-FK.")
 
 # Skema Database
 doc.add_heading('3. Skema Database', level=1)

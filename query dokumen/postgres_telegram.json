@@ -1,0 +1,61 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT table_name, column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' ORDER BY table_name, ordinal_position;"
+      },
+      "id": "2",
+      "name": "PostgreSQL Metadata",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "credentials": {
+        "postgres": "Postgres Credential Name"
+      },
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const grouped = {};\n\nfor (const row of items.map(i => i.json)) {\n  if (!grouped[row.table_name]) {\n    grouped[row.table_name] = [];\n  }\n  grouped[row.table_name].push(`${row.column_name} (${row.data_type}, nullable: ${row.is_nullable})`);\n}\n\nlet docText = '📘 Database Documentation\\n\\n';\n\nfor (const [table, cols] of Object.entries(grouped)) {\n  docText += `Table: ${table}\\n- ${cols.join(\"\\n- \")}\\n\\n`;\n}\n\nreturn [{ json: { docText } }];"
+      },
+      "id": "3",
+      "name": "Format Documentation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{$json[\"docText\"]}}"
+      },
+      "id": "4",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "credentials": {
+        "telegramApi": "Telegram Credential Name"
+      },
+      "position": [950, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "PostgreSQL Metadata", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL Metadata": {
+      "main": [[{ "node": "Format Documentation", "type": "main", "index": 0 }]]
+    },
+    "Format Documentation": {
+      "main": [[{ "node": "Send Telegram Message", "type": "main", "index": 0 }]]
+    }
+  }
+}
