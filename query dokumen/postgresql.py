@@ -4,15 +4,16 @@ from docx import Document
 from docx.shared import Inches
 from graphviz import Digraph
 import os
+import networkx as nx   # <-- tambahan untuk grouping relasi
 
 # ==============================
 # 1. Koneksi Database
 # ==============================
 username = "postgres"     # ganti dengan username PostgreSQL kamu
-password = "1234"     # ganti dengan password PostgreSQL kamu
+password = "1234"         # ganti dengan password PostgreSQL kamu
 host = "localhost"
 port = "5414"
-database = "erm"       # ganti dengan nama database kamu
+database = "erm"          # ganti dengan nama database kamu
 
 engine = create_engine(f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}")
 
@@ -131,135 +132,110 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
 df_fk = pd.read_sql(query_fk, engine)
 
 # ==============================
-# 7. Buat ERD dengan Graphviz - A4 OPTIMIZED
+# 7. Helper: Grouping Berdasarkan Relasi
 # ==============================
-def create_table_html(table_name, columns_df):
-    """Create HTML table representation for Graphviz"""
-    table_columns = columns_df[columns_df['table_name'] == table_name]
-    
-    # Limit columns to prevent overflow (show max 8 columns)
-    max_columns = 8
-    show_more = len(table_columns) > max_columns
-    display_columns = table_columns.head(max_columns)
-    
-    html = f'''<
-    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="2">
-        <TR><TD BGCOLOR="#2E75B6" ALIGN="CENTER"><FONT COLOR="white" POINT-SIZE="10"><B>{table_name}</B></FONT></TD></TR>'''
-    
-    for _, col in display_columns.iterrows():
-        # Truncate long data types
-        data_type = str(col['data_type'])[:15]
-        if len(str(col['data_type'])) > 15:
-            data_type += "..."
-            
-        # Color code based on key type
-        bgcolor = ""
-        if col['key_type'] == 'PK':
-            bgcolor = ' BGCOLOR="#FFD700"'  # Gold for Primary Key
-        elif col['key_type'] == 'FK':
-            bgcolor = ' BGCOLOR="#87CEEB"'  # Sky blue for Foreign Key
-            
-        # Create column row
-        key_indicator = f" [{col['key_type']}]" if col['key_type'] else ""
-        html += f'<TR><TD{bgcolor} ALIGN="LEFT"><FONT POINT-SIZE="9">{col["column_name"]}{key_indicator} : {data_type}</FONT></TD></TR>'
-    
-    if show_more:
-        remaining = len(table_columns) - max_columns
-        html += f'<TR><TD BGCOLOR="#F0F0F0" ALIGN="CENTER"><FONT POINT-SIZE="8"><I>... and {remaining} more columns</I></FONT></TD></TR>'
-    
-    html += '</TABLE>>'
-    return html
-
-# Create the ERD graph with A4 optimization
-dot = Digraph(comment="ERD PostgreSQL", format="png")
-
-# A4 size optimization settings
-dot.attr(size='11.7,8.3!')       # A4 landscape (width x height in inches)
-dot.attr(ratio='fill')           # Fill the specified size
-dot.attr(rankdir='TB')           # Top to Bottom layout
-dot.attr(ranksep='0.8')          # Space between table levels
-dot.attr(nodesep='0.6')          # Space between tables horizontally  
-dot.attr(margin='0.4')           # Margins around the diagram
-dot.attr(dpi='300')              # High resolution
-dot.attr(overlap='false')        # Prevent overlapping
-dot.attr(splines='ortho')        # Orthogonal edges (cleaner look)
-
-# Node styling
-dot.attr('node', 
-         shape='plaintext',
-         fontname='Arial',
-         fontsize='10')
-
-# Edge styling
-dot.attr('edge', 
-         fontname='Arial',
-         fontsize='8',
-         color='#333333',
-         arrowsize='0.8')
-
-# Add table nodes with detailed information
-tables = df_tables["table_name"].unique()
-for table in tables:
-    table_html = create_table_html(table, df_tables)
-    dot.node(table, table_html)
-
-# Add relationships with better labels
-for _, row in df_fk.iterrows():
-    # Create cleaner relationship labels
-    label = f"{row['source_column']}"
-    dot.edge(row["source_table"], row["target_table"], 
-             label=label,
-             color='#666666',
-             fontcolor='#666666')
-
-# Render the ERD
-erd_file = "ERD_PostgreSQL_A4.png"
-dot.render("ERD_PostgreSQL_A4", format="png", cleanup=True)
-
-# Alternative: Create a simplified version for very large databases
-def create_simplified_erd():
-    """Create a simplified ERD showing only table names and relationships"""
-    dot_simple = Digraph(comment="ERD PostgreSQL Simplified", format="png")
-    
-    # A4 settings for simplified version
-    dot_simple.attr(size='11.7,8.3!')
-    dot_simple.attr(ratio='fill')
-    dot_simple.attr(rankdir='LR')     # Left to Right for better width usage
-    dot_simple.attr(ranksep='1.0')
-    dot_simple.attr(nodesep='0.8')
-    dot_simple.attr(margin='0.4')
-    dot_simple.attr(dpi='300')
-    
-    # Simple box styling
-    dot_simple.attr('node', 
-                   shape='box',
-                   style='filled',
-                   fillcolor='lightblue',
-                   fontname='Arial',
-                   fontsize='12')
-    
-    dot_simple.attr('edge',
-                   fontname='Arial',
-                   fontsize='10',
-                   arrowsize='1.0')
-    
-    # Add simple table nodes (just names)
-    for table in tables:
-        table_count = len(df_tables[df_tables['table_name'] == table])
-        dot_simple.node(table, f"{table}\\n({table_count} cols)")
-    
-    # Add relationships
+def group_tables_by_relationships(df_tables, df_fk, max_tables=15):
+    """Group tables into connected components based on relationships"""
+    G = nx.Graph()
+    G.add_nodes_from(df_tables["table_name"].unique())
     for _, row in df_fk.iterrows():
-        dot_simple.edge(row["source_table"], row["target_table"])
-    
-    return dot_simple
+        G.add_edge(row["source_table"], row["target_table"])
 
-# Create simplified version if there are too many tables
-if len(tables) > 15:  # If more than 15 tables, create simplified version too
-    dot_simple = create_simplified_erd()
-    erd_simple_file = "ERD_PostgreSQL_Simple.png"
-    dot_simple.render("ERD_PostgreSQL_Simple", format="png", cleanup=True)
-    print(f"✅ Simplified ERD created: {os.path.abspath(erd_simple_file)}")
+    groups = []
+    for component in nx.connected_components(G):
+        comp = list(component)
+        # Jika group terlalu besar, pecah jadi batch
+        for i in range(0, len(comp), max_tables):
+            groups.append(comp[i:i+max_tables])
+    return groups
+
+# ==============================
+# 8. Buat ERD dengan Graphviz - A4 OPTIMIZED (Paginated)
+# ==============================
+def create_paginated_erds(df_tables, df_fk, tables_per_page=15, use_grouping=True):
+    """Create multiple ERD pages for large databases"""
+    if use_grouping:
+        pages = group_tables_by_relationships(df_tables, df_fk, max_tables=tables_per_page)
+    else:
+        all_tables = df_tables["table_name"].unique()
+        pages = [all_tables[i:i+tables_per_page] for i in range(0, len(all_tables), tables_per_page)]
+    
+    created_files = []
+    for page_idx, page_tables in enumerate(pages, 1):
+        dot = Digraph(comment=f"ERD Page {page_idx}", format="png")
+        
+        # A4 optimized settings
+        dot.attr(size='11.7,8.3!')
+        dot.attr(ratio='compress')
+        dot.attr(rankdir='TB')
+        dot.attr(ranksep='0.6')
+        dot.attr(nodesep='0.4')
+        dot.attr(margin='0.3')
+        dot.attr(dpi='200')
+        dot.attr(overlap='false')
+        dot.attr(splines='true')
+        
+        dot.attr('node', shape='plaintext', fontname='Arial', fontsize='9')
+        dot.attr('edge', fontname='Arial', fontsize='8', color='#666666')
+        
+        # Add tables in this page
+        for table in page_tables:
+            table_columns = df_tables[df_tables['table_name'] == table]
+            
+            html = f'''<
+            <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3">
+                <TR><TD BGCOLOR="#2E75B6"><FONT COLOR="white"><B>{table}</B></FONT></TD></TR>'''
+            for _, col in table_columns.head(6).iterrows():
+                key_indicator = " 🔑" if col['key_type']=='PK' else (" 🔗" if col['key_type']=='FK' else "")
+                html += f'<TR><TD ALIGN="LEFT">{col["column_name"]}{key_indicator}</TD></TR>'
+            if len(table_columns) > 6:
+                html += f'<TR><TD BGCOLOR="#F5F5F5">+{len(table_columns)-6} more</TD></TR>'
+            html += '</TABLE>>'
+            dot.node(table, html)
+
+        # Add relationships within this batch
+        for _, row in df_fk.iterrows():
+            if row["source_table"] in page_tables and row["target_table"] in page_tables:
+                dot.edge(row["source_table"], row["target_table"])
+
+        filename = f"ERD_Page_{page_idx}"
+        dot.render(filename, format="png", cleanup=True)
+        created_files.append(f"{filename}.png")
+        print(f"✅ Created {filename}.png ({len(page_tables)} tables)")
+    
+    return created_files
+
+# ==============================
+# 9. Dashboard + lainnya (tidak diubah)
+# ==============================
+# ... (semua fungsi create_overview_dashboard, create_relationships_only_erd, create_table_index tetap sama seperti code kamu)
+
+# ==============================
+# 10. Eksekusi utama
+# ==============================
+print(f"\n=== CREATING ERDS FOR LARGE DATABASE ({len(df_tables['table_name'].unique())} tables) ===")
+
+# 1. Create paginated ERDs (15 tables per page, grouped by relationships)
+paginated_files = create_paginated_erds(df_tables, df_fk, tables_per_page=15, use_grouping=True)
+
+# 2. Create overview dashboard
+dashboard_file = create_overview_dashboard()
+print(f"✅ Created overview dashboard: {os.path.abspath(dashboard_file)}")
+
+# 3. Create relationships-only ERD
+rel_file = create_relationships_only_erd()
+if rel_file:
+    print(f"✅ Created relationships ERD: {os.path.abspath(rel_file)}")
+
+# 4. Create alphabetical index
+index_file = create_table_index()
+print(f"✅ Created table index: {os.path.abspath(index_file)}")
+
+# ==============================
+# 11. Buat Dokumen Word (tidak diubah banyak)
+# ==============================
+# ... (lanjutkan kode Word kamu persis sama seperti sebelumnya)
+
 
 # ==============================
 # 8. Buat Dokumen Word
@@ -283,9 +259,11 @@ doc.add_paragraph("Topologi : Standalone / Replication / Cluster")
 doc.add_paragraph("Diagram Arsitektur :")
 
 # Sisipkan ERD
-if os.path.exists(erd_file):
-    doc.add_picture(erd_file, width=Inches(7))
-    doc.add_paragraph("Gambar: ERD hasil generate otomatis dengan detail kolom dan relasi PK-FK.")
+if paginated_files:
+    for erd_file in paginated_files:
+        if os.path.exists(erd_file):
+            doc.add_picture(erd_file, width=Inches(7))
+            doc.add_paragraph(f"Gambar: {erd_file} hasil generate otomatis dengan detail kolom dan relasi PK-FK.")
 
 # Skema Database
 doc.add_heading('3. Skema Database', level=1)

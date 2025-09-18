@@ -1,0 +1,15 @@
+Manual Trigger
+   ↓
+Switch Node (pilih DB: MySQL / PostgreSQL / MongoDB)
+   ↓
+Query Metadata (SQL/Mongo)
+   ↓
+Function Node (format docs)
+   ↓
+Execute Command Node (generate ERD via SchemaSpy/DbDiagram)
+   ↓
+Generate Word Docs (Pandoc/LibreOffice)
+   ↓
+Google Drive (upload ERD + Word)
+   ↓
+Telegram (kirim link/attach)

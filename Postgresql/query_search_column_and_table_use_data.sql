@@ -1,3 +1,4 @@
+-- Query untuk mencari "user:" di semua kolom text dalam schema public
 SELECT 
     schemaname,
     tablename,
