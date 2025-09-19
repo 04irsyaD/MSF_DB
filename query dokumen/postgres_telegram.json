@@ -24,10 +24,10 @@
     },
     {
       "parameters": {
-        "functionCode": "const grouped = {};\n\nfor (const row of items.map(i => i.json)) {\n  if (!grouped[row.table_name]) {\n    grouped[row.table_name] = [];\n  }\n  grouped[row.table_name].push(`${row.column_name} (${row.data_type}, nullable: ${row.is_nullable})`);\n}\n\nlet docText = '📘 Database Documentation\\n\\n';\n\nfor (const [table, cols] of Object.entries(grouped)) {\n  docText += `Table: ${table}\\n- ${cols.join(\"\\n- \")}\\n\\n`;\n}\n\nreturn [{ json: { docText } }];"
+        "functionCode": "const grouped = {};\n\nfor (const row of items.map(i => i.json)) {\n  if (!grouped[row.table_name]) {\n    grouped[row.table_name] = [];\n  }\n  grouped[row.table_name].push(`${row.column_name} (${row.data_type}, nullable: ${row.is_nullable})`);\n}\n\nlet docText = '📘 Database Documentation\\n\\n';\n\nfor (const [table, cols] of Object.entries(grouped)) {\n  docText += `Table: ${table}\\n- ${cols.join(\"\\n- \")}\\n\\n`;\n}\n\nreturn [{ json: {}, binary: { data: { data: Buffer.from(docText).toString('base64'), mimeType: 'text/plain', fileName: 'db_documentation.txt' } } }];"
       },
       "id": "3",
-      "name": "Format Documentation",
+      "name": "Format as File",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [700, 300]
@@ -35,10 +35,13 @@
     {
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "={{$json[\"docText\"]}}"
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "📘 Database Documentation"
+        }
       },
       "id": "4",
-      "name": "Send Telegram Message",
+      "name": "Send Telegram File",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "credentials": {
@@ -52,14 +55,10 @@
       "main": [[{ "node": "PostgreSQL Metadata", "type": "main", "index": 0 }]]
     },
     "PostgreSQL Metadata": {
-      "main": [[{ "node": "Format Documentation", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Format as File", "type": "main", "index": 0 }]]
     },
-    "Format Documentation": {
-      "main": [[{ "node": "Send Telegram Message", "type": "main", "index": 0 }]]
+    "Format as File": {
+      "main": [[{ "node": "Send Telegram File", "type": "main", "index": 0 }]]
     }
   }
 }
-
-
-
-.///teting

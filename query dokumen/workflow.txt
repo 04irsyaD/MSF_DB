@@ -13,3 +13,6 @@ Generate Word Docs (Pandoc/LibreOffice)
 Google Drive (upload ERD + Word)
    ↓
 Telegram (kirim link/attach)
+
+
+chat id =1045672747
