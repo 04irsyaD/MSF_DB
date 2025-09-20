@@ -1,4 +1,5 @@
 SHOW max_connections;
+-- show max connection
 
 SHOW shared_buffers;
 

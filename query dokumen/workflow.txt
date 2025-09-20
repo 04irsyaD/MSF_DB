@@ -1,4 +1,4 @@
-Manual Trigger
+Manual Trigger / send messsage 
    ↓
 Switch Node (pilih DB: MySQL / PostgreSQL / MongoDB)
    ↓
