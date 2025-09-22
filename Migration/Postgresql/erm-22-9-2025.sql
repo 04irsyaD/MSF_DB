@@ -6,4 +6,14 @@ add COLUMN
 "CDTR" bool NULL,
 "PRD" int4 NULL
 
+alter Table t_risk_owner
+add COLUMN
+"NSTRO" varchar NULL,
+"PRD" int4 NULL;
+
+ALTER TABLE t_irisktreatment
+ADD COLUMN
+"TRTSRC" varchar(50) NULL
+
+
 
