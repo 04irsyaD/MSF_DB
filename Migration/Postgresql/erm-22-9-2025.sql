@@ -102,6 +102,61 @@ create TABLE t_grisktreatment
 calter table t_ikeyidentification
 "RFCDGEN" varchar(255) NULL,
 
+alter table t_ikeylist
+"STATCD" varchar NULL,
+
+CREATE TABLE public.t_irisk_notes (
+	"BEGDA" date DEFAULT CURRENT_DATE NULL,
+	"ENDDA" date DEFAULT '2999-01-01'::date NULL,
+	"IRNID" uuid DEFAULT uuid_generate_v4() NULL,
+	"RISKCD" varchar NULL,
+	"PRD" date NULL,
+	"VRSN" int4 NULL,
+	"NIK" varchar NULL,
+	"NOTES" text NULL,
+	"SOURCE" varchar NULL,
+	"IRILID" varchar NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_DATE NULL,
+	"CHGDA" timestamptz(6) DEFAULT CURRENT_DATE NULL
+);
+
+
+CREATE table t_iriskidentification
+"CATMPL" uuid NULL,
+"STRISK" varchar(50) NULL,
+"RSCR" varchar(50) NULL
+
+create table t_irisklist
+"NIK" varchar NULL,
+"RSCR" varchar NULL,
+"DVSN" varchar NULL,
+"ALIASEQ" int4 NULL
+
+ALTER TABLE t_irisktreatment
+ADD COLUMN
+"TRTSRC" varchar(50) NULL
+
+CREATE TABLE public.t_list_grisklist (
+	"BEGDA" date DEFAULT CURRENT_DATE NULL,
+	"ENDDA" date DEFAULT '2999-01-01'::date NULL,
+	"LIGRID" uuid DEFAULT uuid_generate_v4() NULL,
+	"CRAT" timestamp(6) NULL,
+	"CHGDA" timestamp(6) NULL,
+	"CHGBY" varchar(150) NULL,
+	"BUCD" varchar(255) NULL,
+	"PRD" date NULL,
+	"VRSN" varchar(255) NULL,
+	"RCEML" varchar(255) NULL,
+	"STATCD" varchar(255) NULL,
+	"X1" varchar(255) NULL,
+	"X2" varchar(255) NULL,
+	"X3" varchar(255) NULL,
+	"X4" varchar(255) NULL,
+	"X5" varchar(255) NULL,
+	"X6" varchar(255) NULL,
+	"X7" varchar(255) NULL
+);
+
 alter table t_risk_champion 
 add COLUMN
 "NSTRC" varchar NULL,
@@ -113,9 +168,7 @@ add COLUMN
 "NSTRO" varchar NULL,
 "PRD" int4 NULL;
 
-ALTER TABLE t_irisktreatment
-ADD COLUMN
-"TRTSRC" varchar(50) NULL
+
 
 
 -- kondistional update
