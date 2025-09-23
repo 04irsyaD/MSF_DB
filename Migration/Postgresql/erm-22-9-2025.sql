@@ -37,6 +37,18 @@ CREATE TABLE public.t_form_risklist (
 	"X7" varchar NULL
 );
 
+alter Table t_gkeyidentification
+"CATMPL" varchar(255) DEFAULT uuid_generate_v4() NULL,
+"DVSN" varchar(255) DEFAULT NULL::character varying NULL,
+"RSCR" varchar(255) DEFAULT NULL::character varying NULL,
+"RISKTPE" varchar(255) DEFAULT NULL::character varying NULL,
+
+alter TABLE t_gkeylist
+add "STATCD" varchar NULL,
+
+
+
+
 alter table t_risk_champion 
 add COLUMN
 "NSTRC" varchar NULL,
