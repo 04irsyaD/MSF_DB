@@ -46,8 +46,61 @@ alter Table t_gkeyidentification
 alter TABLE t_gkeylist
 add "STATCD" varchar NULL,
 
+CREATE TABLE public.t_grisk_notes (
+	"BEGDA" date DEFAULT CURRENT_DATE NULL,
+	"ENDDA" date DEFAULT '2999-01-01'::date NULL,
+	"GRNID" uuid DEFAULT uuid_generate_v4() NULL,
+	"RISKCD" varchar NULL,
+	"PRD" date NULL,
+	"VRSN" int4 NULL,
+	"NIK" varchar NULL,
+	"NOTES" text NULL,
+	"SOURCE" varchar NULL,
+	"GRILID" varchar NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_DATE NULL,
+	"CHGDA" timestamptz(6) DEFAULT CURRENT_DATE NULL
+);
+
+public.t_griskdatabase
+"CATMPL" varchar(255) DEFAULT NULL::character varying NULL,
+"RISKTPE" varchar(255) DEFAULT NULL::character varying NULL
 
 
+CREATE TABLE public.t_griskidentification
+"CATMPL" varchar DEFAULT uuid_generate_v4() NULL,
+"RISKTPE" varchar NULL,
+"RSCR" varchar NULL,
+"DVSN" varchar NULL
+
+CREATE TABLE public.t_grisklist
+"NIK" varchar NULL,
+"RSCR" varchar NULL,
+"DVSN" varchar NULL,
+"ALIASEQ" int4 NULL
+
+CREATE TABLE public.t_griskregister
+prd varchar(50) NULL,
+	lihocd varchar(50) NULL,
+	lihoval int4 NULL,
+	imvalcd varchar(50) NULL,
+	imval int4 NULL,
+	inrisco int4 NULL,
+	inricat varchar(50) NULL,
+	exconli int4 NULL,
+	exconim int4 NULL,
+	adinli int4 NULL,
+	adinim int4 NULL,
+	adinsc int4 NULL,
+	adinsccat varchar(50) NULL,
+	crat varchar(50) NULL,
+	vrsn int4 NULL,
+	x4 varchar(50) NULL
+
+create TABLE t_grisktreatment
+"TRTSRC" varchar(50) NULL
+
+calter table t_ikeyidentification
+"RFCDGEN" varchar(255) NULL,
 
 alter table t_risk_champion 
 add COLUMN
