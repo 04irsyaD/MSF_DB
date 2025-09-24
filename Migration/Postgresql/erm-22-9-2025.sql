@@ -29,6 +29,10 @@ update master data t_personal
 
 update master data t_rbac
 
+update master data t_status_register
+
+update master data t_user
+
 -- update table or column
 
 CREATE TABLE public.t_form_risklist (
@@ -293,14 +297,60 @@ alter table public.t_reviewer
 add COLUMN 
 	"NSTNR" varchar NULL,
 	"PRD" int4 NULL
-	
 
+
+CREATE TABLE public.t_reviewer_list (
+	"BEGDA" date DEFAULT CURRENT_DATE NULL,
+	"ENDDA" date DEFAULT '2999-01-01'::date NULL,
+	"RVLUID" varchar DEFAULT uuid_generate_v4() NULL,
+	"BUCD" varchar NULL,
+	"STRL" varchar NULL,
+	"RLNUM" int4 NULL,
+	"PRD" int4 NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_TIMESTAMP NULL,
+	"CHGDA" date NULL,
+	"CHGBY" varchar(150) NULL,
+	"STAT" varchar DEFAULT 'Active'::character varying NULL,
+	"X1" varchar NULL,
+	"X2" varchar NULL,
+	"X3" varchar NULL,
+	"X4" varchar NULL,
+	"X5" varchar NULL,
+	"X6" varchar NULL,
+	"X7" varchar NULL
+);
+
+CREATE TABLE public.t_rickchampion_list (
+	"BEGDA" date DEFAULT CURRENT_DATE NULL,
+	"ENDDA" date DEFAULT '2999-01-01'::date NULL,
+	"RCLUID" varchar DEFAULT uuid_generate_v4() NULL,
+	"BUCD" varchar NULL,
+	"STRCL" varchar NULL,
+	"RCLNUM" int4 NULL,
+	"PRD" int4 NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_TIMESTAMP NULL,
+	"CHGDA" date NULL,
+	"CHGBY" varchar(150) NULL,
+	"STAT" varchar DEFAULT 'Active'::character varying NULL,
+	"RCHNM" varchar NULL,
+	"RCHEML" varchar NULL,
+	"X3" varchar NULL,
+	"X4" varchar NULL,
+	"X5" varchar NULL,
+	"X6" varchar NULL,
+	"X7" varchar NULL
+);
 
 alter table t_risk_champion 
 add COLUMN
 "NSTRC" varchar NULL,
 "CDTR" bool NULL,
 "PRD" int4 NULL
+
+alter table public.t_risknotes
+add COLUMN 
+	"STAT" varchar NULL
+
 
 alter Table t_risk_owner
 add COLUMN
@@ -310,7 +360,32 @@ add COLUMN
 
 
 
--- kondistional update
+-- view tables
+
+CREATE View v_gris_irislist as
+Select
+tgr."RISKCD",
+COUNT (tgr."RISKCD") as "COUNT",
+tgr."PRD",
+tgr."VRSN",
+tgr."RSCR",
+tgr."CRAT",
+tgr."REFCD",
+tgr."BEGDA",
+tgr."ENDDA"
+from t_grisklist tgr
+inner join t_irisklist tir
+	on tgr."RISKCD" = tir."RISKCD" 
+	and tgr."RSCR" = tir."RSCR" 
+group by tgr."RISKCD", 
+		 tgr."PRD",
+		 tgr."VRSN",
+		 tgr."RSCR",
+		 tgr."CRAT",
+		 tgr."REFCD",
+		 tgr."BEGDA",
+		 tgr."ENDDA",
+		 tgr."PRD"
 
 
 
