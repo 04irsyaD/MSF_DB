@@ -338,6 +338,9 @@ CREATE TABLE public.t_rickchampion_list (
 	"X7" varchar NULL
 );
 
+
+
+
 alter table t_risk_champion 
 add "NSTRC" varchar NULL,
 	"CDTR" bool NULL,
