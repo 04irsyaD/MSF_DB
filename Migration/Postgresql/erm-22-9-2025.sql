@@ -55,13 +55,13 @@ CREATE TABLE public.t_form_risklist (
 );
 
 alter Table t_gkeyidentification
-"CATMPL" varchar(255) DEFAULT uuid_generate_v4() NULL,
-"DVSN" varchar(255) DEFAULT NULL::character varying NULL,
-"RSCR" varchar(255) DEFAULT NULL::character varying NULL,
-"RISKTPE" varchar(255) DEFAULT NULL::character varying NULL,
+ADD "CATMPL" varchar(255) DEFAULT uuid_generate_v4() NULL,
+	"DVSN" varchar(255) DEFAULT NULL::character varying NULL,
+	"RSCR" varchar(255) DEFAULT NULL::character varying NULL,
+	"RISKTPE" varchar(255) DEFAULT NULL::character varying NULL;
 
 alter TABLE t_gkeylist
-add "STATCD" varchar NULL,
+ADD "STATCD" varchar NULL;
 
 CREATE TABLE public.t_grisk_notes (
 	"BEGDA" date DEFAULT CURRENT_DATE NULL,
@@ -79,24 +79,23 @@ CREATE TABLE public.t_grisk_notes (
 );
 
 public.t_griskdatabase
-"CATMPL" varchar(255) DEFAULT NULL::character varying NULL,
-"RISKTPE" varchar(255) DEFAULT NULL::character varying NULL
+ADD "CATMPL" varchar(255) DEFAULT NULL::character varying NULL,
+	"RISKTPE" varchar(255) DEFAULT NULL::character varying NULL;
 
+ALTER TABLE public.t_griskidentification
+ADD "CATMPL" varchar DEFAULT uuid_generate_v4() NULL,
+	"RISKTPE" varchar NULL,
+	"RSCR" varchar NULL,
+	"DVSN" varchar NULL;
 
-CREATE TABLE public.t_griskidentification
-"CATMPL" varchar DEFAULT uuid_generate_v4() NULL,
-"RISKTPE" varchar NULL,
-"RSCR" varchar NULL,
-"DVSN" varchar NULL
-
-CREATE TABLE public.t_grisklist
-"NIK" varchar NULL,
-"RSCR" varchar NULL,
-"DVSN" varchar NULL,
-"ALIASEQ" int4 NULL
+ALTER TABLE public.t_grisklist
+ADD "NIK" varchar NULL,
+	"RSCR" varchar NULL,
+	"DVSN" varchar NULL,
+	"ALIASEQ" int4 NULL; diambil dari RISKCD jika ENDDA = 0
 
 CREATE TABLE public.t_griskregister
-prd varchar(50) NULL,
+	prd varchar(50) NULL,
 	lihocd varchar(50) NULL,
 	lihoval int4 NULL,
 	imvalcd varchar(50) NULL,
@@ -113,14 +112,14 @@ prd varchar(50) NULL,
 	vrsn int4 NULL,
 	x4 varchar(50) NULL
 
-create TABLE t_grisktreatment
-"TRTSRC" varchar(50) NULL
+alter TABLE t_grisktreatment
+ADD "TRTSRC" varchar(50) NULL;
 
-calter table t_ikeyidentification
-"RFCDGEN" varchar(255) NULL,
+alter table t_ikeyidentification
+ADD "RFCDGEN" varchar(255) NULL;
 
 alter table t_ikeylist
-"STATCD" varchar NULL,
+ADD "STATCD" varchar NULL;
 
 CREATE TABLE public.t_irisk_notes (
 	"BEGDA" date DEFAULT CURRENT_DATE NULL,
@@ -138,20 +137,19 @@ CREATE TABLE public.t_irisk_notes (
 );
 
 
-CREATE table t_iriskidentification
-"CATMPL" uuid NULL,
-"STRISK" varchar(50) NULL,
-"RSCR" varchar(50) NULL
+ALTER TABLE t_iriskidentification
+ADD "CATMPL" uuid NULL,
+	"STRISK" varchar(50) NULL,
+	"RSCR" varchar(50) NULL;
 
-create table t_irisklist
-"NIK" varchar NULL,
-"RSCR" varchar NULL,
-"DVSN" varchar NULL,
-"ALIASEQ" int4 NULL
+ALTER TABLE t_irisklist 
+ADD	"NIK" varchar NULL,
+	"RSCR" varchar NULL,
+	"DVSN" varchar NULL,
+	"ALIASEQ" int4 NULL;
 
 ALTER TABLE t_irisktreatment
-ADD COLUMN
-"TRTSRC" varchar(50) NULL
+ADD "TRTSRC" varchar(50) NULL;
 
 CREATE TABLE public.t_list_grisklist (
 	"BEGDA" date DEFAULT CURRENT_DATE NULL,
@@ -294,9 +292,8 @@ CREATE TABLE public.t_multiple_pic_rc (
 
 
 alter table public.t_reviewer
-add COLUMN 
-	"NSTNR" varchar NULL,
-	"PRD" int4 NULL
+add "NSTNR" varchar NULL,
+	"PRD" int4 NULL;
 
 
 CREATE TABLE public.t_reviewer_list (
@@ -342,21 +339,23 @@ CREATE TABLE public.t_rickchampion_list (
 );
 
 alter table t_risk_champion 
-add COLUMN
-"NSTRC" varchar NULL,
-"CDTR" bool NULL,
-"PRD" int4 NULL
+add "NSTRC" varchar NULL,
+	"CDTR" bool NULL,
+	"PRD" int4 NULL;
 
 alter table public.t_risknotes
-add COLUMN 
-	"STAT" varchar NULL
+add "STAT" varchar NULL;
 
 
 alter Table t_risk_owner
-add COLUMN
-"NSTRO" varchar NULL,
-"PRD" int4 NULL;
+add "NSTRO" varchar NULL,  [SREG16 TGRISLIST BUCD = SRO = 4, SREG 1/2 = SRO1 , ENDDA =  CURENTTIME = SREG1, NONACTIVE SRO3] EXept SRO2
+	"PRD" int4 NULL;
 
+
+RS1
+RISKTYPE RI 2 NULL
+CAT5 dan CAT6 diisi RI 1
+CAT3 = RI 1 atau RI 2
 
 
 
