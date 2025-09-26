@@ -351,8 +351,19 @@ add "STAT" varchar NULL;
 
 
 alter Table t_risk_owner
-add "NSTRO" varchar NULL,  [SREG16 TGRISLIST BUCD = SRO = 4, SREG 1/2 = SRO1 , ENDDA =  CURENTTIME = SREG1, NONACTIVE SRO3] EXept SRO2
+add "NSTRO" varchar NULL,  [SREG16 TGRISLIST BUCD = SRO = 4, SREG 1/2 = SRO1 , ENDDA =  CURENTTIME = SREG1, NONACTIVE SRO3] EXept SRO2z
+
+GRIREGISTER BUCD = PRD { STATUS SRO1 =  HREG 1, SRO4 = HREG 5}
+
 	"PRD" int4 NULL;
+
+
+UPDATE nama_tabel
+SET statt = CASE
+    WHEN stcd IN ('CAT-5', 'CAT-6') THEN 'RI-1'
+    WHEN stcd = 'CAT-3' THEN 'RI-2'
+    ELSE statt  -- biar nilai lama tetap kalau tidak sesuai kondisi
+END;
 
 
 RS1

@@ -1,12 +1,12 @@
-m_grisklist DISTINCT
-m_inassets
-m_inthreat
-m_invulnerability
-m_iresidualrisk
-m_iriskidentification
-m_irisklist
-m_iriskmeasurement
-m_irisktreatment
+m_grisklist DISTINCT Done d,a
+m_inassets NOT
+m_inthreat not 
+m_invulnerability not 
+m_iresidualrisk NOT
+m_iriskidentification NOT
+m_irisklist not 
+m_iriskmeasurement no TABLE
+m_irisktreatment not ADD
 t_access
 t_aspect
 t_businessunit
