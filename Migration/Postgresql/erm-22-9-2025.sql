@@ -390,7 +390,8 @@ WHERE DATE_PART('year', p."BEGDA") = 2024;
 
 
 UPDATE t_riskowner
-SET "PRD" = EXTRACT(YEAR from "BEGDA")::INT;
+SET "PRD" = EXTRACT(YEAR from "BEGDA")::INT
+WHERE DATE_PART('year', p."BEGDA") = 2024;
 
 
 RS1
