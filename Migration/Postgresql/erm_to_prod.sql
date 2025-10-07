@@ -45,3 +45,7 @@ CREATE TABLE public.t_grisk_notes (
 	"CRAT" timestamptz(6) DEFAULT CURRENT_DATE NULL,
 	"CHGDA" timestamptz(6) DEFAULT CURRENT_DATE NULL
 );
+
+
+
+
