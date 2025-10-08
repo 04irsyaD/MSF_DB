@@ -888,3 +888,43 @@ SET "NSTRO" = case
 end
 WHERE DATE_PART('year', p."BEGDA") = 2024;
 
+-- add master data
+-- to production database
+-- please table and query has been checked and verified
+
+add masterdata t_acces
+BEGDATE         ENDATE           ACSID                                      ACSCD                                                           ACSNM                                     CRAT                                 CHGDATE           CHGBY
+2025-09-09      2999-12-31      "d66d9696-a053-42d2-99bc-834e4679bc77"      "risk_treatment__pic_deadline" "No specific treatment"          "Risk Treatment Pic Deadline"             2025-09-09 13:34:14.072 +0700        2025-09-09        Jihan/Irsyad
+2025-09-09      2999-12-31      "d66d9696-a053-42d2-99bc-834e4679bc77"      "risk_treatment__only_pic_deadline" "Considered treatment"      "Risk Treatment Only Pic Deadline"        2025-09-09 13:34:14.072 +0700        2025-09-09        Jihan/Irsyad
+
+add master data t_menu_accces
+BEGDATE		 ENDATE           MNACID                                     MNACCD                                     				MNCD                               ACSD          	 					CRAT           						CHGDA					CHGBY	
+2025-09-09  2999-12-31      "01cf59ba-f97d-40ae-9b00-11e92f00d741"      "menu_risk_reporting__risk_treatment__only_pic_deadline"   menu_risk_reporting       		"risk_treatment__only_pic_deadline"     2025-09-09 13:28:32.382 +0700        2025-09-09        Jihan/Irsyad
+2025-09-09  2999-12-31      "0efade78-3360-41d5-aee1-9c96b851f52c"      "menu_risk_reporting__risk_treatment__pic_deadline"  	   menu_risk_reporting      		"risk_treatment__pic_deadline"        	2025-09-09 13:28:32.382 +0700		 2025-09-09        Jihan/Irsyad
+
+
+ADD Master DATA 
+BEGDATE 	ENDDA       ID     										BUCD    	OTYPE   	STEXT  										LTEXT    OBJDS CHGBY 
+2025-10-06	2999-01-01	c64090c7-8bbf-4a61-beeb-7a133dc61a8a		TSKCD		TSK-16		Assign a Risk Champion Coordinator						2025-10-06 10:25:15.296 +0700		irsyad
+2025-10-06	2999-01-01	a990c60e-cb0b-4165-89b2-fcf02bbcb8be		TSKCD		TSK-17		Assign a Risk Coordinator								2025-10-06 10:25:15.315 +0700		irsyad
+2025-10-06	2999-01-01	9b4355f9-71b3-4c94-87a6-8b56419f1059		STATCD		GKEL-2		Final													2025-10-06 16:01:30.380 +0700		irsyad
+2025-10-06	2999-01-01	dd46ddb9-bf52-45b1-b2d6-5adb198bc249		STATCD		GKEL-3		Deleted													2025-10-06 16:01:30.412 +0700		irsyad
+2025-10-06	2999-01-01	4b675a2b-b181-4e0c-b183-61262b5ab59c		STATCD		SREG-20		Approved by Reviewer									2025-10-06 16:09:33.840 +0700		irsyad
+2025-10-07	2999-01-01	a4a4149a-a144-4dff-b540-6556e3d746e2		NSTNR		SNR-1		Active													2025-10-07 08:16:07.560 +0700		irsyad
+2025-10-07	2999-01-01	3783297c-d3d7-40b0-baa3-3041cac727b5		NSTNR		SNR-2		Locked													2025-10-07 08:16:07.577 +0700		irsyad
+2025-10-07	2999-01-01	19dc3c78-f8a0-4b6a-8293-7dd9592ccc3f		NSTNR		SNR-3		Done													2025-10-07 08:16:07.700 +0700		irsyad
+2025-10-06	2999-01-01	bbb5da70-2f4f-4334-9349-9ca3d4595607		STATCD		GKEL-1		Drafted													2025-10-06 16:01:30.336 +0700		irsyad
+2025-10-07	2999-01-01	b7238b34-20a3-4e4f-bf7d-b9df4fae79a9		NSTRC		SRC-1		Active													2025-10-07 08:35:06.353 +0700		irsyad
+2025-10-07	2999-01-01	08bb58b9-6e0f-42e9-98c6-14b80aa263ae		NSTRC		SRC-2		Locked													2025-10-07 08:35:06.374 +0700		irsyad
+2025-10-07	2999-01-01	3dc93cef-dbb6-4a2c-9285-d3f78a2c5c82		NSTRC		SRC-3		Done													2025-10-07 08:35:06.398 +0700		irsyad
+2025-10-07	2999-01-01	4fb585bc-a4e0-48a9-9cc8-20872868442f		NSTRO		SRO-1		Active													2025-10-07 08:36:20.543 +0700		irsyad
+2025-10-07	2999-01-01	c09f5c39-c24f-493a-ae1f-245571d6907f		NSTRO		SRO-2		Locked													2025-10-07 08:36:20.560 +0700		irsyad
+2025-10-07	2999-01-01	7add7a97-46f1-4a57-8783-6f06f4abec66		NSTRO		SRO-3		Non Active												2025-10-07 08:36:20.579 +0700		irsyad
+2025-10-07	2999-01-01	9a1c14e1-fe48-4a57-b75d-1b152a17a7fc		NSTRO		SRO-4		Done													2025-10-07 08:36:20.597 +0700		irsyad
+2025-10-07	2999-01-01	8fe603c2-a05a-49be-938e-b320e6a8ac70		RSOURCE		RS-1		Add	Status for ADD Risk Source							2025-10-07 10:19:33.937 +0700		irsyad
+2025-10-07	2999-01-01	92d09ba4-eccd-4036-9b6e-8192af74d1ed		RSOURCE		RS-2		Force	Status for FORCE Risk Source					2025-10-07 10:19:33.961 +0700		irsyad
+2025-10-07	2999-01-01	a4e80632-75bf-4668-a99b-457a017ae82d		RSOURCE		RS-3		Refer	Status for REFER Risk Source					2025-10-07 10:19:33.981 +0700		irsyad
+2025-10-07	2999-01-01	e6e87a20-8dc1-48ee-b652-fcbf1aef3437		PFSTATUS	STAT-1		Active	Status For Perform Status						2025-10-07 10:19:34.008 +0700		irsyad
+2025-10-07	2999-01-01	6712b9c8-e467-4461-81c5-8296c80dd837		PFSTATUS	STAT-2		Inactive	Status For Perform Status					2025-10-07 10:19:34.027 +0700		irsyad
+2025-10-07	2999-01-01	c71a64d2-0593-4b00-a3e9-3e70668350b0		TREATSOURCE	TRS-1		Treatment Created From Risk General						2025-10-07 10:20:59.713 +0700		irsyad
+2025-10-07	2999-01-01	7d6ba6f5-71f5-4ab9-94f7-631f88a82e1a		DIR-4		SPPM		Strategic Partnership and Portfolio Management			2025-10-07 15:36:18.459 +0700		irsyad
