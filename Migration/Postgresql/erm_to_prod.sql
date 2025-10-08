@@ -9,6 +9,32 @@
 -- Note: This script uses a versioning system to manage data updates. The version number is set to 2 for this migration.
 
 -- Step 1: Add New Tables and columns to PROD schema
+-- ADD VIEWS 
+
+CREATE View v_gris_irislist as
+Select
+tgr."RISKCD",
+COUNT (tgr."RISKCD") as "COUNT",
+tgr."PRD",
+tgr."VRSN",
+tgr."RSCR",
+tgr."CRAT",
+tgr."REFCD",
+tgr."BEGDA",
+tgr."ENDDA"
+from t_grisklist tgr
+inner join t_irisklist tir
+	on tgr."RISKCD" = tir."RISKCD" 
+	and tgr."RSCR" = tir."RSCR" 
+group by tgr."RISKCD", 
+		 tgr."PRD",
+		 tgr."VRSN",
+		 tgr."RSCR",
+		 tgr."CRAT",
+		 tgr."REFCD",
+		 tgr."BEGDA",
+		 tgr."ENDDA",
+		 tgr."PRD"
 
 -- insert ADD UPDATE table prd 
 
@@ -838,3 +864,27 @@ SET "NSTNR" = case
     ) THEN 'SNR-2'
     ELSE 'SNR-3'
 end
+
+
+UPDATE t_riskowner  p
+SET "NSTRO" = case
+	WHEN p."ENDDA" <> DATE '2999-01-01' THEN 'SRO-3'
+    WHEN p."STAT" <> 'Active' THEN 'SRO-3'
+    WHEN EXISTS (
+        SELECT 1
+        FROM t_riskregisterstatus c
+        WHERE c."BUCD" = p."BUCD"
+          AND DATE_PART('year', c."BEGDA") = DATE_PART('year', p."BEGDA")
+          AND c."STATCD" = 'HREG-5'
+    ) THEN 'SRO-4'
+     WHEN EXISTS (
+        SELECT 1
+        FROM t_riskregisterstatus c
+         WHERE c."BUCD" = p."BUCD"
+          AND DATE_PART('year', c."BEGDA") = DATE_PART('year', p."BEGDA")
+          AND c."STATCD" = 'HREG-1'
+    ) THEN 'SRO-1'
+    ELSE 'SR0-2'
+end
+WHERE DATE_PART('year', p."BEGDA") = 2024;
+
