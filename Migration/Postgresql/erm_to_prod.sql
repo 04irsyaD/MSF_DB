@@ -946,4 +946,7 @@ update msaster data directorarte
 -- update functions
 -- update all functions that related to the changes above
 --
-upate all funtions
+update all funtions
+
+f_grislist
+f_irislist
