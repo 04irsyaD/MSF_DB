@@ -929,3 +929,15 @@ BEGDATE 	ENDDA       ID     										BUCD    	OTYPE   	STEXT  										LTEXT  
 2025-10-07	2999-01-01	6712b9c8-e467-4461-81c5-8296c80dd837		PFSTATUS	STAT-2		Inactive	Status For Perform Status					2025-10-07 10:19:34.027 +0700		irsyad
 2025-10-07	2999-01-01	c71a64d2-0593-4b00-a3e9-3e70668350b0		TREATSOURCE	TRS-1		Treatment Created From Risk General						2025-10-07 10:20:59.713 +0700		irsyad
 2025-10-07	2999-01-01	7d6ba6f5-71f5-4ab9-94f7-631f88a82e1a		DIR-4		SPPM		Strategic Partnership and Portfolio Management			2025-10-07 15:36:18.459 +0700		irsyad
+
+UPDATE master data t_otype
+
+update master data t_personal
+
+update master data t_rbac
+
+update master data t_status_register
+
+update master data t_user
+
+update msaster data directorarte
