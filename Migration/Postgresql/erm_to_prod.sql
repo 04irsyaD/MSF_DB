@@ -904,6 +904,7 @@ BEGDATE		 ENDATE           MNACID                                     MNACCD    
 
 
 ADD Master DATA 
+t_object
 BEGDATE 	ENDDA       ID     										BUCD    	OTYPE   	STEXT  										LTEXT    OBJDS CHGBY 
 2025-10-06	2999-01-01	c64090c7-8bbf-4a61-beeb-7a133dc61a8a		TSKCD		TSK-16		Assign a Risk Champion Coordinator						2025-10-06 10:25:15.296 +0700		irsyad
 2025-10-06	2999-01-01	a990c60e-cb0b-4165-89b2-fcf02bbcb8be		TSKCD		TSK-17		Assign a Risk Coordinator								2025-10-06 10:25:15.315 +0700		irsyad
