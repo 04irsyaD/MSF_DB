@@ -941,3 +941,9 @@ update master data t_status_register
 update master data t_user
 
 update msaster data directorarte
+
+
+-- update functions
+-- update all functions that related to the changes above
+--
+upate all funtions
