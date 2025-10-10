@@ -9,6 +9,10 @@
 -- Note: This script uses a versioning system to manage data updates. The version number is set to 2 for this migration.
 
 -- Step 1: Add New Tables and columns to PROD schema
+-- step 2: Add new columns to existing tables
+-- step 3: Add views to join tables
+-- step 4: Add new sequences if needed
+-- step 5: Migrate data from ERM to PROD schema
 -- ADD VIEWS 
 
 CREATE View v_gris_irislist as
