@@ -474,6 +474,48 @@ CREATE TABLE public.t_log_gkeylist (
 	"STATCD" varchar(255) DEFAULT NULL::character varying NULL
 );
 
+CREATE TABLE public.t_log_review_general (
+	"TRGLID" uuid DEFAULT uuid_generate_v4() NOT NULL,
+	"REVID" varchar(50) NULL,
+	"GRILID" varchar(50) NULL,
+	"STATCD" varchar(50) DEFAULT 'SREG-2'::character varying NULL,
+	"RISKCD" varchar(10) NULL,
+	"PRD" date NULL,
+	"VRSN" int4 NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_TIMESTAMP NULL,
+	"CHGDA" timestamptz(6) NULL,
+	"CHGBY" varchar(150) NULL,
+	"X1" varchar NULL,
+	"X2" varchar NULL,
+	"X3" varchar NULL,
+	"X4" varchar NULL,
+	"X5" varchar NULL,
+	"X6" varchar NULL,
+	"X7" varchar NULL,
+	CONSTRAINT t_log_review_general_pkey PRIMARY KEY ("TRGLID")
+);
+
+CREATE TABLE public.t_log_review_infosec (
+	"TRILID" uuid DEFAULT uuid_generate_v4() NOT NULL,
+	"REVID" varchar(50) NULL,
+	"IRILID" varchar(50) NULL,
+	"STATCD" varchar(50) DEFAULT 'SREG-2'::character varying NULL,
+	"RISKCD" varchar(10) NULL,
+	"PRD" date NULL,
+	"VRSN" int4 NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_TIMESTAMP NULL,
+	"CHGDA" timestamptz(6) NULL,
+	"CHGBY" varchar(150) NULL,
+	"X1" varchar NULL,
+	"X2" varchar NULL,
+	"X3" varchar NULL,
+	"X4" varchar NULL,
+	"X5" varchar NULL,
+	"X6" varchar NULL,
+	"X7" varchar NULL,
+	CONSTRAINT t_log_review_infosec_pkey PRIMARY KEY ("TRILID")
+);
+
 CREATE TABLE public.t_log_grisklist (
 	"BEGDA" date DEFAULT CURRENT_DATE NULL,
 	"ENDDA" date DEFAULT '2999-01-01'::date NULL,
