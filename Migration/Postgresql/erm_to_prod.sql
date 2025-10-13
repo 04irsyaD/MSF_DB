@@ -996,3 +996,19 @@ update all funtions
 
 f_grislist
 f_irislist
+
+# # OPSIONAL BUT URGENT
+
+ select 
+"BEGDA",
+"ENDDA",
+"BUCD",
+"PRD",
+"VRSN", default 0
+"CRAT",
+"CHGBY" IRSYAD
+from  t_riskregisterversion
+where "PRD" = '2025-12-31'
+
+-- update t_riskregisterversion
+-- if t_riskregisterversion not same with t_businessunit
