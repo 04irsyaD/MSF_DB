@@ -366,6 +366,34 @@ SET statt = CASE
 END;
 
 
+UPDATE t_riskowner  p
+SET "NSTRO" = case
+	WHEN p."ENDDA" <> DATE '2999-01-01' THEN 'SRO-3'
+    WHEN p."STAT" <> 'Active' THEN 'SRO-3'
+    WHEN EXISTS (
+        SELECT 1
+        FROM t_riskregisterstatus c
+        WHERE c."BUCD" = p."BUCD"
+          AND DATE_PART('year', c."BEGDA") = DATE_PART('year', p."BEGDA")
+          AND c."STATCD" = 'HREG-5'
+    ) THEN 'SRO-4'
+     WHEN EXISTS (
+        SELECT 1
+        FROM t_riskregisterstatus c
+         WHERE c."BUCD" = p."BUCD"
+          AND DATE_PART('year', c."BEGDA") = DATE_PART('year', p."BEGDA")
+          AND c."STATCD" = 'HREG-1'
+    ) THEN 'SRO-1'
+    ELSE 'SR0-2'
+end
+WHERE DATE_PART('year', p."BEGDA") = 2024;
+
+
+UPDATE t_riskowner
+SET "PRD" = EXTRACT(YEAR from "BEGDA")::INT
+WHERE DATE_PART('year', p."BEGDA") = 2024;
+
+
 RS1
 RISKTYPE RI 2 NULL
 CAT5 dan CAT6 diisi RI 1

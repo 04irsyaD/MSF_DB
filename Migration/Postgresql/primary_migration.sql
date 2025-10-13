@@ -1,3 +1,102 @@
+delete from public.t_iriskidentification x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_iriskmeasurement x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_irisktreatment x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_iresidualrisk x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_inassets x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_invulnerability x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_inthreat x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+delete from public.t_irisklist x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+
+delete from  public.t_griskidentification x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+
+delete from  public.t_griskmeasurement x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+
+delete from  public.t_grisktreatment x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+
+delete from  public.t_gresidualrisk x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+
+delete from  public.t_grisklist x
+where x."RISKCD" ~ '^RPD-\d+'
+and x."PRD" = '2025-12-31'
+and x."VRSN" = 2
+;
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 m_grisklist DISTINCT Done d,a
 m_inassets NOT
 m_inthreat not 

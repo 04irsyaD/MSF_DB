@@ -1,4 +1,6 @@
 -- This SQL query retrieves detailed information about all columns in all tables
+-- ini query untuk check data di dalam table beserta deskripsinya
+
 SELECT 
     c.table_name,
     c.column_name,
