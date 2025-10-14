@@ -15,4 +15,6 @@ END;
 $$;
 -- This script disables all triggers on all tables in the 'public' schema.
 -- You can change 'public' to the desired schema if needed.
--- Use with caution, as this will affect all triggers in the specified schema.
+-- Use with caution, as this will affect all triggers in the specified schema.\
+
+ALTER TABLE nama_tabel DISABLE TRIGGER nama_trigger;
