@@ -270,6 +270,24 @@ print(f"✅ Created table index: {os.path.abspath(index_file)}")
 # 8. Buat Dokumen Word
 # ==============================
 doc = Document()
+# Tambahkan header custom berupa tabel
+# Pastikan import Inches sudah ada di atas
+section = doc.sections[0]
+header = section.header
+table = header.add_table(rows=2, cols=4, width=Inches(6))
+table.style = 'Table Grid'
+# Baris header
+hdr_cells = table.rows[0].cells
+hdr_cells[0].text = 'Document Name :'
+hdr_cells[1].text = 'Document Version :'
+hdr_cells[2].text = 'Document Status :'
+hdr_cells[3].text = 'Document :'
+# Baris isi
+row_cells = table.rows[1].cells
+row_cells[0].text = 'TSD ERM'
+row_cells[1].text = '6.7'
+row_cells[2].text = 'Approved'
+row_cells[3].text = 'Confidential'
 doc.add_heading('📘 Dokumentasi Database', 0)
 
 # Ringkasan umum
@@ -291,7 +309,7 @@ doc.add_paragraph("Diagram Arsitektur :")
 if paginated_files:
     for erd_file in paginated_files:
         if os.path.exists(erd_file):
-            doc.add_picture(erd_file, width=Inches(7))
+            doc.add_picture(erd_file, width=Inches(2)) # Sesuaikan ukuran gambar
             doc.add_paragraph(f"Gambar: {erd_file} hasil generate otomatis dengan detail kolom dan relasi PK-FK.")
 
 # Skema Database
