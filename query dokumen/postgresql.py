@@ -199,9 +199,11 @@ def create_paginated_erds(df_tables, df_fk, tables_per_page=15, use_grouping=Tru
             html = f'''<
             <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="3">
                 <TR><TD BGCOLOR="#2E75B6"><FONT COLOR="white"><B>{table}</B></FONT></TD></TR>'''
-            for _, col in table_columns.iterrows():
+            for _, col in table_columns.head(6).iterrows():
                 key_indicator = " 🔑" if col['key_type']=='PK' else (" 🔗" if col['key_type']=='FK' else "")
                 html += f'<TR><TD ALIGN="LEFT">{col["column_name"]}{key_indicator}</TD></TR>'
+            if len(table_columns) > 6:
+                html += f'<TR><TD BGCOLOR="#F5F5F5">+{len(table_columns)-6} more</TD></TR>'
             html += '</TABLE>>'
             dot.node(table, html)
 
