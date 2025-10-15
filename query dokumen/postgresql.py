@@ -271,9 +271,15 @@ print(f"✅ Created table index: {os.path.abspath(index_file)}")
 # ==============================
 doc = Document()
 # Tambahkan header custom berupa tabel
-# Pastikan import Inches sudah ada di atas
 section = doc.sections[0]
 header = section.header
+# Tambahkan logo ke header
+logo_path = os.path.join(os.path.dirname(__file__), "sigma.png")
+if os.path.exists(logo_path):
+    header_paragraph = header.add_paragraph()
+    run = header_paragraph.add_run()
+    run.add_picture(logo_path, width=Inches(1.2))
+# Tambahkan tabel info dokumen
 table = header.add_table(rows=2, cols=4, width=Inches(6))
 table.style = 'Table Grid'
 # Baris header
@@ -288,6 +294,25 @@ row_cells[0].text = 'TSD ERM'
 row_cells[1].text = '6.7'
 row_cells[2].text = 'Approved'
 row_cells[3].text = 'Confidential'
+
+# Tambahkan daftar isi otomatis
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+paragraph = doc.add_paragraph()
+run = paragraph.add_run()
+fldChar = OxmlElement('w:fldChar')
+fldChar.set(qn('w:fldCharType'), 'begin')
+instrText = OxmlElement('w:instrText')
+instrText.text = r'TOC \o "1-3" \h \z \u'
+fldChar2 = OxmlElement('w:fldChar')
+fldChar2.set(qn('w:fldCharType'), 'separate')
+fldChar3 = OxmlElement('w:fldChar')
+fldChar3.set(qn('w:fldCharType'), 'end')
+r_element = run._r
+r_element.append(fldChar)
+r_element.append(instrText)
+r_element.append(fldChar2)
+r_element.append(fldChar3)
 doc.add_heading('📘 Dokumentasi Database', 0)
 
 # Ringkasan umum
