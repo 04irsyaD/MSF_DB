@@ -176,7 +176,10 @@ def create_paginated_erds(df_tables, df_fk, tables_per_page=15, use_grouping=Tru
         pages = [all_tables[i:i+tables_per_page] for i in range(0, len(all_tables), tables_per_page)]
     
     created_files = []
+    max_images = 3  # batas maksimal file gambar ERD_Page
     for page_idx, page_tables in enumerate(pages, 1):
+        if page_idx > max_images:
+            break
         dot = Digraph(comment=f"ERD Page {page_idx}", format="png")
         
         # A4 optimized settings
@@ -267,33 +270,9 @@ print(f"✅ Created table index: {os.path.abspath(index_file)}")
 
 
 # ==============================
-# 8. Buat Dokumen Word
-# ==============================
-doc = Document()
-# Tambahkan header custom berupa tabel
-section = doc.sections[0]
-header = section.header
-# Tambahkan logo ke header
-logo_path = os.path.join(os.path.dirname(__file__), "sigma.png")
-if os.path.exists(logo_path):
-    header_paragraph = header.add_paragraph()
-    run = header_paragraph.add_run()
-    run.add_picture(logo_path, width=Inches(1.2))
-# Tambahkan tabel info dokumen
-table = header.add_table(rows=2, cols=4, width=Inches(6))
-table.style = 'Table Grid'
-# Baris header
-hdr_cells = table.rows[0].cells
-hdr_cells[0].text = 'Document Name :'
-hdr_cells[1].text = 'Document Version :'
-hdr_cells[2].text = 'Document Status :'
-hdr_cells[3].text = 'Document :'
-# Baris isi
-row_cells = table.rows[1].cells
-row_cells[0].text = 'TSD ERM'
-row_cells[1].text = '6.7'
-row_cells[2].text = 'Approved'
-row_cells[3].text = 'Confidential'
+from docx import Document
+template_path = os.path.join(os.path.dirname(__file__), "TSD ERM.docx")
+doc = Document(template_path)
 
 # Tambahkan daftar isi otomatis
 from docx.oxml import OxmlElement
