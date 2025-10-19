@@ -3,5 +3,8 @@
 TSD ERM.docx
 excel_healcheck_kpei.sql
 # Ignore temporary files
+.env
+.env.*
+# Ignore IDE specific files
 
 
