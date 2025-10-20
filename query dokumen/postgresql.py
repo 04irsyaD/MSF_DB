@@ -432,7 +432,7 @@ for table in df_tables['table_name'].unique():
         'x4': 'Example field 4',
         'x5': 'Example field 5',
         'x6': 'Example field 6',
-        'x7': 'Example field 7't
+        'x7': 'Example field 7'
 
     }
 
