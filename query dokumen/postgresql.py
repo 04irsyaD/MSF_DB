@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine, text
 import pandas as pd
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Inches, Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from graphviz import Digraph
 import os
 import networkx as nx   # <-- tambahan untuk grouping relasi
@@ -239,7 +240,6 @@ def create_table_index():
     filename = "table_index.png"
     # Tambahkan logika index jika diperlukan
     return filename
-# ==============================
 # ... (semua fungsi create_overview_dashboard, create_relationships_only_erd, create_table_index tetap sama seperti code kamu)
 
 # ==============================
@@ -333,26 +333,150 @@ for table in df_tables['table_name'].unique():
     
     subset = df_tables[df_tables['table_name'] == table]
     
-    word_table = doc.add_table(rows=1, cols=7)  # Added Key Type column
+    # Create compact table like sample: No | Nama Field | Tipe Data | Deskripsi Field
+    word_table = doc.add_table(rows=1, cols=4)
     word_table.style = 'Table Grid'
+    word_table.autofit = False
+    # Column widths (adjust as needed)
+    NO_COL_WIDTH = Inches(0.32)
+    NAME_COL_WIDTH = Inches(2.2)
+    TYPE_COL_WIDTH = Inches(1.4)
+    DESC_COL_WIDTH = Inches(3.0)
+    col_widths = [NO_COL_WIDTH, NAME_COL_WIDTH, TYPE_COL_WIDTH, DESC_COL_WIDTH]
+
     hdr_cells = word_table.rows[0].cells
-    hdr_cells[0].text = 'NO'
-    hdr_cells[1].text = 'Nama Kolom'
+    hdr_cells[0].text = 'No'
+    hdr_cells[1].text = 'Nama Field'
     hdr_cells[2].text = 'Tipe Data'
-    hdr_cells[3].text = 'Key'
-    hdr_cells[4].text = 'Null'
-    hdr_cells[5].text = 'Default'
-    hdr_cells[6].text = 'Deskripsi'
+    hdr_cells[3].text = 'Deskripsi Field'
+    # header style
+    try:
+        for c in hdr_cells:
+            for p in c.paragraphs:
+                for r in p.runs:
+                    r.font.bold = True
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    except Exception:
+        pass
+
+    # try apply simple widths (some environments accept .width)
+    # Compute available page width and scale columns to fit if needed
+    try:
+        section = doc.sections[0]
+        avail_inches = section.page_width.inches - section.left_margin.inches - section.right_margin.inches
+    except Exception:
+        avail_inches = 6.5
+
+    total_inches = sum(w.inches for w in col_widths)
+    if total_inches > avail_inches and total_inches > 0:
+        scale = avail_inches / total_inches
+        # allow more aggressive scaling but keep some minimum
+        MIN_SCALE = 0.45
+        if scale < MIN_SCALE:
+            scale = MIN_SCALE
+        col_widths = [Inches(w.inches * scale) for w in col_widths]
+
+    # set table width (w:tblW) and per-cell tcW to enforce widths
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    try:
+        total_twips = int(sum(w.inches for w in col_widths) * 1440)
+        tblPr = word_table._tbl.get_or_add_tblPr()
+        # remove existing tblW if present
+        for child in list(tblPr):
+            if child.tag == qn('w:tblW'):
+                tblPr.remove(child)
+        tblW = OxmlElement('w:tblW')
+        tblW.set(qn('w:w'), str(total_twips))
+        tblW.set(qn('w:type'), 'dxa')
+        tblPr.append(tblW)
+
+        # set each cell width via tcPr/tcW
+        for col_idx, w in enumerate(col_widths):
+            tw = int(w.inches * 1440)
+            if col_idx >= len(word_table.columns):
+                break
+            for cell in word_table.columns[col_idx].cells:
+                tc = cell._tc
+                tcPr = tc.get_or_add_tcPr()
+                # remove existing tcW
+                for child in list(tcPr):
+                    if child.tag == qn('w:tcW'):
+                        tcPr.remove(child)
+                tcW = OxmlElement('w:tcW')
+                tcW.set(qn('w:w'), str(tw))
+                tcW.set(qn('w:type'), 'dxa')
+                tcPr.append(tcW)
+    except Exception:
+        # fallback: ignore width enforcement
+        pass
+
+    def _truncate(text, maxlen=40):
+        if text is None:
+            return ''
+        s = str(text)
+        return s if len(s) <= maxlen else s[:maxlen-3] + '...'
+
+    # Default description mapping for common field names
+    default_desc_map = {
+        'BEGDA': 'Begin date',
+        'ENDDA': 'End date',
+        'CHGDA': 'Change date',
+        'CRAT': 'Create at',
+        'DESC': 'Description',
+        'CHGBY': 'Change by',
+        'x1': 'Example field',
+        'x2': 'Example field 2',
+        'x3': 'Example field 3',
+        'x4': 'Example field 4',
+        'x5': 'Example field 5',
+        'x6': 'Example field 6',
+        'x7': 'Example field 7't
+
+    }
 
     for i, row in enumerate(subset.itertuples(), start=1):
         row_cells = word_table.add_row().cells
-        row_cells[0].text = str(i)
-        row_cells[1].text = str(row.column_name)
-        row_cells[2].text = str(row.data_type)
-        row_cells[3].text = str(row.key_type) if row.key_type else ""
-        row_cells[4].text = str(row.is_nullable)
-        row_cells[5].text = str(row.column_default)
-        row_cells[6].text = str(row.column_description) if row.column_description else ""
+        # Number with dot like '1.'
+        row_cells[0].text = f"{i}."
+        dtype = str(row.data_type) if getattr(row, 'data_type', None) is not None else ''
+        if 'character varying' in dtype.lower():
+            dtype_norm = 'Varchar'
+        else:
+            dtype_norm = dtype.title()
+
+        row_cells[1].text = _truncate(row.column_name, maxlen=25)
+        row_cells[2].text = _truncate(dtype_norm, maxlen=20)
+        # use default mapping when column description is empty
+        col_desc = getattr(row, 'column_description', '')
+        if not col_desc or str(col_desc).strip() == '':
+            col_key = str(row.column_name).upper() if getattr(row, 'column_name', None) else ''
+            col_desc = default_desc_map.get(col_key, '')
+        row_cells[3].text = _truncate(col_desc, maxlen=50)
+
+        # Format No cell compact
+        try:
+            p = row_cells[0].paragraphs[0]
+            p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            r = p.runs[0]
+            r.font.size = Pt(12)
+            r.font.bold = True
+        except Exception:
+            pass
+
+    # reduce font size for table body to fit
+    try:
+        for col_idx in range(len(word_table.columns)):
+            for cell in word_table.columns[col_idx].cells:
+                for p in cell.paragraphs:
+                    for run in p.runs:
+                        try:
+                            run.font.size = Pt(12)
+                        except Exception:
+                            pass
+    except Exception:
+        pass
 
 # ==============================
 # 10. Functions
