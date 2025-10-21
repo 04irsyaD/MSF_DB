@@ -6,24 +6,30 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from graphviz import Digraph
 import os
 import networkx as nx   # <-- tambahan untuk grouping relasi
+from dotenv import load_dotenv
 
 # ==============================
 # 1. Koneksi Database
 # ==============================
 
-# --- Tambahkan input schema ---
-username = "postgres"     # ganti dengan username PostgreSQL kamu
-password = "1234"         # ganti dengan password PostgreSQL kamu
-host = "localhost"
-port = "5414"
-database = "erm"          # ganti dengan nama database kamu
 
-# Pilih schema yang ingin diproses
+# --- Load DB config from .env ---
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+username = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWORD')
+host = os.getenv('DB_HOST' )
+port = os.getenv('DB_PORT')
+database = os.getenv('DB_DATABASE')
+
+
+# Pilih schema dari .env, argumen CLI, atau default
 import sys
-if len(sys.argv) > 1:
-    selected_schema = sys.argv[1]
-else:
-    selected_schema = "backup2"  # default
+selected_schema = os.getenv('DB_SCHEMA')
+if not selected_schema:
+    if len(sys.argv) > 1:
+        selected_schema = sys.argv[1]
+    else:
+        selected_schema = "backup2"  # default
 print(f"Schema yang diproses: {selected_schema}")
 
 
