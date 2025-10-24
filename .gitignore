@@ -5,6 +5,10 @@ excel_healcheck_kpei.sql
 # Ignore temporary files
 .env
 .env.*
+*.log
+*.bak
+*.txt
+.txt
 # Ignore IDE specific files
 
 
