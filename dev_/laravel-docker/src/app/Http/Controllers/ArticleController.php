@@ -10,14 +10,23 @@ class ArticleController extends Controller
     // List all articles
     public function index()
     {
-        $articles = Article::with('user')->latest()->paginate(10);
+        $articles = Article::with(['user', 'category'])->latest()->paginate(10);
         return view('articles.index', compact('articles'));
     }
 
     // Show create form
     public function create()
     {
-        return view('articles.create');
+        $categories = \App\Models\Category::all();
+        $levels = \App\Models\Article::getLevelOptions();
+        return view('articles.create', compact('categories', 'levels'));
+    }
+
+    // Show article detail
+    public function show(Article $article)
+    {
+        $article->load(['user', 'category']);
+        return view('articles.show', compact('article'));
     }
 
     // Store new article
@@ -27,6 +36,8 @@ class ArticleController extends Controller
             'title' => 'required|string|max:255',
             'pdf' => 'required|mimes:pdf|max:2048',
             'content' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+            'level' => 'required|in:pemula,menengah,lanjutan',
         ]);
 
         $pdfPath = $request->file('pdf')->store('pdfs', 'public');
@@ -35,7 +46,9 @@ class ArticleController extends Controller
             'title' => $request->title,
             'content' => $request->content,
             'pdf_path' => $pdfPath,
-            'user_id' => auth()->id(), // Gunakan auth()->id() untuk mendapatkan user yang login
+            'user_id' => auth()->id(),
+            'category_id' => $request->category_id,
+            'level' => $request->level,
         ]);
 
         return redirect()->route('articles.index')->with('success', 'Artikel PDF berhasil diupload!');
@@ -49,7 +62,9 @@ class ArticleController extends Controller
             abort(403, 'You can only edit your own articles.');
         }
 
-        return view('articles.edit', compact('article'));
+        $categories = \App\Models\Category::all();
+        $levels = \App\Models\Article::getLevelOptions();
+        return view('articles.edit', compact('article', 'categories', 'levels'));
     }
 
     // Update existing article
@@ -64,11 +79,15 @@ class ArticleController extends Controller
                 'title' => 'required|string|max:255',
                 'pdf' => 'nullable|mimes:pdf|max:2048',
                 'content' => 'nullable|string',
+                'category_id' => 'required|exists:categories,id',
+                'level' => 'required|in:pemula,menengah,lanjutan',
             ]);
 
             $data = [
                 'title' => $request->title,
                 'content' => $request->content,
+                'category_id' => $request->category_id,
+                'level' => $request->level,
             ];
 
             if ($request->hasFile('pdf')) {

@@ -12,7 +12,7 @@ class DashboardController extends Controller
     // Halaman utama dashboard
     public function index()
     {
-        $articles = Article::latest()->get();
+        $articles = Article::with(['user', 'category'])->latest()->get();
         return view('dashboard.index', compact('articles'));
     }
 

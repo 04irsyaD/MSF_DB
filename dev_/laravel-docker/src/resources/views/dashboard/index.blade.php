@@ -21,6 +21,8 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="p-3 border">Judul</th>
+                    <th class="p-3 border">Kategori</th>
+                    <th class="p-3 border">Level</th>
                     <th class="p-3 border">Penulis</th>
                     <th class="p-3 border">Komentar</th>
                     <th class="p-3 border">PDF</th>
@@ -31,6 +33,16 @@
                 @forelse($articles as $article)
                 <tr class="hover:bg-gray-50">
                     <td class="p-3 border">{{ $article->title }}</td>
+                    <td class="p-3 border">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                            {{ $article->category->name ?? 'No Category' }}
+                        </span>
+                    </td>
+                    <td class="p-3 border">
+                        <span class="{{ $article->level_badge_color }} text-xs font-medium px-2.5 py-0.5 rounded">
+                            {{ $article->level_label }}
+                        </span>
+                    </td>
                     <td class="p-3 border">{{ $article->user->name ?? 'Unknown' }}</td>
                     <td class="p-3 border">{{ $article->content ?? '-' }}</td>
                     <td class="p-3 border">
@@ -44,7 +56,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="p-4 text-center text-gray-500">Belum ada artikel.</td>
+                    <td colspan="7" class="p-4 text-center text-gray-500">Belum ada artikel.</td>
                 </tr>
                 @endforelse
             </tbody>

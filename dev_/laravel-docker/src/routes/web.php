@@ -14,9 +14,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Articles - view untuk semua role
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-    Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
 
-    // Articles CRUD - hanya admin dan penulis
+    // Articles CRUD - hanya admin dan penulis (letakkan sebelum route show)
     Route::middleware(['role:admin,penulis'])->group(function () {
         Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
         Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
@@ -24,6 +23,9 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
         Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
     });
+
+    // Show article - untuk semua role (letakkan setelah route yang lebih spesifik)
+    Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
 
     // User Management - hanya admin
     Route::middleware(['role:admin'])->group(function () {
