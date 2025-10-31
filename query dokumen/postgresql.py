@@ -432,13 +432,13 @@ for table in df_tables['table_name'].unique():
         'CRAT': 'Create at',
         'DESC': 'Description',
         'CHGBY': 'Change by',
-        'x1': 'Example field',
-        'x2': 'Example field 2',
-        'x3': 'Example field 3',
-        'x4': 'Example field 4',
-        'x5': 'Example field 5',
-        'x6': 'Example field 6',
-        'x7': 'Example field 7'
+        'X1': 'Example field',
+        'X2': 'Example field 2',
+        'X3': 'Example field 3',
+        'X4': 'Example field 4',
+        'X5': 'Example field 5',
+        'X6': 'Example field 6',
+        'X7': 'Example field 7'
 
     }
 
