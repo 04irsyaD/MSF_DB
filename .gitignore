@@ -9,6 +9,9 @@ excel_healcheck_kpei.sql
 *.bak
 *.txt
 .txt
+.docx
+*.docx
 # Ignore IDE specific files
-
-
+.idea/
+*.sublime-workspace
+*.sublime-project
