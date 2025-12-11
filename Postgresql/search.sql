@@ -30,4 +30,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-
+-- now you can search across all text columns in all tables
+SELECT * FROM search_all('TR-1-LSM-1');
+-- use this to search by data
