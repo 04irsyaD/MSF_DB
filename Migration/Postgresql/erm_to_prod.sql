@@ -13,6 +13,12 @@
 -- step 3: Add views to join tables
 -- step 4: Add new sequences if needed
 -- step 5: Migrate data from ERM to PROD schema
+
+
+
+--- UPDATE MASTER DATA
+TABLE t_businessunit
+TABLE t_categorization
 -- ADD VIEWS 
 
 CREATE View v_gris_irislist as
@@ -375,9 +381,9 @@ ADD "CATMPL" varchar DEFAULT uuid_generate_v4() NULL,
 
 ALTER TABLE public.t_grisklist
 ADD "NIK" varchar NULL,
-	"RSCR" varchar NULL,
-	"DVSN" varchar NULL,
-	"ALIASEQ" int4 NULL; diambil dari RISKCD jika ENDDA = 0
+ADD	"RSCR" varchar NULL,
+ADD	"DVSN" varchar NULL,
+ADD	"ALIASEQ" int4 NULL; diambil dari RISKCD jika ENDDA = 0
 
 CREATE TABLE public.t_griskregister
 	prd varchar(50) NULL,
@@ -621,7 +627,7 @@ CREATE TABLE public.t_multiple_pic_rc (
 
 alter table public.t_reviewer
 add "NSTNR" varchar NULL,
-	"PRD" int4 NULL;
+ADD	"PRD" int4 NULL;
 
 
 CREATE TABLE public.t_reviewer_list (
@@ -1012,3 +1018,376 @@ where "PRD" = '2025-12-31'
 
 -- update t_riskregisterversion
 -- if t_riskregisterversion not same with t_businessunit
+insert into t_multiple_categorization 
+select a.
+from t_griskidentification a
+
+
+SELECT 
+	"BEGDA",
+	"ENDDA",
+    "CATCD",
+    "CATMPL",
+    "CRAT",
+    "CHGDA"
+FROM t_griskidentification;
+insert into t_multiple_categorization
+
+
+INSERT INTO t_multiple_categorization (
+    "BEGDA",
+    "ENDDA",
+    "CATCD",
+    "CATMPL",
+    "CRAT",
+    "CHGDA"
+)
+SELECT 
+    "BEGDA",
+    "ENDDA",
+    "CATCD",
+    "CATMPL",
+    "CRAT",
+    "CHGDA"
+FROM t_griskidentification;
+
+
+SELECT 
+    "CATCD"
+FROM t_griskidentification
+WHERE "CATCD" <> 'CAT-3';
+
+
+UPDATE t_griskidentification
+SET "CATCD" = 'CAT-0'
+WHERE "CATCD" <> 'CAT-3';
+
+ select pg_terminate_backend(pid)
+ from pg_stat_activity
+ where pid <> pg_backend_pid() and state = 'idle in transaction' 
+
+UPDATE t_grisktreatment a
+SET "PIC" = mpc."RLMPID"
+FROM t_personal b
+JOIN t_multiple_pic_rc mpc
+    ON mpc."PICID" = b."PRSNID"
+   AND mpc."CRAT" = a."CRAT"
+   AND mpc."RITREID" = a."RITREID"
+WHERE a."PICNIK" = b."NIK";
+
+
+
+SELECT 
+    a."PICNIK",
+    b."PRSNID",
+    a."RITREID",
+    mpc."RLMPID",
+    a."CRAT"
+FROM t_irisktreatment a,
+     t_personal b,
+     t_multiple_pic_rc mpc
+WHERE a."PICNIK" = b."NIK"
+  AND mpc."PICID" = b."PRSNID"
+  AND mpc."CRAT" = a."CRAT"
+  AND mpc."RITREID" = a."RITREID";
+
+
+
+UPDATE t_grisktreatment a
+SET "PIC" = mpc."RLMPID"
+FROM t_personal b,
+     t_multiple_pic_rc mpc
+WHERE a."PICNIK" = b."NIK"
+  AND mpc."PICID" = b."PRSNID"
+  AND mpc."CRAT" = a."CRAT"
+  AND mpc."RITREID" = a."RITREID";
+
+
+UPDATE t_grisktreatment
+SET "PICNIK" = "PIC"
+WHERE "PICNIK" IS DISTINCT FROM "PIC";
+
+ 
+
+
+
+
+
+INSERT INTO t_multiple_pic_rc ("PICID")
+SELECT b."PRSNID"
+FROM t_grisktreatment  a
+JOIN t_personal b ON a."PICNIK" = b."NIK";
+
+
+INSERT INTO t_multiple_pic_rc ("PICID", "CRAT","RITREID")
+SELECT 
+    b."PRSNID",
+    a."CRAT",
+    a."RITREID"
+FROM t_grisktreatment a
+JOIN t_personal b 
+    ON a."PICNIK" = b."NIK";
+
+
+INSERT INTO t_multiple_pic_rc ("PICID", "CRAT","RITREID")
+SELECT 
+    b."PRSNID",
+    a."CRAT",
+    a."RITREID"
+FROM t_irisktreatment a
+JOIN t_personal b 
+    ON a."PICNIK" = b."NIK";
+
+CREATE UNIQUE INDEX ON t_multiple_pic_rc ("MCPID");
+
+
+update t_grisktreatment a ("PIC")
+select 
+	mpc."RLMPID"
+from t_multiple_pic_rc mpc
+join t_personal b
+	mpc."BEGDA" = tg."BEGDA"
+	mpc."PICID" = ( a."PICNIK" = b."NIK";)
+
+
+SELECT 
+    a."PICNIK",
+    b."PRSNID",
+    a."RITREID",
+    mpc."RLMPID",
+    a."CRAT"
+FROM t_grisktreatment a
+JOIN t_personal b
+    ON a."PICNIK" = b."NIK"
+JOIN t_multiple_pic_rc mpc
+    ON mpc."PICID" = b."PRSNID"
+    AND mpc."CRAT" = a."CRAT"
+    and mpc."RITREID" = a."RITREID" 
+
+SELECT "PICID", "CRAT", COUNT(*)
+FROM t_multiple_pic_rc
+GROUP BY "PICID", "CRAT"
+HAVING COUNT(*) > 1;
+
+
+
+
+
+
+update t_multiple_pic_rc
+set "RLMPID" uuid_generate_v4()
+where "RLMPID"  is null ;
+
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+
+
+UPDATE t_multiple_pic_rc
+SET "RLMPID" = uuid_generate_v4()
+WHERE "RLMPID" IS NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select pg_terminate_backend(pid)
+ from pg_stat_activity
+ where pid <> pg_backend_pid() and state = 'idle in transaction' 
+ 
+ UPDATE t_griskidentification
+SET "RSCR" = CASE
+        WHEN "REFCD" IS NOT NULL THEN 'RS-2'
+        WHEN "REFPRD" IS NOT NULL THEN 'RS-3'
+        ELSE 'RS-1'
+    END;
+
+ 
+ 
+ 
+UPDATE t_riskowner  p
+SET "NSTRO" = case
+	WHEN p."ENDDA" <> DATE '2999-01-01' THEN 'SRO-3'
+    WHEN p."STAT" <> 'Active' THEN 'SRO-3'
+    WHEN EXISTS (
+        SELECT 1
+        FROM t_riskregisterstatus c
+        WHERE c."BUCD" = p."BUCD"
+          AND DATE_PART('year', c."BEGDA") = DATE_PART('year', p."BEGDA")
+          AND c."STATCD" = 'HREG-5'
+    ) THEN 'SRO-4'
+     WHEN EXISTS (
+        SELECT 1
+        FROM t_riskregisterstatus c
+         WHERE c."BUCD" = p."BUCD"
+          AND DATE_PART('year', c."BEGDA") = DATE_PART('year', p."BEGDA")
+          AND c."STATCD" = 'HREG-1'
+    ) THEN 'SRO-1'
+    ELSE 'SR0-2'
+end
+WHERE DATE_PART('year', p."BEGDA") = 2024;
+
+
+UPDATE t_riskowner p
+SET "PRD" = EXTRACT(YEAR from "BEGDA")::INT
+WHERE DATE_PART('year', p."BEGDA") = 2024;
+
+
+
+
+
+select  * from v_gris_irislist
+
+update t_gkeyidentification 
+set "RSCR" = 'RS-1',
+	"RISKTPE" = 'RI-1'
+
+
+	 select pg_terminate_backend(pid)
+ from pg_stat_activity
+ where pid <> pg_backend_pid() and state = 'idle in transaction' 
+
+
+SELECT
+    t.tgname AS trigger_name,
+    c.relname AS table_name,
+    CASE t.tgenabled
+        WHEN 'O' THEN 'ENABLED'
+        WHEN 'D' THEN 'DISABLED'
+        WHEN 'R' THEN 'REPLICA'
+        WHEN 'A' THEN 'ALWAYS'
+    END AS status,
+    pg_get_triggerdef(t.oid) AS trigger_definition
+FROM pg_trigger t
+JOIN pg_class c ON t.tgrelid = c.oid
+JOIN pg_namespace n ON c.relnamespace = n.oid
+WHERE NOT t.tgisinternal
+ORDER BY table_name, trigger_name;
+
+
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN
+        SELECT quote_ident(n.nspname) || '.' || quote_ident(c.relname) AS table_name
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = 'r'  -- hanya tabel biasa
+          AND n.nspname = 'public'  -- ganti dengan nama schema kamu jika perlu
+    LOOP
+        EXECUTE 'ALTER TABLE ' || r.table_name || ' DISABLE TRIGGER ALL;';
+    END LOOP;
+END;
+$$;
+
+SELECT
+    code,
+    MAX(name) AS name,
+    MAX(email) AS email,
+    COUNT(*) AS total
+FROM "user"
+GROUP BY code
+ORDER BY RCLNM DESC;
+
+
+select
+	BUCD, 
+	max(RCHNM),
+	BEGDA,
+	RCLNUM" int4 NULL,
+	"PRD" int4 NULL,
+	"CRAT" timestamptz(6) DEFAULT CURRENT_TIMESTAMP NULL,
+	"CHGDA" date NULL,
+	"CHGBY" varchar(150) NULL,
+	"STAT" varchar DEFAULT 'Active'::character varying NULL,
+	"RCHNM" varchar NULL,
+	"RCHEML" varchar NULL,
+
+
+INSERT INTO public.t_reviewer_list (
+    "BUCD",
+    "RCHNM",
+    "RCLNUM",
+    "PRD",
+    "BEGDA",
+    "CHGBY"
+)
+SELECT
+    u."BUCD",
+    MAX(u."RCHNM") AS "RCHNM",
+    COUNT(*) AS "RCLNUM",
+    EXTRACT(YEAR FROM u."BEGDA")::int AS "PRD",
+    MIN(u."BEGDA") AS "BEGDA",
+    MAX(u."CHGBY") AS "CHGBY"
+FROM "t_riskchampion" u
+GROUP BY
+    u."BUCD",
+    EXTRACT(YEAR FROM u."BEGDA")
+ORDER BY u."BUCD", "PRD";
+
+
+INSERT INTO public.t_reviewer_list (
+    "BUCD",
+    "RLNUM",
+    "PRD",
+    "BEGDA",
+    "CHGBY"
+)
+SELECT
+    u."BUCD",
+    COUNT(*) AS "RCLNUM",
+    EXTRACT(YEAR FROM u."BEGDA")::int AS "PRD",
+    MIN(u."BEGDA") AS "BEGDA",
+    MAX(u."CHGBY") AS "CHGBY"
+FROM "t_reviewer" u
+GROUP BY
+    u."BUCD",
+    EXTRACT(YEAR FROM u."BEGDA")
+ORDER BY u."BUCD", "PRD";
+
+INSERT INTO public.t__list (
+    "BUCD",
+    "RLNUM",
+    "PRD",
+    "BEGDA",
+    "CHGBY"
+)
+SELECT
+    -- Ambil huruf diawal RISKCD
+    REGEXP_REPLACE(u."RISKCD", '[^A-Za-z]+.*$', '') AS "BUCD",
+    COUNT(*) AS "RCLNUM",
+    EXTRACT(YEAR FROM u."BEGDA")::int AS "PRD",
+    MIN(u."BEGDA") AS "BEGDA",
+    MAX(u."CHGBY") AS "CHGBY"
+FROM "t_grisklist" u
+-- Hanya ambil yang diawali huruf
+WHERE u."RISKCD" ~ '^[A-Za-z]'
+GROUP BY
+    REGEXP_REPLACE(u."RISKCD", '[^A-Za-z]+.*$', ''),
+    EXTRACT(YEAR FROM u."BEGDA")
+ORDER BY "BUCD", "PRD";
+
