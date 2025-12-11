@@ -77,3 +77,7 @@ from t_inventor tir
 left join t_object t 
 	on  tir."BUCD" = t."STEXT" 
 	and t."ENDDA" = '2999-01-01'
+
+
+-- risk treatment
+select DISTINCT ON ("RTRUID")
