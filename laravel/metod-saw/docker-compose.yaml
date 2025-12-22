@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saw_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+    ports:
+      - 8080:8000
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=saw_karyawan
+      - DB_USERNAME=saw_user
+      - DB_PASSWORD=saw_password
+
+  db:
+    image: postgres:15
+    container_name: saw_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: saw_karyawan
+      POSTGRES_USER: saw_user
+      POSTGRES_PASSWORD: saw_password
+    volumes:
+      - saw_pgdata:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: saw_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@saw.com
+      PGADMIN_DEFAULT_PASSWORD: sawadmin
+    ports:
+      - 5051:80
+    depends_on:
+      - db
+
+volumes:
+  saw_pgdata:
