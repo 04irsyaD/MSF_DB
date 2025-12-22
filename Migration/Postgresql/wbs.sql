@@ -296,7 +296,7 @@ CREATE TABLE public."L_REPORT_NOTES" (
 	is_active boolean not null default true,
 	is_resolved boolean not null default true, 
 	CONSTRAINT "L_REPORT_NOTES_pkey" PRIMARY KEY (id),
-	constraint "fk_l_notes_report_id" foreign key (notes_id) references public."T_REPORT_NOTES"(id)
+	constraint "fk_l_notes_report_id" foreign key (notes_id) references public."T_REPORT_NOTES"(id),
 	CONSTRAINT fk_l_notes_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
 );
 
@@ -380,6 +380,9 @@ CREATE TABLE public."T_REPORT_VALIDATION" (
 	CONSTRAINT fk_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id),
 	CONSTRAINT fk_type_report FOREIGN KEY (type_report_id) REFERENCES public."M_TYPE_REPORT"(id)
 );
+
+
+
 CREATE TABLE public."M_STATUS_VALIDATION" (
 	id uuid DEFAULT uuid_generate_v4() NOT NULL,
 	code_status varchar(20) NULL,
