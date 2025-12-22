@@ -15,8 +15,8 @@ class UltimateAdaptiveSystem:
             'password': '1234'
         }
         
-        self.template_path = os.path.join('..', 'template', 'template_dokumentasi.docx')
-        self.output_dir = os.path.join('..', 'output')
+        self.template_path = os.path.join('template', 'template_dokumentasi.docx')
+        self.output_dir = os.path.join('output')
         
         print(f"🚀 Ultimate Adaptive System Initialized")
         print(f"🔄 Perfect adaptation to any template structure")
