@@ -241,3 +241,90 @@ CREATE TABLE public."R_USER_PERMISSION" (
 );
 
 
+CREATE TABLE public."L_REPORT" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_id uuid NOT NULL,
+	activity_log varchar(200) NULL,
+	trid varchar(100) NOT NULL,
+	passcode varchar(100) NOT NULL,
+	wbs_code varchar(100) NOT NULL,
+	status_report_id uuid NULL,
+	identity_id uuid NULL,
+	"name" varchar(200) NULL,
+	email varchar(200) NULL,
+	instution varchar(200) NULL,
+	phone_number varchar(200) NULL,
+	created_by_id uuid NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT "L_REPORT_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_log_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id),
+	CONSTRAINT fk_l_identity_report FOREIGN KEY (identity_id) REFERENCES public."M_IDENTITY"(id),
+	CONSTRAINT fk_l_status_report FOREIGN KEY (status_report_id) REFERENCES public."M_STATUS_REPORT"(id)
+);
+
+
+CREATE TABLE public."T_REPORT_NOTES" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_id uuid NOT NULL,
+	notes text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	is_resolved boolean not null default true, 
+	CONSTRAINT "T_REPORT_NOTES_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_notes_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
+);
+
+CREATE TABLE public."L_REPORT_NOTES" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	notes_id uuid not null,
+	report_id uuid NOT NULL,
+	activity_log varchar(200) NULL,
+	notes text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	is_resolved boolean not null default true, 
+	CONSTRAINT "L_REPORT_NOTES_pkey" PRIMARY KEY (id),
+	constraint "fk_l_notes_report_id" foreign key (notes_id) references public."T_REPORT_NOTES"(id)
+	CONSTRAINT fk_l_notes_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
+);
+
+
+CREATE TABLE public."M_STATUS_NOTES_RETURN" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	code_status varchar(20) NULL,
+	name_status varchar(100) NOT NULL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT "M_STATUS_RETURN_pkey" PRIMARY KEY (id)
+);
+
+CREATE TABLE public."R_REPORT_DETAIL_NOTES" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_notes_id uuid NOT NULL,
+	status_return_notes_id uuid NOT NULL,
+	created_by_id uuid NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT "R_REPORT_DETAIL_NOTES" PRIMARY KEY (id),
+	CONSTRAINT fk_R_REPORT_NOTES FOREIGN KEY (report_notes_id) REFERENCES public."T_REPORT_NOTES"(id),
+	CONSTRAINT fk_r_report_status_return_notes_id FOREIGN KEY (status_return_notes_id) REFERENCES public."M_STATUS_NOTES_RETURN"(id)
+);
