@@ -54,7 +54,7 @@ LEFT JOIN t_object t2
  AND t2."OTYPE" = 'NSTRC'
 ORDER BY trl."RCLUID", trl."PRD" DESC;
 
-
+--risk champion detail 
 SELECT DISTINCT ON (trc."RCHID")
 trc."RCHNM" as "Name",
 trc."STAT" as "Status",
