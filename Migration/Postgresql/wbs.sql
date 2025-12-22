@@ -328,3 +328,20 @@ CREATE TABLE public."R_REPORT_DETAIL_NOTES" (
 	CONSTRAINT fk_R_REPORT_NOTES FOREIGN KEY (report_notes_id) REFERENCES public."T_REPORT_NOTES"(id),
 	CONSTRAINT fk_r_report_status_return_notes_id FOREIGN KEY (status_return_notes_id) REFERENCES public."M_STATUS_NOTES_RETURN"(id)
 );
+
+
+
+CREATE TABLE public."T_REPORT_NOTES" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_id uuid NOT NULL,
+	notes text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	is_resolved boolean not null default true, 
+	CONSTRAINT "T_REPORT_NOTES_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_notes_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
+);
