@@ -476,6 +476,100 @@ CREATE TABLE public."T_REPORT_INSPECTION" (
 	CONSTRAINT fk_type_report FOREIGN KEY (type_report_id) REFERENCES public."M_TYPE_REPORT"(id)
 );
 
+CREATE TABLE public."M_STATUS_INSPECTION" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	code_status varchar(20) NULL,
+	name_status varchar(100) NOT NULL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT "M_STATUS_INSPECTION_pkey" PRIMARY KEY (id)
+);
+
+CREATE TABLE public."L_INSPECTION_LOG" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	inspection_id uuid NOT NULL,
+	status_id uuid NOT NULL,
+	activity_log varchar(200) NULL,
+	note text NULL,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "L_INSPECTION_LOG_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_inspection_log FOREIGN KEY (inspection_id) REFERENCES public."T_REPORT_INSPECTION"(id),
+	CONSTRAINT fk_status_inspection_log FOREIGN KEY (status_id) REFERENCES public."M_STATUS_INSPECTION"(id)
+);
+
+CREATE TABLE PUBLIC."T_REPORT_INSPECTION_NOTES" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	inspection_id uuid NOT NULL,
+	notes text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "T_INSPECTION_NOTES_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_inspection_notes FOREIGN KEY (inspection_id) REFERENCES public."T_REPORT_INSPECTION"(id)
+);
+
+CREATE TABLE public."L_INSPECTION_NOTES" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	inspection_notes_id uuid not null,
+	inspection_id uuid NOT NULL,
+	activity_log varchar(200) NULL,
+	notes text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "L_INSPECTION_NOTES_pkey" PRIMARY KEY (id),
+	constraint "fk_l_inspection_notes_id" foreign key (inspection_notes_id) references public."T_REPORT_INSPECTION_NOTES"(id)
+	CONSTRAINT fk_l_inspection_notes FOREIGN KEY (inspection_id) REFERENCES public."T_REPORT_INSPECTION"(id)
+);
+
+CREATE TABLE PUBLIC."R_INSPECTION_NOTE_DETAIL" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	inspection_notes_id uuid NOT NULL,
+	status_note_return_uuid NOT NULL,
+	created_by_id uuid NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT "R_INSPECTION_NOTE_DETAIL_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_R_INSPECTION_NOTES FOREIGN KEY (inspection_notes_id) REFERENCES public."T_REPORT_INSPECTION_NOTES"(id),
+	CONSTRAINT fk_r_inspection_status_id FOREIGN KEY (status_note_detail_id) REFERENCES public."M_STATUS_NOTES_RETURN"(id)
+);
+
+CREATE TABLE public.."L_SELET_TYPE_REPORT" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	select_type_report_id uuid NOT NULL,
+	type_report_id uuid NOT NULL,
+	activity_log varchar(200) NULL,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "L_SELET_TYPE_REPORT_pkey" PRIMARY KEY (id),
+	constraint fk_l_select_type_report foreign key (select_type_report_id) references public."R_SELECT_TYPE_REPORT"(id)
+	CONSTRAINT fk_l_type_report FOREIGN KEY (type_report_id) REFERENCES public."M_TYPE_REPORT"(id)
+);
+
+
+
 
 
 
