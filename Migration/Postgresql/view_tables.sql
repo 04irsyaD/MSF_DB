@@ -132,6 +132,23 @@ left join t_object t
 
 
 
+-- tratment testing
+select DISTINCT ON ("TRILID")
+t."LTEXT" as "Bussiness Unit",
+EXTRACT(YEAR FROM ttr."PRD") AS "Period",
+ttr."TRTCD" as "Treatment Code",
+ttr."ADDCON" as "Additional Control",
+ttr."RISKSUM" as "Risk Summary",
+ttr."VRSN" as "Version"
+--trit."DDLN" as "Deadline"
+from t_trisklist ttr
+left join t_object t 
+--	on  ttr."RISKCD" = t."STEXT" 
+	ON split_part(ttr."RISKCD", '-', 1) = t."STEXT"
+	and t."ENDDA" = '2999-01-01'
+where ttr."ENDDA" = '2999-01-01'
+
+
 
 
 
