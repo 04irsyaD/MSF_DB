@@ -91,8 +91,8 @@ select DISTINCT ON ("RVWID")
 tr."RVWNM" as "Name",
 t."LTEXT" as "Bussiness Unit",
 CASE tr."ISACT"
-    WHEN true THEN 'Aktif'
-    WHEN false THEN 'Tidak Aktif'
+    WHEN true THEN 'Active'
+    WHEN false THEN 'Non Active'	
   END AS status_text,
  tr."CHGBY" as "Change by"
 from t_reviewer tr
@@ -101,6 +101,34 @@ left join t_object t
 	and t."ENDDA" = '2999-01-01'
 where tr."ENDDA" = '2999-01-01';
 
+
+-- inventor
+WITH buscdinv AS (
+select DISTINCT ON ("INVNM") 
+ti."INVNM" as "NAME",
+CASE ti."ISACT"
+    WHEN true THEN 'Active'
+    WHEN false THEN 'Non Active'
+  END AS status_text,
+ CASE
+    WHEN ti."BUCD" = tp."BUCD" THEN tp."BUCD"
+    ELSE NULL
+  END AS "BUCD",
+ ti."CHGBY" as "Personel RM"
+from t_inventor ti 
+LEFT JOIN t_personal tp ON ti."INVNM" = tp."NAM"
+where ti."ENDDA" = '2999-01-01'
+)
+SELECT
+  mc."NAME",
+  mc.status_text,
+  mc."Personel RM",
+  mc."BUCD",
+  t."LTEXT" as "Bussiness Unit"
+FROM buscdinv mc
+left join t_object t 
+	on  mc."BUCD" = t."STEXT" 
+	and t."ENDDA" = '2999-01-01'
 
 
 
