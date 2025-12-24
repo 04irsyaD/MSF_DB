@@ -578,6 +578,7 @@ left join t_object t2
 
 
 
+
 --- RISK OWNER WOK 
 SELECT DISTINCT ON ("ROWID")
 ROW_NUMBER() OVER (ORDER BY tr."ROWID" ) AS "No",
