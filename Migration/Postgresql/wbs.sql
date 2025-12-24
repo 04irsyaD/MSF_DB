@@ -345,3 +345,18 @@ CREATE TABLE public."T_REPORT_NOTES" (
 	CONSTRAINT "T_REPORT_NOTES_pkey" PRIMARY KEY (id),
 	CONSTRAINT fk_notes_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
 );
+
+
+CREATE TABLE public."R_ROLE_Api_PERMISSION" (
+	id uuid PRIMARY key NOT null default uuid_generate_v4(),
+	role_id uuid NOT NULL,
+	api_permission varchar NOT NULL,
+	created_by_id uuid not null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	constraint fk_r_role_api_permission foreign key(role_id)references "M_ROLE"(id),
+	
+);

@@ -69,6 +69,23 @@ left join t_riskowner tro
  and trc."PRD" = tro."PRD"
  where trc."ENDDA"  = '2999-01-01'
 
+-- revirewer list
+select DISTINCT ON ("RVLUID")
+t."LTEXT" as "Bussiness Unit",
+trl."PRD" as "Period",
+trl."RLNUM" as "Risk Reviewer",
+COALESCE(t2."LTEXT", 'ACTIVE') AS "STATUS"
+from t_reviewer_list trl
+left join t_object t 
+	on  trl."BUCD" = t."STEXT" 
+	and t."ENDDA" = '2999-01-01'
+left join t_reviewer tr 
+	on tr."BUCD" = trl."BUCD"
+	and tr."PRD" = trl."PRD"
+left join t_object t2 
+	on tr."NSTNR" = t2."STEXT"
+	and t2."OTYPE" = 'NSTNR';
+
 
 
 
