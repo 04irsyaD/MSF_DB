@@ -197,8 +197,57 @@ left join t_object t2
 	and t."ENDDA" = '2999-01-01'
 
 
+-- RISK REGISTER VIEW
+create or replace view v_risk_register as
+WITH base_data AS (
+    SELECT
+        LEFT("RISKCD", 3) AS riskcd_prefix,
+        "PRD",
+        "ENDDA",
+        "VRSN",
+        'A' AS src
+    FROM t_grisklist
 
+    UNION ALL
 
+    SELECT
+        LEFT("RISKCD", 3) AS riskcd_prefix,
+        "PRD",
+        "ENDDA",
+        "VRSN",
+        'B' AS src
+    FROM t_irisklist
+),
+agg_data AS (
+    SELECT
+        riskcd_prefix,
+        "PRD",
+
+        MAX("VRSN") AS max_vrsn,
+
+        COUNT(*) FILTER (WHERE src = 'A') AS total_table_a,
+        COUNT(*) FILTER (WHERE src = 'B') AS total_table_b,
+
+        COUNT(*) FILTER (WHERE src = 'A' AND "ENDDA" = DATE '2999-01-01') AS total_active_a,
+        COUNT(*) FILTER (WHERE src = 'B' AND "ENDDA" = DATE '2999-01-01') AS total_active_b
+    FROM base_data
+    GROUP BY riskcd_prefix, "PRD"
+)
+
+SELECT 
+	a.riskcd_prefix as "Business Unit",
+    a."PRD" as "Period",
+    trc."RCHNM" as "Risk Champion",
+    a.max_vrsn as "Verrsion",
+    a.total_table_a as "General info",
+    a.total_table_b as "Info Sec",
+    a.total_active_a as "Info Sec info Data Active",
+    a.total_active_b as "General info Data Active"
+FROM agg_data a
+LEFT JOIN t_riskchampion trc
+  on trc."BUCD" = a.riskcd_prefix
+  and trc."ENDDA" = '2999-01-01'
+ORDER BY riskcd_prefix;
 
 
 
