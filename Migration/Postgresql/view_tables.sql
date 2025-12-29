@@ -149,6 +149,52 @@ left join t_object t
 where ttr."ENDDA" = '2999-01-01'
 
 
+-- treatment final version
+WITH filtered_data AS (
+SELECT *
+FROM (
+    SELECT *,
+           MAX("VRSN") OVER (PARTITION BY "TRTCD")                                   AS max_version,
+           MAX(CASE WHEN "STATCD" <> 'STRE-0' THEN "VRSN"  END)
+               OVER (PARTITION BY "TRTCD")                                           AS max_valid_version
+    FROM t_trisklist
+) t
+WHERE
+    (
+        -- kalau versi tertinggi punya status selain ST01
+        "VRSN" = max_version
+        AND "STATCD" <> 'STRE-0'
+    )
+    OR
+    (
+        -- kalau versi tertinggi SEMUA ST01, ambil versi tertinggi non-ST01 di bawahnya
+        "VRSN" = max_valid_version
+        AND "STATCD" <> 'STRE-0'
+        AND max_valid_version < max_version
+        and "ENDDA" = '2999-01-01'
+    )
+   )
+select DISTINCT ON ("TRILID")
+t."LTEXT" as "Bussiness Unit",
+EXTRACT(YEAR FROM fd."PRD") AS "Period",
+fd."TRTCD" as "Treatment Code",
+fd."ADDCON" as "Additional Control",
+fd."RISKSUM" as "Risk Summary",
+fd."VRSN" as "Version",
+tgk."DDLN" as "Deadline",
+t2."LTEXT" as "Status"
+FROM filtered_data fd
+left join t_object t 
+--	on  ttr."RISKCD" = t."STEXT" 
+	ON split_part(fd."RISKCD", '-', 1) = t."STEXT"
+	and t."ENDDA" = '2999-01-01'
+left join t_grisktreatment tgk
+	on fd."TRTCD" = tgk."TRTCD"
+	and tgk."ENDDA" = '2999-01-01'
+left join t_object t2 
+--	on  ttr."RISKCD" = t."STEXT" 
+	on fd."STATCD" = t2."STEXT"
+	and t."ENDDA" = '2999-01-01'
 
 
 
