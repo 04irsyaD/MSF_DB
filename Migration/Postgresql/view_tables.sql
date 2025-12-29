@@ -249,9 +249,24 @@ LEFT JOIN t_riskchampion trc
   and trc."ENDDA" = '2999-01-01'
 ORDER BY riskcd_prefix;
 
+-- ;loss event view
+create or replace view v_loss_event as
+select DISTINCT ON ("LOLID") 
+tl."LOCD" as  "Loss Event Code",
+tl."LOTIT" as "Title",
+t."LTEXT" as "Status",
+tl."REPBY" as "Reported By",
+t2."LTEXT" as "Bussiness Unit",
+tl."REPAT" as "Reported Date"
 
-
-
+from t_losseventlist tl
+left join t_object t 
+	on  tl."STATLE" = t."STEXT" 
+	and t."ENDDA" = '2999-01-01'
+left join t_object t2 
+	on  tl."BUCD" = t2."STEXT" 
+	and t2."ENDDA" = '2999-01-01'
+where tl."ENDDA" = '2999-01-01';
 
 
 
