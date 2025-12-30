@@ -291,7 +291,372 @@ where tl."ENDDA" = '2999-01-01';
 
 
 
+-- public.detail_reviewer source
 
+CREATE OR REPLACE VIEW public.detail_reviewer
+AS SELECT DISTINCT ON (tr."RVWID") tr."RVWNM" AS "Name",
+    t."LTEXT" AS "Bussiness Unit",
+        CASE tr."ISACT"
+            WHEN true THEN 'Active'::text
+            WHEN false THEN 'Non Active'::text
+            ELSE NULL::text
+        END AS status_text,
+    tr."CHGBY" AS "Change by"
+   FROM t_reviewer tr
+     LEFT JOIN t_object t ON tr."BUCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+  WHERE tr."ENDDA" = '2999-01-01'::date;
+
+COMMENT ON VIEW public.detail_reviewer IS 'Detail Dari List Reviewer';
+COMMENT ON COLUMN public.detail_reviewer."Name" IS 'Nama Reviewer';
+COMMENT ON COLUMN public.detail_reviewer."Bussiness Unit" IS 'Nama Bussines Unit';
+COMMENT ON COLUMN public.detail_reviewer.status_text IS 'Status Reviewer';
+COMMENT ON COLUMN public.detail_reviewer."Change by" IS 'User Yang merubah Datanya';
+
+-- Permissions
+
+ALTER TABLE public.detail_reviewer OWNER TO devermusr;
+GRANT ALL ON TABLE public.detail_reviewer TO devermusr;
+
+
+-- public.inventor source
+
+CREATE OR REPLACE VIEW public.inventor
+AS WITH buscdinv AS (
+         SELECT DISTINCT ON (ti."INVNM") ti."INVNM" AS "NAME",
+                CASE ti."ISACT"
+                    WHEN true THEN 'Active'::text
+                    WHEN false THEN 'Non Active'::text
+                    ELSE NULL::text
+                END AS status_text,
+                CASE
+                    WHEN ti."BUCD"::text = tp."BUCD"::text THEN tp."BUCD"
+                    ELSE NULL::character varying
+                END AS "BUCD",
+            ti."CHGBY" AS "Personel RM"
+           FROM t_inventor ti
+             LEFT JOIN t_personal tp ON ti."INVNM"::text = tp."NAM"::text
+          WHERE ti."ENDDA" = '2999-01-01'::date
+        )
+ SELECT mc."NAME",
+    mc.status_text,
+    mc."Personel RM",
+    mc."BUCD",
+    t."LTEXT" AS "Bussiness Unit"
+   FROM buscdinv mc
+     LEFT JOIN t_object t ON mc."BUCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date;
+
+COMMENT ON VIEW public.inventor IS 'List Data Inventor';
+COMMENT ON COLUMN public.inventor."NAME" IS 'Nama Inventor';
+COMMENT ON COLUMN public.inventor.status_text IS 'Status Inventor';
+COMMENT ON COLUMN public.inventor."Personel RM" IS 'Nama Personel RM';
+COMMENT ON COLUMN public.inventor."BUCD" IS 'Code Bussiness Unit';
+COMMENT ON COLUMN public.inventor."Bussiness Unit" IS 'Nama Bussiness Unit';
+
+-- Permissions
+
+ALTER TABLE public.inventor OWNER TO devermusr;
+GRANT ALL ON TABLE public.inventor TO devermusr;
+
+
+-- public.performance_review source
+
+CREATE OR REPLACE VIEW public.performance_review
+AS SELECT DISTINCT ON ("PEREMID") row_number() OVER (ORDER BY "PEREMID") AS "No",
+    "PRD" AS "Period",
+    "PEREMNM" AS "Remark",
+    "CHGBY" AS "Updated By",
+    date("UPAT") AS "Last Update"
+   FROM t_performremarks tp;
+
+COMMENT ON VIEW public.performance_review IS 'Data Performance Review';
+COMMENT ON COLUMN public.performance_review."Period" IS 'Periode Performance Reviewer';
+COMMENT ON COLUMN public.performance_review."Remark" IS 'Catatan Performance Review';
+COMMENT ON COLUMN public.performance_review."Updated By" IS 'Di update oleh';
+COMMENT ON COLUMN public.performance_review."Last Update" IS 'Tanggal update terakhir';
+
+-- Permissions
+
+ALTER TABLE public.performance_review OWNER TO devermusr;
+GRANT ALL ON TABLE public.performance_review TO devermusr;
+
+
+-- public.reviewer_list source
+
+CREATE OR REPLACE VIEW public.reviewer_list
+AS SELECT DISTINCT ON (trl."RVLUID") t."LTEXT" AS "Bussiness Unit",
+    trl."PRD" AS "Period",
+    trl."RLNUM" AS "Risk Reviewer",
+    COALESCE(t2."LTEXT", 'ACTIVE'::character varying) AS "STATUS"
+   FROM t_reviewer_list trl
+     LEFT JOIN t_object t ON trl."BUCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_reviewer tr ON tr."BUCD"::text = trl."BUCD"::text AND tr."PRD" = trl."PRD"
+     LEFT JOIN t_object t2 ON tr."NSTNR"::text = t2."STEXT"::text AND t2."OTYPE"::text = 'NSTNR'::text;
+
+COMMENT ON VIEW public.reviewer_list IS 'Data List Reviewer';
+COMMENT ON COLUMN public.reviewer_list."Bussiness Unit" IS 'Nama Bussiness Unit';
+COMMENT ON COLUMN public.reviewer_list."Period" IS 'Periode reviewer';
+COMMENT ON COLUMN public.reviewer_list."Risk Reviewer" IS 'Total Reviewer';
+COMMENT ON COLUMN public.reviewer_list."STATUS" IS 'Status Reviewer';
+
+-- Permissions
+
+ALTER TABLE public.reviewer_list OWNER TO devermusr;
+GRANT ALL ON TABLE public.reviewer_list TO devermusr;
+
+
+-- public.risk_champion_detail source
+
+CREATE OR REPLACE VIEW public.risk_champion_detail
+AS SELECT DISTINCT ON (trc."RCHID") trc."RCHNM" AS "Name",
+    trc."STAT" AS "Status",
+    t."LTEXT" AS "Bussiness Unit",
+    tro."ROWNM" AS "RISK OWNER"
+   FROM t_riskchampion trc
+     LEFT JOIN t_object t ON trc."BUCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_riskowner tro ON trc."BUCD"::text = tro."BUCD"::text AND trc."PRD" = tro."PRD"
+  WHERE trc."ENDDA" = '2999-01-01'::date;
+
+COMMENT ON VIEW public.risk_champion_detail IS 'List Risk Champion Detail';
+COMMENT ON COLUMN public.risk_champion_detail."Name" IS 'Nama Risk Champions';
+COMMENT ON COLUMN public.risk_champion_detail."Status" IS 'Status Risk Champion';
+COMMENT ON COLUMN public.risk_champion_detail."Bussiness Unit" IS 'Nama Bussiness Unit';
+COMMENT ON COLUMN public.risk_champion_detail."RISK OWNER" IS 'Nama Risk Owner';
+
+-- Permissions
+
+ALTER TABLE public.risk_champion_detail OWNER TO devermusr;
+GRANT ALL ON TABLE public.risk_champion_detail TO devermusr;
+
+
+-- public.risk_champion_list source
+
+CREATE OR REPLACE VIEW public.risk_champion_list
+AS SELECT DISTINCT ON (trl."RCLUID") t."LTEXT" AS "Bussiness Unit",
+    trl."BUCD",
+    trl."RCLNUM" AS "Risk Champion",
+    trl."PRD" AS "Period",
+    trl."RCHNM" AS "Risk Champion Coordinator",
+    trl."STAT" AS "S",
+    tr."NSTRC",
+    t2."LTEXT",
+    COALESCE(t2."LTEXT", 'ACTIVE NULL'::character varying) AS nama_tampil
+   FROM t_rickchampion_list trl
+     LEFT JOIN t_object t ON trl."BUCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_riskchampion tr ON tr."BUCD"::text = trl."BUCD"::text AND tr."PRD" = trl."PRD"
+     LEFT JOIN t_object t2 ON tr."NSTRC"::text = t2."STEXT"::text AND t2."OTYPE"::text = 'NSTRC'::text
+  ORDER BY trl."RCLUID", trl."PRD" DESC;
+
+COMMENT ON VIEW public.risk_champion_list IS 'List Risk Champion';
+COMMENT ON COLUMN public.risk_champion_list."Bussiness Unit" IS 'Nama Bussiness Unit';
+COMMENT ON COLUMN public.risk_champion_list."BUCD" IS 'Code Bussiness Unit';
+COMMENT ON COLUMN public.risk_champion_list."Risk Champion" IS 'Total Risk Champion';
+COMMENT ON COLUMN public.risk_champion_list."Period" IS 'Periode Risk Champion';
+COMMENT ON COLUMN public.risk_champion_list."Risk Champion Coordinator" IS 'Nama Coordinator Risk Champion';
+COMMENT ON COLUMN public.risk_champion_list.nama_tampil IS 'Status Risk Champion';
+
+-- Permissions
+
+ALTER TABLE public.risk_champion_list OWNER TO devermusr;
+GRANT ALL ON TABLE public.risk_champion_list TO devermusr;
+
+
+-- public.risk_owner source
+
+CREATE OR REPLACE VIEW public.risk_owner
+AS SELECT DISTINCT ON (tr."ROWID") t."LTEXT" AS "Bussiness Unit",
+    tr."PRD" AS "Period",
+    tr."ROWNM" AS "NAME",
+    tr."NSTRO",
+    t2."LTEXT",
+    tr."BUCD",
+    tr."NIK",
+    tr."SELBY",
+    tr."SELEML"
+   FROM t_riskowner tr
+     LEFT JOIN t_object t ON tr."BUCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_object t2 ON tr."NSTRO"::text = t2."STEXT"::text AND t2."OTYPE"::text = 'NSTRO'::text
+  WHERE tr."ENDDA" = '2999-01-01'::date AND tr."ISACT" = true AND EXTRACT(year FROM tr."STASS") = 2025::numeric;
+
+COMMENT ON VIEW public.risk_owner IS 'List Risk Owner';
+COMMENT ON COLUMN public.risk_owner."Bussiness Unit" IS 'Nama Bussiness Unit';
+COMMENT ON COLUMN public.risk_owner."Period" IS 'Periode Risk Owner';
+COMMENT ON COLUMN public.risk_owner."NAME" IS 'Nama Risk Owner';
+COMMENT ON COLUMN public.risk_owner."LTEXT" IS 'Status Risk Owner';
+COMMENT ON COLUMN public.risk_owner."BUCD" IS 'Business Unit Code';
+COMMENT ON COLUMN public.risk_owner."NIK" IS 'NIK Risk Owner';
+COMMENT ON COLUMN public.risk_owner."SELBY" IS 'Dipilih oleh';
+COMMENT ON COLUMN public.risk_owner."SELEML" IS 'Email pemilih';
+
+-- Permissions
+
+ALTER TABLE public.risk_owner OWNER TO devermusr;
+GRANT ALL ON TABLE public.risk_owner TO devermusr;
+
+
+-- public.treatment_final_version source
+
+CREATE OR REPLACE VIEW public.treatment_final_version
+AS WITH filtered_data AS (
+         SELECT t_1."BEGDA",
+            t_1."ENDDA",
+            t_1."TRILID",
+            t_1."ADDCON",
+            t_1."TRTCD",
+            t_1."RISKSUM",
+            t_1."CRAT",
+            t_1."CHGDA",
+            t_1."CHGBY",
+            t_1."STATCD",
+            t_1."PRD",
+            t_1."RISKCD",
+            t_1."FRZ",
+            t_1."VRSN",
+            t_1."X5",
+            t_1."X6",
+            t_1."X7",
+            t_1."PICNIK",
+            t_1."BEGDA"",""ENDDA"",""TRILID"",""ADDCON"",""TRTCD"",""RISKSUM"",""CRAT"",""CHGD",
+            t_1.max_version,
+            t_1.max_valid_version
+           FROM ( SELECT t_trisklist."BEGDA",
+                    t_trisklist."ENDDA",
+                    t_trisklist."TRILID",
+                    t_trisklist."ADDCON",
+                    t_trisklist."TRTCD",
+                    t_trisklist."RISKSUM",
+                    t_trisklist."CRAT",
+                    t_trisklist."CHGDA",
+                    t_trisklist."CHGBY",
+                    t_trisklist."STATCD",
+                    t_trisklist."PRD",
+                    t_trisklist."RISKCD",
+                    t_trisklist."FRZ",
+                    t_trisklist."VRSN",
+                    t_trisklist."X5",
+                    t_trisklist."X6",
+                    t_trisklist."X7",
+                    t_trisklist."PICNIK",
+                    t_trisklist."BEGDA"",""ENDDA"",""TRILID"",""ADDCON"",""TRTCD"",""RISKSUM"",""CRAT"",""CHGD",
+                    max(t_trisklist."VRSN") OVER (PARTITION BY t_trisklist."TRTCD") AS max_version,
+                    max(
+                        CASE
+                            WHEN t_trisklist."STATCD"::text <> 'STRE-0'::text THEN t_trisklist."VRSN"
+                            ELSE NULL::integer
+                        END) OVER (PARTITION BY t_trisklist."TRTCD") AS max_valid_version
+                   FROM t_trisklist) t_1
+          WHERE t_1."VRSN" = t_1.max_version AND t_1."STATCD"::text <> 'STRE-0'::text OR t_1."VRSN" = t_1.max_valid_version AND t_1."STATCD"::text <> 'STRE-0'::text AND t_1.max_valid_version < t_1.max_version AND t_1."ENDDA" = '2999-01-01'::date
+        )
+ SELECT DISTINCT ON (fd."TRILID") t."LTEXT" AS "Bussiness Unit",
+    EXTRACT(year FROM fd."PRD") AS "Period",
+    fd."TRTCD" AS "Treatment Code",
+    fd."ADDCON" AS "Additional Control",
+    fd."RISKSUM" AS "Risk Summary",
+    fd."VRSN" AS "Version",
+    tgk."DDLN" AS "Deadline",
+    t2."LTEXT" AS "Status"
+   FROM filtered_data fd
+     LEFT JOIN t_object t ON split_part(fd."RISKCD"::text, '-'::text, 1) = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_grisktreatment tgk ON fd."TRTCD"::text = tgk."TRTCD"::text AND tgk."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_object t2 ON fd."STATCD"::text = t2."STEXT"::text AND t."ENDDA" = '2999-01-01'::date;
+
+COMMENT ON VIEW public.treatment_final_version IS 'Risk Treatment List';
+COMMENT ON COLUMN public.treatment_final_version."Bussiness Unit" IS 'Nama Bussiness Unit';
+COMMENT ON COLUMN public.treatment_final_version."Period" IS 'Periode Risk Treatment List';
+COMMENT ON COLUMN public.treatment_final_version."Treatment Code" IS 'Treatment Code Risk Treatment';
+COMMENT ON COLUMN public.treatment_final_version."Additional Control" IS 'Kontrol Tambahan Risk Treatment';
+COMMENT ON COLUMN public.treatment_final_version."Risk Summary" IS 'Ringkasan Risiko Risk Treatment';
+COMMENT ON COLUMN public.treatment_final_version."Version" IS 'Version Risk Treatment';
+COMMENT ON COLUMN public.treatment_final_version."Deadline" IS 'Deadline Risk Treatment';
+COMMENT ON COLUMN public.treatment_final_version."Status" IS 'Status Risk Treatment';
+
+-- Permissions
+
+ALTER TABLE public.treatment_final_version OWNER TO devermusr;
+GRANT ALL ON TABLE public.treatment_final_version TO devermusr;
+
+
+-- public.v_loss_event source
+
+CREATE OR REPLACE VIEW public.v_loss_event
+AS SELECT DISTINCT ON (tl."LOLID") tl."LOCD" AS "Loss Event Code",
+    tl."LOTIT" AS "Title",
+    t."LTEXT" AS "Status",
+    tl."REPBY" AS "Reported By",
+    t2."LTEXT" AS "Bussiness Unit",
+    tl."REPAT" AS "Reported Date"
+   FROM t_losseventlist tl
+     LEFT JOIN t_object t ON tl."STATLE"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+     LEFT JOIN t_object t2 ON tl."BUCD"::text = t2."STEXT"::text AND t2."ENDDA" = '2999-01-01'::date
+  WHERE tl."ENDDA" = '2999-01-01'::date;
+
+COMMENT ON VIEW public.v_loss_event IS 'List loss Event';
+COMMENT ON COLUMN public.v_loss_event."Loss Event Code" IS 'Code Loss Event';
+COMMENT ON COLUMN public.v_loss_event."Title" IS 'Title Loss Event';
+COMMENT ON COLUMN public.v_loss_event."Status" IS 'Status Loss Event';
+COMMENT ON COLUMN public.v_loss_event."Reported By" IS 'Dilaporkan Oleh';
+COMMENT ON COLUMN public.v_loss_event."Bussiness Unit" IS 'Nama Bussiness Unit';
+COMMENT ON COLUMN public.v_loss_event."Reported Date" IS 'tanggal pelaporan Loss Event';
+
+-- Permissions
+
+ALTER TABLE public.v_loss_event OWNER TO devermusr;
+GRANT ALL ON TABLE public.v_loss_event TO devermusr;
+
+
+-- public.v_risk_register source
+
+CREATE OR REPLACE VIEW public.v_risk_register
+AS WITH base_data AS (
+         SELECT "left"(t_grisklist."RISKCD"::text, 3) AS riskcd_prefix,
+            t_grisklist."PRD",
+            t_grisklist."ENDDA",
+            t_grisklist."VRSN",
+            'A'::text AS src
+           FROM t_grisklist
+        UNION ALL
+         SELECT "left"(t_irisklist."RISKCD"::text, 3) AS riskcd_prefix,
+            t_irisklist."PRD",
+            t_irisklist."ENDDA",
+            t_irisklist."VRSN",
+            'B'::text AS src
+           FROM t_irisklist
+        ), agg_data AS (
+         SELECT base_data.riskcd_prefix,
+            base_data."PRD",
+            max(base_data."VRSN") AS max_vrsn,
+            count(*) FILTER (WHERE base_data.src = 'A'::text) AS total_table_a,
+            count(*) FILTER (WHERE base_data.src = 'B'::text) AS total_table_b,
+            count(*) FILTER (WHERE base_data.src = 'A'::text AND base_data."ENDDA" = '2999-01-01'::date) AS total_active_a,
+            count(*) FILTER (WHERE base_data.src = 'B'::text AND base_data."ENDDA" = '2999-01-01'::date) AS total_active_b
+           FROM base_data
+          GROUP BY base_data.riskcd_prefix, base_data."PRD"
+        )
+ SELECT a.riskcd_prefix AS "Business Unit",
+    a."PRD" AS "Period",
+    trc."RCHNM" AS "Risk Champion",
+    a.max_vrsn AS "Verrsion",
+    a.total_table_a AS "General info",
+    a.total_table_b AS "Info Sec",
+    a.total_active_a AS "Info Sec info Data Active",
+    a.total_active_b AS "General info Data Active"
+   FROM agg_data a
+     LEFT JOIN t_riskchampion trc ON trc."BUCD"::text = a.riskcd_prefix AND trc."ENDDA" = '2999-01-01'::date
+  ORDER BY a.riskcd_prefix;
+
+COMMENT ON VIEW public.v_risk_register IS 'List Register';
+COMMENT ON COLUMN public.v_risk_register."Business Unit" IS 'Nama Bussiness unit';
+COMMENT ON COLUMN public.v_risk_register."Period" IS 'Periode Risk Register';
+COMMENT ON COLUMN public.v_risk_register."Risk Champion" IS 'Nama Risk Champions';
+COMMENT ON COLUMN public.v_risk_register."Verrsion" IS 'Version Risk Register';
+COMMENT ON COLUMN public.v_risk_register."General info" IS 'Progress General info';
+COMMENT ON COLUMN public.v_risk_register."Info Sec" IS 'Progress Info Sec';
+COMMENT ON COLUMN public.v_risk_register."Info Sec info Data Active" IS 'Progress General info Completed';
+COMMENT ON COLUMN public.v_risk_register."General info Data Active" IS 'Progress Info sec Completed';
+
+-- Permissions
+
+ALTER TABLE public.v_risk_register OWNER TO devermusr;
+GRANT ALL ON TABLE public.v_risk_register TO devermusr;
 
 
 
