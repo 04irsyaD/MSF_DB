@@ -675,6 +675,41 @@ EXTRACT(YEAR FROM tcp."PRD") AS "Period",
 tcp."TOTAL" as "Total Risk"
 from t_corporaterisktotal tcp
 
+--Risk Database
+--general information
+CREATE OR REPLACE VIEW public.risk_database_general_info
+select DISTINCT ON ("GRDID")
+CONCAT(tgb."RISKCD",'-', EXTRACT(YEAR FROM tgb."PRD")) AS "RISK CODE" ,
+tgb."RISK" as "Risk Description",
+tck."DESC" as "Corporate Risk Description",
+tcs."CHANNM" as "Risk Chain Analysis",
+CASE
+--        WHEN tgb."PRD" < CURRENT_DATE - INTERVAL '2 years'
+       WHEN AGE(CURRENT_DATE, tgb."PRD" ) < INTERVAL '1 years'
+--		WHEN EXTRACT(YEAR FROM CURRENT_DATE)
+--           - EXTRACT(YEAR FROM tgb."PRD") < 2
+        THEN 'Active'
+        ELSE 'Non-Active'
+    END AS "Key Risk",
+CASE
+    WHEN EXISTS (
+            SELECT 1
+            FROM t_griskdatabase tgb2
+            WHERE tgb2."GRDID" = tgb."GRDID"
+              AND tgb2."TARECD" = tgb."TARECD"
+        )
+        THEN 'MAPPED'
+        ELSE 'NOT MAPPED'
+    END AS "MAPPING"
+from t_griskdatabase tgb
+left join t_corporaterisk tck
+	on tck."CORICD" = tgb."CORICD" 
+	and tck."TARECD" = tgb."TARECD"
+left join t_chainanalysis tcs
+	on tcs."CHANCD" = tgb."CHANCD" 
+where tgb."ENDDA" = '2999-01-01'
+
+
 
 
 
