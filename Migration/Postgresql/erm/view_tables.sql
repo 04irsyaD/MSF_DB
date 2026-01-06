@@ -743,10 +743,29 @@ left join t_chainanalysis tcs
 where tib."ENDDA" = '2999-01-01'
 
 
+   
+--Key Risk List Library
+--  general information
+create or replace view v_keyrisklist_generalinfo as
+select DISTINCT ON ("ID")
+CONCAT(tgl."REFCD",'-', EXTRACT(YEAR FROM tgl."PRD")) AS "REFERENCE" ,
+tgl."STATCD" as "Status ",
+tgl."DESC" as "Risk Description",
+tgl."ENFOD" as "Set as Library Dropdown List",
+tgl."ENFOR" as "Enforce Risk for Business Unit"
+from t_gkeylist tgl
+where tgl."ENDDA" = '2999-01-01'
 
-
-
-
+   
+--Key Risk List Library
+--information security
+create or replace view v_keyrisklist_informationsecurity as
+select 
+CONCAT(ti."REFCD",'-', EXTRACT(YEAR FROM ti."PRD")) AS "REFERENCE" ,
+ti."ASDESC" as "Asset Description",
+ti."ENFOD" as "Set as Library Dropdown List",
+ti."ENFOR" as "Enforce Risk for Business Unit"
+from t_ikeylist ti 
 
 
 
