@@ -661,7 +661,19 @@ GRANT ALL ON TABLE public.v_risk_register TO devermusr;
 
 
 
+create or replace view v_risk_universe as
+select 
+EXTRACT(YEAR FROM trl."PRD") AS "Period",
+trl."BUTOT" as  "Total Business Unit",
+trl."RISKTOT" as "Total Risk"
+from t_riskuniversetotal trl;
 
+
+create or replace view corporate_risk_period as
+select 
+EXTRACT(YEAR FROM tcp."PRD") AS "Period",
+tcp."TOTAL" as "Total Risk"
+from t_corporaterisktotal tcp
 
 
 
