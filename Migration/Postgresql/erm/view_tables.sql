@@ -710,7 +710,37 @@ left join t_chainanalysis tcs
 where tgb."ENDDA" = '2999-01-01'
 
 
+--informations security
+-- Risk Database
+CREATE OR REPLACE VIEW public.risk_database_information_security
+select DISTINCT ON ("IRDID")
+CONCAT(tib."INFOCD",'-', EXTRACT(YEAR FROM tib."PRD")) AS "Asset Code" ,
+tib."ASDESC" as "Asset Description",
+tck."DESC" as "Corporate Risk Description",
+tcs."CHANNM" as "Risk Chain Analysis",
+	CASE
+       WHEN AGE(CURRENT_DATE, tib."PRD" ) < INTERVAL '1 years'
+        THEN 'Active'
+        ELSE 'Non-Active'
+    END AS "Key Risk",
+CASE
+    WHEN EXISTS (
+            SELECT 1
+            FROM t_iriskdatabase tib2
+            WHERE tib2."IRDID" = tib."IRDID"
+              AND tib2."TARECD" = tib."TARECD"
+        )
+        THEN 'MAPPED'
+        ELSE 'NOT MAPPED'
+    END AS "MAPPING"
 
+from t_iriskdatabase tib
+left join t_corporaterisk tck
+	on tck."CORICD" = tib."CORICD" 
+	and tck."TARECD" = tib."TARECD"
+left join t_chainanalysis tcs
+	on tcs."CHANCD" = tib."CHANCD" 
+where tib."ENDDA" = '2999-01-01'
 
 
 
