@@ -660,16 +660,16 @@ GRANT ALL ON TABLE public.v_risk_register TO devermusr;
 
 
 
-
-create or replace view v_risk_universe as
+-- risk universe view
+create or replace view public.v_risk_universe as
 select 
 EXTRACT(YEAR FROM trl."PRD") AS "Period",
 trl."BUTOT" as  "Total Business Unit",
 trl."RISKTOT" as "Total Risk"
 from t_riskuniversetotal trl;
 
-
-create or replace view corporate_risk_period as
+-- corporate risk period
+create or replace view public.v_corporate_risk_period as
 select 
 EXTRACT(YEAR FROM tcp."PRD") AS "Period",
 tcp."TOTAL" as "Total Risk"
@@ -677,7 +677,7 @@ from t_corporaterisktotal tcp
 
 --Risk Database
 --general information
-CREATE OR REPLACE VIEW public.risk_database_general_info
+CREATE OR REPLACE VIEW public.v_risk_database_general_info
 select DISTINCT ON ("GRDID")
 CONCAT(tgb."RISKCD",'-', EXTRACT(YEAR FROM tgb."PRD")) AS "RISK CODE" ,
 tgb."RISK" as "Risk Description",
@@ -712,7 +712,7 @@ where tgb."ENDDA" = '2999-01-01'
 
 --informations security
 -- Risk Database
-CREATE OR REPLACE VIEW public.risk_database_information_security
+CREATE OR REPLACE VIEW public.v_risk_database_information_security
 select DISTINCT ON ("IRDID")
 CONCAT(tib."INFOCD",'-', EXTRACT(YEAR FROM tib."PRD")) AS "Asset Code" ,
 tib."ASDESC" as "Asset Description",

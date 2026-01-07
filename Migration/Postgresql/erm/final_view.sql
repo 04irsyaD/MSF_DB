@@ -129,3 +129,132 @@ left join t_object t2
     ON fd."STATCD" = t2."STEXT"
     AND t2."ENDDA" = '2999-01-01'  -- Fix: ganti t."ENDDA" jadi t2."ENDDA"
 ORDER BY fd."TRTCD", fd."VRSN" DESC;
+
+
+
+-- risk universe view
+create or replace view public.v_risk_universe as
+select 
+EXTRACT(YEAR FROM trl."PRD") AS "Period",
+trl."BUTOT" as  "Total Business Unit",
+trl."RISKTOT" as "Total Risk"
+from t_riskuniversetotal trl;
+
+-- corporate risk period
+create or replace view public.v_corporate_risk_period as
+select 
+EXTRACT(YEAR FROM tcp."PRD") AS "Period",
+tcp."TOTAL" as "Total Risk"
+from t_corporaterisktotal tcp
+
+--Risk Database
+--general information
+CREATE OR REPLACE VIEW public.v_risk_database_general_info
+select DISTINCT ON ("GRDID")
+CONCAT(tgb."RISKCD",'-', EXTRACT(YEAR FROM tgb."PRD")) AS "RISK CODE" ,
+tgb."RISK" as "Risk Description",
+tck."DESC" as "Corporate Risk Description",
+tcs."CHANNM" as "Risk Chain Analysis",
+CASE
+--        WHEN tgb."PRD" < CURRENT_DATE - INTERVAL '2 years'
+       WHEN AGE(CURRENT_DATE, tgb."PRD" ) < INTERVAL '1 years'
+--		WHEN EXTRACT(YEAR FROM CURRENT_DATE)
+--           - EXTRACT(YEAR FROM tgb."PRD") < 2
+        THEN 'Active'
+        ELSE 'Non-Active'
+    END AS "Key Risk",
+CASE
+    WHEN EXISTS (
+            SELECT 1
+            FROM t_griskdatabase tgb2
+            WHERE tgb2."GRDID" = tgb."GRDID"
+              AND tgb2."TARECD" = tgb."TARECD"
+        )
+        THEN 'MAPPED'
+        ELSE 'NOT MAPPED'
+    END AS "MAPPING"
+from t_griskdatabase tgb
+left join t_corporaterisk tck
+	on tck."CORICD" = tgb."CORICD" 
+	and tck."TARECD" = tgb."TARECD"
+left join t_chainanalysis tcs
+	on tcs."CHANCD" = tgb."CHANCD" 
+where tgb."ENDDA" = '2999-01-01'
+
+
+--informations security
+-- Risk Database
+CREATE OR REPLACE VIEW public.v_risk_database_information_security
+select DISTINCT ON ("IRDID")
+CONCAT(tib."INFOCD",'-', EXTRACT(YEAR FROM tib."PRD")) AS "Asset Code" ,
+tib."ASDESC" as "Asset Description",
+tck."DESC" as "Corporate Risk Description",
+tcs."CHANNM" as "Risk Chain Analysis",
+	CASE
+       WHEN AGE(CURRENT_DATE, tib."PRD" ) < INTERVAL '1 years'
+        THEN 'Active'
+        ELSE 'Non-Active'
+    END AS "Key Risk",
+CASE
+    WHEN EXISTS (
+            SELECT 1
+            FROM t_iriskdatabase tib2
+            WHERE tib2."IRDID" = tib."IRDID"
+              AND tib2."TARECD" = tib."TARECD"
+        )
+        THEN 'MAPPED'
+        ELSE 'NOT MAPPED'
+    END AS "MAPPING"
+
+from t_iriskdatabase tib
+left join t_corporaterisk tck
+	on tck."CORICD" = tib."CORICD" 
+	and tck."TARECD" = tib."TARECD"
+left join t_chainanalysis tcs
+	on tcs."CHANCD" = tib."CHANCD" 
+where tib."ENDDA" = '2999-01-01'
+
+
+   
+--Key Risk List Library
+--  general information
+create or replace view v_keyrisklist_generalinfo as
+select DISTINCT ON ("ID")
+CONCAT(tgl."REFCD",'-', EXTRACT(YEAR FROM tgl."PRD")) AS "REFERENCE" ,
+tgl."STATCD" as "Status ",
+tgl."DESC" as "Risk Description",
+tgl."ENFOD" as "Set as Library Dropdown List",
+tgl."ENFOR" as "Enforce Risk for Business Unit"
+from t_gkeylist tgl
+where tgl."ENDDA" = '2999-01-01'
+
+   
+--Key Risk List Library
+--information security
+create or replace view v_keyrisklist_informationsecurity as
+select 
+CONCAT(ti."REFCD",'-', EXTRACT(YEAR FROM ti."PRD")) AS "REFERENCE" ,
+ti."ASDESC" as "Asset Description",
+ti."ENFOD" as "Set as Library Dropdown List",
+ti."ENFOR" as "Enforce Risk for Business Unit"
+from t_ikeylist ti 
+
+
+-- ;loss event view
+create or replace view v_loss_event as
+select DISTINCT ON ("LOLID") 
+tl."LOCD" as  "Loss Event Code",
+tl."LOTIT" as "Title",
+t."LTEXT" as "Status",
+tl."REPBY" as "Reported By",
+t2."LTEXT" as "Bussiness Unit",
+tl."REPAT" as "Reported Date"
+
+from t_losseventlist tl
+left join t_object t 
+	on  tl."STATLE" = t."STEXT" 
+	and t."ENDDA" = '2999-01-01'
+left join t_object t2 
+	on  tl."BUCD" = t2."STEXT" 
+	and t2."ENDDA" = '2999-01-01'
+where tl."ENDDA" = '2999-01-01';
