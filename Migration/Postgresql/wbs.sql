@@ -593,3 +593,26 @@ CREATE TABLE public.."L_SELET_TYPE_REPORT" (
 
 
 >>>>>>> 2cf25bc512963ffdebeeee15aa19fb717770487e
+
+
+
+CREATE TABLE public."T_REPORT_VALIDATION" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_id uuid NULL,
+	type_report_id uuid NULL,
+	validation_no varchar(150) NULL,
+	validation_sequence varchar(150) DEFAULT '1'::character varying NOT NULL,
+	status_id uuid NULL,
+	is_changed bool DEFAULT false NOT NULL,
+	note text NULL,
+	validate_by uuid NULL,
+	validate_at timestamptz NULL,
+	created_at timestamptz DEFAULT now() NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	status varchar(50) NULL,
+	CONSTRAINT "T_REPORT_VALIDATION_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id),
+	CONSTRAINT fk_report_status_validation FOREIGN KEY (status_id) REFERENCES public."M_STATUS_VALIDATION"(id),
+	CONSTRAINT fk_type_report FOREIGN KEY (type_report_id) REFERENCES public."M_TYPE_REPORT"(id)
+);
