@@ -258,3 +258,116 @@ left join t_object t2
 	on  tl."BUCD" = t2."STEXT" 
 	and t2."ENDDA" = '2999-01-01'
 where tl."ENDDA" = '2999-01-01';
+
+
+
+
+
+
+
+
+
+
+
+
+
+ALTER view v_keyrisklist_generalinfo as
+	SELECT DISTINCT ON ( tgl."ID") 
+	concat( "REFCD", '-', EXTRACT(year FROM "PRD")) AS "REFERENCE",
+      t."LTEXT" AS "Status",
+     "DESC" AS "Risk Description",
+     "ENFOD" AS "Set as Library Dropdown List",
+     "ENFOR" AS "Enforce Risk for Business Unit"
+   FROM t_gkeylist tgl
+  LEFT JOIN t_object t on "STATCD"::text = t."STEXT"::text AND t."ENDDA" = '2999-01-01'::date
+  where  tgl. "ENDDA" = '2999-01-01'::date;
+
+
+
+
+
+
+WITH base AS (
+
+  /* =======================
+     QUERY 1 : TABLE A + B
+     ======================= */
+  SELECT
+    "PRD",
+    "ENDDA",
+    "VRSN",
+    MAX("STATCD") AS "STATCD",
+    split_part("RISKCD", '-', 1) AS riskcd_clean,
+
+    COUNT(*) AS total_q1,
+    COUNT(*) FILTER (
+      WHERE "STATCD" <> 'SREG-1'
+      and "STATCD" <> 'SREG-7'
+    ) AS total_q1_endda,
+
+    0 AS total_q2,
+    0 AS total_q2_endda
+
+  FROM (
+    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM t_grisklist
+    UNION ALL
+    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM m_grisklist
+  ) q1
+  WHERE "RISKCD" IS NOT NULL
+  AND "ENDDA" = '2999-01-01'
+  GROUP BY
+    "PRD", "ENDDA", "VRSN", split_part("RISKCD", '-', 1)
+
+  UNION ALL
+
+  /* =======================
+     QUERY 2 : TABLE C + D
+     ======================= */
+  SELECT
+    "PRD",
+    "ENDDA",
+    "VRSN",
+    MAX("STATCD") AS "STATCD",
+    split_part("RISKCD", '-', 1) AS riskcd_clean,
+
+    0 AS total_q1,
+    0 AS total_q1_endda,
+
+    COUNT(*) AS total_q2,
+    COUNT(*) FILTER (
+        WHERE "STATCD" <> 'SREG-1'
+        and "STATCD" <> 'SREG-7'
+    ) AS total_q2_endda
+
+  FROM (
+    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM t_irisklist
+    UNION ALL
+    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM m_irisklist
+  ) q2
+  WHERE "RISKCD" IS NOT NULL
+  AND "ENDDA" = '2999-01-01'
+  GROUP BY
+    "PRD", "ENDDA", "VRSN", split_part("RISKCD", '-', 1)
+)
+
+SELECT
+  "PRD",
+  "VRSN",
+  MAX("STATCD") AS "STATCD",
+  riskcd_clean,
+
+  SUM(total_q1) AS total_query_1,
+  SUM(total_q1_endda) AS total_query_1_endda_2999,
+
+  SUM(total_q2) AS total_query_2,
+  SUM(total_q2_endda) AS total_query_2_endda_2999,
+
+  SUM(total_q1 + total_q2) AS total_all
+
+FROM base
+GROUP BY
+  "PRD",
+  "VRSN",
+  riskcd_clean
+ORDER BY
+  "PRD", "VRSN", riskcd_clean;
