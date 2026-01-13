@@ -290,7 +290,7 @@ ALTER view v_keyrisklist_generalinfo as
 WITH base AS (
 
   /* =======================
-     QUERY 1 : TABLE A + B
+     QUERY 1 : TABLE A + B + C
      ======================= */
   SELECT
     "PRD",
@@ -310,8 +310,10 @@ WITH base AS (
 
   FROM (
     SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM t_grisklist
+--    UNION ALL
+--    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM m_grisklist
     UNION ALL
-    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM m_grisklist
+    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM t_dup_grisklist
   ) q1
   WHERE "RISKCD" IS NOT NULL
   AND "ENDDA" = '2999-01-01'
@@ -321,7 +323,7 @@ WITH base AS (
   UNION ALL
 
   /* =======================
-     QUERY 2 : TABLE C + D
+     QUERY 2 : TABLE D + F + G
      ======================= */
   SELECT
     "PRD",
@@ -341,8 +343,10 @@ WITH base AS (
 
   FROM (
     SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM t_irisklist
+--    UNION ALL
+--    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM m_irisklist
     UNION ALL
-    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM m_irisklist
+    SELECT "PRD", "VRSN", "RISKCD", "ENDDA", "STATCD" FROM t_dup_irisklist
   ) q2
   WHERE "RISKCD" IS NOT NULL
   AND "ENDDA" = '2999-01-01'
@@ -351,23 +355,83 @@ WITH base AS (
 )
 
 SELECT
-  "PRD",
-  "VRSN",
-  MAX("STATCD") AS "STATCD",
-  riskcd_clean,
+  b."PRD" as "Period",
+  b."VRSN" as "Version",
+--  MAX("STATCD") AS "STATCD",
+ 
+  b."riskcd_clean",
+  t2."LTEXT" as "Bussiness Unit",
+  trc."RCHNM" AS "Risk Champion",
 
-  SUM(total_q1) AS total_query_1,
-  SUM(total_q1_endda) AS total_query_1_endda_2999,
+  SUM(total_q1) AS "General info",
+  SUM(total_q1_endda) AS "General Info Active",
 
-  SUM(total_q2) AS total_query_2,
-  SUM(total_q2_endda) AS total_query_2_endda_2999,
+  SUM(total_q2) AS "Info Security",
+  SUM(total_q2_endda) AS "Info Security Active"
 
-  SUM(total_q1 + total_q2) AS total_all
+--  SUM(total_q1 + total_q2) AS total_all
 
-FROM base
+FROM base b
+LEFT JOIN (
+	SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"
+	FROM t_object 
+	WHERE "ENDDA" = '2999-01-01'
+	ORDER BY "STEXT", "LTEXT"
+) t2 ON b."riskcd_clean" = t2."STEXT" 
+
+LEFT JOIN (
+	SELECT DISTINCT ON ("BUCD") "BUCD", "RCHNM"
+	FROM t_rickchampion_list 
+	WHERE "ENDDA" = '2999-01-01'
+	ORDER BY "BUCD", "RCHNM"
+) trc ON trc."BUCD"::text = b."riskcd_clean"
 GROUP BY
-  "PRD",
-  "VRSN",
-  riskcd_clean
+  b."PRD",
+  b."VRSN",
+  b.riskcd_clean,
+  t2."LTEXT",
+  trc."RCHNM"
+  
 ORDER BY
-  "PRD", "VRSN", riskcd_clean;
+  b."PRD", b."VRSN", b.riskcd_clean;
+
+-- Risk List Final View (Keep All Data)
+-- v1 risk list final view
+-- harus join ke table lain untuk ambil deskripsi dan detail lain
+-- mengg
+CREATE OR REPLACE VIEW v_risk_list_final AS
+WITH base_data AS (
+    -- UNION ALL: Gabungkan semua data tanpa hilangkan apapun
+    SELECT "PRD", "RISKCD", "STATCD", "OBJTV",'General' as source_type
+    FROM t_grisklist
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+    
+    UNION ALL
+    
+    SELECT "PRD", "RISKCD", "STATCD","OBJTV", 'InfoSec' as source_type
+    FROM t_dup_grisklist  
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+)
+-- LEFT JOIN: Ambil deskripsi dari master tables
+SELECT 
+    bd."PRD",
+    bd."RISKCD",
+    bd.source_type,
+    bd."OBJTV",
+    obj."LTEXT" as "Business Unit",
+    stat."LTEXT" as "Status Description"
+FROM base_data bd
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) obj ON split_part(bd."RISKCD", '-', 1) = obj."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"  
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) stat ON bd."STATCD" = stat."STEXT";
