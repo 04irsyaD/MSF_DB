@@ -490,7 +490,7 @@ and bd."VRSN" = rtpe."VRSN";
 
 -- verisi gacor king
 -- v3 risk list final view with risk type and risk source
-CREATE OR REPLACE VIEW v_risk_list_detail AS
+CREATE OR REPLACE VIEW v_risk_list_general_inf_detail AS
 WITH base_data AS (
     -- UNION ALL: Gabungkan semua data tanpa hilangkan apapun
     SELECT "PRD", "RISKCD", "STATCD","VRSN","RSCR","RISKSUM","DVSN", "OBJTV",'General' as source_type
@@ -548,3 +548,44 @@ LEFT JOIN (
 ON bd."RISKCD" = rtpe."RISKCD" 
 and bd."PRD" = rtpe."PRD"
 and bd."VRSN" = rtpe."VRSN";
+
+
+-- VERSI GACOR KING WOKK DAMNN !( SAWIT)
+CREATE OR REPLACE VIEW v_risk_list_information_sec_detail AS
+WITH base_data AS (
+    -- UNION ALL: Gabungkan semua data tanpa hilangkan apapun
+    SELECT "PRD", "RISKCD", "STATCD","VRSN","RSCR","DVSN","DESC", "OBJTV",'General' as source_type
+    FROM t_irisklist
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+    
+    UNION ALL
+    
+    SELECT "PRD", "RISKCD", "STATCD","VRSN","RSCR","DVSN","DESC", "OBJTV", 'InfoSec' as source_type
+    FROM t_dup_irisklist  
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+)
+-- LEFT JOIN: Ambil deskripsi dari master tables
+SELECT 
+    bd."PRD" as "Period",
+    bd."VRSN"as "Version",
+    obj."LTEXT" as "Business Unit",
+    bd."OBJTV" as "Objecttive",
+    stat."LTEXT" as "Status",
+    bd."RISKCD" as "Asset Code",
+    bd."DESC" as "Description"
+    
+FROM base_data bd
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) obj ON split_part(bd."RISKCD", '-', 1) = obj."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"  
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) stat ON bd."STATCD" = stat."STEXT"
