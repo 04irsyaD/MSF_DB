@@ -435,3 +435,116 @@ LEFT JOIN (
     WHERE "ENDDA" = '2999-01-01'
     ORDER BY "STEXT", "LTEXT"
 ) stat ON bd."STATCD" = stat."STEXT";
+
+
+-- v2 risk list final view with risk type
+CREATE OR REPLACE VIEW v_risk_list_final_with_type AS
+WITH base_data AS (
+    -- UNION ALL: Gabungkan semua data tanpa hilangkan apapun
+    SELECT "PRD", "RISKCD", "STATCD","VRSN", "OBJTV",'General' as source_type
+    FROM t_grisklist
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+    
+    UNION ALL
+    
+    SELECT "PRD", "RISKCD", "STATCD","VRSN","OBJTV", 'InfoSec' as source_type
+    FROM t_dup_grisklist  
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+)
+-- LEFT JOIN: Ambil deskripsi dari master tables
+SELECT 
+    bd."PRD",
+    bd."RISKCD",
+    bd."VRSN",
+    bd.source_type,
+    obj."LTEXT" as "Business Unit",
+    bd."OBJTV" as "Status",
+    stat."LTEXT" as "Status Description",
+    bd."STATCD",
+    rtpe."RISKTPE"
+    
+FROM base_data bd
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) obj ON split_part(bd."RISKCD", '-', 1) = obj."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"  
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) stat ON bd."STATCD" = stat."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("RISKCD", "PRD", "VRSN") "RISKCD", "PRD", "VRSN", "RISKTPE"
+    FROM t_griskidentification 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "RISKCD", "PRD", "VRSN"
+) rtpe 
+ON bd."RISKCD" = rtpe."RISKCD" 
+and bd."PRD" = rtpe."PRD"
+and bd."VRSN" = rtpe."VRSN";
+
+-- verisi gacor king
+-- v3 risk list final view with risk type and risk source
+CREATE OR REPLACE VIEW v_risk_list_detail AS
+WITH base_data AS (
+    -- UNION ALL: Gabungkan semua data tanpa hilangkan apapun
+    SELECT "PRD", "RISKCD", "STATCD","VRSN","RSCR","RISKSUM","DVSN", "OBJTV",'General' as source_type
+    FROM t_grisklist
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+    
+    UNION ALL
+    
+    SELECT "PRD", "RISKCD", "STATCD","VRSN","RSCR","RISKSUM","DVSN","OBJTV", 'InfoSec' as source_type
+    FROM t_dup_grisklist  
+    WHERE "ENDDA" = '2999-01-01'
+      AND "RISKCD" IS NOT NULL
+)
+-- LEFT JOIN: Ambil deskripsi dari master tables
+SELECT 
+    bd."PRD" as "Period",
+    bd."VRSN"as "Version",
+    obj."LTEXT" as "Business Unit",
+    bd."OBJTV" as "Objecttive",
+    stat."LTEXT" as "Status Description",
+--    bd."STATCD" as "",
+    rtpe."RISKTPE" as "Risk Type",
+--    bd."RSCR" 
+    rist."LTEXT" as "Risk Source",
+    bd."RISKCD" as "Risk Code",
+    bd."RISKSUM" as "Risk Summary",
+    bd."DVSN" as "Division"
+    
+FROM base_data bd
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) obj ON split_part(bd."RISKCD", '-', 1) = obj."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"  
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) stat ON bd."STATCD" = stat."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("STEXT") "STEXT", "LTEXT"  
+    FROM t_object 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "STEXT", "LTEXT"
+) rist ON bd."RSCR" = rist."STEXT"
+LEFT JOIN (
+    SELECT DISTINCT ON ("RISKCD", "PRD", "VRSN") "RISKCD", "PRD", "VRSN", "RISKTPE"
+    FROM t_griskidentification 
+    WHERE "ENDDA" = '2999-01-01'
+    ORDER BY "RISKCD", "PRD", "VRSN"
+) rtpe 
+ON bd."RISKCD" = rtpe."RISKCD" 
+and bd."PRD" = rtpe."PRD"
+and bd."VRSN" = rtpe."VRSN";
