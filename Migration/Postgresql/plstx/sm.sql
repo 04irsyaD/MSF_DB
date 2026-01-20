@@ -89,6 +89,7 @@ create Table public."t_r_jadwal_logon"(
 	jadwal_shift_id UUID NOT NULL,
 	logon_id UUID NOT NULL,
 	DATE_LOGON date NOT NULL,
+	kondition_id int4 NULL,
 	created_by_id uuid NOT NULL,
 	updated_by_id uuid NULL,
 	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -97,11 +98,25 @@ create Table public."t_r_jadwal_logon"(
 	is_active bool DEFAULT true NOT NULL,
 	CONSTRAINT t_r_jadwal_logon_pk PRIMARY KEY (id),
 	constraint fk_t_r_jadwal_logon_jadwal_shift_id foreign key(jadwal_shift_id)references t_m_jadwal_shift(id),
-	constraint fk_t_r_jadwal_logon_logon_id foreign key(logon_id)references t_t_logon(id)
+	constraint fk_t_r_jadwal_logon_logon_id foreign key(logon_id)references t_t_logon_shift(id),
+	constraint fk_t_r_jadwal_logon_kondition_id foreign key(kondition_id)references t_m_condition_logon(id)
 
 )
 
-create table public."t_t_logon"(
+create Table public."t_m_condition_logon"(
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	kondition_name varchar(100) NOT NULL,
+	"order_data" SERIAL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT condition_logon_pk PRIMARY KEY (id)
+)
+
+create table public."t_t_logon_shift"(
 	id uuid DEFAULT uuid_generate_v4() NOT NULL,
 	user_id uuid NOT NULL,
 	code_member varchar(100) NOT NULL,
@@ -118,4 +133,21 @@ create table public."t_t_logon"(
 	CONSTRAINT t_t_logon_pk PRIMARY KEY (id),
 	constraint fk_t_t_logon_user_id foreign key(user_id)references "user"(id),
 	constraint fk_t_t_logon_status_shift_kehadiran_member_id foreign key(status_shift_kehadiran_member_id)references t_m_status_shift_kehadiran_member(id)
+)
+
+
+create table public."t_t_ticket_member" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	logon_shift_id uuid NOT NULL,
+	ticket_take int4 NOT NULL DEFAULT 0,
+	ticket_pending int4 NOT NULL DEFAULT 0,
+	ticket_solved int4 NOT NULL DEFAULT 0,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT t_t_ticket_member_pk PRIMARY KEY (id),
+	constraint fk_t_t_ticket_member_logon_shift_id foreign key(logon_shift_id)references t_t_logon_shift(id)
 )
