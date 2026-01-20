@@ -151,3 +151,12 @@ create table public."t_t_ticket_member" (
 	CONSTRAINT t_t_ticket_member_pk PRIMARY KEY (id),
 	constraint fk_t_t_ticket_member_logon_shift_id foreign key(logon_shift_id)references t_t_logon_shift(id)
 )
+
+-- qeuery testingquery testing
+select 
+p.id,
+p.permission,
+m.nama
+from permission p
+left join module m on m.id = p.module_id
+
