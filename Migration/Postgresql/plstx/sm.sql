@@ -40,7 +40,7 @@ CREATE TABLE public."L_FAQ" (
 	constraint fk_l_faq_id foreign key(faq_id)references "M_FAQ"(id)
 );
 
-
+--  this is for final in this top is a example create table
 
 
 CREATE TABLE public."t_m_jadwal_shift" (
@@ -58,7 +58,7 @@ CREATE TABLE public."t_m_jadwal_shift" (
     CONSTRAINT t_m_jadwal_shift_pk PRIMARY KEY (id)
 )
 
-create Table public."t_m_status_shift_member" (
+create Table public."t_m_status_shift_kehadiran_member" (
     id uuid DEFAULT uuid_generate_v4() NOT NULL,
     status_shift varchar(100) NOT NULL,
     "order_data" SERIAL,
@@ -68,7 +68,54 @@ create Table public."t_m_status_shift_member" (
     updated_at timestamptz(6) NULL,
     deleted_at timestamptz(6) NULL,
     is_active bool DEFAULT true NOT NULL,
-    CONSTRAINT t_m_status_shift_pk PRIMARY KEY (id)
+    CONSTRAINT t_m_status_shift_kehadiran_member_pk PRIMARY KEY (id)
 )
 
-create table 
+create table public."t_m_reason_rating"(
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	reason_rating varchar(100) NOT NULL,
+	"order_data" SERIAL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT t_m_reason_rating_pk PRIMARY KEY (id)
+)
+
+create Table public."t_r_jadwal_logon"(
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	jadwal_shift_id UUID NOT NULL,
+	logon_id UUID NOT NULL,
+	DATE_LOGON date NOT NULL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT t_r_jadwal_logon_pk PRIMARY KEY (id),
+	constraint fk_t_r_jadwal_logon_jadwal_shift_id foreign key(jadwal_shift_id)references t_m_jadwal_shift(id),
+	constraint fk_t_r_jadwal_logon_logon_id foreign key(logon_id)references t_t_logon(id)
+
+)
+
+create table public."t_t_logon"(
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	user_id uuid NOT NULL,
+	code_member varchar(100) NOT NULL,
+	role_id int4 NOT NULL,
+	status_shift_kehadiran_member_id int4 NOT NULL,
+	reason_hadir TEXT NULL,
+	evidence_path varchar(500) NULL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT t_t_logon_pk PRIMARY KEY (id),
+	constraint fk_t_t_logon_user_id foreign key(user_id)references "user"(id),
+	constraint fk_t_t_logon_status_shift_kehadiran_member_id foreign key(status_shift_kehadiran_member_id)references t_m_status_shift_kehadiran_member(id)
+)
