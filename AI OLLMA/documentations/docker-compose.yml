@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: query_shortcut_app
+    # Mount the local summary folder so changes are reflected without rebuilding
+    volumes:
+      - ./summary:/app/summary:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Default command: run main.py. You can override with `docker-compose run app python summary/scripts/other.py`
+    command: ["python", "summary/scripts/main.py"]
+    # Forward standard output to host
+    stdin_open: false
+    tty: false
