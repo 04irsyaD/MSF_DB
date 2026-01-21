@@ -208,3 +208,23 @@ create table public."t_m_new_data_logon" (
 	is_active bool DEFAULT true NOT NULL,
 	CONSTRAINT t_m_new_data_logon_pk PRIMARY KEY (id)
 )
+
+alter table t_r_jadwal_logon
+add submited_at timestamptz(6) NULL;
+add CONSTRAINT fk_t_r_jadwal_logon_new_data_logon_id foreign key(status_new_data_id)references t_m_new_data_logon(id);
+
+
+
+Create table public."t_m_division" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	code_division varchar(50) NOT NULL,
+	division_name varchar(100) NOT NULL,
+	"order_data" SERIAL,
+	created_by_id uuid NOT NULL,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT t_m_division_pk PRIMARY KEY (id)
+)
