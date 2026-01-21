@@ -589,3 +589,80 @@ LEFT JOIN (
     WHERE "ENDDA" = '2999-01-01'
     ORDER BY "STEXT", "LTEXT"
 ) stat ON bd."STATCD" = stat."STEXT"
+
+
+-- public.v_risk_register source
+
+CREATE OR REPLACE VIEW public.v_risk_register
+AS WITH base AS (
+         SELECT q1."PRD",
+            q1."ENDDA",
+            q1."VRSN",
+            max(q1."STATCD"::text) AS "STATCD",
+            split_part(q1."RISKCD"::text, '-'::text, 1) AS riskcd_clean,
+            count(*) AS total_q1,
+            count(*) FILTER (WHERE q1."STATCD"::text <> 'SREG-1'::text AND q1."STATCD"::text <> 'SREG-7'::text) AS total_q1_endda,
+            0 AS total_q2,
+            0 AS total_q2_endda
+           FROM ( SELECT t_grisklist."PRD",
+                    t_grisklist."VRSN",
+                    t_grisklist."RISKCD",
+                    t_grisklist."ENDDA",
+                    t_grisklist."STATCD"
+                   FROM t_grisklist
+                UNION ALL
+                 SELECT t_dup_grisklist."PRD",
+                    t_dup_grisklist."VRSN",
+                    t_dup_grisklist."RISKCD",
+                    t_dup_grisklist."ENDDA",
+                    t_dup_grisklist."STATCD"
+                   FROM t_dup_grisklist) q1
+          WHERE q1."RISKCD" IS NOT NULL AND q1."ENDDA" = '2999-01-01'::date
+          GROUP BY q1."PRD", q1."ENDDA", q1."VRSN", (split_part(q1."RISKCD"::text, '-'::text, 1))
+        UNION ALL
+         SELECT q2."PRD",
+            q2."ENDDA",
+            q2."VRSN",
+            max(q2."STATCD"::text) AS "STATCD",
+            split_part(q2."RISKCD"::text, '-'::text, 1) AS riskcd_clean,
+            0 AS total_q1,
+            0 AS total_q1_endda,
+            count(*) AS total_q2,
+            count(*) FILTER (WHERE q2."STATCD"::text <> 'SREG-1'::text AND q2."STATCD"::text <> 'SREG-7'::text) AS total_q2_endda
+           FROM ( SELECT t_irisklist."PRD",
+                    t_irisklist."VRSN",
+                    t_irisklist."RISKCD",
+                    t_irisklist."ENDDA",
+                    t_irisklist."STATCD"
+                   FROM t_irisklist
+                UNION ALL
+                 SELECT t_dup_irisklist."PRD",
+                    t_dup_irisklist."VRSN",
+                    t_dup_irisklist."RISKCD",
+                    t_dup_irisklist."ENDDA",
+                    t_dup_irisklist."STATCD"
+                   FROM t_dup_irisklist) q2
+          WHERE q2."RISKCD" IS NOT NULL AND q2."ENDDA" = '2999-01-01'::date
+          GROUP BY q2."PRD", q2."ENDDA", q2."VRSN", (split_part(q2."RISKCD"::text, '-'::text, 1))
+        )
+ SELECT b."PRD" AS "Period",
+    b."VRSN" AS "Version",
+    t2."LTEXT" AS "Bussiness Unit",
+    trc."RCHNM" AS "Risk Champion",
+    sum(b.total_q1) AS "General info",
+    sum(b.total_q1_endda) AS "General Info Active",
+    sum(b.total_q2) AS "Info Security",
+    sum(b.total_q2_endda) AS "Info Security Active"
+   FROM base b
+     LEFT JOIN ( SELECT DISTINCT ON (t_object."STEXT") t_object."STEXT",
+            t_object."LTEXT"
+           FROM t_object
+          WHERE t_object."ENDDA" = '2999-01-01'::date
+          ORDER BY t_object."STEXT", t_object."LTEXT") t2 ON b.riskcd_clean = t2."STEXT"::text
+     LEFT JOIN ( SELECT DISTINCT ON (t_rickchampion_list."BUCD") t_rickchampion_list."BUCD",
+            t_rickchampion_list."RCHNM"
+           FROM t_rickchampion_list
+          WHERE t_rickchampion_list."ENDDA" = '2999-01-01'::date
+          ORDER BY t_rickchampion_list."BUCD", t_rickchampion_list."RCHNM") trc ON trc."BUCD"::text = b.riskcd_clean
+  GROUP BY b."PRD", b."VRSN", b.riskcd_clean, t2."LTEXT", trc."RCHNM"
+  ORDER BY b."PRD", b."VRSN", b.riskcd_clean;
