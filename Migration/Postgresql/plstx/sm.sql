@@ -228,3 +228,9 @@ Create table public."t_m_division" (
 	is_active bool DEFAULT true NOT NULL,
 	CONSTRAINT t_m_division_pk PRIMARY KEY (id)
 )
+
+alter table t_ticket_eskalasi
+add constraint fk_t_ticket_eskalasi_division_id foreign key(division_id)references t_m_division(id);
+
+
+--  add 
