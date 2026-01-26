@@ -660,12 +660,9 @@ GRANT ALL ON TABLE public.v_risk_register TO devermusr;
 
 
 
--- .loss event filter
 
-select * from v_loss_event
-where "Bussiness Unit" = 'Technology Strategy and Planning'
-and "Status"  = 'Approved'
-and extract (year from "Reported Date" ) = '2024'
+
+
 
 
 
