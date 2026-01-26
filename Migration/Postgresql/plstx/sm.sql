@@ -401,4 +401,4 @@ create table public."t_r_rating_logon_relation" (
 
 
 alter table t_t_logon_gangguan
-add c
+add constraint fk_t_t_logon_gangguan_ticket_id foreign key(ticket_id)references t_ticket(id);
