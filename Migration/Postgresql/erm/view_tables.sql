@@ -1117,6 +1117,7 @@ GRANT ALL ON TABLE public.v_risk_register TO devermusr;
 
 
 
+
 --- RISK OWNER WOK 
 SELECT DISTINCT ON ("ROWID")
 ROW_NUMBER() OVER (ORDER BY tr."ROWID" ) AS "No",
