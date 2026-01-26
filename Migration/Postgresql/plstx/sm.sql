@@ -384,3 +384,21 @@ create table public."t_t_rating_logon" (
 	constraint fk_t_t_rating_logon_reason_rating_id foreign key(reason_rating_id)references t_m_reason_rating(id),
 	constraint fk_t_t_rating_logon_ticket_id foreign key(t_ticket_id)references t_ticket(id)
 )
+
+
+create table public."t_r_rating_logon_relation" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	logon_rating_id uuid NOT NULL,
+	reason_rating_id uuid NOT NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,	
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,	
+	is_active bool DEFAULT true NOT NULL,
+	CONSTRAINT t_r_rating_logon_history_pk PRIMARY KEY (id),
+	constraint fk_t_r_rating_logon_history_logon_rating_id foreign key(logon_rating_id)references t_t_rating_logon(id),
+	constraint fk_t_r_rating_logon_history_reason_rating_id foreign key(reason_rating_id)references t_m_reason_rating(id)
+)
+
+
+alter table t_t_logon_gangguan
+add c

@@ -1213,6 +1213,7 @@ from t_ikeylist ti
 
 
 
+
 --- RISK OWNER WOK 
 SELECT DISTINCT ON ("ROWID")
 ROW_NUMBER() OVER (ORDER BY tr."ROWID" ) AS "No",
