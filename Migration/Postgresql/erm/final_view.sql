@@ -652,7 +652,8 @@ AS WITH base AS (
     sum(b.total_q1) AS "General info",
     sum(b.total_q1_endda) AS "General Info Active",
     sum(b.total_q2) AS "Info Security",
-    sum(b.total_q2_endda) AS "Info Security Active"
+    sum(b.total_q2_endda) AS "Info Security Active",
+    tstat."LTEXT" AS "Risk Register Status"
    FROM base b
      LEFT JOIN ( SELECT DISTINCT ON (t_object."STEXT") t_object."STEXT",
             t_object."LTEXT"
@@ -664,5 +665,22 @@ AS WITH base AS (
            FROM t_rickchampion_list
           WHERE t_rickchampion_list."ENDDA" = '2999-01-01'::date
           ORDER BY t_rickchampion_list."BUCD", t_rickchampion_list."RCHNM") trc ON trc."BUCD"::text = b.riskcd_clean
-  GROUP BY b."PRD", b."VRSN", b.riskcd_clean, t2."LTEXT", trc."RCHNM"
+    LEFT JOIN ( SELECT DISTINCT on (t_riskregisterstatus."BUCD", t_riskregisterstatus."PRD", t_riskregisterstatus."VRSN") 
+            t_riskregisterstatus."STATCD",
+            t_riskregisterstatus."BUCD",
+            t_riskregisterstatus."PRD",
+            t_riskregisterstatus."VRSN"
+           FROM t_riskregisterstatus
+          WHERE t_riskregisterstatus."ENDDA" = '2999-01-01'::date
+          ORDER BY t_riskregisterstatus."BUCD", t_riskregisterstatus."PRD", t_riskregisterstatus."VRSN") trs 
+    ON trs."BUCD"::text = b.riskcd_clean
+    AND trs."PRD" = b."PRD"
+    AND trs."VRSN" = b."VRSN"
+    LEFT JOIN ( SELECT DISTINCT ON (t_object."STEXT") t_object."STEXT",
+            t_object."LTEXT"
+           FROM t_object
+          WHERE t_object."ENDDA" = '2999-01-01'::date
+          ORDER BY t_object."STEXT", t_object."LTEXT") tstat ON trs."STATCD" = tstat."STEXT"
+    
+  GROUP BY b."PRD", b."VRSN", b.riskcd_clean, t2."LTEXT", trc."RCHNM", tstat."LTEXT"
   ORDER BY b."PRD", b."VRSN", b.riskcd_clean;

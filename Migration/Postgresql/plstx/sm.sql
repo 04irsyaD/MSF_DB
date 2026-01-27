@@ -404,3 +404,7 @@ alter table t_t_logon_gangguan
 add constraint fk_t_t_logon_gangguan_ticket_id foreign key(ticket_id)references t_ticket(id);
 alter table t_t_logon_gangguan
 add constraint fk_t_t_logon_gangguankategori_id foreign key(kategori_id)REFERENCES public.t_kategori(id);
+
+
+CREATE INDEX idx_ticket_eskalasi_code_spbu 
+ON t_ticket_eskalasi USING btree (code_ticket, nomor_spbu);
