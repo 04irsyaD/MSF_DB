@@ -616,3 +616,9 @@ CREATE TABLE public."T_REPORT_VALIDATION" (
 	CONSTRAINT fk_report_status_validation FOREIGN KEY (status_id) REFERENCES public."M_STATUS_VALIDATION"(id),
 	CONSTRAINT fk_type_report FOREIGN KEY (type_report_id) REFERENCES public."M_TYPE_REPORT"(id)
 );
+
+
+create INDEX idx_t_report ON t_report USING btree (trid, passcode, wbs_code);
+create index  idx_t_report_validation on t_report_validation using btree ( validation_no, note );
+
+create index idx_t_report_inspection on t_report_inspection using btree ( inspection_no, note );
