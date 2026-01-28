@@ -684,3 +684,38 @@ AS WITH base AS (
     
   GROUP BY b."PRD", b."VRSN", b.riskcd_clean, t2."LTEXT", trc."RCHNM", tstat."LTEXT"
   ORDER BY b."PRD", b."VRSN", b.riskcd_clean;
+
+
+ CREATE OR REPLACE VIEW public.v_inventor AS
+ WITH buscdinv AS (
+select DISTINCT ON ("INVNM") 
+ti."INVNM" as "NAME",
+CASE ti."ISACT"
+    WHEN true THEN 'Active'
+    WHEN false THEN 'Non Active'
+  END AS "Status",
+ CASE
+    WHEN ti."BUCD" = tp."BUCD" THEN tp."BUCD"
+    ELSE NULL
+  END AS "BUCD",
+ ti."CHGBY" as "Personel RM"
+from t_inventor ti 
+LEFT JOIN t_personal tp ON ti."INVNM" = tp."NAM"
+where ti."ENDDA" = '2999-01-01'
+)
+SELECT
+  mc."NAME",
+  mc."Status",
+  mc."Personel RM",
+--  mc."BUCD",
+  t."LTEXT" as "Bussiness Unit",
+  CASE 
+        WHEN t."LTEXT" IS NULL THEN 'Non-Active'
+        ELSE 'Active'
+  END AS "Status Bussiness Unit"
+FROM buscdinv mc
+left join t_object t 
+	on  mc."BUCD" = t."STEXT" 
+	and t."ENDDA" = '2999-01-01'
+GROUP BY t."LTEXT", mc."NAME", mc."Status", mc."Personel RM", mc."BUCD"
+ORDER BY mc."NAME";
