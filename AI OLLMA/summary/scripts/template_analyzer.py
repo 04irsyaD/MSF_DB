@@ -2,6 +2,10 @@
 import subprocess
 import os
 from docx import Document
+# template_analyzer.py - Analisis template dengan Ollama
+import subprocess
+import os
+from docx import Document
 import zipfile
 import xml.etree.ElementTree as ET
 
@@ -45,32 +49,33 @@ def analyze_template_with_ollama(template_path, model='llama3'):
         return None
     
     # Prompt untuk Ollama
-    prompt = f"""
-Analisis template dokumentasi berikut dan berikan panduan untuk mengisinya:
-
-KONTEN TEMPLATE:
-{template_content}
-
-Tolong identifikasi:
-1. Apakah ada placeholder seperti {{variabel}} atau merge fields?
-2. Bagaimana struktur template (heading, paragraf, tabel)?
-3. Di mana data tabel database harus diisi?
-4. Format apa yang diharapkan untuk deskripsi tabel dan kolom?
-
-Berikan jawaban dalam format JSON seperti ini:
-{{
-    "has_placeholders": true/false,
-    "placeholder_format": "jinja2/mailmerge/manual",
-    "sections": ["section1", "section2"],
-    "table_format": "deskripsi format tabel",
-    "recommendations": "saran untuk mengisi template"
-}}
-"""
+    # NOTE: build the prompt without f-string to avoid formatting errors due to JSON-like braces
+    prompt = (
+        "Analisis template dokumentasi berikut dan berikan panduan untuk mengisinya:\n\n"
+        "KONTEN TEMPLATE:\n"
+        + template_content
+        + "\n\n"
+        "Tolong identifikasi:\n"
+        "1. Apakah ada placeholder seperti {{variabel}} atau merge fields?\n"
+        "2. Bagaimana struktur template (heading, paragraf, tabel)?\n"
+        "3. Di mana data tabel database harus diisi?\n"
+        "4. Format apa yang diharapkan untuk deskripsi tabel dan kolom?\n\n"
+        "Berikan jawaban dalam format JSON seperti ini:\n"
+        "{\n"
+        "    \"has_placeholders\": true/false,\n"
+        "    \"placeholder_format\": \"jinja2/mailmerge/manual\",\n"
+        "    \"sections\": [\"section1\", \"section2\"],\n"
+        "    \"table_format\": \"deskripsi format tabel\",\n"
+        "    \"recommendations\": \"saran untuk mengisi template\"\n"
+        "}\n"
+    )
     
     try:
         # Jalankan Ollama
+        # Pass the prompt via stdin to avoid Windows command-line length limits
         result = subprocess.run(
-            ["ollama", "run", model, prompt],
+            ["ollama", "run", model],
+            input=prompt,
             capture_output=True,
             text=True,
             check=True,
@@ -78,7 +83,7 @@ Berikan jawaban dalam format JSON seperti ini:
             encoding='utf-8',
             errors='replace'
         )
-        
+
         response = result.stdout.strip()
         print("✅ Analisis template selesai")
         return response
