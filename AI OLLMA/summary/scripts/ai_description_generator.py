@@ -147,8 +147,10 @@ class TemplateAwareAIGenerator:
         
         try:
             # Generate dengan AI
+            # Send prompt via stdin to avoid Windows command-line length limits
             result = subprocess.run(
-                ["ollama", "run", self.model, prompt],
+                ["ollama", "run", self.model],
+                input=prompt,
                 capture_output=True, text=True, timeout=30,
                 encoding='utf-8', errors='replace'
             )

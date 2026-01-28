@@ -15,7 +15,8 @@ RUN if [ -f /app/requirements.txt ]; then \
     fi
 
 # Copy the summary folder (source code)
-COPY summary /app/summary
+## Use the patched backup copy (summary_backup) to avoid importing malformed files in the original summary/
+COPY documentations/summary_backup /app/summary
 
 # Default entrypoint runs python so user can override command to run any script
 ENTRYPOINT ["python"]

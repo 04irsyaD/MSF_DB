@@ -2,12 +2,14 @@
 import os
 from dotenv import load_dotenv
 from db_reader import get_db_metadata
-from ai_writer import generate_table_description
+from ai_writer_fixed import generate_table_description
 from doc_generator import generate_document
 from template_analyzer import analyze_and_prepare_template
 
 # Load environment variables
-load_dotenv()
+# Explicitly load .env from the summary folder to ensure correct config when running from other CWDs
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(env_path)
 
 # --- CONFIG from .env file ---
 DB_CONFIG = {
@@ -40,6 +42,17 @@ def main():
         tables = get_db_metadata(DB_CONFIG['host'], DB_CONFIG['dbname'], 
                                DB_CONFIG['user'], DB_CONFIG['password'], 
                                port=DB_CONFIG['port'], schema=DB_SCHEMA)
+        # Normalize different return shapes from db_reader
+        # Some versions return a dict {table_name: columns}, others return a list of dicts
+        if isinstance(tables, list):
+            normalized = {}
+            for t in tables:
+                name = t.get('table_name') or t.get('name')
+                cols = t.get('columns') or t.get('cols') or []
+                if name:
+                    normalized[name] = cols
+            tables = normalized
+
         print(f'   ditemukan {len(tables)} tabel.')
     except Exception as e:
         print(f'❌ Error koneksi database: {e}')
