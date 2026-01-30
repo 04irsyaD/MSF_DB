@@ -1,0 +1,310 @@
+{
+  "name": "GitHub SQL Docs → Telegram (PostgreSQL)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "owner": "={{ $vars.GITHUB_OWNER }}",
+        "repository": "={{ $vars.GITHUB_REPO }}",
+        "options": {}
+      },
+      "id": "github-commits",
+      "name": "Get Recent Commits",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "githubApi": {
+          "id": "github-cred",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter commits dalam 5 menit terakhir yang punya file .sql\nconst commits = $input.all();\nconst fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);\n\nconst recentCommits = [];\n\nfor (const item of commits) {\n  const commit = item.json;\n  const commitDate = new Date(commit.commit?.author?.date || commit.created_at);\n  \n  if (commitDate > fiveMinutesAgo) {\n    recentCommits.push({\n      sha: commit.sha,\n      message: commit.commit?.message || '',\n      author: commit.commit?.author?.name || 'Unknown',\n      date: commitDate.toISOString(),\n      url: commit.html_url\n    });\n  }\n}\n\nif (recentCommits.length === 0) {\n  return []; // Stop workflow jika tidak ada commit baru\n}\n\nreturn recentCommits.map(c => ({ json: c }));"
+      },
+      "id": "filter-recent",
+      "name": "Filter Recent Commits",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $vars.GITHUB_OWNER }}/{{ $vars.GITHUB_REPO }}/commits/{{ $json.sha }}",
+        "options": {},
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        }
+      },
+      "id": "get-commit-files",
+      "name": "Get Commit Files",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract .sql files dari commit\nconst commit = $input.first().json;\nconst files = commit.files || [];\n\nconst sqlFiles = files.filter(f => \n  f.filename.endsWith('.sql') && \n  (f.status === 'added' || f.status === 'modified')\n);\n\nif (sqlFiles.length === 0) {\n  return []; // Tidak ada file SQL\n}\n\nreturn [{\n  json: {\n    sha: commit.sha,\n    message: commit.commit?.message || '',\n    author: commit.commit?.author?.name || 'Unknown',\n    url: commit.html_url,\n    sqlFiles: sqlFiles.map(f => ({\n      filename: f.filename,\n      raw_url: f.raw_url,\n      status: f.status\n    }))\n  }\n}];"
+      },
+      "id": "extract-sql-files",
+      "name": "Extract SQL Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.sqlFiles[0].raw_url }}",
+        "options": {}
+      },
+      "id": "download-sql",
+      "name": "Download SQL Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse CREATE TABLE statements dari SQL\nconst sqlContent = $input.first().json.data || $input.first().json.body || '';\nconst prevData = $('Extract SQL Files').first().json;\n\nconst tablePattern = /CREATE\\s+TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:public\\.)?[\"']?(\\w+)[\"']?\\s*\\(([\\s\\S]*?)\\)(?:\\s*;)?/gi;\n\nconst tables = [];\nlet match;\n\nwhile ((match = tablePattern.exec(sqlContent)) !== null) {\n  const tableName = match[1];\n  const tableBody = match[2];\n  \n  const columns = [];\n  const lines = tableBody.split(',');\n  \n  for (const line of lines) {\n    const trimmed = line.trim();\n    if (!trimmed) continue;\n    if (/^(CONSTRAINT|PRIMARY\\s+KEY\\(|FOREIGN\\s+KEY|UNIQUE\\(|CHECK\\(|INDEX)/i.test(trimmed)) continue;\n    \n    const colMatch = trimmed.match(/^[\"']?(\\w+)[\"']?\\s+(\\w+(?:\\([^)]+\\))?)/i);\n    if (colMatch) {\n      columns.push({\n        name: colMatch[1],\n        type: colMatch[2]\n      });\n    }\n  }\n  \n  if (columns.length > 0) {\n    tables.push({\n      name: tableName,\n      columns: columns,\n      definition: match[0]\n    });\n  }\n}\n\nreturn [{\n  json: {\n    ...prevData,\n    tables,\n    tableCount: tables.length,\n    sqlContent\n  }\n}];"
+      },
+      "id": "parse-sql",
+      "name": "Parse PostgreSQL Tables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1750, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-tables",
+              "leftValue": "={{ $json.tableCount }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-tables",
+      "name": "Has Tables?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3:latest\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Database documentation expert untuk PostgreSQL. Dokumentasi Bahasa Indonesia.\\n\\nTABLES:\\n{{ $json.tables.map(t => 'TABLE: ' + t.name + '\\\\nCOLUMNS: ' + t.columns.map(c => c.name + ' (' + c.type + ')').join(', ')).join('\\\\n\\\\n') }}\\n\\nResponse JSON only:\\n{\\\"tables\\\": [{\\\"name\\\": \\\"table_name\\\", \\\"description\\\": \\\"1 kalimat\\\", \\\"columns\\\": {\\\"col\\\": \\\"max 5 kata\\\"}}]}\"\n    }\n  ],\n  \"stream\": false,\n  \"options\": { \"temperature\": 0.3 }\n}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "ollama-ai",
+      "name": "Ollama AI (PostgreSQL Docs)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2250, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format hasil untuk Telegram\nconst prevData = $('Parse PostgreSQL Tables').first().json;\nconst aiResponse = $input.first().json.message?.content || '{}';\n\n// Parse AI response\nlet aiDoc = { tables: [] };\ntry {\n  const jsonMatch = aiResponse.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    aiDoc = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {}\n\n// Build Telegram message\nlet msg = `🔔 *GITHUB SQL UPDATE*\\n`;\nmsg += `━━━━━━━━━━━━━━━━━━━━━\\n\\n`;\nmsg += `📁 *File:* \\`${prevData.sqlFiles[0].filename}\\`\\n`;\nmsg += `👤 *Author:* ${prevData.author}\\n`;\nmsg += `💬 *Commit:* ${prevData.message.substring(0, 50)}\\n`;\nmsg += `🔗 [View on GitHub](${prevData.url})\\n\\n`;\nmsg += `📚 *DOKUMENTASI PostgreSQL*\\n`;\nmsg += `━━━━━━━━━━━━━━━━━━━━━\\n\\n`;\n\nfor (let i = 0; i < prevData.tables.length; i++) {\n  const t = prevData.tables[i];\n  const aiTable = aiDoc.tables?.find(at => at.name === t.name) || {};\n  const desc = aiTable.description || `Tabel ${t.name}`;\n  \n  msg += `*${i + 1}. ${t.name}*\\n`;\n  msg += `📝 ${desc}\\n\\n\\`\\`\\`\\n`;\n  \n  for (let j = 0; j < t.columns.length; j++) {\n    const c = t.columns[j];\n    const colDesc = (aiTable.columns?.[c.name] || c.name).substring(0, 25);\n    msg += `${j + 1}. ${c.name} (${c.type})\\n   → ${colDesc}\\n`;\n  }\n  \n  msg += `\\`\\`\\`\\n\\n`;\n}\n\nmsg += `✅ *Total:* ${prevData.tableCount} table(s)`;\n\nreturn [{ json: { message: msg, chatId: $vars.TELEGRAM_CHAT_ID } }];"
+      },
+      "id": "format-telegram",
+      "name": "Format Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2500, 200]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true
+        }
+      },
+      "id": "send-telegram",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2750, 200]
+    },
+    {
+      "parameters": {},
+      "id": "no-op",
+      "name": "No Tables Found",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2250, 400]
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Commits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Commits": {
+      "main": [
+        [
+          {
+            "node": "Filter Recent Commits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Recent Commits": {
+      "main": [
+        [
+          {
+            "node": "Get Commit Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Commit Files": {
+      "main": [
+        [
+          {
+            "node": "Extract SQL Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract SQL Files": {
+      "main": [
+        [
+          {
+            "node": "Download SQL Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download SQL Content": {
+      "main": [
+        [
+          {
+            "node": "Parse PostgreSQL Tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse PostgreSQL Tables": {
+      "main": [
+        [
+          {
+            "node": "Has Tables?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Tables?": {
+      "main": [
+        [
+          {
+            "node": "Ollama AI (PostgreSQL Docs)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Tables Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama AI (PostgreSQL Docs)": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PostgreSQL"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-30T12:00:00.000Z",
+  "versionId": "1"
+}

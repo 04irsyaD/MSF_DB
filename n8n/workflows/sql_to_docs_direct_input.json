@@ -1,0 +1,165 @@
+{
+  "name": "SQL to Documentation - Direct Input",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sql-to-docs",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-input",
+      "name": "Webhook - SQL Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "sql-to-docs-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse SQL dan extract CREATE TABLE statements\nconst sqlInput = $input.first().json.body.sql || '';\n\n// Regex untuk extract CREATE TABLE\nconst tablePattern = /CREATE\\s+TABLE\\s+(?:public\\.)?\"?(\\w+)\"?\\s*\\(([\\s\\S]*?)\\)(?:\\s*;)?/gi;\n\nconst tables = [];\nlet match;\n\nwhile ((match = tablePattern.exec(sqlInput)) !== null) {\n  const tableName = match[1];\n  const tableBody = match[2];\n  \n  // Parse columns\n  const columns = [];\n  const lines = tableBody.split(',');\n  \n  for (const line of lines) {\n    const trimmed = line.trim();\n    if (!trimmed || trimmed.toUpperCase().startsWith('CONSTRAINT') || trimmed.toUpperCase().startsWith('PRIMARY') || trimmed.toUpperCase().startsWith('FOREIGN')) {\n      continue;\n    }\n    \n    // Match column: name type [constraints]\n    const colMatch = trimmed.match(/^\"?(\\w+)\"?\\s+(\\w+(?:\\([^)]+\\))?)/);\n    if (colMatch) {\n      columns.push({\n        name: colMatch[1],\n        type: colMatch[2]\n      });\n    }\n  }\n  \n  tables.push({\n    name: tableName,\n    columns: columns,\n    definition: match[0]\n  });\n}\n\nreturn [{ json: { tables, sqlInput } }];"
+      },
+      "id": "parse-sql",
+      "name": "Parse SQL Tables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-tables",
+      "name": "Split Tables",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3:latest\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Kamu adalah database documentation expert. Analisis PostgreSQL table berikut dan buat dokumentasi dalam Bahasa Indonesia.\\n\\nNAMA TABLE: {{ $json.tables[0].name }}\\n\\nKOLOM-KOLOM:\\n{{ $json.tables[0].columns.map(c => '- ' + c.name + ' (' + c.type + ')').join('\\\\n') }}\\n\\nBuatkan dokumentasi dengan format JSON:\\n{\\n  \\\"table_description\\\": \\\"Deskripsi singkat 1 kalimat\\\",\\n  \\\"columns\\\": {\\n    \\\"nama_kolom\\\": \\\"Deskripsi singkat max 5 kata\\\"\\n  }\\n}\\n\\nPENTING:\\n- Jawab HANYA dalam format JSON yang valid\\n- Deskripsi dalam Bahasa Indonesia\\n- Deskripsi kolom SINGKAT (max 5-8 kata)\"\n    }\n  ],\n  \"stream\": false,\n  \"options\": {\n    \"temperature\": 0.3\n  }\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "ollama-request",
+      "name": "Ollama - Generate Docs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect all results dan format sebagai dokumentasi\nconst items = $input.all();\nconst allDocs = [];\n\nfor (const item of items) {\n  try {\n    const tableName = item.json.tables?.[0]?.name || 'Unknown';\n    const columns = item.json.tables?.[0]?.columns || [];\n    const definition = item.json.tables?.[0]?.definition || '';\n    \n    // Parse AI response\n    let aiResponse = item.json.message?.content || '{}';\n    let aiDoc = {};\n    \n    try {\n      const jsonMatch = aiResponse.match(/\\{[\\s\\S]*\\}/);\n      if (jsonMatch) {\n        aiDoc = JSON.parse(jsonMatch[0]);\n      }\n    } catch (e) {\n      aiDoc = { table_description: 'Dokumentasi otomatis', columns: {} };\n    }\n    \n    allDocs.push({\n      table_name: tableName,\n      description: aiDoc.table_description || 'Dokumentasi belum tersedia',\n      columns: columns.map((col, idx) => ({\n        no: idx + 1,\n        name: col.name,\n        type: col.type,\n        description: aiDoc.columns?.[col.name] || `Field ${col.name}`\n      })),\n      sql_definition: definition\n    });\n  } catch (e) {\n    // Skip errors\n  }\n}\n\nreturn [{ json: { documentation: allDocs, total_tables: allDocs.length } }];"
+      },
+      "id": "format-docs",
+      "name": "Format Documentation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate Markdown output\nconst docs = $input.first().json.documentation;\nconst total = $input.first().json.total_tables;\n\nlet markdown = `# 📚 Dokumentasi Database Schema\\n\\n`;\nmarkdown += `> **Generated:** ${new Date().toISOString()}\\n`;\nmarkdown += `> **Total Tables:** ${total}\\n\\n`;\nmarkdown += `---\\n\\n`;\n\n// Daftar Tables\nmarkdown += `## 📋 Daftar Tables\\n\\n`;\nmarkdown += `| No | Nama Table | Deskripsi |\\n`;\nmarkdown += `|----|------------|-----------|\\n`;\n\ndocs.forEach((doc, idx) => {\n  markdown += `| ${idx + 1} | \\`${doc.table_name}\\` | ${doc.description} |\\n`;\n});\n\nmarkdown += `\\n---\\n\\n`;\n\n// Detail per table\ndocs.forEach((doc, idx) => {\n  markdown += `## ${idx + 1}. \\`${doc.table_name}\\`\\n\\n`;\n  markdown += `### Deskripsi\\n${doc.description}\\n\\n`;\n  markdown += `### Kolom\\n\\n`;\n  markdown += `| No | Nama Field | Tipe Data | Deskripsi |\\n`;\n  markdown += `|----|------------|-----------|-----------|\\n`;\n  \n  doc.columns.forEach(col => {\n    markdown += `| ${col.no} | ${col.name} | ${col.type} | ${col.description} |\\n`;\n  });\n  \n  markdown += `\\n<details>\\n<summary>📝 <strong>SQL Definition</strong></summary>\\n\\n`;\n  markdown += `\\`\\`\\`sql\\n${doc.sql_definition}\\n\\`\\`\\`\\n\\n</details>\\n\\n`;\n  markdown += `---\\n\\n`;\n});\n\nreturn [{ \n  json: { \n    markdown: markdown,\n    documentation: docs,\n    total_tables: total \n  } \n}];"
+      },
+      "id": "generate-markdown",
+      "name": "Generate Markdown",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "response",
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1750, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - SQL Input": {
+      "main": [
+        [
+          {
+            "node": "Parse SQL Tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse SQL Tables": {
+      "main": [
+        [
+          {
+            "node": "Split Tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Tables": {
+      "main": [
+        [
+          {
+            "node": "Ollama - Generate Docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama - Generate Docs": {
+      "main": [
+        [
+          {
+            "node": "Format Documentation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Documentation": {
+      "main": [
+        [
+          {
+            "node": "Generate Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Markdown": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-30T08:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,308 @@
+{
+  "name": "SQL Docs - Telegram + Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "telegram-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Telegram Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "telegram-sql-docs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract message dari Telegram webhook\nconst body = $input.first().json.body || $input.first().json;\nconst message = body.message || {};\nconst text = message.text || '';\nconst chatId = message.chat?.id || '';\nconst username = message.from?.username || message.from?.first_name || 'User';\n\n// Check if it's a command or SQL\nlet sql = text;\nif (text.startsWith('/docs')) {\n  sql = text.replace('/docs', '').trim();\n}\n\n// Check if contains CREATE TABLE\nconst hasSQL = sql.toUpperCase().includes('CREATE TABLE');\n\nreturn [{\n  json: {\n    chatId,\n    username,\n    originalText: text,\n    sql,\n    hasSQL,\n    isStart: text === '/start',\n    isHelp: text === '/help'\n  }\n}];"
+      },
+      "id": "parse-telegram",
+      "name": "Parse Telegram Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "sql",
+              "leftValue": "={{ $json.hasSQL }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-sql",
+      "name": "Has SQL?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse SQL dan extract CREATE TABLE statements\nconst sqlInput = $input.first().json.sql || '';\nconst chatId = $input.first().json.chatId;\nconst username = $input.first().json.username;\n\nconst tablePattern = /CREATE\\s+TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:public\\.)?[\"']?(\\w+)[\"']?\\s*\\(([\\s\\S]*?)\\)(?:\\s*;)?/gi;\n\nconst tables = [];\nlet match;\n\nwhile ((match = tablePattern.exec(sqlInput)) !== null) {\n  const tableName = match[1];\n  const tableBody = match[2];\n  \n  const columns = [];\n  const lines = tableBody.split(',');\n  \n  for (const line of lines) {\n    const trimmed = line.trim();\n    if (!trimmed) continue;\n    if (/^(CONSTRAINT|PRIMARY\\s+KEY\\(|FOREIGN\\s+KEY|UNIQUE\\(|CHECK\\(|INDEX)/i.test(trimmed)) continue;\n    \n    const colMatch = trimmed.match(/^[\"']?(\\w+)[\"']?\\s+(\\w+(?:\\([^)]+\\))?)/i);\n    if (colMatch) {\n      columns.push({\n        name: colMatch[1],\n        type: colMatch[2]\n      });\n    }\n  }\n  \n  if (columns.length > 0) {\n    tables.push({\n      name: tableName,\n      columns: columns,\n      definition: match[0]\n    });\n  }\n}\n\nreturn [{ json: { tables, chatId, username, tableCount: tables.length } }];"
+      },
+      "id": "parse-sql",
+      "name": "Parse SQL Tables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate help/welcome message\nconst chatId = $input.first().json.chatId;\nconst isStart = $input.first().json.isStart;\nconst isHelp = $input.first().json.isHelp;\n\nlet message = '';\n\nif (isStart) {\n  message = `👋 *Selamat datang di SQL Docs Bot!*\\n\\n` +\n    `Saya bisa generate dokumentasi dari SQL query.\\n\\n` +\n    `*Cara Pakai:*\\n` +\n    `1️⃣ Kirim \\`/docs\\` + SQL query\\n` +\n    `2️⃣ Atau langsung kirim CREATE TABLE\\n\\n` +\n    `*Contoh:*\\n` +\n    `\\`\\`\\`\\n/docs CREATE TABLE users (\\n  id serial,\\n  name varchar(100)\\n);\\n\\`\\`\\`\\n\\n` +\n    `_Powered by n8n + Ollama AI_ 🤖`;\n} else if (isHelp) {\n  message = `📖 *BANTUAN*\\n\\n` +\n    `*Commands:*\\n` +\n    `/start - Pesan selamat datang\\n` +\n    `/docs - Generate dokumentasi\\n` +\n    `/help - Bantuan ini\\n\\n` +\n    `*Format:*\\n` +\n    `Kirim CREATE TABLE statement, hasil akan dikirim + upload ke Google Drive.`;\n} else {\n  message = `🤔 Tidak ditemukan CREATE TABLE.\\n\\n` +\n    `Kirim SQL dengan format:\\n` +\n    `\\`\\`\\`sql\\nCREATE TABLE nama (\\n  kolom tipe\\n);\\n\\`\\`\\`\\n\\n` +\n    `Ketik /help untuk bantuan.`;\n}\n\nreturn [{ json: { chatId, message, isError: true } }];"
+      },
+      "id": "help-message",
+      "name": "Help/Error Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3:latest\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Kamu database documentation expert. Analisis PostgreSQL table dan buat dokumentasi Bahasa Indonesia.\\n\\nTABLES:\\n{{ $json.tables.map(t => 'TABLE: ' + t.name + '\\\\nCOLUMNS: ' + t.columns.map(c => c.name + ' (' + c.type + ')').join(', ')).join('\\\\n\\\\n') }}\\n\\nBuatkan dokumentasi JSON format:\\n{\\n  \\\"tables\\\": [\\n    {\\n      \\\"name\\\": \\\"nama_table\\\",\\n      \\\"description\\\": \\\"Deskripsi 1 kalimat\\\",\\n      \\\"columns\\\": {\\n        \\\"nama_kolom\\\": \\\"Deskripsi max 5 kata\\\"\\n      }\\n    }\\n  ]\\n}\\n\\nPENTING: Jawab HANYA JSON valid, semua table harus ada.\"\n    }\n  ],\n  \"stream\": false,\n  \"options\": { \"temperature\": 0.3 }\n}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "ollama",
+      "name": "Ollama AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format hasil untuk Telegram + Drive\nconst tables = $('Parse SQL Tables').first().json.tables;\nconst chatId = $('Parse SQL Tables').first().json.chatId;\nconst username = $('Parse SQL Tables').first().json.username;\nconst aiResponse = $input.first().json.message?.content || '{}';\n\n// Parse AI response\nlet aiDoc = { tables: [] };\ntry {\n  const jsonMatch = aiResponse.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    aiDoc = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  aiDoc = { tables: [] };\n}\n\n// Build Telegram message\nlet telegramMsg = `📚 *DOKUMENTASI DATABASE*\\n`;\ntelegramMsg += `━━━━━━━━━━━━━━━━━━━━━━━\\n\\n`;\n\n// Build Markdown for Drive\nlet markdown = `# 📚 Dokumentasi Database Schema\\n\\n`;\nmarkdown += `> **Generated:** ${new Date().toISOString()}\\n`;\nmarkdown += `> **By:** @${username}\\n`;\nmarkdown += `> **Total Tables:** ${tables.length}\\n\\n---\\n\\n`;\n\nmarkdown += `## 📋 Daftar Tables\\n\\n`;\nmarkdown += `| No | Nama Table | Deskripsi |\\n`;\nmarkdown += `|----|------------|-----------|\\n`;\n\ntables.forEach((table, idx) => {\n  const aiTable = aiDoc.tables?.find(t => t.name === table.name) || {};\n  const desc = aiTable.description || `Tabel ${table.name}`;\n  \n  // Telegram\n  telegramMsg += `*${idx + 1}. ${table.name}*\\n`;\n  telegramMsg += `📝 ${desc}\\n\\n`;\n  telegramMsg += `\\`\\`\\`\\n`;\n  \n  // Markdown summary\n  markdown += `| ${idx + 1} | \\`${table.name}\\` | ${desc} |\\n`;\n  \n  table.columns.forEach((col, cidx) => {\n    const colDesc = aiTable.columns?.[col.name] || `Field ${col.name}`;\n    telegramMsg += `${cidx + 1}. ${col.name} (${col.type})\\n   → ${colDesc}\\n`;\n  });\n  \n  telegramMsg += `\\`\\`\\`\\n\\n`;\n});\n\nmarkdown += `\\n---\\n\\n`;\n\n// Detail per table in markdown\ntables.forEach((table, idx) => {\n  const aiTable = aiDoc.tables?.find(t => t.name === table.name) || {};\n  \n  markdown += `## ${idx + 1}. \\`${table.name}\\`\\n\\n`;\n  markdown += `### Deskripsi\\n${aiTable.description || 'Dokumentasi otomatis'}\\n\\n`;\n  markdown += `### Kolom\\n\\n`;\n  markdown += `| No | Nama Field | Tipe Data | Deskripsi |\\n`;\n  markdown += `|----|------------|-----------|-----------|\\n`;\n  \n  table.columns.forEach((col, cidx) => {\n    const colDesc = aiTable.columns?.[col.name] || `Field ${col.name}`;\n    markdown += `| ${cidx + 1} | ${col.name} | ${col.type} | ${colDesc} |\\n`;\n  });\n  \n  markdown += `\\n<details>\\n<summary>📝 SQL Definition</summary>\\n\\n`;\n  markdown += `\\`\\`\\`sql\\n${table.definition}\\n\\`\\`\\`\\n\\n</details>\\n\\n---\\n\\n`;\n});\n\ntelegramMsg += `✅ *Total: ${tables.length} table(s)*\\n`;\ntelegramMsg += `📁 _File juga diupload ke Google Drive_`;\n\nconst fileName = `dokumentasi_${new Date().toISOString().slice(0,10)}_${Date.now()}.md`;\n\nreturn [{\n  json: {\n    chatId,\n    telegramMessage: telegramMsg,\n    markdown,\n    fileName,\n    tableCount: tables.length\n  }\n}];"
+      },
+      "id": "format-output",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 200]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "name": "={{ $json.fileName }}",
+        "folderId": "",
+        "options": {
+          "fields": "*"
+        }
+      },
+      "id": "google-drive",
+      "name": "Upload to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1750, 100],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.telegramMessage }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "send-telegram",
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1750, 300],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "send-help",
+      "name": "Send Help/Error",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1250, 400],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": true}",
+        "options": {}
+      },
+      "id": "response",
+      "name": "Response OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": true}",
+        "options": {}
+      },
+      "id": "response-help",
+      "name": "Response Help",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1500, 400]
+    }
+  ],
+  "connections": {
+    "Telegram Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Has SQL?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has SQL?": {
+      "main": [
+        [
+          {
+            "node": "Parse SQL Tables",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Help/Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse SQL Tables": {
+      "main": [
+        [
+          {
+            "node": "Ollama AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama AI": {
+      "main": [
+        [
+          {
+            "node": "Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Output": {
+      "main": [
+        [
+          {
+            "node": "Upload to Drive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Drive": {
+      "main": [
+        [
+          {
+            "node": "Response OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Telegram": {
+      "main": [
+        [
+          {
+            "node": "Response OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Help/Error Message": {
+      "main": [
+        [
+          {
+            "node": "Send Help/Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Help/Error": {
+      "main": [
+        [
+          {
+            "node": "Response Help",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-30T10:00:00.000Z",
+  "versionId": "2"
+}
