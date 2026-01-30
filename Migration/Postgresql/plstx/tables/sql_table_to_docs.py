@@ -57,7 +57,7 @@ except ImportError:
 # ============================================
 # Optimized for NVIDIA RTX 3050 (4GB VRAM)
 CONFIG = {
-    "sql_file": r"..\sm.sql",  # Relative path ke file SQL
+    "sql_file": r"..\testinglowerdata.sql",  # Relative path ke file SQL
     "output_dir": r".\output",
     
     # Model Ollama - Pakai yang sudah terinstall
