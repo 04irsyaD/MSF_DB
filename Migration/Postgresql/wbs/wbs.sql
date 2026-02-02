@@ -622,3 +622,20 @@ create INDEX idx_t_report ON t_report USING btree (trid, passcode, wbs_code);
 create index  idx_t_report_validation on t_report_validation using btree ( validation_no, note );
 
 create index idx_t_report_inspection on t_report_inspection using btree ( inspection_no, note );
+
+
+
+CREATE TABLE public."M_RESOURCE_REPORT" (
+	id uuid PRIMARY key NOT null default uuid_generate_v4(),
+	resource_name varchar NOT NULL,
+	resource_code varchar NOT NULL,
+	created_by_id uuid not null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true
+	
+)
+
+alter table "T_REPORT" add CONSTRAINT fk_resource_report foreign key(resource_report_id)references "M_RESOURCE_REPORT"(id);
