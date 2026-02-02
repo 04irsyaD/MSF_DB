@@ -51,13 +51,22 @@ try:
 except ImportError:
     DOCX_AVAILABLE = False
 
+try:
+    import psycopg2
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
+    print("⚠️  Package 'psycopg2' tidak ditemukan. Install dengan: pip install psycopg2-binary")
+
+import json
+
 
 # ============================================
 # CONFIGURATION
 # ============================================
 # Optimized for NVIDIA RTX 3050 (4GB VRAM)
 CONFIG = {
-    "sql_file": r"..\testinglowerdata.sql",  # Relative path ke file SQL
+    "sql_file": r"..\sm.sql",  # Relative path ke file SQL
     "output_dir": r".\output",
     
     # Model Ollama - Pakai yang sudah terinstall
@@ -69,7 +78,138 @@ CONFIG = {
     # GPU Settings untuk RTX 3050
     "gpu_layers": 35,  # Optimal untuk 4GB VRAM
     "num_ctx": 2048,   # Context window
+    
+    # ==========================================
+    # KNOWLEDGE BASE DATABASE
+    # ==========================================
+    "use_db_knowledge": True,  # Set False untuk skip DB, langsung AI
+    
+    "db_config": {
+        "host": "localhost",
+        "port": 5414,
+        "database": "knowledge_db",    # ← Ganti dengan nama database kamu
+        "user": "postgres",            # ← Ganti dengan username
+        "password": "1234",    # ← Ganti dengan password
+    },
 }
+
+
+# ============================================
+# KNOWLEDGE BASE FROM DATABASE
+# ============================================
+KNOWLEDGE_CACHE = {}  # Cache untuk mengurangi query DB
+
+def load_knowledge_base_from_db():
+    """
+    Load semua knowledge base dari PostgreSQL ke cache
+    Dipanggil sekali di awal untuk performa
+    """
+    global KNOWLEDGE_CACHE
+    
+    if not CONFIG.get("use_db_knowledge", False):
+        print("⚠️  Knowledge base DB dinonaktifkan (use_db_knowledge=False)")
+        return False
+    
+    if not PSYCOPG2_AVAILABLE:
+        print("⚠️  psycopg2 tidak tersedia, skip knowledge base DB")
+        return False
+    
+    try:
+        conn = psycopg2.connect(**CONFIG["db_config"])
+        cur = conn.cursor()
+        
+        # Check if table exists
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'doc_knowledge_base'
+            )
+        """)
+        
+        if not cur.fetchone()[0]:
+            print("⚠️  Tabel doc_knowledge_base belum ada di database")
+            print("   Jalankan create_knowledge_base.sql terlebih dahulu")
+            cur.close()
+            conn.close()
+            return False
+        
+        # Load semua data ke cache
+        cur.execute("""
+            SELECT table_name, column_name, description 
+            FROM doc_knowledge_base
+            ORDER BY table_name, column_name
+        """)
+        
+        KNOWLEDGE_CACHE = {
+            'tables': {},       # {table_name: description}
+            'columns': {},      # {table_name: {column_name: description}}
+            'common': {}        # {column_name: description} untuk table_name='*'
+        }
+        
+        row_count = 0
+        for row in cur.fetchall():
+            table_name, column_name, description = row
+            row_count += 1
+            
+            if table_name == '*':
+                # Common column
+                KNOWLEDGE_CACHE['common'][column_name] = description
+            elif column_name is None:
+                # Table description
+                KNOWLEDGE_CACHE['tables'][table_name] = description
+            else:
+                # Column description
+                if table_name not in KNOWLEDGE_CACHE['columns']:
+                    KNOWLEDGE_CACHE['columns'][table_name] = {}
+                KNOWLEDGE_CACHE['columns'][table_name][column_name] = description
+        
+        cur.close()
+        conn.close()
+        
+        table_count = len(KNOWLEDGE_CACHE['tables'])
+        common_count = len(KNOWLEDGE_CACHE['common'])
+        specific_count = sum(len(cols) for cols in KNOWLEDGE_CACHE['columns'].values())
+        
+        print(f"✅ Knowledge base loaded dari DB:")
+        print(f"   📋 {table_count} deskripsi tabel")
+        print(f"   📝 {specific_count} deskripsi kolom spesifik")
+        print(f"   🔄 {common_count} common columns")
+        
+        return True
+        
+    except psycopg2.OperationalError as e:
+        print(f"❌ Gagal connect ke database: {e}")
+        print("   Cek konfigurasi db_config di CONFIG")
+        return False
+    except Exception as e:
+        print(f"❌ Error loading knowledge base: {e}")
+        return False
+
+
+def get_description_from_db(table_name: str, column_name: str = None) -> str:
+    """
+    Ambil deskripsi dari cache (yang diload dari DB)
+    
+    Prioritas:
+    1. Tabel/kolom spesifik
+    2. Common columns (untuk kolom)
+    3. Return None → AI akan handle
+    """
+    if not KNOWLEDGE_CACHE:
+        return None
+    
+    if column_name is None:
+        # Ambil deskripsi tabel
+        return KNOWLEDGE_CACHE.get('tables', {}).get(table_name)
+    
+    # Ambil deskripsi kolom
+    # 1. Cek spesifik dulu
+    specific = KNOWLEDGE_CACHE.get('columns', {}).get(table_name, {}).get(column_name)
+    if specific:
+        return specific
+    
+    # 2. Fallback ke common
+    return KNOWLEDGE_CACHE.get('common', {}).get(column_name)
 
 
 # ============================================
@@ -245,30 +385,79 @@ def parse_constraint(const_str: str) -> dict:
 
 
 # ============================================
-# AI DOCUMENTATION GENERATOR
+# AI DOCUMENTATION GENERATOR (DB + AI)
 # ============================================
 def generate_table_documentation_with_ai(table: dict, model: str = "llama3:latest") -> dict:
     """
-    Generate dokumentasi menggunakan Ollama AI
+    Generate dokumentasi dengan prioritas:
+    1. Knowledge Base dari DB
+    2. AI (Ollama) untuk yang tidak ada di DB
+    3. Fallback basic
     
     Returns:
-        Dict dengan keys: description, columns_desc
+        Dict dengan keys: table_description, columns
     """
-    if not OLLAMA_AVAILABLE:
-        return generate_table_documentation_basic(table)
+    table_name = table['name']
     
-    # Build column info for prompt
-    columns_info = "\n".join([
+    # ==========================================
+    # STEP 1: Cek Knowledge Base (DB) dulu
+    # ==========================================
+    db_table_desc = get_description_from_db(table_name)
+    db_columns = {}
+    need_ai_columns = []  # Kolom yang perlu AI generate
+    
+    for col in table['columns']:
+        db_col_desc = get_description_from_db(table_name, col['name'])
+        if db_col_desc:
+            db_columns[col['name']] = db_col_desc
+        else:
+            need_ai_columns.append(col)
+    
+    # Hitung statistik
+    total_cols = len(table['columns'])
+    db_cols_count = len(db_columns)
+    ai_cols_count = len(need_ai_columns)
+    
+    # Jika SEMUA sudah ada di DB, skip AI
+    if db_table_desc and ai_cols_count == 0:
+        if RICH_AVAILABLE:
+            console.print(f"     [green]📊 100% dari DB[/green]")
+        else:
+            print(f"     📊 100% dari DB")
+        return {
+            'table_description': db_table_desc,
+            'columns': db_columns,
+            'source': 'db'
+        }
+    
+    # ==========================================
+    # STEP 2: Generate dengan AI (untuk yang tidak ada)
+    # ==========================================
+    if not OLLAMA_AVAILABLE:
+        # Gabung DB + fallback
+        result = generate_table_documentation_basic(table)
+        if db_table_desc:
+            result['table_description'] = db_table_desc
+        for col_name, desc in db_columns.items():
+            result['columns'][col_name] = desc
+        return result
+    
+    # Build prompt HANYA untuk kolom yang perlu AI
+    columns_for_ai = "\n".join([
         f"- {col['name']} ({col['data_type']})" 
-        for col in table['columns']
+        for col in need_ai_columns
     ])
+    
+    # Konteks dari DB jika ada
+    context = db_table_desc if db_table_desc else f"Tabel {table_name}"
     
     prompt = f"""Kamu adalah database documentation expert. Analisis PostgreSQL table berikut dan buat dokumentasi dalam Bahasa Indonesia.
 
-NAMA TABLE: {table['name']}
+NAMA TABLE: {table_name}
+KONTEKS: {context}
 
-KOLOM-KOLOM:
-{columns_info}
+KOLOM YANG PERLU DESKRIPSI:
+{columns_for_ai}
 
 Buatkan dokumentasi dengan format JSON seperti ini:
 {{
@@ -283,12 +472,6 @@ PENTING:
 - Jawab HANYA dalam format JSON yang valid
 - Deskripsi dalam Bahasa Indonesia
 - DESKRIPSI KOLOM HARUS SINGKAT (maksimal 5-8 kata)
-- Contoh deskripsi kolom yang baik:
-  - "id": "Primary key unik"
-  - "email": "Alamat email pengguna"
-  - "created_at": "Waktu pembuatan record"
-  - "is_active": "Status aktif record"
-  - "user_id": "FK ke tabel user"
 """
 
     try:
@@ -304,24 +487,52 @@ PENTING:
         
         response_text = response['message']['content']
         
-        # Try to parse JSON from response
-        import json
-        
-        # Find JSON in response
+        # Parse JSON dari response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
         if json_match:
             try:
-                result = json.loads(json_match.group())
-                return result
+                ai_result = json.loads(json_match.group())
+                
+                # ==========================================
+                # STEP 3: Gabungkan DB + AI
+                # ==========================================
+                final_columns = db_columns.copy()
+                final_columns.update(ai_result.get('columns', {}))
+                
+                # Table desc: prioritas DB
+                final_desc = db_table_desc or ai_result.get('table_description', f"Tabel {table_name}")
+                
+                # Print statistik
+                db_pct = int(db_cols_count / total_cols * 100) if total_cols > 0 else 0
+                if RICH_AVAILABLE:
+                    console.print(f"     [cyan]📊 DB: {db_pct}% ({db_cols_count}) | 🤖 AI: {100-db_pct}% ({ai_cols_count})[/cyan]")
+                else:
+                    print(f"     📊 DB: {db_pct}% ({db_cols_count}) | 🤖 AI: {100-db_pct}% ({ai_cols_count})")
+                
+                return {
+                    'table_description': final_desc,
+                    'columns': final_columns,
+                    'source': 'db+ai' if db_columns else 'ai'
+                }
             except json.JSONDecodeError:
                 pass
         
-        # Fallback: extract description manually
-        return generate_table_documentation_basic(table, response_text)
+        # Fallback
+        result = generate_table_documentation_basic(table, response_text)
+        if db_table_desc:
+            result['table_description'] = db_table_desc
+        for col_name, desc in db_columns.items():
+            result['columns'][col_name] = desc
+        return result
         
     except Exception as e:
         print(f"⚠️  Error calling Ollama: {e}")
-        return generate_table_documentation_basic(table)
+        result = generate_table_documentation_basic(table)
+        if db_table_desc:
+            result['table_description'] = db_table_desc
+        for col_name, desc in db_columns.items():
+            result['columns'][col_name] = desc
+        return result
 
 
 def generate_table_documentation_basic(table: dict, ai_response: str = None) -> dict:
@@ -579,6 +790,23 @@ def main():
     print_header()
     check_gpu_status()
     
+    # ==========================================
+    # Load Knowledge Base dari Database
+    # ==========================================
+    print()
+    print("=" * 50)
+    print("📚 KNOWLEDGE BASE")
+    print("=" * 50)
+    
+    if CONFIG.get("use_db_knowledge", False):
+        kb_loaded = load_knowledge_base_from_db()
+        if not kb_loaded:
+            print("⚠️  Lanjut tanpa knowledge base, AI akan generate semua")
+    else:
+        print("ℹ️  Knowledge base dinonaktifkan (use_db_knowledge=False)")
+    
+    print()
+    
     # Resolve paths
     script_dir = Path(__file__).parent
     sql_file = (script_dir / CONFIG['sql_file']).resolve()
@@ -610,8 +838,10 @@ def main():
     # Generate documentation for each table
     tables_docs = []
     
-    print("🤖 Generating dokumentasi dengan AI...")
-    print("   (Proses ini membutuhkan waktu beberapa menit)")
+    print("=" * 50)
+    print("🤖 GENERATING DOKUMENTASI (DB + AI)")
+    print("=" * 50)
+    print("   Prioritas: DB Knowledge Base → AI → Fallback")
     print()
     
     for i, table in enumerate(tables, 1):
