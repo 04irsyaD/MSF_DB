@@ -15,3 +15,5 @@ excel_healcheck_kpei.sql
 .idea/
 *.sublime-workspace
 *.sublime-project
+*.vscode/
+*.md
