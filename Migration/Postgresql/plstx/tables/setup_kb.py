@@ -10,7 +10,7 @@ DB_CONFIG = {
 }
 
 SQL_STATEMENTS = [
-    # Create table
+    # Create table for columns/tables
     """
     CREATE TABLE IF NOT EXISTS doc_knowledge_base (
         id SERIAL PRIMARY KEY,
@@ -24,9 +24,46 @@ SQL_STATEMENTS = [
     )
     """,
     
+    # Create table for PREFIX PATTERNS (t_m_, t_t_, L_, etc)
+    """
+    CREATE TABLE IF NOT EXISTS doc_prefix_patterns (
+        id SERIAL PRIMARY KEY,
+        prefix VARCHAR(50) NOT NULL UNIQUE,
+        description TEXT NOT NULL,
+        category VARCHAR(50),
+        sort_order INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT NOW()
+    )
+    """,
+    
     # Create indexes
     "CREATE INDEX IF NOT EXISTS idx_kb_table_name ON doc_knowledge_base(table_name)",
     "CREATE INDEX IF NOT EXISTS idx_kb_column_name ON doc_knowledge_base(column_name)",
+    "CREATE INDEX IF NOT EXISTS idx_prefix_pattern ON doc_prefix_patterns(prefix)",
+]
+
+# Table/Column prefix patterns
+PREFIX_PATTERNS = [
+    # Table prefixes
+    ('t_m_', 'Tabel Master', 'table'),
+    ('t_t_', 'Tabel Transaksi', 'table'),
+    ('t_r_', 'Tabel Relasi/Reference', 'table'),
+    ('t_h_', 'Tabel History', 'table'),
+    ('t_l_', 'Tabel Log', 'table'),
+    ('m_', 'Master Data', 'table'),
+    ('M_', 'Master Data', 'table'),
+    ('L_', 'Log Data', 'table'),
+    ('l_', 'Log Data', 'table'),
+    ('H_', 'History Data', 'table'),
+    ('h_', 'History Data', 'table'),
+    ('R_', 'Reference/Relasi', 'table'),
+    ('r_', 'Reference/Relasi', 'table'),
+    ('TRX_', 'Transaksi', 'table'),
+    ('trx_', 'Transaksi', 'table'),
+    ('REF_', 'Reference Data', 'table'),
+    ('ref_', 'Reference Data', 'table'),
+    ('SM_', 'System Module', 'table'),
+    ('sm_', 'System Module', 'table'),
 ]
 
 # Common columns data
@@ -85,10 +122,29 @@ def main():
     
     print(f"✅ Inserted {len(COMMON_COLUMNS)} common columns")
     
-    # Check count
+    # Insert prefix patterns
+    prefix_sql = """
+        INSERT INTO doc_prefix_patterns (prefix, description, category)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (prefix) DO UPDATE SET description = EXCLUDED.description
+    """
+    
+    for prefix, description, category in PREFIX_PATTERNS:
+        try:
+            cur.execute(prefix_sql, (prefix, description, category))
+        except Exception as e:
+            print(f"⚠️ {e}")
+    
+    print(f"✅ Inserted {len(PREFIX_PATTERNS)} prefix patterns")
+    
+    # Check counts
     cur.execute("SELECT COUNT(*) FROM doc_knowledge_base")
-    count = cur.fetchone()[0]
-    print(f"📊 Total rows: {count}")
+    kb_count = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM doc_prefix_patterns")
+    prefix_count = cur.fetchone()[0]
+    
+    print(f"📊 Knowledge base: {kb_count} rows")
+    print(f"📊 Prefix patterns: {prefix_count} rows")
     
     cur.close()
     conn.close()

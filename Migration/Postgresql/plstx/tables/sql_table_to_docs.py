@@ -66,7 +66,7 @@ import json
 # ============================================
 # Optimized for NVIDIA RTX 3050 (4GB VRAM)
 CONFIG = {
-    "sql_file": r"..\sm.sql",  # Relative path ke file SQL
+    "sql_file": r"..\wbs.sql",  # Relative path ke file SQL
     "output_dir": r".\output",
     
     # Model Ollama - Pakai yang sudah terinstall
@@ -98,13 +98,14 @@ CONFIG = {
 # KNOWLEDGE BASE FROM DATABASE
 # ============================================
 KNOWLEDGE_CACHE = {}  # Cache untuk mengurangi query DB
+PREFIX_PATTERNS = {}  # Cache untuk prefix patterns (t_m_, L_, dll)
 
 def load_knowledge_base_from_db():
     """
     Load semua knowledge base dari PostgreSQL ke cache
     Dipanggil sekali di awal untuk performa
     """
-    global KNOWLEDGE_CACHE
+    global KNOWLEDGE_CACHE, PREFIX_PATTERNS
     
     if not CONFIG.get("use_db_knowledge", False):
         print("⚠️  Knowledge base DB dinonaktifkan (use_db_knowledge=False)")
@@ -163,17 +164,36 @@ def load_knowledge_base_from_db():
                     KNOWLEDGE_CACHE['columns'][table_name] = {}
                 KNOWLEDGE_CACHE['columns'][table_name][column_name] = description
         
+        # Load prefix patterns
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'doc_prefix_patterns'
+            )
+        """)
+        
+        if cur.fetchone()[0]:
+            cur.execute("""
+                SELECT prefix, description 
+                FROM doc_prefix_patterns
+                ORDER BY LENGTH(prefix) DESC
+            """)
+            for row in cur.fetchall():
+                PREFIX_PATTERNS[row[0]] = row[1]
+        
         cur.close()
         conn.close()
         
         table_count = len(KNOWLEDGE_CACHE['tables'])
         common_count = len(KNOWLEDGE_CACHE['common'])
         specific_count = sum(len(cols) for cols in KNOWLEDGE_CACHE['columns'].values())
+        prefix_count = len(PREFIX_PATTERNS)
         
         print(f"✅ Knowledge base loaded dari DB:")
         print(f"   📋 {table_count} deskripsi tabel")
         print(f"   📝 {specific_count} deskripsi kolom spesifik")
         print(f"   🔄 {common_count} common columns")
+        print(f"   🏷️  {prefix_count} prefix patterns")
         
         return True
         
@@ -193,14 +213,21 @@ def get_description_from_db(table_name: str, column_name: str = None) -> str:
     Prioritas:
     1. Tabel/kolom spesifik
     2. Common columns (untuk kolom)
-    3. Return None → AI akan handle
+    3. Prefix patterns (untuk tabel)
+    4. Return None → AI akan handle
     """
     if not KNOWLEDGE_CACHE:
         return None
     
     if column_name is None:
         # Ambil deskripsi tabel
-        return KNOWLEDGE_CACHE.get('tables', {}).get(table_name)
+        # 1. Cek spesifik dulu
+        specific = KNOWLEDGE_CACHE.get('tables', {}).get(table_name)
+        if specific:
+            return specific
+        
+        # 2. Cek prefix patterns
+        return get_table_prefix_description(table_name)
     
     # Ambil deskripsi kolom
     # 1. Cek spesifik dulu
@@ -210,6 +237,32 @@ def get_description_from_db(table_name: str, column_name: str = None) -> str:
     
     # 2. Fallback ke common
     return KNOWLEDGE_CACHE.get('common', {}).get(column_name)
+
+
+def get_table_prefix_description(table_name: str) -> str:
+    """
+    Generate deskripsi tabel berdasarkan prefix dari DB
+    
+    Contoh:
+    - t_m_division → "Tabel Master - division"
+    - L_FAQ → "Log Data - FAQ"
+    """
+    if not PREFIX_PATTERNS:
+        return None
+    
+    table_lower = table_name.lower()
+    
+    # Cari prefix yang match (sudah diurutkan dari terpanjang)
+    for prefix, description in PREFIX_PATTERNS.items():
+        if table_lower.startswith(prefix.lower()):
+            # Ambil nama tanpa prefix
+            name_part = table_name[len(prefix):]
+            # Format: "Tabel Master - division" atau "Tabel Master" kalau nama kosong
+            if name_part:
+                return f"{description} - {name_part.replace('_', ' ').title()}"
+            return description
+    
+    return None
 
 
 # ============================================
