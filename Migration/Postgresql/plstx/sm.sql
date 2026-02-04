@@ -408,3 +408,7 @@ add constraint fk_t_t_logon_gangguankategori_id foreign key(kategori_id)REFERENC
 
 CREATE INDEX idx_ticket_eskalasi_code_spbu 
 ON t_ticket_eskalasi USING btree (code_ticket, nomor_spbu);
+
+
+create INDEX fk_logon_gg_ticket_eskalasi
+ON t_t_logon_gangguan USING btree (ticket_id) REFERENCES t_ticket_eskalasi(id);
