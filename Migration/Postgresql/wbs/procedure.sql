@@ -26,12 +26,7 @@ WHERE tr.deleted_at IS NULL
 GROUP BY mac.name_concern
 ORDER BY jumlah DESC;
 
-select 
-COUNT(*) AS jumlah,
 
-from  "T_REPORT" tr 
-left join 
-where tr.deleted_at IS NULL
 
 -- ini query selct untuk content Concern unconcern
 SELECT 
