@@ -639,3 +639,38 @@ CREATE TABLE public."M_RESOURCE_REPORT" (
 )
 
 alter table "T_REPORT" add CONSTRAINT fk_resource_report foreign key(resource_report_id)references "M_RESOURCE_REPORT"(id);
+
+
+
+create table public."T_REPORT_SUMMARY" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_id uuid NOT NULL,
+	summary text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "T_REPORT_SUMMARY_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_summary_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
+);
+
+
+
+select DISTICT(ID)
+EXTRACT(YEAR FROM tr.created_at), --tahun 
+tr.wbs_code, --code pelaporan wbs
+--tr.identity_id, -- tipe pelapor
+mi.identity_title_eng,-- tipe pelapor
+--tr.resource_report_id,
+mrr.resource_name,     --media penyampaian
+from "T_REPORT" tr
+left join "M_IDENTITY" mi
+on tr."identity_id" = mi.id
+AND mi.is_active is true
+left join "M_RESOURCE_REPORT" mrr
+on tr.resource_report_id = mrr.id
+AND mrr.is_active is true
+left join "R_SELECT_TYPE_REPORT" rstr
+on tr.id = rstr.report.id
