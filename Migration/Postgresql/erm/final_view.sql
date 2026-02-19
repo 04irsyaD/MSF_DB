@@ -719,3 +719,83 @@ left join t_object t
 	and t."ENDDA" = '2999-01-01'
 GROUP BY t."LTEXT", mc."NAME", mc."Status", mc."Personel RM", mc."BUCD"
 ORDER BY mc."NAME";
+
+
+
+
+select 
+-- RISK REGISTER DETAIL
+tg."OBJTV" as "Objective",
+tobj."LTEXT" as "Status Description",
+ttype."LTEXT" as "BUSINESS UNIT",
+-- risk type
+tg."RSCR" as "Risk Type",
+tg."RISKCD" as "Risk Code",
+tg."RISKSUM" as "Risk Summary",
+tg."PRD" as "Period",
+tg."VRSN" as "Version"
+-- RISK MEASUREMENT
+tgm."LIHOVAL" as "Likelihood Value",
+tgm."IMVAL" as "Impact Value",
+tgm."INRISCO" as "Inherent RISK Score",
+tgm."inricat" as "Inherent LIKELIHOOD Category",
+tgm."EXCONLI" as "Existing Control can reduce the level of Inherent LIKELIHOOD Value",
+tgm."EXCONIM" as "Existing Control can reduce the level of Inherent IMPACT Value",
+tgm."ADINLI" as "adjustment Likelihood Value",
+tgm."ADINIM" as "adjustment Inherent IMPACT VAlue",
+tgm."ADINSC" as "adjustment Inherent RISK Score",
+tgm."ADINSCCAT" as "adjustment Inherent RISK Score Category"
+from t_grisklist tg 
+left join t_object tobj 
+  on tg."STATCD" = tobj."STEXT"
+  and tobj."ENDDA" = '2999-01-01'
+left join t_object ttype
+  on split_part(tg."RISKCD", '-', 1) = ttype."STEXT"
+  and ttype."ENDDA" = '2999-01-01'
+left join t_griskmeasurement tgm
+  on tg."RISKCD" = tgm."RISKCD"
+  and tg."PRD" = tgm."PRD"
+  and tg."VRSN" = tgm."VRSN"
+where tg."ENDDA" = '2999-01-01';
+
+
+
+
+
+create or REPLACE VIEW public.v_risk_total AS
+SELECT DISTINCT ON (i."BEGDA", i."RISKCD", i."RIDENID")
+    ttype."LTEXT" as "Business Unit",
+    i."PRD" as "Period",
+    i."OBJTV" as "Objective",
+    i."PRONM" as "Process Name",
+    i."RISK",
+--    i."CONCD",
+--    i."CATCD",
+--    i."CSCATCD",
+--    i."CAUSE",
+--    i."EXCON",
+--    i."IMCRCD",
+    l."OPTI" as "Likelihood Value",
+    m."INRISCO" as "Inherent Risk Score",
+    m."INRICAT" as "Inherent Likelihood Category" 
+   FROM t_griskidentification i
+   LEFT JOIN t_griskmeasurement m 
+   ON i."RISKCD"::text = m."RISKCD"::text 
+   AND i."PRD" = m."PRD"
+   left join t_likelihoodvalue l
+  	on m."LIHOCD" = l."LIHOCD" 
+  and l."ENDDA" = '2999-01-01'
+   left join t_object ttype
+  on split_part(i."RISKCD", '-', 1) = ttype."STEXT"
+  and ttype."ENDDA" = '2999-01-01'
+  ORDER BY i."BEGDA", i."RISKCD", i."RIDENID";
+HISENSE Kulkas 1 Pintu [90L] RR120D4IGN - Silver
+
+
+create or REPLACE VIEW public.v_business_unit AS
+select 
+tb."BUCD" as "Bussiness Unit Code",
+tb."BUNM" as "Bussiness Unit Name",
+tb."CHGBY" as "Changed by"
+from t_businessunit tb 
+where tb."ENDDA" = '2999-01-01'
