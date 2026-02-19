@@ -789,3 +789,13 @@ SELECT DISTINCT ON (i."BEGDA", i."RISKCD", i."RIDENID")
   on split_part(i."RISKCD", '-', 1) = ttype."STEXT"
   and ttype."ENDDA" = '2999-01-01'
   ORDER BY i."BEGDA", i."RISKCD", i."RIDENID";
+HISENSE Kulkas 1 Pintu [90L] RR120D4IGN - Silver
+
+
+create or REPLACE VIEW public.v_business_unit AS
+select 
+tb."BUCD" as "Bussiness Unit Code",
+tb."BUNM" as "Bussiness Unit Name",
+tb."CHGBY" as "Changed by"
+from t_businessunit tb 
+where tb."ENDDA" = '2999-01-01'
