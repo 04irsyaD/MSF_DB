@@ -66,7 +66,7 @@ import json
 # ============================================
 # Optimized for NVIDIA RTX 3050 (4GB VRAM)
 CONFIG = {
-    "sql_file": r"..\wbs.sql",  # Relative path ke file SQL
+    "sql_file": r"..\doc.sql",  # Relative path ke file SQL
     "output_dir": r".\output",
     
     # Model Ollama - Pakai yang sudah terinstall

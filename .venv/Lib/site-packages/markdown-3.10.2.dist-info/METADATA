@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: Markdown
-Version: 3.10.1
+Version: 3.10.2
 Summary: Python implementation of John Gruber's Markdown.
 Author: Manfred Stienstra, Yuri Takhteyev
 Author-email: Waylan limberg <python.markdown@gmail.com>
