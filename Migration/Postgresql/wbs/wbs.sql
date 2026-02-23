@@ -674,3 +674,18 @@ on tr.resource_report_id = mrr.id
 AND mrr.is_active is true
 left join "R_SELECT_TYPE_REPORT" rstr
 on tr.id = rstr.report.id
+
+
+CREATE TABLE public."T_REQUEST" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	report_id uuid NOT NULL,
+	request text null,
+	created_by_id uuid  null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "T_REQUEST_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_request_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
+)
