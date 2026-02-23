@@ -66,7 +66,7 @@ import json
 # ============================================
 # Optimized for NVIDIA RTX 3050 (4GB VRAM)
 CONFIG = {
-    "sql_file": r"..\wbs.sql",  # Relative path ke file SQL
+    "sql_file": r"..\doc.sql",  # Relative path ke file SQL
     "output_dir": r".\output",
     
     # Model Ollama - Pakai yang sudah terinstall
@@ -74,6 +74,15 @@ CONFIG = {
     # "model": "deepseek-r1:8b",      # 5.2GB - Reasoning model, lebih lambat tapi detail
     
     "output_formats": ["md", "docx"],  # Format output: md, docx, atau keduanya
+    
+    # Word Document Settings
+    "word_font": {
+        "name": "DM Sans",          # Font utama: DM Sans (Google Font)
+        "size": 11,                 # Ukuran font body (pt)
+        "heading_font": "DM Sans",  # Font untuk heading
+        "code_font": "Consolas",    # Font untuk SQL code
+        "code_size": 8,             # Ukuran font code (pt)
+    },
     
     # GPU Settings untuk RTX 3050
     "gpu_layers": 35,  # Optimal untuk 4GB VRAM
@@ -746,6 +755,27 @@ def save_as_docx(tables_docs: list[dict], output_path: str):
     
     doc = Document()
     
+    # Get font settings from config
+    font_cfg = CONFIG.get("word_font", {})
+    main_font = font_cfg.get("name", "Arial")
+    main_size = font_cfg.get("size", 11)
+    heading_font = font_cfg.get("heading_font", "Arial")
+    code_font = font_cfg.get("code_font", "Consolas")
+    code_size = font_cfg.get("code_size", 8)
+    
+    # Set default font for document
+    style = doc.styles['Normal']
+    style.font.name = main_font
+    style.font.size = Pt(main_size)
+    
+    # Set heading fonts
+    for i in range(10):
+        try:
+            heading_style = doc.styles[f'Heading {i}']
+            heading_style.font.name = heading_font
+        except KeyError:
+            pass
+    
     # Title
     title = doc.add_heading('Dokumentasi Database Schema - PLSTX System', 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -825,8 +855,8 @@ def save_as_docx(tables_docs: list[dict], output_path: str):
         doc.add_heading('SQL Definition', level=2)
         sql_para = doc.add_paragraph()
         sql_run = sql_para.add_run(table['definition'])
-        sql_run.font.name = 'Consolas'
-        sql_run.font.size = Pt(8)
+        sql_run.font.name = code_font
+        sql_run.font.size = Pt(code_size)
         
         doc.add_paragraph("─" * 50)
     
