@@ -400,6 +400,26 @@ create table public."t_r_rating_logon_relation" (
 )
 
 
+create table public.t_m_global_variabel (
+	id UUID DEFAULT uuid_generate_v4() NOT NULL,
+	name varchar NOT NULL,
+	value varchar NULL,
+	"group" varchar NULL,
+	created_at timestamptz DEFAULT now() NULL,
+	updated_at timestamptz NULL,
+	deleted_at timestamptz NULL,
+	satuan varchar NULL,
+	is_encrypted bool NULL,
+	is_active bool DEFAULT true NULL,
+	CONSTRAINT t_m_global_variabel PRIMARY KEY (id)
+)
+
+
+
+
+
+)
+
 alter table t_t_logon_gangguan
 add constraint fk_t_t_logon_gangguan_ticket_id foreign key(ticket_id)references t_ticket(id);
 alter table t_t_logon_gangguan
@@ -412,3 +432,5 @@ ON t_ticket_eskalasi USING btree (code_ticket, nomor_spbu);
 
 create INDEX fk_logon_gg_ticket_eskalasi
 ON t_t_logon_gangguan USING btree (ticket_id) REFERENCES t_ticket_eskalasi(id);
+
+create

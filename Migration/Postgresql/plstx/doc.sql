@@ -4,3 +4,5 @@ AS SELECT "BUCD" AS "Bussiness Unit Code",
     "CHGBY" AS "Changed by"
    FROM t_businessunit tb
   WHERE "ENDDA" = '2999-01-01'::date;
+
+  

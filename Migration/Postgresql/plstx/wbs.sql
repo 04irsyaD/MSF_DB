@@ -521,3 +521,5 @@ CREATE TABLE public."T_INSPECTION_REOPEN_REASON" ( id uuid DEFAULT uuid_generate
 
 
 -- DROP FUNCTION public.armor(bytea, _text, _text);
+
+

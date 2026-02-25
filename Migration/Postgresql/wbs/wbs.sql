@@ -676,16 +676,39 @@ left join "R_SELECT_TYPE_REPORT" rstr
 on tr.id = rstr.report.id
 
 
-CREATE TABLE public."T_REQUEST" (
+CREATE TABLE public."T_REPORT_REQUEST" (
 	id uuid DEFAULT uuid_generate_v4() NOT NULL,
 	report_id uuid NOT NULL,
-	request text null,
+	type_report_id uuid NULL,
+	start_date timestamptz NULL,
+	end_date timestamptz NULL,
+	request_by_id uuid NULL,
+	inserted_date timestamptz(6)  NOT NULL,
+	status_id uuid NULL,
 	created_by_id uuid  null,
 	updated_by_id uuid NULL,
 	created_at timestamptz(6) not null DEFAULT CURRENT_TIMESTAMP,
 	updated_at timestamptz(6) NULL,
 	deleted_at timestamptz(6) NULL,
 	is_active boolean not null default true,
-	CONSTRAINT "T_REQUEST_pkey" PRIMARY KEY (id),
-	CONSTRAINT fk_request_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id)
+	CONSTRAINT "T_REPORT_REQUEST_pkey" PRIMARY KEY (id),
+	CONSTRAINT fk_request_report FOREIGN KEY (report_id) REFERENCES public."T_REPORT"(id),
+	CONSTRAINT fk_request_type_report FOREIGN KEY (type_report_id) REFERENCES public."M_TYPE_REPORT"(id),
+	CONSTRAINT fk_request_status FOREIGN KEY (status_id) REFERENCES public."M_STATUS_REQUEST"(id)
 )
+
+create index idx_t_report_request on t_report_request using btree (report_id, type_report_id, status_id);
+
+
+create table public."STATUS_REQUEST" (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	code_status varchar(20) null,
+	name_status varchar(100) not null,
+	created_by_id uuid not null,
+	updated_by_id uuid NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active boolean not null default true,
+	CONSTRAINT "STATUS_REQUEST_pkey" PRIMARY KEY (id)
+);
