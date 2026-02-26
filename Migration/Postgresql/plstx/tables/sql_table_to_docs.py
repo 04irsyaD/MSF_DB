@@ -78,7 +78,7 @@ CONFIG = {
     # Word Document Settings
     "word_font": {
         "name": "DM Sans",          # Font utama: DM Sans (Google Font)
-        "size": 11,                 # Ukuran font body (pt)
+        "size": 12,                 # Ukuran font body (pt)
         "heading_font": "DM Sans",  # Font untuk heading
         "code_font": "Consolas",    # Font untuk SQL code
         "code_size": 8,             # Ukuran font code (pt)
