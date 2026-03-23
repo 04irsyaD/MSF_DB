@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 245, 247, 250;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Markdown styling */
+.markdown-body h1 {
+  @apply text-3xl font-bold mb-4 mt-6 text-gray-800;
+}
+
+.markdown-body h2 {
+  @apply text-2xl font-semibold mb-3 mt-5 text-gray-700;
+}
+
+.markdown-body h3 {
+  @apply text-xl font-medium mb-2 mt-4 text-gray-600;
+}
+
+.markdown-body p {
+  @apply mb-3 leading-relaxed;
+}
+
+.markdown-body table {
+  @apply w-full border-collapse mb-4;
+}
+
+.markdown-body th {
+  @apply bg-gray-100 border border-gray-300 px-4 py-2 text-left font-semibold;
+}
+
+.markdown-body td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.markdown-body code {
+  @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-pink-600;
+}
+
+.markdown-body pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.markdown-body pre code {
+  @apply bg-transparent text-gray-100 p-0;
+}
+
+.markdown-body ul {
+  @apply list-disc pl-6 mb-3;
+}
+
+.markdown-body ol {
+  @apply list-decimal pl-6 mb-3;
+}
+
+.markdown-body li {
+  @apply mb-1;
+}
+
+.markdown-body hr {
+  @apply my-6 border-gray-300;
+}
