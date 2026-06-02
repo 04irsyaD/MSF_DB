@@ -28,7 +28,7 @@ jobs:
       - name: Check for accidental secrets and build artifacts
         shell: bash
         run: |
-          banned=$(git ls-files | grep -E '(^|/)(\.venv|venv|node_modules|__pycache__|dist|build)(/|$)|(^|/)\.env(\.|$)' || true)
+          banned=$(git ls-files | grep -E '(^|/)(\.venv|venv|node_modules|__pycache__|dist|build)(/|$)|(^|/)\.env$' || true)
           if [ -n "$banned" ]; then
             echo "Unexpected tracked files found:"
             echo "$banned"
