@@ -415,7 +415,7 @@ create table public.t_m_global_variabel (
 )
 
 
-
+on detele CASCADE t_t_rating_logon	
 
 
 )
@@ -434,3 +434,34 @@ create INDEX fk_logon_gg_ticket_eskalasi
 ON t_t_logon_gangguan USING btree (ticket_id) REFERENCES t_ticket_eskalasi(id);
 
 create
+
+
+alter table t_t_rating_logon
+add 
+id_ticket_id from ticket_id int4 NULL to ticket_id uuid NULL
+where t_ticket_id from t_ticket_id int4 NULL to t_ticket_id uuid NULL  
+
+
+
+-- INSERT ticket yang belum ada di t_t_rating_logon
+INSERT INTO t_t_rating_logon (
+    id,
+    logon_shift_id,
+    rating_value,
+    t_ticket_id,
+    created_by_id,
+    created_at,
+    is_active
+)
+SELECT 
+    uuid_generate_v4(),          -- id baru
+    r.logon_shift_id,            -- ambil logon_shift_id dari row yang sudah ada
+    0,                           -- default rating_value (sesuaikan jika perlu)
+    t.id,                        -- ticket id dari t_ticket
+    t.created_by_id,             -- created_by dari t_ticket
+    NOW(),                       -- waktu sekarang
+    true                         -- aktif
+FROM t_ticket t
+LEFT JOIN t_t_rating_logon r2 ON r2.t_ticket_id = t.id::int4
+CROSS JOIN (SELECT logon_shift_id FROM t_t_rating_logon LIMIT 1) r
+WHERE r2.id IS NULL;             -- hanya ticket yang BELUM ada di t_t_rating_logon  

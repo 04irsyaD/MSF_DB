@@ -152,3 +152,25 @@ CREATE TABLE public.pm_t_log (
 	pm_create_date timestamptz NULL,
 	CONSTRAINT pk_pm_t_log_id PRIMARY KEY (id)
 );
+
+
+ALTER TABLE public.t_t_rating_logon
+ADD COLUMN rating_wb_value int4 NULL,
+ADD COLUMN note_wb_rating text NULL,
+ADD COLUMN rate_wb_by_id uuid NULL,
+ADD COLUMN rated_wb_at timestamptz(6) NULL;
+
+
+CREATE TABLE public.t_r_rating_wb_logon_relation (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	logon_rating_id uuid NOT NULL,
+	reason_rating_id uuid NOT NULL,
+	created_at timestamptz(6) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at timestamptz(6) NULL,
+	deleted_at timestamptz(6) NULL,
+	is_active bool DEFAULT true NOT NULL,
+	flag_rating int4 NULL,
+	CONSTRAINT t_r_rating_logon_history_pk PRIMARY KEY (id),
+	CONSTRAINT fk_t_r_rating_logon_history_logon_rating_id FOREIGN KEY (logon_rating_id) REFERENCES public.t_t_rating_logon(id) ON DELETE CASCADE,
+	CONSTRAINT fk_t_r_rating_logon_history_reason_rating_id FOREIGN KEY (reason_rating_id) REFERENCES public.t_m_reason_rating(id) ON DELETE CASCADE
+);
