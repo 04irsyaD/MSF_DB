@@ -1,79 +1,77 @@
--- Database Query Shortcut Collection
--- Comprehensive database tools and scripts
+# Database Query Shortcut Collection
 
-# 🗃️ Database Query Shortcut Collection
+Comprehensive database tools, scripts, examples, and references for working across multiple database systems and development stacks.
 
-## 📦 Deskripsi
+## Description
 
-Repository ini adalah **comprehensive database toolkit** yang berisi koleksi lengkap scripts, queries, aplikasi, dan tools untuk berbagai sistem database dan development frameworks. Dirancang sebagai shortcut dan reference untuk developer yang bekerja dengan multiple database systems dan modern web frameworks.
+This repository is a practical database toolkit that contains reusable scripts, SQL queries, application examples, automation utilities, and documentation for developers who work with multiple database systems and modern web frameworks.
 
----
+It is designed as a shortcut collection and technical reference for day-to-day database administration, query writing, troubleshooting, migration work, and application development.
 
-## 🧰 Teknologi
+## Technologies
 
-- **PostgreSQL** versi 12+ - Database utama RDBMS
-- **Oracle Database** - Enterprise database solution
-- **SQLite** - Embedded database untuk development
-- **MongoDB** - NoSQL document database
-- **MySQL** - Alternative RDBMS
-- ORM/Query tool: Sequelize, TypeORM, Prisma, Mongoose
-- Bahasa backend: Node.js, Python, Java, PHP
+- PostgreSQL 12+ as the main relational database reference
+- Oracle Database for enterprise database examples
+- SQLite for embedded and local development workflows
+- MongoDB for NoSQL document database examples
+- MySQL for additional relational database references
+- ORM and query tools: Sequelize, TypeORM, Prisma, and Mongoose
+- Backend languages: Node.js, Python, Java, and PHP
 
----
+## Project Structure Overview
 
-## 📁 Project Structure Overview
-
-```
-🗃️ Query-Shortcut-Database/
-├── 📊 Database Scripts & Queries
-│   ├── 🐘 Postgresql/          # PostgreSQL queries, functions, triggers
-│   ├── 🐬 Mysql/              # MySQL configurations & queries  
-│   └── 🔄 Migration/          # Database migration scripts
-│
-├── 🚀 Applications
-│   ├── 🎯 laravel/            # Laravel applications
-│   │   ├── example-app/       # Complete Laravel example
-│   │   └── metod-saw/         # SAW method implementation
-│   └── 🌐 nextjs-website/     # Next.js web application
-│
-├── 🐳 DevOps & Infrastructure  
-│   ├── docker/                # Docker configurations
-│   └── dev_/                  # Development environments
-│
-├── 🤖 AI & Automation
-│   ├── AI OLLMA/              # AI templates & solutions
-│   ├── 📊 Excel/              # VBA automation scripts
-│   └── 🐍 py/                 # Python utilities
-│
-└── 📚 Documentation
-    └── query dokumen/         # Additional query documentation
+```text
+Query-Shortcut-Database/
+|-- Database Scripts & Queries
+|   |-- Postgresql/          # PostgreSQL queries, functions, triggers
+|   |-- Mysql/               # MySQL configurations and queries
+|   `-- Migration/           # Database migration scripts
+|
+|-- Applications
+|   |-- laravel/             # Laravel applications
+|   |   |-- example-app/     # Complete Laravel example
+|   |   `-- metod-saw/       # SAW method implementation
+|   `-- nextjs-website/      # Next.js web application
+|
+|-- DevOps & Infrastructure
+|   |-- docker/              # Docker configurations
+|   `-- dev_/                # Development environments
+|
+|-- AI & Automation
+|   |-- AI OLLMA/            # AI templates and solutions
+|   |-- Excel/               # VBA automation scripts
+|   `-- py/                  # Python utilities
+|
+`-- Documentation
+    `-- query dokumen/       # Additional query documentation
 ```
 
-### 🎯 Key Components
+## Key Components
 
-- **Multi-Database Support** - PostgreSQL, MySQL, Oracle, SQLite, MongoDB
-- **Web Applications** - Laravel & Next.js implementations  
-- **Automation Tools** - Excel VBA, Python scripts, AI templates
-- **Docker Environment** - Containerized development setup
-- **Query Collections** - Ready-to-use database queries
+- Multi-database support for PostgreSQL, MySQL, Oracle, SQLite, and MongoDB
+- Web application examples using Laravel and Next.js
+- Automation tools for Excel VBA, Python scripts, and AI templates
+- Docker-based development environments
+- Ready-to-use query collections for common database tasks
 
----
-
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### Prerequisites
-- Docker & Docker Compose
-- Node.js 18+ (for Next.js)
-- PHP 8.0+ & Composer (for Laravel)
-- Python 3.8+ (for scripts)
 
-### 1. Clone & Setup
+- Docker and Docker Compose
+- Node.js 18+ for Next.js projects
+- PHP 8.0+ and Composer for Laravel projects
+- Python 3.8+ for utility scripts
+
+### 1. Clone and Set Up
+
 ```bash
 git clone <repository-url>
-cd Query-Shrocut-database
+cd Query-Shortcut-Database
 ```
 
 ### 2. Start Database Services
+
 ```bash
 # Start databases with Docker
 docker-compose up -d postgres mongodb
@@ -82,46 +80,48 @@ docker-compose up -d postgres mongodb
 docker-compose ps
 ```
 
-### 3. Quick Database Setup
+### 3. Quick PostgreSQL Setup
+
 ```bash
-# Import PostgreSQL configurations
+# Import PostgreSQL configuration
 psql -U postgres -h localhost -f Postgresql/config/config.sql
 ```
 
----
+## PostgreSQL Setup
 
-## ⚙️ Setup Database
+### 1. Install PostgreSQL
 
-### 1. Instalasi PostgreSQL
+Linux Ubuntu:
 
-**Linux (Ubuntu):**
 ```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 ```
 
-**Mac (via Homebrew):**
+macOS using Homebrew:
+
 ```bash
 brew install postgresql
 ```
 
-### 2. Menjalankan PostgreSQL
+### 2. Start PostgreSQL
+
 ```bash
 sudo service postgresql start
 ```
 
-### 3. Masuk ke PostgreSQL CLI
+### 3. Open the PostgreSQL CLI
+
 ```bash
 sudo -u postgres psql
 ```
 
----
+## Oracle Database Setup
 
-## 🔶 Setup Oracle Database
+### 1. Install Oracle Database
 
-### 1. Instalasi Oracle Database
+Using Docker, recommended:
 
-**Using Docker (Recommended):**
 ```bash
 docker pull container-registry.oracle.com/database/express:21.3.0-xe
 docker run -d --name oracle-xe \
@@ -130,24 +130,27 @@ docker run -d --name oracle-xe \
   container-registry.oracle.com/database/express:21.3.0-xe
 ```
 
-**Manual Installation (Linux):**
+Manual installation on Linux:
+
 ```bash
-# Download dari Oracle website
-# Extract dan jalankan installer
+# Download from the Oracle website
+# Extract the files and run the installer
 ./runInstaller -silent -responseFile /path/to/db_install.rsp
 ```
 
-### 2. Koneksi ke Oracle
+### 2. Connect to Oracle
+
 ```bash
 # SQL*Plus
 sqlplus sys/mypassword@localhost:1521/XE as sysdba
 
-# SQL Developer atau DBeaver untuk GUI
+# Use SQL Developer or DBeaver for a GUI workflow
 ```
 
-### 3. Konfigurasi User Oracle
+### 3. Configure an Oracle User
+
 ```sql
--- Buat user baru
+-- Create a new user
 CREATE USER myuser IDENTIFIED BY mypassword;
 
 -- Grant privileges
@@ -156,49 +159,52 @@ GRANT CREATE SESSION TO myuser;
 GRANT CREATE TABLE TO myuser;
 GRANT CREATE VIEW TO myuser;
 
--- Set default tablespace
+-- Set the default tablespace
 ALTER USER myuser DEFAULT TABLESPACE USERS;
 ALTER USER myuser QUOTA UNLIMITED ON USERS;
 ```
 
----
+## SQLite Setup
 
-## 📱 Setup SQLite
+### 1. Install SQLite
 
-### 1. Instalasi SQLite
+Linux Ubuntu:
 
-**Linux (Ubuntu):**
 ```bash
 sudo apt update
 sudo apt install sqlite3
 ```
 
-**Windows:**
+Windows:
+
 ```bash
-# Download dari https://sqlite.org/download.html
-# Extract dan add ke PATH
+# Download SQLite from https://sqlite.org/download.html
+# Extract the files and add SQLite to PATH
 ```
 
-**Mac:**
+macOS:
+
 ```bash
 brew install sqlite
 ```
 
-### 2. Membuat Database SQLite
+### 2. Create a SQLite Database
+
 ```bash
-# Buat database baru
+# Create a new database
 sqlite3 mydatabase.db
 
-# Import dari file SQL
+# Import from an SQL file
 sqlite3 mydatabase.db < schema.sql
 ```
 
-### 3. Basic Commands SQLite
+### 3. Basic SQLite Commands
+
 ```sql
 -- List all tables
 .tables
 
--- Show schema
+-- Show table schema
 .schema table_name
 
 -- Export to CSV
@@ -212,13 +218,12 @@ SELECT * FROM table_name;
 .import data.csv table_name
 ```
 
----
+## MongoDB Setup
 
-## 🍃 Setup MongoDB
+### 1. Install MongoDB
 
-### 1. Instalasi MongoDB
+Using Docker:
 
-**Using Docker:**
 ```bash
 docker pull mongo:latest
 docker run -d --name mongodb \
@@ -228,7 +233,8 @@ docker run -d --name mongodb \
   mongo:latest
 ```
 
-**Linux (Ubuntu):**
+Linux Ubuntu:
+
 ```bash
 wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
@@ -236,27 +242,30 @@ sudo apt update
 sudo apt install mongodb-org
 ```
 
-**Windows:**
+Windows:
+
 ```bash
-# Download MongoDB Community Server dari mongodb.com
-# Install menggunakan MSI installer
+# Download MongoDB Community Server from mongodb.com
+# Install it using the MSI installer
 ```
 
-### 2. Koneksi MongoDB
+### 2. Connect to MongoDB
+
 ```bash
 # MongoDB Shell
 mongosh "mongodb://admin:password@localhost:27017"
 
-# MongoDB Compass untuk GUI
-# Connection string: mongodb://admin:password@localhost:27017
+# MongoDB Compass GUI connection string:
+# mongodb://admin:password@localhost:27017
 ```
 
 ### 3. Basic MongoDB Operations
+
 ```javascript
-// Pilih database
+// Select a database
 use myDatabase
 
-// Buat collection dan insert data
+// Create a collection and insert data
 db.users.insertOne({
   name: "John Doe",
   email: "john@example.com",
@@ -276,67 +285,66 @@ db.users.updateOne(
 db.users.deleteOne({ name: "John Doe" })
 ```
 
----
+## Initial Database Configuration
 
-## 🛠️ Konfigurasi Awal
+### Create a User and Database
 
-### Membuat User dan Database
 ```sql
--- Buat user baru
-CREATE USER nama_user WITH PASSWORD 'passwordku';
+-- Create a new user
+CREATE USER app_user WITH PASSWORD 'secure_password';
 
--- Buat database
-CREATE DATABASE nama_database OWNER nama_user;
+-- Create a database
+CREATE DATABASE app_database OWNER app_user;
 
--- Berikan hak akses
-GRANT ALL PRIVILEGES ON DATABASE nama_database TO nama_user;
+-- Grant access
+GRANT ALL PRIVILEGES ON DATABASE app_database TO app_user;
 ```
 
----
+## Example Table Structure
 
-## 📁 Struktur Tabel (Contoh)
 ```sql
-CREATE TABLE laporan (
+CREATE TABLE reports (
   id SERIAL PRIMARY KEY,
-  judul VARCHAR(255) NOT NULL,
-  isi TEXT,
+  title VARCHAR(255) NOT NULL,
+  body TEXT,
   status VARCHAR(50),
-  tanggal_laporan DATE DEFAULT CURRENT_DATE
+  report_date DATE DEFAULT CURRENT_DATE
 );
 ```
 
----
-
-## 🔍 Query SQL Umum
+## Common SQL Queries
 
 ### Insert Data
+
 ```sql
-INSERT INTO laporan (judul, isi, status) 
-VALUES ('Laporan Mingguan', 'Isi laporan...', 'draft');
+INSERT INTO reports (title, body, status)
+VALUES ('Weekly Report', 'Report content...', 'draft');
 ```
 
 ### Select Data
+
 ```sql
-SELECT * FROM laporan WHERE status = 'draft';
+SELECT * FROM reports WHERE status = 'draft';
 ```
 
 ### Update Data
+
 ```sql
-UPDATE laporan SET status = 'selesai' WHERE id = 1;
+UPDATE reports SET status = 'completed' WHERE id = 1;
 ```
 
 ### Delete Data
+
 ```sql
-DELETE FROM laporan WHERE id = 2;
+DELETE FROM reports WHERE id = 2;
 ```
 
----
-
-## 🔶 Query Oracle Umum
+## Common Oracle Queries
 
 ### Table Management
+
 ```sql
--- Create table dengan constraint
+-- Create a table with constraints
 CREATE TABLE employees (
   emp_id NUMBER PRIMARY KEY,
   first_name VARCHAR2(50) NOT NULL,
@@ -346,10 +354,10 @@ CREATE TABLE employees (
   salary NUMBER(10,2)
 );
 
--- Create sequence untuk auto increment
+-- Create a sequence for auto increment
 CREATE SEQUENCE emp_seq START WITH 1 INCREMENT BY 1;
 
--- Create trigger untuk auto increment
+-- Create a trigger for auto increment
 CREATE OR REPLACE TRIGGER emp_trigger
 BEFORE INSERT ON employees
 FOR EACH ROW
@@ -359,12 +367,13 @@ END;
 ```
 
 ### Data Manipulation
+
 ```sql
--- Insert dengan sequence
+-- Insert with a sequence
 INSERT INTO employees (first_name, last_name, email, salary)
 VALUES ('John', 'Doe', 'john.doe@company.com', 50000);
 
--- Select dengan pagination
+-- Select with pagination
 SELECT * FROM (
   SELECT ROWNUM rn, emp.*
   FROM employees emp
@@ -372,7 +381,7 @@ SELECT * FROM (
 )
 WHERE rn > 10;
 
--- Update dengan join
+-- Update with join-style filtering
 UPDATE employees e
 SET salary = salary * 1.1
 WHERE EXISTS (
@@ -382,7 +391,8 @@ WHERE EXISTS (
 );
 ```
 
-### Oracle Specific Functions
+### Oracle-Specific Functions
+
 ```sql
 -- Date functions
 SELECT SYSDATE FROM DUAL;
@@ -401,25 +411,25 @@ SELECT emp_id, salary,
 FROM employees;
 ```
 
----
-
-## 📱 Query SQLite Umum
+## Common SQLite Queries
 
 ### Database Operations
+
 ```sql
 -- Attach multiple databases
 ATTACH DATABASE 'backup.db' AS backup;
 
--- Copy table between databases
+-- Copy a table between databases
 CREATE TABLE backup.employees AS SELECT * FROM main.employees;
 
--- Detach database
+-- Detach a database
 DETACH DATABASE backup;
 ```
 
 ### Table Management
+
 ```sql
--- Create table dengan auto increment
+-- Create a table with auto increment
 CREATE TABLE products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -427,20 +437,21 @@ CREATE TABLE products (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add column (SQLite limitation workaround)
+-- Add a column
 ALTER TABLE products ADD COLUMN description TEXT;
 
--- Create index
+-- Create an index
 CREATE INDEX idx_products_name ON products(name);
 ```
 
 ### Data Queries
+
 ```sql
--- Full text search
+-- Full-text search
 CREATE VIRTUAL TABLE products_fts USING fts5(name, description);
 SELECT * FROM products_fts WHERE products_fts MATCH 'laptop';
 
--- JSON operations (SQLite 3.38+)
+-- JSON operations in SQLite 3.38+
 SELECT json_extract(metadata, '$.category') as category
 FROM products
 WHERE json_valid(metadata);
@@ -457,13 +468,12 @@ WITH RECURSIVE category_tree AS (
 SELECT * FROM category_tree;
 ```
 
----
-
-## 🍃 MongoDB Query Umum
+## Common MongoDB Queries
 
 ### Collection Operations
+
 ```javascript
-// Create collection dengan validation
+// Create a collection with validation
 db.createCollection("products", {
   validator: {
     $jsonSchema: {
@@ -478,13 +488,14 @@ db.createCollection("products", {
   }
 })
 
-// Create index
+// Create indexes
 db.products.createIndex({ name: "text", description: "text" })
-db.products.createIndex({ "categories": 1 })
-db.products.createIndex({ "price": 1, "createdAt": -1 })
+db.products.createIndex({ categories: 1 })
+db.products.createIndex({ price: 1, createdAt: -1 })
 ```
 
 ### Advanced Queries
+
 ```javascript
 // Aggregation pipeline
 db.orders.aggregate([
@@ -518,18 +529,19 @@ db.products.find({ "reviews.rating": { $gte: 4 } })
 ```
 
 ### Data Manipulation
+
 ```javascript
 // Bulk operations
 db.products.bulkWrite([
   { insertOne: { document: { name: "Product 1", price: 100 } } },
-  { updateOne: { 
+  { updateOne: {
     filter: { _id: ObjectId("...") },
     update: { $set: { price: 120 } }
   }},
   { deleteOne: { filter: { name: "Old Product" } } }
 ])
 
-# Upsert operation
+// Upsert operation
 db.products.updateOne(
   { sku: "ABC123" },
   { $set: { name: "Updated Product", price: 150 } },
@@ -537,14 +549,14 @@ db.products.updateOne(
 )
 ```
 
----
+## Laravel Applications
 
-## 🎯 Laravel Applications
+### Example App: `laravel/example-app/`
 
-### 📱 Example App (`laravel/example-app/`)
-Complete Laravel application dengan fitur lengkap:
+Complete Laravel application with common features.
 
-#### Setup & Installation
+#### Setup and Installation
+
 ```bash
 cd laravel/example-app
 
@@ -562,43 +574,47 @@ php artisan db:seed
 
 # Development server
 php artisan serve
+
 # Frontend assets
 npm run dev
 ```
 
 #### Available Features
+
 - Authentication system
 - CRUD operations
 - Database migrations
 - API endpoints
 - Admin dashboard
 
-### 🔢 Method SAW (`laravel/metod-saw/`)
-Implementasi metode Simple Additive Weighting untuk decision support system:
+### SAW Method: `laravel/metod-saw/`
+
+Simple Additive Weighting implementation for a decision support system.
 
 #### Docker Setup
+
 ```bash
 cd laravel/metod-saw
 
-# Build dan run dengan Docker
+# Build and run with Docker
 docker-compose up -d
 
-# Access application: http://localhost:8080
+# Access the application at http://localhost:8080
 ```
 
 #### SAW Method Features
+
 - Multi-criteria decision making
 - Weight calculation
 - Alternative ranking
 - Result visualization
 
----
+## Next.js Website: `nextjs-website/`
 
-## 🌐 Next.js Website (`nextjs-website/`)
+Modern React-based website using TypeScript and Tailwind CSS.
 
-Modern React-based website dengan TypeScript dan Tailwind CSS:
+### Setup and Development
 
-### Setup & Development
 ```bash
 cd nextjs-website
 
@@ -615,6 +631,7 @@ npm start
 ```
 
 ### Available Scripts
+
 ```bash
 npm run dev        # Development server
 npm run build      # Production build
@@ -623,74 +640,78 @@ npm run lint       # ESLint check
 npm run type-check # TypeScript check
 ```
 
----
+## Excel VBA Automation: `Excel/`
 
-## 📊 Excel VBA Automation (`Excel/`)
+Collection of VBA scripts for Excel automation.
 
-Koleksi VBA scripts untuk otomatisasi Excel:
+### Available Scripts
 
-### 📋 Available Scripts
+#### 1. Asset Data Management: `excel_asset_data.vba`
 
-#### 1. **Asset Data Management** (`excel_asset_data.vba`)
-- Import/export asset data
-- Data validation dan cleaning
+- Import and export asset data
+- Data validation and cleaning
 - Report generation
 
-#### 2. **Data Comparison Tool** (`excel_compare_data.vba`)
-- Side-by-side data comparison
-- Highlight differences
-- Generate comparison report
+#### 2. Data Comparison Tool: `excel_compare_data.vba`
 
-#### 3. **KPEI Health Check** (`excel_healcheck_kpei.VBA`)
+- Side-by-side data comparison
+- Difference highlighting
+- Comparison report generation
+
+#### 3. KPEI Health Check: `excel_healcheck_kpei.VBA`
+
 - System status monitoring
 - Performance metrics
 - Alert generation
 
-#### 4. **Asset Merging** (`excel_merge_asset.vba`)
-- Consolidate asset data
-- Remove duplicates
+#### 4. Asset Merging: `excel_merge_asset.vba`
+
+- Asset data consolidation
+- Duplicate removal
 - Master file creation
 
-#### 5. **Column Query Filter** (`query_filter_by_column_in_excel.VBA`)
+#### 5. Column Query Filter: `query_filter_by_column_in_excel.VBA`
+
 - Dynamic filter creation
 - Multi-column filtering
-- Export filtered results
+- Filtered result export
 
-### 🔧 Installation & Usage
+### Installation and Usage
 
 #### Enable VBA in Excel
-1. File → Options → Trust Center
-2. Trust Center Settings → Macro Settings
-3. Enable "Enable all macros"
+
+1. Open File > Options > Trust Center.
+2. Open Trust Center Settings > Macro Settings.
+3. Enable macros according to your security policy.
 
 #### Import VBA Scripts
-1. Press `Alt + F11` (VBA Editor)
-2. File → Import File
-3. Select `.vba` file
-4. Run macros from Developer tab
 
----
+1. Press `Alt + F11` to open the VBA editor.
+2. Choose File > Import File.
+3. Select the `.vba` file.
+4. Run the macro from the Developer tab.
 
-## 🤖 AI Integration (`AI OLLMA/`)
+## AI Integration: `AI OLLMA/`
 
-AI templates dan solutions untuk automation:
+AI templates and solutions for automation workflows.
 
-### 📁 Summary Tools (`AI OLLMA/summary/`)
+### Summary Tools: `AI OLLMA/summary/`
 
 #### Available Tools
-- **create_template.py** - Template generation tool
-- **debug_data.py** - Data debugging utilities
-- **fix_template.py** - Template repair tool
-- **test_template.py** - Template testing framework
+
+- `create_template.py` - Template generation tool
+- `debug_data.py` - Data debugging utilities
+- `fix_template.py` - Template repair tool
+- `test_template.py` - Template testing framework
 
 #### Documentation Files
+
 - [FINAL_SOLUTION_GUIDE.md](AI%20OLLMA/summary/FINAL_SOLUTION_GUIDE.md) - Comprehensive solution guide
 - [PANDUAN_FINAL_SYSTEM.md](AI%20OLLMA/summary/PANDUAN_FINAL_SYSTEM.md) - Final system guidelines
 - [README_SYSTEM.md](AI%20OLLMA/summary/README_SYSTEM.md) - System documentation
 
-### 🛠️ Usage Examples
+### Usage Example
 
-#### Template Creation
 ```python
 # create_template.py
 from template_creator import TemplateCreator
@@ -703,138 +724,139 @@ template = creator.create_db_template({
 })
 ```
 
----
+## Python Utilities: `py/`
 
-## 🐍 Python Utilities (`py/`)
-
-Python scripts untuk data processing:
+Python scripts for data processing and database utilities.
 
 ### Available Scripts
 
-#### test.py
-```python
+#### `test.py`
+
+```bash
 # Main testing and utility script
 python py/test.py
-
-# Features:
-- Database connection testing
-- Data validation utilities  
-- Performance benchmarking
-- API testing tools
 ```
 
+Features:
+
+- Database connection testing
+- Data validation utilities
+- Performance benchmarking
+- API testing tools
+
 ### Usage Examples
+
 ```bash
 # Run database tests
 cd py
 python test.py --test-db
 
-# Data processing
+# Process data
 python test.py --process-data input.csv
 ```
 
----
+## Database Query Collections
 
-## 🗃️ Database Query Collections
-
-### PostgreSQL Queries (`Postgresql/`)
+### PostgreSQL Queries: `Postgresql/`
 
 #### Core Directories
-- **config/** - Database configuration scripts
-- **Data/** - Data manipulation queries
-- **functions/** - Custom PostgreSQL functions
-- **table/** - Table operations and utilities
-- **Trigger/** - Database triggers
+
+- `config/` - Database configuration scripts
+- `Data/` - Data manipulation queries
+- `functions/` - Custom PostgreSQL functions
+- `table/` - Table operations and utilities
+- `Trigger/` - Database triggers
 
 #### Key Files
-- **search.sql** - Comprehensive search templates
-- **config/config.sql** - Database setup configuration
 
-### Migration Scripts (`Migration/Postgresql/`)
+- `search.sql` - Comprehensive search templates
+- `config/config.sql` - Database setup configuration
+
+### Migration Scripts: `Migration/Postgresql/`
 
 #### Available Migrations
-- **column_update.sql** - Column modification scripts
-- **pertamina_ticket.sql** - Ticketing system setup
-- **pm_merah.sql** - PM Red system migration
-- **wbs.sql** - Work Breakdown Structure
 
----
+- `column_update.sql` - Column modification scripts
+- `pertamina_ticket.sql` - Ticketing system setup
+- `pm_merah.sql` - PM Red system migration
+- `wbs.sql` - Work Breakdown Structure
 
-## 🔁 Manajemen Sequence
+## Sequence Management
 
-### Atur sequence ke angka tertentu (misal: 150)
+### Set a Sequence to a Specific Value
+
 ```sql
-SELECT setval('laporan_id_seq', 150);
+SELECT setval('reports_id_seq', 150);
 ```
 
-### Cek nama sequence dari kolom SERIAL
+### Check the Sequence Name for a SERIAL Column
+
 ```sql
-SELECT pg_get_serial_sequence('laporan', 'id');
+SELECT pg_get_serial_sequence('reports', 'id');
 ```
 
-### Cek nilai berikutnya dari sequence
+### Check the Next Sequence Value
+
 ```sql
-SELECT nextval('laporan_id_seq');
+SELECT nextval('reports_id_seq');
 ```
 
----
+## Security Tips
 
-## 🔐 Tips Keamanan
+- Never commit `.env` files that contain database usernames or passwords.
+- Use database accounts with the least privileges required in production.
+- Back up databases regularly.
 
-- Jangan pernah commit file `.env` yang berisi username/password database.
-- Gunakan user database dengan hak akses minimal di lingkungan produksi.
-- Selalu backup database secara berkala.
+## Backup and Restore
 
----
+### Backup
 
-## 📤 Backup & Restore
-
-### Backup:
 ```bash
-pg_dump -U nama_user -F c -b -v -f backup_db.dump nama_database
+pg_dump -U app_user -F c -b -v -f backup_db.dump app_database
 ```
 
-### Restore:
+### Restore
+
 ```bash
-pg_restore -U nama_user -d nama_database -v backup_db.dump
+pg_restore -U app_user -d app_database -v backup_db.dump
 ```
 
----
+## Test a PostgreSQL Connection
 
-## 🧪 Testing Koneksi (dengan psql)
 ```bash
-psql -U nama_user -d nama_database -h localhost -p 5432
+psql -U app_user -d app_database -h localhost -p 5432
 ```
 
----
-
-## � Database Management Tools
+## Database Management Tools
 
 ### PostgreSQL Tools
-- **pgAdmin** - Web-based GUI
-- **DBeaver** - Universal database tool
-- **psql** - Command line interface
+
+- pgAdmin - Web-based GUI
+- DBeaver - Universal database tool
+- psql - Command-line interface
 
 ### Oracle Tools
-- **SQL Developer** - Official Oracle IDE
-- **Oracle SQL*Plus** - Command line tool
-- **Toad** - Third-party GUI tool
+
+- SQL Developer - Official Oracle IDE
+- Oracle SQL*Plus - Command-line tool
+- Toad - Third-party GUI tool
 
 ### SQLite Tools
-- **SQLite Browser** - Simple GUI browser
-- **sqlite3** - Command line interface
-- **SQLiteStudio** - Feature-rich GUI
+
+- SQLite Browser - Simple GUI browser
+- sqlite3 - Command-line interface
+- SQLiteStudio - Feature-rich GUI
 
 ### MongoDB Tools
-- **MongoDB Compass** - Official GUI
-- **mongosh** - Modern shell
-- **Robo 3T** - Popular GUI client
 
----
+- MongoDB Compass - Official GUI
+- mongosh - Modern shell
+- Robo 3T - Popular GUI client
 
-## 🐳 Docker Compose Setup
+## Docker Compose Setup
 
 ### Multi-Database Environment
+
 ```yaml
 version: '3.8'
 services:
@@ -875,23 +897,23 @@ volumes:
   mongodb_data:
 ```
 
-### Menjalankan Environment
+### Run the Environment
+
 ```bash
-# Start semua database
+# Start all databases
 docker-compose up -d
 
 # Check status
 docker-compose ps
 
-# Stop semua
+# Stop all services
 docker-compose down
 ```
 
----
+## Backup and Migration
 
-## 📤 Backup & Migration
+### PostgreSQL Backup and Restore
 
-### PostgreSQL Backup/Restore
 ```bash
 # Backup
 pg_dump -U username -h localhost -p 5432 database_name > backup.sql
@@ -902,7 +924,8 @@ psql -U username -d database_name < backup.sql
 pg_restore -U username -d database_name backup.dump
 ```
 
-### Oracle Backup/Restore
+### Oracle Backup and Restore
+
 ```bash
 # Export
 expdp username/password@localhost:1521/XE schemas=schema_name directory=DATA_PUMP_DIR dumpfile=backup.dmp
@@ -916,8 +939,9 @@ imp username/password@localhost:1521/XE file=backup.dmp fromuser=schema_name tou
 ```
 
 ### SQLite Backup
+
 ```bash
-# Backup (simple copy)
+# Backup with a simple copy
 cp database.db backup_database.db
 
 # Dump to SQL
@@ -927,9 +951,10 @@ sqlite3 database.db .dump > backup.sql
 sqlite3 new_database.db < backup.sql
 ```
 
-### MongoDB Backup/Restore
+### MongoDB Backup and Restore
+
 ```bash
-# Backup single database
+# Backup a single database
 mongodump --host localhost:27017 --db database_name --out backup_folder
 
 # Backup with authentication
@@ -942,13 +967,15 @@ mongorestore --host localhost:27017 --db database_name backup_folder/database_na
 mongoexport --host localhost:27017 --db database_name --collection collection_name --out data.json
 
 # Import from JSON
----
+mongoimport --host localhost:27017 --db database_name --collection collection_name --file data.json
+```
 
-## 🛠️ Troubleshooting & Common Issues
+## Troubleshooting and Common Issues
 
-### 🐘 PostgreSQL Issues
+### PostgreSQL Issues
 
 #### Connection Problems
+
 ```bash
 # Check if PostgreSQL is running
 sudo systemctl status postgresql
@@ -963,10 +990,11 @@ sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'newpassword';"
 ```
 
 #### Performance Issues
+
 ```sql
 -- Check slow queries
-SELECT query, mean_time, calls 
-FROM pg_stat_statements 
+SELECT query, mean_time, calls
+FROM pg_stat_statements
 ORDER BY mean_time DESC LIMIT 10;
 
 -- Check active connections
@@ -979,9 +1007,10 @@ WHERE pg_stat_activity.datname = 'target_db'
 AND pid <> pg_backend_pid();
 ```
 
-### 🔶 Oracle Issues
+### Oracle Issues
 
 #### TNS Listener Problems
+
 ```bash
 # Check listener status
 lsnrctl status
@@ -994,8 +1023,9 @@ tnsping XE
 ```
 
 #### User Lock Issues
+
 ```sql
--- Unlock user account
+-- Unlock a user account
 ALTER USER username ACCOUNT UNLOCK;
 
 -- Reset password
@@ -1005,18 +1035,20 @@ ALTER USER username IDENTIFIED BY newpassword;
 SELECT username, account_status FROM dba_users WHERE username = 'USERNAME';
 ```
 
-### 📱 SQLite Issues
+### SQLite Issues
 
 #### Database Locked
+
 ```bash
-# Check if database is in use
+# Check if the database is in use
 lsof database.db
 
-# Force unlock (backup first!)
+# Force unlock after backing up the database
 sqlite3 database.db "BEGIN IMMEDIATE; ROLLBACK;"
 ```
 
 #### Corruption Recovery
+
 ```bash
 # Check integrity
 sqlite3 database.db "PRAGMA integrity_check;"
@@ -1025,9 +1057,10 @@ sqlite3 database.db "PRAGMA integrity_check;"
 sqlite3 database.db ".dump" | sqlite3 repaired.db
 ```
 
-### 🍃 MongoDB Issues
+### MongoDB Issues
 
 #### Connection Problems
+
 ```bash
 # Check MongoDB service
 sudo systemctl status mongod
@@ -1039,8 +1072,9 @@ mongosh "mongodb://localhost:27017"
 ```
 
 #### Authentication Issues
+
 ```javascript
-// Create admin user
+// Create an admin user
 use admin
 db.createUser({
   user: "admin",
@@ -1048,13 +1082,14 @@ db.createUser({
   roles: ["root"]
 })
 
-// Connect with auth
+// Connect with authentication
 mongosh "mongodb://admin:password@localhost:27017/admin"
 ```
 
-### 🎯 Laravel Issues
+### Laravel Issues
 
 #### Common Problems
+
 ```bash
 # Clear cache
 php artisan cache:clear
@@ -1071,21 +1106,23 @@ chmod -R 755 bootstrap/cache
 ```
 
 #### Database Migration Issues
+
 ```bash
 # Reset migrations
 php artisan migrate:reset
 php artisan migrate
 
-# Rollback specific migration
+# Roll back one migration step
 php artisan migrate:rollback --step=1
 
 # Check migration status
 php artisan migrate:status
 ```
 
-### 🌐 Next.js Issues
+### Next.js Issues
 
 #### Build Problems
+
 ```bash
 # Clear cache
 rm -rf .next
@@ -1100,19 +1137,20 @@ npm install
 ```
 
 #### Runtime Errors
+
 ```bash
 # Development debugging
 npm run dev
-# Check console for errors
 
 # Production debugging
 NODE_ENV=production npm run build
 npm start
 ```
 
-### 🐳 Docker Issues
+### Docker Issues
 
 #### Container Problems
+
 ```bash
 # Check container status
 docker ps -a
@@ -1129,6 +1167,7 @@ docker-compose up --build -d
 ```
 
 #### Volume Issues
+
 ```bash
 # Check volumes
 docker volume ls
@@ -1136,39 +1175,40 @@ docker volume ls
 # Remove unused volumes
 docker volume prune
 
-# Backup volume
+# Back up a volume
 docker run --rm -v volume_name:/data -v $(pwd):/backup ubuntu tar czf /backup/backup.tar.gz -C /data .
 ```
 
-### 📊 Excel VBA Issues
+### Excel VBA Issues
 
 #### Macro Security
+
 ```vb
 ' Enable macros in Excel:
-' File → Options → Trust Center → Macro Settings
-' Select "Enable all macros"
+' File > Options > Trust Center > Macro Settings
+' Select the macro setting required by your security policy.
 
-' Trust specific folder:
-' Add project folder to Trusted Locations
+' Trust a specific folder:
+' Add the project folder to Trusted Locations.
 ```
 
 #### Common VBA Errors
+
 ```vb
 ' Handle missing references
 On Error Resume Next
 Set obj = CreateObject("Excel.Application")
 If Err.Number <> 0 Then
-    MsgBox "Excel not available"
+    MsgBox "Excel is not available"
     Exit Sub
 End If
 On Error GoTo 0
 ```
 
----
-
-## ⚡ Performance Optimization
+## Performance Optimization
 
 ### Database Optimization
+
 ```sql
 -- PostgreSQL
 ANALYZE;  -- Update table statistics
@@ -1184,6 +1224,7 @@ db.collection.reIndex();  -- Rebuild indexes
 ```
 
 ### Application Optimization
+
 ```bash
 # Laravel
 php artisan optimize
@@ -1191,38 +1232,38 @@ php artisan config:cache
 php artisan route:cache
 
 # Next.js
-npm run build  # Optimized production build
-npm run analyze  # Bundle analysis
+npm run build
+npm run analyze
 ```
 
----
-
-## 📎 Referensi & Documentation
+## References and Documentation
 
 ### PostgreSQL
-- [PostgreSQL Official Docs](https://www.postgresql.org/docs/)
-- [pgAdmin](https://www.pgadmin.org/) – GUI untuk manajemen database PostgreSQL
-- [PostgREST](https://postgrest.org/) – Auto-generated REST API
+
+- [PostgreSQL Official Documentation](https://www.postgresql.org/docs/)
+- [pgAdmin](https://www.pgadmin.org/) - GUI for PostgreSQL database management
+- [PostgREST](https://postgrest.org/) - Auto-generated REST API
 
 ### Oracle Database
+
 - [Oracle Database Documentation](https://docs.oracle.com/en/database/)
-- [Oracle SQL Developer](https://www.oracle.com/database/sqldeveloper/) – Official IDE
-- [Oracle Live SQL](https://livesql.oracle.com/) – Online Oracle playground
+- [Oracle SQL Developer](https://www.oracle.com/database/sqldeveloper/) - Official IDE
+- [Oracle Live SQL](https://livesql.oracle.com/) - Online Oracle playground
 
 ### SQLite
-- [SQLite Official Docs](https://sqlite.org/docs.html)
-- [SQLite Browser](https://sqlitebrowser.org/) – GUI tool
-- [SQLite Tutorial](https://www.sqlitetutorial.net/) – Comprehensive tutorial
+
+- [SQLite Official Documentation](https://sqlite.org/docs.html)
+- [SQLite Browser](https://sqlitebrowser.org/) - GUI tool
+- [SQLite Tutorial](https://www.sqlitetutorial.net/) - Comprehensive tutorial
 
 ### MongoDB
+
 - [MongoDB Documentation](https://docs.mongodb.com/)
-- [MongoDB Compass](https://www.mongodb.com/products/compass) – Official GUI
-- [MongoDB University](https://university.mongodb.com/) – Free courses
+- [MongoDB Compass](https://www.mongodb.com/products/compass) - Official GUI
+- [MongoDB University](https://university.mongodb.com/) - Free courses
 
 ### Multi-Database Tools
-- [DBeaver](https://dbeaver.io/) – Universal database tool
-- [DataGrip](https://www.jetbrains.com/datagrip/) – JetBrains database IDE
-- [DB Fiddle](https://www.db-fiddle.com/) – Online SQL playground
 
----
-
+- [DBeaver](https://dbeaver.io/) - Universal database tool
+- [DataGrip](https://www.jetbrains.com/datagrip/) - JetBrains database IDE
+- [DB Fiddle](https://www.db-fiddle.com/) - Online SQL playground
