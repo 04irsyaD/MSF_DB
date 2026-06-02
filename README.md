@@ -42,8 +42,15 @@ Query-Shortcut-Database/
 |   |-- Excel/               # VBA automation scripts
 |   `-- py/                  # Python utilities
 |
+|-- Database Documentation
+|   |-- sql-docs-generator/  # Next.js + FastAPI + Ollama SQL documentation generator
+|   |-- sql-docs-app/        # Lightweight SQL-to-docs app reference
+|   |-- telegram-sql-docs/   # Telegram bot for SQL documentation workflows
+|   |-- n8n/workflows/       # Automation workflows for SQL-to-docs pipelines
+|   `-- query dokumen/       # Additional query documentation and examples
+|
 `-- Documentation
-    `-- query dokumen/       # Additional query documentation
+    `-- AI OLLMA/            # AI documentation and summary tooling
 ```
 
 ## Key Components
@@ -53,6 +60,7 @@ Query-Shortcut-Database/
 - Automation tools for Excel VBA, Python scripts, and AI templates
 - Docker-based development environments
 - Ready-to-use query collections for common database tasks
+- AI-assisted database documentation from SQL DDL, table schemas, and business context
 
 ## Quick Start Guide
 
@@ -86,6 +94,179 @@ docker-compose ps
 # Import PostgreSQL configuration
 psql -U postgres -h localhost -f Postgresql/config/config.sql
 ```
+
+## Database Documentation Workflow
+
+This repository includes a database documentation workflow for turning SQL DDL, table structures, and business context into readable technical documentation. The goal is to make database knowledge easier to share across developers, analysts, QA, and operations teams.
+
+### What the Documentation Should Cover
+
+A good database documentation page should include:
+
+- Project or database overview
+- Table purpose and business meaning
+- Column descriptions, data types, nullability, defaults, and constraints
+- Primary keys, foreign keys, and table relationships
+- Indexes and performance notes
+- Common query examples
+- Data ownership and source notes
+- Security notes for sensitive columns
+- Change history for schema updates or migrations
+
+### Recommended Documentation Output
+
+Use Markdown as the primary output format because it is easy to review, commit, search, and publish.
+
+```text
+docs/database/
+|-- README.md                 # Database overview
+|-- schema-summary.md          # Table and relationship summary
+|-- tables/
+|   |-- users.md
+|   |-- orders.md
+|   `-- products.md
+|-- erd/
+|   `-- database-erd.md
+`-- changelog/
+    `-- schema-changelog.md
+```
+
+### Available Documentation Tools
+
+#### `sql-docs-generator/`
+
+Full SQL documentation generator using:
+
+- Next.js frontend for uploading or pasting SQL
+- Python FastAPI backend for parsing SQL
+- Ollama local LLM for generating human-readable table documentation
+- Markdown output for generated documentation
+
+Quick start:
+
+```bash
+cd sql-docs-generator
+docker-compose up -d
+```
+
+Access:
+
+- Frontend: `http://localhost:3000`
+- API: `http://localhost:8000`
+- API docs: `http://localhost:8000/docs`
+
+Pull an Ollama model before first use:
+
+```bash
+docker exec -it ollama ollama pull llama3
+```
+
+#### `sql-docs-app/`
+
+Lightweight SQL-to-documentation app reference for a simple paste-and-generate workflow. It is useful for quick experiments, smaller schemas, or validating documentation prompts before moving them into the full generator.
+
+#### `n8n/workflows/`
+
+Workflow automation for generating database documentation from SQL input.
+
+Important workflow files:
+
+- `sql_to_docs_direct_input.json` - Generate documentation from direct SQL input
+- `sql_table_to_docs_workflow.json` - Generate documentation from table-oriented SQL input
+- `telegram_drive_sql_docs.json` - Receive SQL through Telegram and upload documentation to Google Drive
+- `github_postgresql_telegram.json` - GitHub, PostgreSQL, and Telegram workflow integration
+
+Start n8n:
+
+```powershell
+cd "c:\Users\ROG\Documents\query db\n8n"
+docker-compose up -d
+```
+
+Access n8n at `http://localhost:5678`.
+
+#### `telegram-sql-docs/`
+
+Telegram bot integration for sending SQL snippets and receiving generated documentation. This is useful when database documentation needs to be created from mobile chat, internal team chat, or lightweight operational workflows.
+
+#### `query dokumen/`
+
+Collection of database documentation examples, SQL notes, and helper scripts. Use this folder for reference material, manual documentation drafts, and SQL snippets that are not yet part of the generated docs workflow.
+
+### SQL Documentation API Example
+
+The FastAPI service in `sql-docs-generator/ai-service` exposes `/api/generate`.
+
+```bash
+curl -X POST http://localhost:8000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sql_content": "CREATE TABLE users (id SERIAL PRIMARY KEY, email VARCHAR(255) NOT NULL);",
+    "project_name": "Customer Database",
+    "language": "English",
+    "detail_level": "detailed",
+    "business_context": "Stores customer account and authentication data",
+    "custom_terms": [
+      {
+        "term": "customer",
+        "definition": "A registered user of the application"
+      }
+    ]
+  }'
+```
+
+### Suggested Documentation Template
+
+Use this structure for each generated table document:
+
+````markdown
+# Table: table_name
+
+## Purpose
+
+Explain what this table stores and why it exists.
+
+## Columns
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| id | serial | no | auto | Primary identifier |
+
+## Relationships
+
+- `user_id` references `users.id`
+
+## Common Queries
+
+```sql
+SELECT *
+FROM table_name
+LIMIT 100;
+```
+
+## Notes
+
+- Mention business rules, data quality rules, and sensitive fields here.
+````
+
+### Documentation Best Practices
+
+- Keep generated documentation in version control.
+- Review AI-generated descriptions before publishing.
+- Add business context when generating docs so table descriptions are meaningful.
+- Use consistent names for tables, columns, and glossary terms.
+- Mark sensitive columns such as password, token, phone number, email, address, and identity number.
+- Update docs whenever migrations change table structure.
+- Keep raw SQL, generated Markdown, and final reviewed docs separate when possible.
+
+### Recommended Workflow
+
+1. Export or collect `CREATE TABLE` statements from the target database.
+2. Add project context, business terms, and expected output language.
+3. Generate documentation with `sql-docs-generator` or an n8n workflow.
+4. Review table and column descriptions manually.
+5. Save the reviewed Markdown under `docs/database/` or another project-specific docs folder.
+6. Commit documentation together with schema changes or migration updates.
 
 ## PostgreSQL Setup
 
