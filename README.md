@@ -62,6 +62,13 @@ Query-Shortcut-Database/
 - Ready-to-use query collections for common database tasks
 - AI-assisted database documentation from SQL DDL, table schemas, and business context
 
+## Project Policies
+
+- [Contributing Guide](CONTRIBUTING.md) - How to add queries, documentation, scripts, and workflow updates.
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Expected behavior for project discussions and contributions.
+- [Security Policy](SECURITY.md) - How to handle vulnerabilities, secrets, and sensitive data.
+- [MIT License](LICENSE) - Usage, modification, and distribution terms.
+
 ## Quick Start Guide
 
 ### Prerequisites

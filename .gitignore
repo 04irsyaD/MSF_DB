@@ -17,3 +17,5 @@ excel_healcheck_kpei.sql
 *.sublime-project
 *.vscode/
 *.md
+!CODE_OF_CONDUCT.md
+!CONTRIBUTING.md

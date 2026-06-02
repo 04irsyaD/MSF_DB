@@ -1,21 +1,44 @@
 # Security Policy
 
-## Supported Versions
+## Scope
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+This repository contains database queries, documentation workflows, automation scripts, and application examples. Security issues may include exposed credentials, unsafe scripts, vulnerable dependencies, insecure workflow configuration, or documentation that reveals sensitive information.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :x:                |
-| < 4.0   | :x:                |
+## Supported Project State
+
+This project is maintained as a collection of scripts and examples rather than a versioned product. Security fixes are applied to the current default branch.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you find a security issue, report it to the repository maintainers through the available private contact path for this project. If no private channel is configured, open a minimal public issue that does not include sensitive details and ask for a secure contact method.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Do not publish:
+
+- Passwords, tokens, API keys, SSH keys, or private certificates
+- Production hostnames, private IP addresses, or connection strings
+- Customer, employee, financial, or regulated data
+- Screenshots that reveal secrets or internal system details
+- Exploit steps that could be used against a live environment
+
+## What to Include
+
+When reporting a vulnerability, include:
+
+- A short description of the issue
+- The affected file, script, workflow, or dependency
+- The impact and likely risk
+- Safe reproduction steps using placeholder data
+- A suggested fix, if you have one
+
+## Security Guidelines for Contributors
+
+- Never commit `.env` files or real credentials.
+- Use placeholder values such as `localhost`, `app_user`, `app_database`, and `example.com`.
+- Add warning comments to destructive SQL statements.
+- Prefer read-only examples when demonstrating diagnostics.
+- Review AI-generated documentation before publishing it.
+- Remove private data from exported SQL, JSON, logs, screenshots, and workflow files.
+
+## Response Expectations
+
+Maintainers will review security reports as soon as practical. If the report is valid, the fix may include removing exposed data, rotating affected secrets, updating scripts, patching dependencies, or improving documentation.
