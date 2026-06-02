@@ -1,0 +1,11 @@
+{
+  "id": "oracle-index-info",
+  "title": "Index info",
+  "database": "oracle",
+  "category": "performance",
+  "risk_level": "read_only",
+  "description": "Shows index metadata in Oracle.",
+  "query": "SELECT owner, index_name, table_name, uniqueness, status FROM all_indexes ORDER BY owner, table_name, index_name;",
+  "explanation": "This shortcut helps inspect indexes and verify whether they are valid and usable.",
+  "tags": ["performance", "index", "oracle"]
+}

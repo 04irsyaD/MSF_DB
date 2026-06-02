@@ -1,0 +1,11 @@
+{
+  "id": "postgres-show-table-size",
+  "title": "Show table size",
+  "database": "postgresql",
+  "category": "performance",
+  "risk_level": "read_only",
+  "description": "Shows table size information in PostgreSQL.",
+  "query": "SELECT relname AS table_name, pg_size_pretty(pg_total_relation_size(relid)) AS total_size FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC;",
+  "explanation": "This query helps identify large tables and storage-heavy objects in PostgreSQL.",
+  "tags": ["performance", "storage", "table-size"]
+}

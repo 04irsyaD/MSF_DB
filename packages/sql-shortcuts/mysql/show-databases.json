@@ -1,0 +1,11 @@
+{
+  "id": "mysql-show-databases",
+  "title": "Show databases",
+  "database": "mysql",
+  "category": "inventory",
+  "risk_level": "safe",
+  "description": "Lists databases available in the MySQL server.",
+  "query": "SHOW DATABASES;",
+  "explanation": "This shortcut is a quick inventory check for available schemas in MySQL.",
+  "tags": ["inventory", "database", "mysql"]
+}

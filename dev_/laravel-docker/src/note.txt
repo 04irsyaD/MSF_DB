@@ -1,0 +1,75 @@
+Log in 
+Home (search, lihat berita,)
+Profil user 
+
+Log in
+Menu berita
+Pen
+
+Tabel
+User -> role,  
+Kategori -> artikel,
+1. 	Class: User (untuk mengelola akun admin dan pengguna lain)
+Kelas Pengguna ini berperan penting dalam sistem karena mengelola semua akun yang bisa login.
+·       Atribut:
+o   pengguna_no : int (PK, auto-increment)
+o   nama_lengkap : string NOT NULL
+o   username : string NOT NULL UNIQUE
+o   email : string NOT NULL UNIQUE
+o   kata_sandi : string NOT NULL (simpan hashed)
+o  peran : string NOT NULL (enum: admin, editor, pengunjung)
+o   terakhir_login : datetime nullable
+o   created_at : timestamp, updated_at : timestamp (timestamps)
+Method :
+o   cekPassword($plain) → boolean
+o   ubahProfil($data) 
+2. 	Class: Admin (menginherit dari Pengguna)
+·       Atribut :
+o   namaLengkap
+o   hak_akses (string): Peran atau level hak akses (misalnya, 'Super Admin', 'Editor').
+·       Metode :
+o   login(username, kata_sandi): Memeriksa validitas kredensial untuk login.
+o   tambahBerita(berita): Menambahkan objek berita baru.
+o   hapusBerita(kode_berita): Menghapus berita berdasarkan kode uniknya.
+o   kelolaPengguna(pengguna): Mengelola data pengguna lain.
+o   updateProfilInstansi(data): Mengubah data company profile.
+3. 	Class: Artikel
+·       Atribut :
+o   kode_artikel (string): Kode unik untuk setiap artikel, misalnya gabungan tanggal + judul. Atribut ini berfungsi sebagai primary key.
+o   judul (string): Judul artikel berita.
+o   isi_konten (teks): Isi lengkap artikel.
+o   tanggalPublikasi (tanggal): Waktu dan tanggal berita diterbitkan.
+o   penulis (string): Nama penulis artikel.
+o   kategori_kode : string (FK ke Kategori)
+o   jumlah_view : int
+o   statusPublikasi (string): Status artikel ('draft', 'terbit', 'arsip')
+o   gambar_utama (string): Nama atau URL file gambar utama.
+·       Metode :
+o   terbitkan(): Mengubah status artikel menjadi 'terbit'.
+o   edit(judul, isi_konten): Mengubah judul dan isi artikel.
+o   cari(kata_kunci): Mencari artikel berdasarkan kata kunci.
+o   tambahKomentar(komentar): Menambahkan objek komentar ke berita ini.
+o   tampilkanPratinjau(): Menampilkan ringkasan singkat dari artikel.
+4. 	Class: Kategori
+·       Atribut :
+o   kategori_kode : primary key.
+o   nama_kategori
+o   deskripsi
+5. 	class: Komentar
+Atribut:
+o   komentar_kode : (PK)
+o   kode_artikel : string (FK)
+o   pengguna_no : int
+o   isiKomentar : text
+o   tanggalKirim : datetime
+o   statusModerasi
+6. 	Class: ProfilInstansi
+·       Atribut :
+o   instansi_kode : string (PK, mis. "DINKES-001"
+o   nama_instansi (string): Nama resmi instansi.
+o   visi (teks): Visi organisasi.
+o   misi (teks): Misi organisasi.
+o   layanan_utama : text
+o   alamat_fisik (string): Alamat kantor.
+o   kontak_email (string): Email instansi.
+o   nomor_telepon (string): Nomor telepon instansi.

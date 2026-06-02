@@ -1,0 +1,52 @@
+name: Repo Health
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  markdown:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Markdownlint
+        run: npx --yes markdownlint-cli2 "**/*.md" "!**/node_modules/**" "!**/.venv/**" "!**/venv/**" "!**/.git/**"
+
+  repo-health:
+    name: Repository health check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for accidental secrets and build artifacts
+        shell: bash
+        run: |
+          banned=$(git ls-files | grep -E '(^|/)(\.venv|venv|node_modules|__pycache__|dist|build)(/|$)|(^|/)\.env(\.|$)' || true)
+          if [ -n "$banned" ]; then
+            echo "Unexpected tracked files found:"
+            echo "$banned"
+            exit 1
+          fi
+
+  package-check:
+    name: Package smoke check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect package manager files
+        shell: bash
+        run: |
+          if [ -f package.json ]; then
+            echo "Root package.json detected. Add lint/test steps when the app is ready."
+          else
+            echo "No root package.json yet."
+          fi

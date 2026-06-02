@@ -1,0 +1,11 @@
+{
+  "id": "mongodb-show-databases",
+  "title": "Show databases",
+  "database": "mongodb",
+  "category": "inventory",
+  "risk_level": "safe",
+  "description": "Lists MongoDB databases.",
+  "query": "db.adminCommand({ listDatabases: 1 })",
+  "explanation": "This shortcut helps inspect available MongoDB databases without changing data.",
+  "tags": ["inventory", "database", "mongodb"]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "sqlserver-active-sessions",
+  "title": "Active sessions",
+  "database": "sqlserver",
+  "category": "monitoring",
+  "risk_level": "read_only",
+  "description": "Lists active sessions in SQL Server.",
+  "query": "SELECT session_id, login_name, status, host_name, program_name, last_request_start_time FROM sys.dm_exec_sessions ORDER BY last_request_start_time DESC;",
+  "explanation": "This query helps review currently connected sessions and recent activity.",
+  "tags": ["monitoring", "sessions", "sqlserver"]
+}

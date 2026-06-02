@@ -1,0 +1,11 @@
+{
+  "id": "mysql-show-tables",
+  "title": "Show tables",
+  "database": "mysql",
+  "category": "inventory",
+  "risk_level": "safe",
+  "description": "Lists tables in the current MySQL database.",
+  "query": "SHOW TABLES;",
+  "explanation": "This shortcut helps confirm which tables are available in the active schema.",
+  "tags": ["inventory", "tables", "mysql"]
+}

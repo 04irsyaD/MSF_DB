@@ -1,21 +1,49 @@
-# Ignore TSD ERM.docx
-# Ignore Excel Healcheck SQL
-TSD ERM.docx
-excel_healcheck_kpei.sql
-# Ignore temporary files
+# Environment and secrets
 .env
 .env.*
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.venv/
+venv/
+env/
+
+# Node / frontend
+node_modules/
+.next/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Generic caches and logs
 *.log
+*.tmp
+*.temp
 *.bak
-*.txt
-.txt
-.docx
+*.cache
+.cache/
 *.docx
-# Ignore IDE specific files
+
+# OS and editor files
+.DS_Store
+Thumbs.db
 .idea/
 *.sublime-workspace
 *.sublime-project
-*.vscode/
-*.md
-!CODE_OF_CONDUCT.md
-!CONTRIBUTING.md
+.vscode/
+
+# Local secrets and generated artifacts
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Keep documentation and source files tracked by default

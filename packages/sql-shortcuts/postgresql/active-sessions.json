@@ -1,0 +1,11 @@
+{
+  "id": "postgres-active-sessions",
+  "title": "Active sessions",
+  "database": "postgresql",
+  "category": "monitoring",
+  "risk_level": "read_only",
+  "description": "Lists active PostgreSQL sessions.",
+  "query": "SELECT pid, usename, state, query_start, now() - query_start AS runtime, query FROM pg_stat_activity WHERE state IS NOT NULL ORDER BY query_start DESC;",
+  "explanation": "This query helps inspect long-running or currently active sessions.",
+  "tags": ["monitoring", "sessions", "performance"]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "databricks-query-performance",
+  "title": "Query performance overview",
+  "database": "databricks",
+  "category": "performance",
+  "risk_level": "read_only",
+  "description": "Shows recent query execution details in Databricks SQL.",
+  "query": "SELECT * FROM system.query_history ORDER BY start_time DESC LIMIT 20;",
+  "explanation": "This shortcut helps review recent query behavior and execution trends.",
+  "tags": ["performance", "query-history", "databricks"]
+}

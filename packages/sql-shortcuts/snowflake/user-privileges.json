@@ -1,0 +1,11 @@
+{
+  "id": "snowflake-user-privileges",
+  "title": "User privileges",
+  "database": "snowflake",
+  "category": "security",
+  "risk_level": "read_only",
+  "description": "Lists role and privilege grants in Snowflake.",
+  "query": "SHOW GRANTS TO USER IDENTIFIER('APP_USER');",
+  "explanation": "This shortcut helps review access and privilege assignments in Snowflake.",
+  "tags": ["security", "privileges", "snowflake"]
+}
