@@ -12,7 +12,7 @@ services:
       - N8N_HOST=localhost
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://localhost:5678/
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL:-http://localhost:5678/}
       
       # Database (SQLite default, atau ganti ke PostgreSQL)
       - DB_TYPE=sqlite
@@ -23,9 +23,9 @@ services:
       - TZ=Asia/Jakarta
       
       # Security (ganti di production!)
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=admin
-      - N8N_BASIC_AUTH_PASSWORD=admin123
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
       
       # Optional: Enable metrics
       # - N8N_METRICS=true
@@ -42,9 +42,9 @@ services:
   #   container_name: n8n_postgres
   #   restart: unless-stopped
   #   environment:
-  #     - POSTGRES_USER=n8n
-  #     - POSTGRES_PASSWORD=n8n_password
-  #     - POSTGRES_DB=n8n
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${POSTGRES_DB}
   #   volumes:
   #     - postgres_data:/var/lib/postgresql/data
   #   networks:

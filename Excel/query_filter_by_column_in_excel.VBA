@@ -1,5 +1,5 @@
 let
-    Source = Excel.Workbook(File.Contents("C:\Users\ROG\Downloads\pokemon (1).xlsx"), null, true),
+    Source = Excel.Workbook(File.Contents("data/pokemon.xlsx"), null, true),
     // source di gunakan untuk memanggil file yang akan di gunakan 
 
     Pokemon_Sheet = Source{[Item="Pokemon",Kind="Sheet"]}[Data],

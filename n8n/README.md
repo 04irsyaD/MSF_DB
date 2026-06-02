@@ -1,130 +1,57 @@
-# 🔄 n8n - Workflow Automation
+# n8n Workflow Automation
 
-Setup n8n untuk workflow automation - SQL to Documentation.
+Automation workflows for SQL-to-documentation pipelines, Telegram notifications, and Google Drive publishing.
 
----
+## Quick Start
 
-## 🚀 Quick Start
+1. Copy the example environment file and fill local values:
 
-### 1. Jalankan n8n
+```bash
+cp .env.example .env
+```
 
-```powershell
-cd "n8n"
+2. Start n8n:
+
+```bash
+cd n8n
 docker-compose up -d
 ```
 
-### 2. Akses n8n
+3. Open n8n:
 
-Buka browser: **http://localhost:5678**
-
-Login:
-- **Username:** `admin`
-- **Password:** `admin123`
-
-### 3. Import Workflow
-
-1. Buka n8n di browser
-2. Klik **"..."** menu → **Import from File**
-3. Pilih file `workflows/sql_to_docs_direct_input.json`
-4. **Aktifkan** workflow (toggle ON)
-
----
-
-## 📁 Struktur Folder
-
+```text
+http://localhost:5678
 ```
+
+Use the username and password configured in your local `.env` file:
+
+- `N8N_BASIC_AUTH_USER`
+- `N8N_BASIC_AUTH_PASSWORD`
+
+## Import a Workflow
+
+1. Open n8n in the browser.
+2. Choose Import from File.
+3. Select a workflow from `workflows/`.
+4. Configure required credentials in n8n.
+5. Activate the workflow after reviewing every node.
+
+## Available Workflows
+
+```text
 n8n/
-├── docker-compose.yml                    # Docker configuration
-├── README.md                             # File ini
-└── workflows/
-    ├── sql_to_docs_direct_input.json     # Workflow via API/curl
-    └── telegram_drive_sql_docs.json      # ⭐ Telegram + Google Drive
+|-- docker-compose.yml
+|-- .env.example
+`-- workflows/
+    |-- sql_to_docs_direct_input.json
+    |-- sql_table_to_docs_workflow.json
+    |-- telegram_drive_sql_docs.json
+    `-- github_postgresql_telegram.json
 ```
 
----
+## Direct SQL Input Workflow
 
-## 🤖 Workflow: Telegram + Google Drive (RECOMMENDED!)
-
-Input via Telegram → Process di n8n → Hasil ke Telegram + Google Drive
-
-### Setup (10 menit):
-
-#### 1. Buat Telegram Bot
-1. Buka Telegram, cari **@BotFather**
-2. Kirim `/newbot` → ikuti instruksi
-3. Dapat **Bot Token** (simpan)
-
-#### 2. Import Workflow
-1. Buka n8n: http://localhost:5678
-2. Import `workflows/telegram_drive_sql_docs.json`
-3. **Setup credentials:**
-   - Klik node **"Send to Telegram"** → Add credential → Paste Bot Token
-   - Klik node **"Upload to Drive"** → Add credential → Connect Google Account
-4. **Enable nodes** (click each disabled node → toggle ON):
-   - Send to Telegram
-   - Send Help/Error
-   - Upload to Drive
-5. **Activate** workflow
-
-#### 3. Setup Telegram Webhook
-Setelah workflow aktif, set webhook Telegram:
-
-```powershell
-# Ganti YOUR_BOT_TOKEN dan YOUR_N8N_URL
-$token = "YOUR_BOT_TOKEN"
-$webhookUrl = "https://your-n8n-domain.com/webhook/telegram-webhook"
-
-# Untuk local (pakai ngrok):
-# $webhookUrl = "https://abc123.ngrok.io/webhook/telegram-webhook"
-
-Invoke-RestMethod -Uri "https://api.telegram.org/bot$token/setWebhook?url=$webhookUrl"
-```
-
-#### 4. Test di Telegram!
-```
-/start
-/docs CREATE TABLE users (id serial, name varchar(100));
-```
-
-### Flow Diagram:
-
-```
-Telegram Message
-      ↓
-   n8n Webhook
-      ↓
-  Parse SQL?
-   ↙     ↘
- Yes      No
-  ↓        ↓
-Ollama AI  Send Help
-  ↓
-Format Output
-  ↓
-┌─────────────────┐
-│ Send Telegram   │ ← Hasil dokumentasi
-│ Upload Drive    │ ← File .md
-└─────────────────┘
-```
-
-### Untuk Local Development (ngrok):
-
-```powershell
-# Install ngrok jika belum
-# Download dari https://ngrok.com/download
-
-# Expose n8n webhook
-ngrok http 5678
-
-# Dapat URL seperti: https://abc123.ngrok.io
-# Gunakan untuk webhook Telegram
-```
-
----
-
-## 🎯 Cara Pakai - Direct SQL Input
-
-### Via cURL (Terminal)
+Send SQL to the webhook endpoint:
 
 ```bash
 curl -X POST http://localhost:5678/webhook/sql-to-docs \
@@ -132,107 +59,43 @@ curl -X POST http://localhost:5678/webhook/sql-to-docs \
   -d '{"sql": "CREATE TABLE users (id serial PRIMARY KEY, name varchar(100));"}'
 ```
 
-### Via PowerShell
+## Telegram and Google Drive Workflow
 
-```powershell
-$body = @{
-    sql = @"
-CREATE TABLE users (
-    id serial PRIMARY KEY,
-    name varchar(100),
-    email varchar(255),
-    created_at timestamp
-);
+The `telegram_drive_sql_docs.json` workflow can receive SQL from Telegram, generate documentation, send the result back to Telegram, and upload Markdown output to Google Drive.
 
-CREATE TABLE orders (
-    id serial PRIMARY KEY,
-    user_id integer,
-    total numeric(10,2),
-    status varchar(50)
-);
-"@
-} | ConvertTo-Json
+Required credentials are configured inside n8n:
 
-Invoke-RestMethod -Uri "http://localhost:5678/webhook/sql-to-docs" -Method POST -Body $body -ContentType "application/json"
-```
+- Telegram bot token
+- Google Drive account
+- Optional external webhook URL
 
-### Via Postman / Insomnia
+Use `N8N_WEBHOOK_URL` in `.env` when exposing n8n through a public URL or tunneling service.
 
-1. Method: **POST**
-2. URL: `http://localhost:5678/webhook/sql-to-docs`
-3. Body (JSON):
-```json
-{
-  "sql": "CREATE TABLE products (id serial PRIMARY KEY, name varchar(200), price numeric(10,2));"
-}
-```
+## Requirements
 
----
+- Docker and Docker Compose
+- Ollama running for AI-assisted documentation workflows
+- Local `.env` file created from `.env.example`
 
-## 📋 Response Format
+## Commands
 
-```json
-{
-  "markdown": "# 📚 Dokumentasi Database Schema\n...",
-  "documentation": [
-    {
-      "table_name": "users",
-      "description": "Tabel untuk menyimpan data pengguna",
-      "columns": [
-        {"no": 1, "name": "id", "type": "serial", "description": "ID unik pengguna"}
-      ]
-    }
-  ],
-  "total_tables": 1
-}
-```
-
----
-
-## ⚙️ Workflow Flow
-
-```
-[Webhook Input] → [Parse SQL] → [Ollama AI] → [Format Docs] → [Markdown] → [Response]
-```
-
----
-
-## ⚠️ Requirements
-
-- **Ollama** harus running: `ollama serve`
-- **Model**: `llama3:latest`
-
----
-
-## 🛠️ Commands
-
-```powershell
+```bash
 # Start n8n
 docker-compose up -d
 
 # Stop n8n
 docker-compose down
 
-# Lihat logs
+# View logs
 docker-compose logs -f n8n
 
 # Restart n8n
 docker-compose restart n8n
 ```
 
----
+## Security Notes
 
-## 🔧 Troubleshooting
-
-### Ollama tidak terkoneksi
-
-Pastikan Ollama running:
-```bash
-ollama serve
-```
-
-### Response kosong
-
-- Pastikan SQL format benar (CREATE TABLE)
-- Cek n8n Executions untuk error detail
-
+- Do not commit `.env`.
+- Do not paste real tokens into workflow JSON files.
+- Configure secrets through n8n credentials or local environment variables.
+- Review workflow exports before committing them.

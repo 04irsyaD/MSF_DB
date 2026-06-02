@@ -44,11 +44,11 @@ pwd = quick_password(12)
 print(pwd)  # Output: K9@mL2$xQ4pN
 
 # Hash password
-hashed = quick_hash("mypassword")
+hashed = quick_hash("example-password")
 print(hashed)  # Output: $2b$10$...
 
 # Verifikasi
-is_match = verify("mypassword", hashed)
+is_match = verify("example-password", hashed)
 
 ## 📖 File yang Tersedia
 
@@ -62,11 +62,11 @@ pwd = quick_password(12)
 print(pwd)  # Output: K9@mL2$xQ4pN
 
 # Hash password
-hashed = quick_hash("mypassword")
+hashed = quick_hash("example-password")
 print(hashed)  # Output: $2b$10$...
 
 # Verifikasi
-is_match = verify("mypassword", hashed)
+is_match = verify("example-password", hashed)
 print(is_match)  # True atau False
 ```
 print(is_match)  # True atau False
@@ -207,12 +207,12 @@ for i in range(1, 6):
 from quick import verify
 
 given_hash = "$2b$10$NM7Odhof400Pfu6j90WWL.i.JYCrp0CL7jfvKK3W/FPj9LdqGwWga"
-test_password = "admin123"
+test_password = "example-password"
 ```python
 from quick import verify
 
 given_hash = "$2b$10$NM7Odhof400Pfu6j90WWL.i.JYCrp0CL7jfvKK3W/FPj9LdqGwWga"
-test_password = "admin123"
+test_password = "example-password"
 
 if verify(test_password, given_hash):
     print("✓ Password cocok!")

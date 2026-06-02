@@ -1,40 +1,54 @@
-# 🤖 Telegram Bot - SQL to Documentation
+# Telegram SQL Docs Bot
 
-Generate dokumentasi database langsung dari Telegram!
+Generate database documentation from SQL snippets sent through Telegram.
 
-## 🚀 Setup (5 menit)
+## Setup
 
-### 1. Buat Bot di Telegram
+### 1. Create a Telegram Bot
 
-1. Buka Telegram, cari **@BotFather**
-2. Kirim `/newbot`
-3. Ikuti instruksi:
-   - Nama bot: `SQL Docs Bot` (atau terserah)
-   - Username: `sqldocs_yourname_bot` (harus unik, akhiran `_bot`)
-4. Copy **token** yang diberikan
+1. Open Telegram and search for `@BotFather`.
+2. Send `/newbot`.
+3. Follow the instructions.
+4. Copy the bot token and store it only in your local `.env` or shell environment.
 
-### 2. Install & Run
+### 2. Configure Environment Variables
 
-```powershell
-# Install dependencies
-cd "telegram-sql-docs"
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Set the following local values:
+
+```text
+TELEGRAM_BOT_TOKEN=
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3:latest
+```
+
+Do not commit `.env`.
+
+### 3. Install and Run
+
+```bash
+cd telegram-sql-docs
 pip install -r requirements.txt
 
-# Edit bot.py, ganti YOUR_BOT_TOKEN_HERE dengan token dari BotFather
-# Atau set environment variable:
-$env:TELEGRAM_BOT_TOKEN = "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+# Linux/macOS
+export TELEGRAM_BOT_TOKEN="<your-telegram-bot-token>"
 
-# Jalankan bot
+# Windows PowerShell
+$env:TELEGRAM_BOT_TOKEN = "<your-telegram-bot-token>"
+
 python bot.py
 ```
 
-### 3. Test di Telegram
+## Usage
 
-1. Cari bot kamu di Telegram (pakai username yang tadi dibuat)
-2. Klik **Start**
-3. Kirim SQL:
+Send SQL with `/docs`:
 
-```
+```text
 /docs CREATE TABLE users (
   id serial PRIMARY KEY,
   name varchar(100),
@@ -42,15 +56,9 @@ python bot.py
 );
 ```
 
-## 📱 Cara Pakai
+Or send a `CREATE TABLE` statement directly:
 
-### Command `/docs`
-```
-/docs CREATE TABLE products (id serial, name varchar(200), price numeric);
-```
-
-### Langsung Kirim SQL
-```
+```sql
 CREATE TABLE orders (
   id serial PRIMARY KEY,
   user_id integer,
@@ -59,76 +67,25 @@ CREATE TABLE orders (
 );
 ```
 
-Bot akan otomatis detect dan generate docs!
+## Output
 
-## 📋 Output Example
+The bot returns a table-oriented documentation summary with:
 
-```
-📚 DOKUMENTASI DATABASE
-━━━━━━━━━━━━━━━━━━━━━━━
+- Table name
+- AI-assisted table description
+- Column names
+- Data types
+- Short column descriptions
 
-1. users
-📝 Tabel untuk menyimpan data pengguna sistem
+## Requirements
 
-No  Field               Type            Deskripsi
-1   id                  serial          ID unik pengguna
-2   name                varchar(100)    Nama lengkap pengguna
-3   email               varchar(255)    Alamat email pengguna
+- Python
+- `python-telegram-bot`
+- Ollama running locally or through `OLLAMA_BASE_URL`
+- A local Telegram bot token
 
-✅ Total: 1 table(s)
-```
+## Security Notes
 
-## ⚙️ Konfigurasi
-
-Edit `bot.py`:
-
-```python
-# Ganti model Ollama
-OLLAMA_MODEL = "llama3:latest"  # atau mistral:latest, gemma:7b
-```
-
-## 📁 Struktur
-
-```
-telegram-sql-docs/
-├── bot.py              # Main bot script
-├── requirements.txt    # Dependencies
-└── README.md           # File ini
-```
-
-## ⚠️ Requirements
-
-
-## 🔧 Troubleshooting
-
-### Bot tidak respond
-
-### Error timeout
-
-### Ollama error
-```powershell
-# Pastikan Ollama running
-ollama serve
-
-# Check model ada
-ollama list
-```
-
-## 🚀 Run as Background Service (Optional)
-
-### Windows (Task Scheduler)
-1. Buka Task Scheduler
-2. Create Basic Task
-3. Trigger: At startup
-4. Action: Start program → `python bot.py`
-
-### Linux (systemd)
-```bash
-# /etc/systemd/system/sqldocs-bot.service
-[Service]
-ExecStart=/usr/bin/python3 /path/to/bot.py
-Restart=always
-```
-
-
-Made with ❤️ using python-telegram-bot + Ollama
+- Keep `TELEGRAM_BOT_TOKEN` out of Git.
+- Do not paste real tokens into README files, screenshots, workflow JSON, or issue comments.
+- Rotate the bot token if it was ever committed or shared publicly.
