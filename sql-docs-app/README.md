@@ -55,11 +55,8 @@ Browser akan otomatis terbuka di **http://localhost:8501**
 - Ollama running (`ollama serve`)
 - Model tersedia (misal `ollama pull llama3`)
 
-## 🎨 Features
-
-- ✅ Paste SQL langsung
 - ✅ Multiple tables sekaligus
 - ✅ AI generate deskripsi (ID/EN)
 - ✅ Preview Markdown
-- ✅ Download MD/JSON
-- ✅ Pilih model Ollama
+
+- ✅ Multiple tables sekaligus

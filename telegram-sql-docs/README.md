@@ -71,7 +71,6 @@ Bot akan otomatis detect dan generate docs!
 📝 Tabel untuk menyimpan data pengguna sistem
 
 No  Field               Type            Deskripsi
-------------------------------------------------------------
 1   id                  serial          ID unik pengguna
 2   name                varchar(100)    Nama lengkap pengguna
 3   email               varchar(255)    Alamat email pengguna
@@ -99,20 +98,12 @@ telegram-sql-docs/
 
 ## ⚠️ Requirements
 
-- Python 3.8+
-- Ollama running (`ollama serve`)
-- Internet connection (untuk Telegram API)
 
 ## 🔧 Troubleshooting
 
 ### Bot tidak respond
-- Pastikan `python bot.py` masih running
-- Check token sudah benar
-- Pastikan Ollama running
 
 ### Error timeout
-- AI butuh waktu ~10-30 detik per table
-- Kalau banyak table, sabar ya 😄
 
 ### Ollama error
 ```powershell
@@ -139,6 +130,5 @@ ExecStart=/usr/bin/python3 /path/to/bot.py
 Restart=always
 ```
 
----
 
 Made with ❤️ using python-telegram-bot + Ollama
