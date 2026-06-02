@@ -9,8 +9,8 @@ Syarat:
 1) Build image dan jalankan dengan Docker Compose (Docker Compose v2, `docker compose`):
 
 ```powershell
-# dari root proyek: c:\Users\ROG\Documents\query db\AI OLLMA
-cd "c:\Users\ROG\Documents\query db\AI OLLMA"
+# dari root proyek: AI OLLMA
+cd "AI OLLMA"
 
 # build image (opsional --no-cache untuk memastikan fresh build)
 docker compose build --no-cache
@@ -37,10 +37,10 @@ docker compose run --rm app python summary/scripts/ai_writer.py
 
 ```powershell
 # install dependencies
-python -m pip install -r "c:\Users\ROG\Documents\query db\AI OLLMA\summary\requirements.txt"
+python -m pip install -r "summary/requirements.txt"
 
 # jalankan main.py atau script lainnya
-python "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts\main.py"
+python "summary/scripts/main.py"
 ```
 
 Catatan tambahan:

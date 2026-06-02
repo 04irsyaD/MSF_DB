@@ -69,7 +69,7 @@ python reliable_docx_system.py
 
 ### Quick Start (RECOMMENDED):
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python reliable_docx_system.py
 ```
 

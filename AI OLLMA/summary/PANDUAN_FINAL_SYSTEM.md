@@ -37,7 +37,7 @@ Sistem ini adalah **solusi final** yang menghasilkan **DOCX profesional SAJA** (
 
 #### Option 1: Quick Sample (Direkomendasikan untuk testing)
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 echo "1" | python final_template_system.py
 ```
 - Memproses 15 tabel (2-3 menit)
@@ -45,7 +45,7 @@ echo "1" | python final_template_system.py
 
 #### Option 2: Medium Batch (Untuk dokumentasi lengkap)  
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 echo "2" | python final_template_system.py
 ```
 - Memproses 75 tabel (~30-40 menit)
@@ -53,7 +53,7 @@ echo "2" | python final_template_system.py
 
 #### Option 3: Complete Database (Untuk dokumentasi penuh)
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"  
+cd "AI OLLMA/summary/scripts"  
 echo "3" | python final_template_system.py
 ```
 - Memproses semua 170 tabel (~60-90 menit)
@@ -146,7 +146,7 @@ self.db_config = {
 
 Semua file hasil akan disimpan di:
 ```
-c:\Users\ROG\Documents\query db\AI OLLMA\summary\output\
+AI OLLMA/summary/output/
 ```
 
 File hasil:

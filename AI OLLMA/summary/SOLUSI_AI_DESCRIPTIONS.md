@@ -124,13 +124,13 @@ Smart Constraint Analysis:
 
 ### Generate AI-Enhanced Documentation:
 ```bash
-cd "C:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python ai_enhanced_table_generator.py
 ```
 
 ### Output Location:
 ```
-📁 File: C:\Users\ROG\Documents\query db\AI OLLMA\summary\output\AI_Enhanced_Documentation_15.docx
+📁 File: AI OLLMA/summary/output/AI_Enhanced_Documentation_15.docx
 ```
 
 ## 📋 COMPARISON: MANUAL vs AI DESCRIPTIONS

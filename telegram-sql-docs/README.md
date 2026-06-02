@@ -17,12 +17,11 @@ Generate dokumentasi database langsung dari Telegram!
 
 ```powershell
 # Install dependencies
-cd "c:\Users\ROG\Documents\query db\telegram-sql-docs"
+cd "telegram-sql-docs"
 pip install -r requirements.txt
 
-# Edit bot.py, ganti YOUR_BOT_TOKEN_HERE dengan token dari BotFather
-# Atau set environment variable:
-$env:TELEGRAM_BOT_TOKEN = "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+# Edit bot.py, atau set environment variable sebelum menjalankan bot:
+$env:TELEGRAM_BOT_TOKEN = "<your-telegram-bot-token>"
 
 # Jalankan bot
 python bot.py

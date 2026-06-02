@@ -147,7 +147,7 @@ Ringkasan:
 
 ### **Step 2: Run System**
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python template_filler_docx.py
 ```
 

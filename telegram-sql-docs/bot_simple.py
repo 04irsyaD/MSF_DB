@@ -13,7 +13,9 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 import ollama
 
 # ============== CONFIG ==============
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+if not BOT_TOKEN:
+    raise RuntimeError("TELEGRAM_BOT_TOKEN is not set")
 OLLAMA_MODEL = "llama3:latest"
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -122,10 +124,10 @@ async def process(update: Update, sql: str):
 
 # ============== MAIN ==============
 def main():
-    if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+    if not BOT_TOKEN:
         print("❌ Set BOT_TOKEN dulu!")
         print("1. @BotFather → /newbot → dapat token")
-        print("2. Ganti YOUR_BOT_TOKEN_HERE dengan token")
+        print("2. Set TELEGRAM_BOT_TOKEN sebagai environment variable")
         return
     
     print("🤖 SQL Docs Bot (Polling Mode)")

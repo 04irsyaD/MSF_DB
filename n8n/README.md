@@ -9,7 +9,7 @@ Setup n8n untuk workflow automation - SQL to Documentation.
 ### 1. Jalankan n8n
 
 ```powershell
-cd "c:\Users\ROG\Documents\query db\n8n"
+cd "n8n"
 docker-compose up -d
 ```
 
@@ -18,8 +18,8 @@ docker-compose up -d
 Buka browser: **http://localhost:5678**
 
 Login:
-- **Username:** `admin`
-- **Password:** `admin123`
+- **Username:** set via `N8N_BASIC_AUTH_USER`
+- **Password:** set via `N8N_BASIC_AUTH_PASSWORD`
 
 ### 3. Import Workflow
 
