@@ -5,19 +5,23 @@ title: "[Shortcut] "
 labels: shortcut-request
 ---
 
-## Database
+## Database engine
 
 Which database engine should this shortcut support?
 
-## Category
+## Shortcut title
 
-Examples: show tables, table size, index info, active sessions, privileges, performance.
+Give the shortcut a short, descriptive title.
 
-## Desired Shortcut
+## Use case
 
-Describe the query you want included.
+What task should this shortcut help with?
 
-## Risk Level
+## Query example
+
+Provide a sample query or the expected SQL pattern.
+
+## Risk level
 
 Choose one:
 
@@ -27,6 +31,6 @@ Choose one:
 - destructive
 - needs_backup
 
-## Notes
+## Additional notes
 
-Include any constraints, assumptions, or sample output.
+Include any constraints, assumptions, or expected output.

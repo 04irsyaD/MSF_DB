@@ -96,7 +96,7 @@ Description: [table description]
 
 ### Option 1: Generate Semua Database Tables (170 tables)
 ```bash
-cd "C:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python dynamic_table_generator.py
 ```
 **Output**: `Dynamic_Tables_Documentation.docx` (96.9 KB)

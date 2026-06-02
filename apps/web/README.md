@@ -28,4 +28,4 @@ The web app should give users a fast way to:
 
 ## Notes
 
-This folder is intentionally lightweight for now so the repository can be reorganized safely without breaking the existing legacy folders.
+This folder is intentionally lightweight for now so the repository can grow safely while the toolkit structure is still being shaped.

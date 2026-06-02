@@ -69,13 +69,13 @@ def safe_xml_escape(self, text):
 
 #### **Quick Fix (Minimal):**
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python fixed_docx_system.py
 ```
 
 #### **Enhanced Fix (Professional):**
 ```bash
-cd "c:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 echo "1" | python enhanced_safe_docx.py  # 15 tables
 echo "2" | python enhanced_safe_docx.py  # 35 tables  
 echo "3" | python enhanced_safe_docx.py  # 75 tables

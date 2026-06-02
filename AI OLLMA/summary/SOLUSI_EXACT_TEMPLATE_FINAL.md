@@ -145,13 +145,13 @@ Table 2: auth_permission
 
 ### Generate Exact Template Tables:
 ```bash
-cd "C:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python exact_template_table_generator.py
 ```
 
 ### Output Location:
 ```
-📁 File: C:\Users\ROG\Documents\query db\AI OLLMA\summary\output\Exact_Template_Tables_15.docx
+📁 File: AI OLLMA/summary/output/Exact_Template_Tables_15.docx
 📊 Contains: 15 database tables with exact template structure
 🎨 Format: Exact match dengan template original
 📐 Borders: ALL borders enabled dan visible

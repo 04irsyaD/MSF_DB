@@ -9,7 +9,7 @@ Web app sederhana untuk generate dokumentasi dari SQL!
 pip install streamlit ollama
 
 # 2. Jalankan app
-cd "c:\Users\ROG\Documents\query db\sql-docs-app"
+cd "sql-docs-app"
 streamlit run app.py
 ```
 

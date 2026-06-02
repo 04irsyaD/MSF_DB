@@ -7,7 +7,7 @@ labels: bug
 
 ## Summary
 
-Describe the bug clearly and briefly.
+Describe the issue clearly and briefly.
 
 ## Expected Behavior
 
@@ -19,9 +19,9 @@ What happened instead?
 
 ## Steps to Reproduce
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Environment
 

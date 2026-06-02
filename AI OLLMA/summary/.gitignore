@@ -1,4 +1,14 @@
 venv/
+env/
+_venv/
 __pycache__/
-output/
+*.py[cod]
+*.pyo
+*.pyd
 *.pyc
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+output/

@@ -9,7 +9,7 @@ Setup n8n untuk workflow automation - SQL to Documentation.
 ### 1. Jalankan n8n
 
 ```powershell
-cd "c:\Users\ROG\Documents\query db\n8n"
+cd "n8n"
 docker-compose up -d
 ```
 

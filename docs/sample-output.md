@@ -1,6 +1,6 @@
 # Sample Output
 
-This file shows the kind of Markdown documentation MSF_DB should generate from SQL schema input.
+This file shows the kind of Markdown documentation MSF_DB should generate from SQL DDL.
 
 ## Example Input
 
@@ -25,50 +25,19 @@ CREATE TABLE orders (
 ```md
 # Database Documentation
 
-## Overview
+## Table: customers
+Purpose: Stores customer master data.
 
-This schema contains customer master data and order transaction data.
+### Columns
+| Column | Type | Description |
+|---|---|---|
+| customer_id | INT | Unique customer identifier |
+| customer_name | VARCHAR(100) | Customer full name |
+| segment | VARCHAR(50) | Customer business segment |
 
-## Tables
+## Table: orders
+Purpose: Stores customer order transactions.
 
-### customers
-
-Stores customer master data.
-
-| Column | Type | Notes |
-| --- | --- | --- |
-| customer_id | INT | Primary key |
-| customer_name | VARCHAR(100) | Customer display name |
-| segment | VARCHAR(50) | Business segment |
-
-### orders
-
-Stores customer order transactions.
-
-| Column | Type | Notes |
-| --- | --- | --- |
-| order_id | INT | Primary key |
-| customer_id | INT | Foreign key to customers.customer_id |
-| order_date | DATE | Order date |
-| total_amount | DECIMAL(12,2) | Order total |
-
-## Relationships
-
-- `orders.customer_id` references `customers.customer_id`
-
-## Documentation Notes
-
-- The relationship is one customer to many orders.
-- The generated output should be reviewed before publishing.
+### Relationships
+- orders.customer_id references customers.customer_id
 ```
-
-## Output Goals
-
-A good DBDocs Gen result should include:
-
-- a short schema summary
-- table-level descriptions
-- column-level notes
-- relationship summary
-- any safety or governance warnings
-- a format that is easy to export to Markdown or PDF

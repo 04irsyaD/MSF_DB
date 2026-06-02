@@ -1,45 +1,36 @@
 # Roadmap
 
-## v0.1: SQL Shortcut Explorer
+## v0.1 — OSS Readiness
+- Clean README and project positioning
+- Clean repository structure
+- Add documentation pages
+- Improve .gitignore
+- Add issue and PR templates
 
-- Search shortcuts by database.
-- Filter by category.
-- Show risk labels.
-- Copy query text.
+## v0.2 — SQL Shortcut Explorer
+- Organize SQL shortcuts by database
+- Add metadata for shortcut category and risk level
+- Add search and filter support
+- Add copy query functionality
 
-## v0.2: AI SQL Explanation
+## v0.3 — AI SQL Explanation
+- Explain SQL shortcuts using AI
+- Add query risk explanation
+- Add database-specific notes
 
-- Explain what a query does.
-- Add safer summaries for risky operations.
-- Help users understand before execution.
+## v0.4 — DBDocs Gen
+- Parse SQL DDL
+- Detect tables and relationships
+- Generate table and column descriptions
+- Export documentation as Markdown
 
-## v0.3: DBDocs Gen from SQL DDL
+## v0.5 — Export and Sharing
+- Export to PDF
+- Export to Markdown
+- Generate shareable documentation pages
 
-- Parse DDL into schema objects.
-- Detect keys and relationships.
-- Generate Markdown documentation drafts.
-
-## v0.4: ERD / Schema Support
-
-- Support ERD input.
-- Support exported schema metadata.
-- Improve relationship summaries.
-
-## v0.5: Markdown / PDF Export
-
-- Export generated docs to Markdown.
-- Add PDF-ready output.
-- Improve rendering for portfolio and sharing use cases.
-
-## v0.6: Database Comparison Features
-
-- Compare schema versions.
-- Compare table definitions.
-- Highlight differences across engines or environments.
-
-## v1.0: Stable Database Productivity Platform
-
-- Frontend explorer is stable.
-- Shortcut catalog is broad and consistent.
-- DBDocs Gen is reliable for common schemas.
-- The toolkit is ready for public contributions and portfolio use.
+## v1.0 — Stable Platform
+- Stable frontend and backend
+- Multi-database shortcut library
+- AI-assisted database documentation
+- Contributor-friendly workflow

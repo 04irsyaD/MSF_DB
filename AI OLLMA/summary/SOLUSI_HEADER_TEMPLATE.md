@@ -98,7 +98,7 @@ Header structure harus identik!
 
 ### Quick Run:
 ```bash
-cd "C:\Users\ROG\Documents\query db\AI OLLMA\summary\scripts"
+cd "AI OLLMA/summary/scripts"
 python smart_template_replacer.py
 ```
 

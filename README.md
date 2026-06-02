@@ -1,179 +1,165 @@
-# MSF_DB
+# MSF_DB — Database Productivity Toolkit
 
-Open-source database productivity toolkit for SQL shortcuts, AI documentation, and DBA workflows.
+Open-source database productivity toolkit for SQL shortcuts, AI-powered database documentation, and DBA/Data Engineer workflows.
+
+MSF_DB is early-stage and actively developed. The goal is to turn a useful collection of database notes, shortcut queries, and automation experiments into a clean open-source toolkit.
 
 ## Overview
 
-MSF_DB is a database productivity toolkit that combines a searchable SQL shortcut library, AI-assisted database documentation generation, and workflow support for DBA and data engineering tasks.
+MSF_DB combines a SQL shortcut library, AI-assisted database documentation, and workflow automation into one repository. It is meant to help with fast database inspection, reusable query patterns, and readable schema documentation.
 
-It is designed to help teams move faster when they need to inspect databases, explain SQL, document schemas, compare systems, or reuse safe query patterns across engines.
+## Why MSF_DB?
 
-## Problem It Solves
+Database work is often spread across SQL snippets, manual documentation, setup notes, and automation scripts. MSF_DB brings those pieces together so the workflow is easier to reuse and review.
 
-Database work is often spread across notes, snippets, screenshots, and ad-hoc scripts. That makes it hard to:
-
-- Find the right query quickly.
-- Understand what a query does before running it.
-- Turn schema definitions into readable documentation.
-- Keep DBA and data engineering workflows consistent across databases.
-- Reuse proven patterns without rebuilding them from scratch.
-
-MSF_DB solves this by combining a shortcut explorer, documentation generator, and workflow-oriented reference layer in one repository.
+- SQL snippets and shortcuts stay organized by engine and purpose.
+- Database documentation can be generated from SQL DDL and schema metadata.
+- DBA and Data Engineer helpers live alongside the documentation flow.
+- n8n and Telegram workflows can deliver documentation or automate common tasks.
+- Multi-database references make the repository easier to browse as a toolkit.
 
 ## Core Features
 
-- SQL Shortcut Library for MySQL, PostgreSQL, SQL Server, Oracle, MongoDB, Databricks, and Snowflake.
-- AI Database Documentation Generator (DBDocs Gen) from SQL DDL, schema metadata, or ERD inputs.
-- Query explanation and risk labeling for safer database operations.
-- DBA and Data Engineer workflow patterns for inspection, monitoring, and documentation.
-- Frontend-ready structure for search, filter, copy, and explain experiences.
+- SQL Shortcut Library
+- AI-Powered Database Documentation
+- SQL DDL to Markdown Documentation
+- Multi-Database References
+- DBA/Data Engineer Helper Scripts
+- n8n and Telegram Workflow Automation
+- Query Safety and Explanation, as a planned enhancement
 
-## Architecture Overview
+## Main Components
 
-MSF_DB is organized as a monorepo-style toolkit:
+- [sql-docs-generator/](sql-docs-generator/)
+- [sql-docs-app/](sql-docs-app/)
+- [telegram-sql-docs/](telegram-sql-docs/)
+- [n8n/](n8n/)
+- [Mysql/](Mysql/)
+- [Postgresql/](Postgresql/)
+- [Databricks/](Databricks/)
+- [docs/](docs/)
+- [AI OLLMA/](AI%20OLLMA/)
 
-- `apps/web/` for the frontend shortcut explorer and documentation UI.
-- `apps/api/` for backend APIs that serve shortcuts, schema parsing, and generation endpoints.
-- `packages/sql-shortcuts/` for machine-readable shortcut definitions.
-- `packages/schema-parser/` for schema extraction and relationship detection.
-- `packages/dbdocs-gen/` for documentation generation logic and prompt orchestration.
-- `docs/` for project documentation, examples, and roadmap notes.
-- `examples/` for database-specific sample inputs and outputs.
+## Quick Start
 
-The current repository also contains legacy folders such as `Postgresql/`, `Mysql/`, `Databricks/`, `sql-docs-generator/`, and `sql-docs-app/`. These remain available as source material and can be mapped into the new structure over time.
-
-## Tech Stack
-
-- TypeScript and JavaScript for app and tool development.
-- Next.js for the web interface.
-- Python for parsing, automation, and AI-assisted tooling.
-- SQL and JSON for shortcut and metadata definitions.
-- Markdown for docs, examples, and generated outputs.
-- Docker for local services and reproducible workflows.
-
-## Project Structure
-
-```text
-MSF_DB/
-|-- apps/
-|   |-- web/
-|   `-- api/
-|-- packages/
-|   |-- dbdocs-gen/
-|   |-- sql-shortcuts/
-|   `-- schema-parser/
-|-- docs/
-|   |-- getting-started.md
-|   |-- architecture.md
-|   |-- sample-output.md
-|   `-- roadmap.md
-|-- examples/
-|   |-- mysql/
-|   |-- postgresql/
-|   |-- sqlserver/
-|   |-- oracle/
-|   |-- mongodb/
-|   |-- databricks/
-|   `-- snowflake/
-|-- README.md
-|-- CONTRIBUTING.md
-|-- CODE_OF_CONDUCT.md
-|-- SECURITY.md
-|-- LICENSE
-`-- CHANGELOG.md
+```bash
+git clone https://github.com/04irsyaD/MSF_DB.git
+cd MSF_DB
 ```
 
-Legacy folders such as `Postgresql/`, `Mysql/`, `Databricks/`, `sql-docs-generator/`, and `sql-docs-app/` remain in the repository during the transition and should be mapped into the new structure gradually.
+### Run SQL Docs Generator
 
-## Getting Started
+```bash
+cd sql-docs-generator
+docker-compose up -d
+```
 
-See [docs/getting-started.md](docs/getting-started.md) for setup instructions. In short:
+### Browse SQL Shortcuts
 
-1. Clone the repository.
-2. Install the runtime you need for the part you want to use.
-3. Run the web app, API, or shortcut catalog once the target package is available.
-4. Open the documentation pages in `docs/` for architecture and examples.
+Open the engine folders to browse shortcuts and reference material:
+
+- [Mysql/](Mysql/)
+- [Postgresql/](Postgresql/)
+- [Databricks/](Databricks/)
+
+### Run n8n Workflow
+
+```bash
+cd n8n
+docker-compose up -d
+```
 
 ## Usage Examples
 
-### Explore SQL Shortcuts
+- Search a shortcut query by database engine and risk level before running it.
+- Paste SQL DDL into the documentation flow to generate Markdown output.
+- Use n8n or Telegram automation to move documentation output into a sharing workflow.
 
-Use the shortcut library to find engine-specific queries by database, category, or risk level. Example use cases include listing tables, checking table size, reviewing indexes, or inspecting active sessions.
+## AI Database Documentation Workflow
 
-### Generate Documentation
+DBDocs Gen is the documentation workflow in MSF_DB.
 
-Paste SQL DDL or schema metadata into DBDocs Gen to create Markdown documentation, relationship summaries, and table dictionaries.
-
-### Explain Queries
-
-Use the AI-assisted layer to explain what a query does, what it touches, and what risk level it should carry before execution.
-
-## SQL Shortcut Library
-
-The shortcut library is a structured collection of reusable database queries.
-
-Each shortcut should include:
-
-- `id`
-- `title`
-- `database`
-- `category`
-- `risk_level`
-- `description`
-- `query`
-- `explanation`
-- `tags`
-
-This structure makes shortcuts easy to search, filter, render, and copy from the frontend.
-
-Example categories include:
-
-- show databases
-- show tables
-- table size
-- index info
-- active sessions
-- backup/checkpoint
-- user privileges
-- query performance
-
-## AI Database Documentation Generator
-
-DBDocs Gen is one of the core features of MSF_DB.
-
-Input sources:
+**Input**
 
 - SQL DDL
-- schema metadata
-- ERD diagrams
-- exported database metadata
+- database schema
+- table metadata
+- business context
 
-Process:
+**Process**
 
-- parse tables and columns
-- detect primary keys and foreign keys
-- infer relationships
+- parse schema
+- detect tables, columns, and relationships
 - generate AI-assisted descriptions
-- build a readable documentation page
+- produce readable documentation
 
-Output formats:
+**Output**
 
 - Markdown documentation
-- PDF export-ready content
 - table dictionary
 - relationship summary
-- documentation pages for internal or public use
+- developer-friendly database docs
+
+Example input:
+
+```sql
+CREATE TABLE customers (
+  customer_id INT PRIMARY KEY,
+  customer_name VARCHAR(100),
+  segment VARCHAR(50)
+);
+
+CREATE TABLE orders (
+  order_id INT PRIMARY KEY,
+  customer_id INT,
+  order_date DATE,
+  total_amount DECIMAL(12,2),
+  FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+```
+
+Example output:
+
+```md
+# Database Documentation
+
+## Table: customers
+Purpose: Stores customer master data.
+
+### Columns
+| Column | Type | Description |
+|---|---|---|
+| customer_id | INT | Unique customer identifier |
+| customer_name | VARCHAR(100) | Customer full name |
+| segment | VARCHAR(50) | Customer business segment |
+
+## Table: orders
+Purpose: Stores customer order transactions.
+
+### Relationships
+- orders.customer_id references customers.customer_id
+```
 
 ## Roadmap
 
-See [docs/roadmap.md](docs/roadmap.md) for the current delivery plan.
+- v0.1: repository cleanup and documentation
+- v0.2: SQL shortcut explorer
+- v0.3: AI SQL explanation
+- v0.4: DBDocs Gen from SQL DDL
+- v0.5: Markdown/PDF export
+- v0.6: multi-database comparison
+- v1.0: stable database productivity platform
+
+See [docs/roadmap.md](docs/roadmap.md) for the working roadmap.
 
 ## Contributing
 
-Contributions are welcome for SQL shortcuts, documentation improvements, parsers, generator logic, and frontend features.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+## Security
+
+Please read [SECURITY.md](SECURITY.md) before sharing data, credentials, or security-sensitive findings.
 
 ## License
 
-Licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
