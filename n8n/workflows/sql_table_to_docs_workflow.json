@@ -29,7 +29,7 @@
     },
     {
       "parameters": {
-        "command": "cd \"C:\\Users\\ROG\\Documents\\query db\\Migration\\Postgresql\\plstx\\tables\" && python sql_table_to_docs.py"
+        "command": "cd \"${SQL_TABLE_DOCS_DIR:-sql-docs-generator}\" && python sql_table_to_docs.py"
       },
       "id": "execute-python",
       "name": "Run Documentation Generator",

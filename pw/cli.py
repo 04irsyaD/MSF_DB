@@ -5,8 +5,8 @@ Langsung keluar hasil di terminal - bisa langsung dikopi!
 Penggunaan:
     python cli.py                    # Generate 1 password random
     python cli.py -n 5              # Generate 5 password
-    python cli.py -hash admin123    # Hash password spesifik
-    python cli.py -v admin123 (hash) # Verifikasi password
+    python cli.py -hash example-password    # Hash password spesifik
+    python cli.py -v example-password (hash) # Verifikasi password
 """
 
 import sys
@@ -83,17 +83,17 @@ COMMAND:
    Output: K9@mL2$xQ4pNaB3xL8$m
 
 4. Hash password:
-   python cli.py -hash admin123
+   python cli.py -hash example-password
    
    Output: $2b$10$NM7Odhof400Pfu6j90WWL.i.JYCrp0CL7jfvKK3W/FPj9LdqGwWga
 
 5. Hash dengan rounds custom:
-   python cli.py -hash-rounds admin123 12
+   python cli.py -hash-rounds example-password 12
    
    Output: $2b$12$...
 
 6. Verifikasi password:
-   python cli.py -verify admin123 "$2b$10$..."
+   python cli.py -verify example-password "$2b$10$..."
    
    Output: COCOK atau TIDAK COCOK
 

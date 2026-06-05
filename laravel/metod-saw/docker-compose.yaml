@@ -17,18 +17,18 @@ services:
     environment:
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_DATABASE=saw_karyawan
-      - DB_USERNAME=saw_user
-      - DB_PASSWORD=saw_password
+      - DB_DATABASE=${POSTGRES_DB}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
 
   db:
     image: postgres:15
     container_name: saw_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: saw_karyawan
-      POSTGRES_USER: saw_user
-      POSTGRES_PASSWORD: saw_password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - saw_pgdata:/var/lib/postgresql/data
     ports:
@@ -39,8 +39,8 @@ services:
     container_name: saw_pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@saw.com
-      PGADMIN_DEFAULT_PASSWORD: sawadmin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - 5051:80
     depends_on:

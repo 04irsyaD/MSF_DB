@@ -17,11 +17,11 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 import ollama
 
 # ============== KONFIGURASI ==============
-# Ganti dengan token dari @BotFather
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+# Token must be provided through the local environment.
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
 # Model Ollama
-OLLAMA_MODEL = "llama3:latest"
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3:latest")
 
 # Logging
 logging.basicConfig(
@@ -281,7 +281,7 @@ async def process_sql(update: Update, sql_text: str):
 def main():
     """Start the bot"""
     
-    if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+    if not BOT_TOKEN:
         print("=" * 50)
         print("❌ ERROR: Bot token belum diset!")
         print()
@@ -289,7 +289,7 @@ def main():
         print("1. Buka Telegram, cari @BotFather")
         print("2. Kirim /newbot")
         print("3. Ikuti instruksi, dapat token")
-        print("4. Copy token ke BOT_TOKEN di file ini")
+        print("4. Set TELEGRAM_BOT_TOKEN di environment lokal")
         print("=" * 50)
         return
     

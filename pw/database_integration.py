@@ -148,7 +148,7 @@ external_hash = "$2b$10$NM7Odhof400Pfu6j90WWL.i.JYCrp0CL7jfvKK3W/FPj9LdqGwWga"
 print(f"\nDiberikan hash dari sistem lain:")
 print(f"{external_hash}\n")
 
-test_passwords = ["password", "admin123", "secret123", "bcrypt123"]
+test_passwords = ["example-password", "sample-password", "demo-password", "bcrypt-example"]
 print("Mencoba untuk menemukan password:")
 for pwd in test_passwords:
     match = verify(pwd, external_hash)

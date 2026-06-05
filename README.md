@@ -2,21 +2,22 @@
 
 Open-source database productivity toolkit for SQL shortcuts, AI-powered database documentation, and DBA/Data Engineer workflows.
 
-MSF_DB is early-stage and actively developed. The goal is to turn a useful collection of database notes, shortcut queries, and automation experiments into a clean open-source toolkit.
-
 ## Overview
 
-MSF_DB combines a SQL shortcut library, AI-assisted database documentation, and workflow automation into one repository. It is meant to help with fast database inspection, reusable query patterns, and readable schema documentation.
+MSF_DB is an early-stage open-source database productivity toolkit. It brings together practical SQL shortcuts, AI-assisted database documentation, SQL DDL to Markdown workflows, DBA/Data Engineer helper scripts, n8n automation, Telegram bot workflows, and multi-database references in one repository.
+
+The project is designed for people who frequently work with database schemas, query snippets, operational notes, automation scripts, and documentation that needs to be easier to find, review, and reuse.
 
 ## Why MSF_DB?
 
-Database work is often spread across SQL snippets, manual documentation, setup notes, and automation scripts. MSF_DB brings those pieces together so the workflow is easier to reuse and review.
+Database knowledge is often scattered across query snippets, setup notes, manual documentation, local scripts, chat messages, and workflow automation. That makes it harder for teams to understand schema intent, safely reuse queries, document changes, and onboard new developers or data engineers.
 
-- SQL snippets and shortcuts stay organized by engine and purpose.
-- Database documentation can be generated from SQL DDL and schema metadata.
-- DBA and Data Engineer helpers live alongside the documentation flow.
-- n8n and Telegram workflows can deliver documentation or automate common tasks.
-- Multi-database references make the repository easier to browse as a toolkit.
+MSF_DB tries to organize those pieces into a single toolkit:
+
+- SQL shortcuts stay close to the database engine they support.
+- Documentation workflows help turn schema definitions into readable Markdown.
+- Automation examples show how database work can connect with n8n, Telegram, and AI services.
+- Security and cleanup guidance helps keep the repository safe for open-source usage.
 
 ## Core Features
 
@@ -26,19 +27,18 @@ Database work is often spread across SQL snippets, manual documentation, setup n
 - Multi-Database References
 - DBA/Data Engineer Helper Scripts
 - n8n and Telegram Workflow Automation
-- Query Safety and Explanation, as a planned enhancement
+- Query Safety and Explanation, as planned enhancement
 
 ## Main Components
 
-- [sql-docs-generator/](sql-docs-generator/)
-- [sql-docs-app/](sql-docs-app/)
-- [telegram-sql-docs/](telegram-sql-docs/)
-- [n8n/](n8n/)
-- [Mysql/](Mysql/)
-- [Postgresql/](Postgresql/)
-- [Databricks/](Databricks/)
-- [docs/](docs/)
-- [AI OLLMA/](AI%20OLLMA/)
+- `sql-docs-generator/` - AI-assisted SQL documentation generator using a frontend, FastAPI service, and Ollama.
+- `sql-docs-app/` - Lightweight SQL-to-docs application reference.
+- `telegram-sql-docs/` - Telegram bot workflow for generating database documentation from SQL snippets.
+- `n8n/` - Workflow automation for SQL-to-docs and notification pipelines.
+- `Mysql/` - MySQL query shortcuts and references.
+- `Postgresql/` - PostgreSQL scripts, table utilities, functions, triggers, and configuration examples.
+- `Databricks/` - Databricks SQL and RBAC examples.
+- `docs/` - Project documentation, roadmap, examples, and security cleanup guidance.
 
 ## Quick Start
 
@@ -47,119 +47,121 @@ git clone https://github.com/04irsyaD/MSF_DB.git
 cd MSF_DB
 ```
 
-### Run SQL Docs Generator
+Browse SQL shortcuts by opening the database folders:
+
+```text
+Mysql/
+Postgresql/
+Databricks/
+```
+
+Run the SQL Docs Generator from `sql-docs-generator/`:
 
 ```bash
 cd sql-docs-generator
 docker-compose up -d
 ```
 
-### Browse SQL Shortcuts
-
-Open the engine folders to browse shortcuts and reference material:
-
-- [Mysql/](Mysql/)
-- [Postgresql/](Postgresql/)
-- [Databricks/](Databricks/)
-
-### Run n8n Workflow
+Run n8n workflows from `n8n/`:
 
 ```bash
 cd n8n
 docker-compose up -d
 ```
 
-## Usage Examples
-
-- Search a shortcut query by database engine and risk level before running it.
-- Paste SQL DDL into the documentation flow to generate Markdown output.
-- Use n8n or Telegram automation to move documentation output into a sharing workflow.
+Use `.env.example` files to document required environment variables. Keep real `.env` files local and out of Git.
 
 ## AI Database Documentation Workflow
 
-DBDocs Gen is the documentation workflow in MSF_DB.
+MSF_DB includes workflows for generating database documentation from schema input.
 
-**Input**
+Input:
 
 - SQL DDL
-- database schema
-- table metadata
-- business context
+- Database schema
+- Table metadata
+- Business context
 
-**Process**
+Process:
 
-- parse schema
-- detect tables, columns, and relationships
-- generate AI-assisted descriptions
-- produce readable documentation
+- Parse schema definitions.
+- Detect tables, columns, and relationships.
+- Generate AI-assisted descriptions.
+- Produce readable documentation for developers, DBAs, analysts, and data engineers.
 
-**Output**
+Output:
 
 - Markdown documentation
-- table dictionary
-- relationship summary
-- developer-friendly database docs
+- Table dictionary
+- Relationship summary
+- Developer-friendly database docs
 
-Example input:
+Example input SQL:
 
 ```sql
-CREATE TABLE customers (
-  customer_id INT PRIMARY KEY,
-  customer_name VARCHAR(100),
-  segment VARCHAR(50)
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  full_name VARCHAR(150),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE orders (
-  order_id INT PRIMARY KEY,
-  customer_id INT,
-  order_date DATE,
-  total_amount DECIMAL(12,2),
-  FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  total_amount NUMERIC(12,2) NOT NULL,
+  status VARCHAR(30) DEFAULT 'pending'
 );
 ```
 
-Example output:
+Example output Markdown:
 
-```md
-# Database Documentation
+```markdown
+# Table: users
 
-## Table: customers
-Purpose: Stores customer master data.
+## Purpose
 
-### Columns
-| Column | Type | Description |
-|---|---|---|
-| customer_id | INT | Unique customer identifier |
-| customer_name | VARCHAR(100) | Customer full name |
-| segment | VARCHAR(50) | Customer business segment |
+Stores application user account information.
 
-## Table: orders
-Purpose: Stores customer order transactions.
+## Columns
 
-### Relationships
-- orders.customer_id references customers.customer_id
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| id | serial | no | Primary user identifier |
+| email | varchar(255) | no | Unique email used for account access |
+| full_name | varchar(150) | yes | User display name |
+| created_at | timestamp | yes | Account creation timestamp |
+
+## Relationships
+
+- Referenced by `orders.user_id`.
 ```
+
+## Security Notice
+
+Do not commit real credentials, API keys, database passwords, private keys, access tokens, or production connection strings. Use `.env.example` to document required environment variables and keep real `.env` files local.
+
+Review SQL, workflow JSON, Docker Compose files, logs, screenshots, generated documentation, and exported data before committing them.
 
 ## Roadmap
 
-- v0.1: repository cleanup and documentation
+- v0.1: Repository cleanup and documentation
 - v0.2: SQL shortcut explorer
 - v0.3: AI SQL explanation
 - v0.4: DBDocs Gen from SQL DDL
 - v0.5: Markdown/PDF export
-- v0.6: multi-database comparison
-- v1.0: stable database productivity platform
-
-See [docs/roadmap.md](docs/roadmap.md) for the working roadmap.
+- v1.0: Stable database productivity platform
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for SQL, documentation, workflow, and automation contribution guidelines.
+
+Please follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) when participating in the project.
 
 ## Security
 
-Please read [SECURITY.md](SECURITY.md) before sharing data, credentials, or security-sensitive findings.
+See [SECURITY_NOTICE.md](SECURITY_NOTICE.md), [SECURITY.md](SECURITY.md), and [docs/security-cleanup.md](docs/security-cleanup.md) for security guidance, vulnerability reporting, and cleanup steps.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+This project is licensed under the [MIT License](LICENSE).

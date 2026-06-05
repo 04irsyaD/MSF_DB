@@ -121,7 +121,7 @@ if HAS_BCRYPT:
     given_hash = "$2b$10$NM7Odhof400Pfu6j90WWL.i.JYCrp0CL7jfvKK3W/FPj9LdqGwWga"
     
     # Coba berbagai password
-    candidates = ["password", "admin123", "secret123", "bcrypt123"]
+    candidates = ["example-password", "sample-password", "demo-password", "bcrypt-example"]
     
     print(f"Mencoba verifikasi hash:\n{given_hash}\n")
     print("Mencoba password:")
@@ -150,12 +150,12 @@ print("""
    print(pwd)  # Contoh output: K9@mL2$xQ4pN
 
 3. HASH PASSWORD:
-   hashed = hash_password_bcrypt("mypassword", rounds=10)
+   hashed = hash_password_bcrypt("example-password", rounds=10)
    print(hashed)  # Contoh: $2b$10$...
 
 4. VERIFIKASI:
    import bcrypt
-   match = bcrypt.checkpw("mypassword".encode(), hashed.encode())
+   match = bcrypt.checkpw("example-password".encode(), hashed.encode())
    
 5. UNTUK PRODUCTION:
    - Selalu gunakan rounds=10 atau lebih

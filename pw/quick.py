@@ -44,10 +44,10 @@ if __name__ == "__main__":
     for i in range(1, 4):
         print(f"   {i}. {quick_password(12)}")
     
-    print("\n2️⃣  Hash password 'admin123':")
-    hash_result = quick_hash("admin123", rounds=10)
+    print("\n2️⃣  Hash password 'example-password':")
+    hash_result = quick_hash("example-password", rounds=10)
     if hash_result:
         print(f"   {hash_result}")
         print("\n3️⃣  Verifikasi password:")
-        print(f"   'admin123' cocok? {verify('admin123', hash_result)}")
+        print(f"   'example-password' cocok? {verify('example-password', hash_result)}")
         print(f"   'salah123' cocok? {verify('salah123', hash_result)}")
