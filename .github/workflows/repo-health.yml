@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Markdownlint
-        run: npx --yes markdownlint-cli2 "**/*.md" "!**/node_modules/**" "!**/.venv/**" "!**/venv/**" "!**/.git/**"
+        run: npx --yes markdownlint-cli2 "**/*.md" "!**/node_modules/**" "!**/vendor/**" "!**/.venv/**" "!**/venv/**" "!**/.git/**"
 
   repo-health:
     name: Repository health check

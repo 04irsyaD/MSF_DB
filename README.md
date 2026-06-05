@@ -27,7 +27,7 @@ MSF_DB tries to organize those pieces into a single toolkit:
 - Multi-Database References
 - DBA/Data Engineer Helper Scripts
 - n8n and Telegram Workflow Automation
-- Query Safety and Explanation, as a planned enhancement
+- Query Safety and Explanation, as planned enhancement
 
 ## Main Components
 
@@ -160,7 +160,7 @@ Please follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) when participating in the
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for vulnerability reporting guidance and [docs/security-cleanup.md](docs/security-cleanup.md) for the cleanup checklist.
+See [SECURITY_NOTICE.md](SECURITY_NOTICE.md), [SECURITY.md](SECURITY.md), and [docs/security-cleanup.md](docs/security-cleanup.md) for security guidance, vulnerability reporting, and cleanup steps.
 
 ## License
 
