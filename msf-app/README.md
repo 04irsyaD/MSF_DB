@@ -186,6 +186,7 @@ Lihat file `.env.example` untuk daftar lengkap.
 ## API Endpoints
 
 ### Generate Documentation
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | `POST` | `/api/generate/from-ddl` | Generate dari SQL DDL |
@@ -194,12 +195,14 @@ Lihat file `.env.example` untuk daftar lengkap.
 | `GET` | `/api/jobs/{job_id}/download` | Download hasil (DOCX) |
 
 ### Database
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | `POST` | `/api/db/test-connection` | Test koneksi DB |
 | `POST` | `/api/db/metadata` | Ambil metadata dari DB |
 
 ### AI
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | `GET` | `/api/ai/models` | List model Ollama tersedia |
@@ -207,6 +210,7 @@ Lihat file `.env.example` untuk daftar lengkap.
 | `POST` | `/api/ai/test` | Test koneksi AI provider |
 
 ### Shortcuts
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | `GET` | `/api/shortcuts` | List semua shortcut |
@@ -214,12 +218,14 @@ Lihat file `.env.example` untuk daftar lengkap.
 | `GET` | `/api/shortcuts?category=monitoring` | Filter by kategori |
 
 ### Export
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | `POST` | `/api/export/docx` | Markdown → Word |
 | `POST` | `/api/export/pdf` | Markdown → PDF _(fase 2)_ |
 
 ### Health
+
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
 | `GET` | `/health` | Health check semua service |

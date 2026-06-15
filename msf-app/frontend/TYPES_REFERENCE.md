@@ -1,10 +1,12 @@
-# ==============================================================
 # MSF-APP — TypeScript Types & Interfaces
-# Semua type yang dipakai di seluruh frontend
-# ==============================================================
 
-# ---- GENERATE / JOB ----
+Semua type yang dipakai di seluruh frontend Next.js.
 
+---
+
+## Generate / Job Types
+
+```typescript
 type JobStatus = "queued" | "processing" | "done" | "error"
 
 type DetailLevel = "simple" | "detailed" | "comprehensive"
@@ -18,9 +20,13 @@ type AIProvider = "ollama" | "deepseek" | "openai"
 type DBEngine = "postgresql" | "mysql" | "sqlite" | "sqlserver" | "mongodb"
 
 type ExportFormat = "docx" | "pdf"
+```
 
-# ---- API REQUEST SHAPES ----
+---
 
+## API Request Shapes
+
+```typescript
 interface GenerateFromDDLRequest {
   sql_content: string
   project_name?: string
@@ -45,25 +51,29 @@ interface GenerateFromDBRequest {
   output_format: ExportFormat
   include_views?: boolean
   include_functions?: boolean
-  schema_filter?: string       # Filter hanya schema tertentu
-  table_filter?: string[]      # Filter hanya tabel tertentu
+  schema_filter?: string       // Filter hanya schema tertentu
+  table_filter?: string[]      // Filter hanya tabel tertentu
 }
 
 interface DBConnection {
   engine: DBEngine
-  # Opsi A: Form manual
+  // Opsi A: Form manual
   host?: string
   port?: number
   database?: string
   username?: string
   password?: string
   schema_name?: string
-  # Opsi B: Connection string
+  // Opsi B: Connection string
   connection_string?: string
 }
+```
 
-# ---- API RESPONSE SHAPES ----
+---
 
+## API Response Shapes
+
+```typescript
 interface GenerateJobResponse {
   job_id: string
   status: JobStatus
@@ -74,16 +84,16 @@ interface GenerateJobResponse {
 interface JobStatusResponse {
   job_id: string
   status: JobStatus
-  progress: number             # 0-100
+  progress: number             // 0-100
   tables_total: number
   tables_processed: number
-  current_table?: string       # Tabel yang sedang diproses
+  current_table?: string       // Tabel yang sedang diproses
   created_at: string
   updated_at: string
   completed_at?: string
   error_message?: string
-  preview_markdown?: string    # Preview sebagian hasil (untuk display)
-  download_url?: string        # URL download saat status=done
+  preview_markdown?: string    // Preview sebagian hasil (untuk display)
+  download_url?: string        // URL download saat status=done
 }
 
 interface AIModelsResponse {
@@ -177,9 +187,13 @@ interface FunctionMetadata {
   language?: string
   return_type?: string
 }
+```
 
-# ---- UI STATE ----
+---
 
+## UI State Shapes
+
+```typescript
 interface GeneratorSettings {
   language: OutputLanguage
   detail_level: DetailLevel
@@ -197,3 +211,4 @@ interface ActiveJob {
   status: JobStatus
   started_at: string
 }
+```

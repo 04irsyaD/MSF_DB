@@ -268,6 +268,7 @@ List semua provider yang dikonfigurasi dan status ketersediaannya.
 List semua shortcut SQL dengan filter opsional.
 
 **Query Parameters:**
+
 | Param | Type | Default | Keterangan |
 |-------|------|---------|------------|
 | `engine` | string | null | Filter: postgresql, mysql, sqlserver, mongodb |
@@ -344,6 +345,7 @@ Semua error mengikuti format yang konsisten:
 ```
 
 **HTTP Status Codes:**
+
 | Code | Keterangan |
 |------|------------|
 | `400` | Request tidak valid (validasi gagal) |
