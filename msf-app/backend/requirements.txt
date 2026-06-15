@@ -1,0 +1,65 @@
+# ==============================================================
+# MSF-APP Backend — Python Requirements
+# ==============================================================
+# Install: pip install -r requirements.txt
+# Rekomendasi pakai uv: uv pip install -r requirements.txt
+# ==============================================================
+
+# --------------------------------------------------------------
+# CORE FRAMEWORK
+# --------------------------------------------------------------
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12        # File upload support
+
+# --------------------------------------------------------------
+# DATA VALIDATION
+# --------------------------------------------------------------
+pydantic==2.10.3
+pydantic-settings==2.6.1        # Settings dari .env
+
+# --------------------------------------------------------------
+# HTTP CLIENT (untuk Ollama & Cloud AI)
+# --------------------------------------------------------------
+httpx==0.28.1                   # Async HTTP client
+httpx[http2]==0.28.1            # HTTP/2 support
+
+# --------------------------------------------------------------
+# DATABASE CONNECTIVITY
+# --------------------------------------------------------------
+sqlalchemy==2.0.36              # ORM & multi-DB connector
+psycopg2-binary==2.9.10         # PostgreSQL driver
+pymysql==1.1.1                  # MySQL / MariaDB driver
+cryptography==44.0.0            # Required by pymysql untuk SSL
+# pyodbc==5.2.0                 # SQL Server (aktifkan di v2.1 — butuh ODBC driver)
+# pymongo==4.10.1               # MongoDB (aktifkan di v2.1)
+
+# --------------------------------------------------------------
+# DOCUMENT GENERATION
+# --------------------------------------------------------------
+python-docx==1.1.2              # Generate / edit file Word (.docx)
+# weasyprint==62.3              # PDF generation (aktifkan di v2.2)
+# markdown==3.7                 # Parse Markdown ke HTML (untuk PDF)
+
+# --------------------------------------------------------------
+# UTILITIES
+# --------------------------------------------------------------
+python-dotenv==1.0.1            # Load .env file
+structlog==24.4.0               # Structured logging
+anyio==4.7.0                    # Async utilities
+aiofiles==24.1.0                # Async file I/O
+uuid7==0.1.0                    # Generate job ID dengan UUID v7
+
+# --------------------------------------------------------------
+# DATA PROCESSING (untuk metadata processing)
+# --------------------------------------------------------------
+# pandas==2.2.3                 # Opsional — untuk data manipulation lanjutan
+
+# --------------------------------------------------------------
+# DEVELOPMENT & TESTING
+# --------------------------------------------------------------
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.1                   # Untuk test FastAPI (TestClient async)
+pytest-cov==6.0.0               # Coverage report
+ruff==0.8.4                     # Linter + formatter (ganti flake8 + black)
