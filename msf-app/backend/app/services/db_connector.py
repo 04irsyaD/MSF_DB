@@ -67,7 +67,13 @@ class DBConnector:
 
     @classmethod
     async def test_connection(cls, conn: DBConnection) -> DBTestConnectionResponse:
-        """Test apakah koneksi ke database berhasil"""
+        """Test apakah koneksi ke database berhasil (async non-blocking)"""
+        import asyncio
+        return await asyncio.to_thread(cls.test_connection_sync, conn)
+
+    @classmethod
+    def test_connection_sync(cls, conn: DBConnection) -> DBTestConnectionResponse:
+        """Test apakah koneksi ke database berhasil (blocking sync)"""
         try:
             url = cls.build_connection_url(conn)
             engine = create_engine(url, connect_args={"connect_timeout": 10})
@@ -117,7 +123,27 @@ class DBConnector:
         include_views: bool = False,
         include_functions: bool = False,
     ) -> DBMetadataResponse:
-        """Ambil metadata lengkap dari database"""
+        """Ambil metadata lengkap dari database (async non-blocking)"""
+        import asyncio
+        return await asyncio.to_thread(
+            cls.get_metadata_sync,
+            conn,
+            schema_filter,
+            table_filter,
+            include_views,
+            include_functions,
+        )
+
+    @classmethod
+    def get_metadata_sync(
+        cls,
+        conn: DBConnection,
+        schema_filter: Optional[str] = None,
+        table_filter: Optional[List[str]] = None,
+        include_views: bool = False,
+        include_functions: bool = False,
+    ) -> DBMetadataResponse:
+        """Ambil metadata lengkap dari database (blocking sync)"""
         url = cls.build_connection_url(conn)
         schema = schema_filter or conn.schema_name or "public"
         db_name = conn.database or "main"
@@ -244,9 +270,14 @@ class DBConnector:
 
         indexes = []
         for idx in raw_indexes:
+            # PostgreSQL functional indexes might return None in column_names
+            cols = [c for c in idx.get("column_names", []) if c is not None]
+            if not cols and idx.get("expressions"):
+                cols = [str(expr) for expr in idx.get("expressions", []) if expr is not None]
+
             indexes.append(IndexMetadata(
-                name=idx.get("name", f"idx_{table_name}"),
-                columns=idx.get("column_names", []),
+                name=idx.get("name", f"idx_{table_name}") or f"idx_{table_name}",
+                columns=cols,
                 is_unique=idx.get("unique", False),
             ))
 

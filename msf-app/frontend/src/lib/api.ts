@@ -193,3 +193,22 @@ export const api = {
     return response.blob();
   },
 };
+
+export function getFriendlyErrorMessage(err: any): string {
+  if (err instanceof ApiError) {
+    if (err.status === 400) return err.message;
+    if (err.status === 401) return "Autentikasi gagal. Kunci API tidak valid atau konfigurasi salah.";
+    if (err.status === 403) return "Akses ditolak. Anda tidak memiliki izin untuk mengakses fitur ini.";
+    if (err.status === 404) return "Layanan tidak ditemukan (404). Silakan periksa kembali konfigurasi API URL.";
+    if (err.status === 422) return err.message || "Data input tidak valid. Mohon periksa kembali form pengisian Anda.";
+    if (err.status === 500) return "Terjadi kesalahan internal pada server (500). Mohon coba beberapa saat lagi.";
+    if (err.status >= 502 && err.status <= 504) return "Server backend sedang sibuk atau mati (Gateway Timeout/Bad Gateway). Silakan coba lagi nanti.";
+  }
+  
+  const msg = err?.message || "";
+  if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("ECONNRESET") || msg.includes("socket hang up")) {
+    return "Gagal terhubung ke API server. Pastikan kontainer backend sedang berjalan dan dapat diakses.";
+  }
+  
+  return msg || "Terjadi kesalahan tidak terduga.";
+}

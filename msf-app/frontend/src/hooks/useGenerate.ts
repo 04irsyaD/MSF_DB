@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { api } from "@/lib/api";
+import { api, getFriendlyErrorMessage } from "@/lib/api";
 import {
   GenerateFromDDLRequest,
   GenerateFromDBRequest,
@@ -142,7 +142,7 @@ export function useGenerate() {
       return res.job_id;
     } catch (err: any) {
       setIsGenerating(false);
-      const msg = err.message || "Gagal memulai pembuatan dokumentasi.";
+      const msg = getFriendlyErrorMessage(err);
       setErrorMessage(msg);
       toast.error(msg);
       throw err;
@@ -165,7 +165,7 @@ export function useGenerate() {
       return res.job_id;
     } catch (err: any) {
       setIsGenerating(false);
-      const msg = err.message || "Gagal memulai pembuatan dokumentasi.";
+      const msg = getFriendlyErrorMessage(err);
       setErrorMessage(msg);
       toast.error(msg);
       throw err;

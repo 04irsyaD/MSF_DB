@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DBConnection, DBEngine } from "@/lib/types";
-import { api } from "@/lib/api";
+import { api, getFriendlyErrorMessage } from "@/lib/api";
 import { Link2, Play, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -74,12 +74,13 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
         toast.error(`Koneksi gagal: ${res.message}`);
       }
     } catch (err: any) {
+      const friendlyMsg = getFriendlyErrorMessage(err);
       setTestResult({
         success: false,
-        message: err.message || "Failed to reach backend api",
+        message: friendlyMsg,
       });
       onVerified(false);
-      toast.error(`Error: ${err.message}`);
+      toast.error(`Error: ${friendlyMsg}`);
     } finally {
       setTesting(false);
     }
