@@ -98,14 +98,18 @@ export const api = {
 
   // Generate Endpoints
   async generateFromDDL(data: GenerateFromDDLRequest): Promise<GenerateJobResponse> {
-    return request<GenerateJobResponse>("/api/generate/ddl", {
+    console.log("Generate Request:", data);
+    console.log("API URL:", "/api/generate/from-ddl");
+    return request<GenerateJobResponse>("/api/generate/from-ddl", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
   async generateFromDB(data: GenerateFromDBRequest): Promise<GenerateJobResponse> {
-    return request<GenerateJobResponse>("/api/generate/db", {
+    console.log("Generate Request:", data);
+    console.log("API URL:", "/api/generate/from-db");
+    return request<GenerateJobResponse>("/api/generate/from-db", {
       method: "POST",
       body: JSON.stringify(data),
     });

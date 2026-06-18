@@ -10,23 +10,7 @@ interface SqlEditorProps {
   onChange: (val: string | undefined) => void;
 }
 
-export default function SqlEditor({ value, onChange }: SqlEditorProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    if (!value) return;
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    toast.success("SQL disalin ke clipboard");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleClear = () => {
-    onChange("");
-    toast.info("Editor dibersihkan");
-  };
-
-  const defaultSQL = `-- Contoh DDL SQL. Ketik atau paste DDL Anda di sini:
+export const defaultSQL = `-- Contoh DDL SQL. Ketik atau paste DDL Anda di sini:
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -43,6 +27,22 @@ CREATE TABLE posts (
     is_published BOOLEAN DEFAULT false,
     published_at TIMESTAMP WITH TIME ZONE
 );`;
+
+export default function SqlEditor({ value, onChange }: SqlEditorProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!value) return;
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    toast.success("SQL disalin ke clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleClear = () => {
+    onChange("");
+    toast.info("Editor dibersihkan");
+  };
 
   return (
     <div className="flex flex-col h-[500px] border border-border rounded-2xl overflow-hidden bg-card/40 backdrop-blur-md">
@@ -86,7 +86,7 @@ CREATE TABLE posts (
           height="100%"
           language="sql"
           theme="vs-dark"
-          value={value || defaultSQL}
+          value={value}
           onChange={onChange}
           loading={
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-card gap-3">

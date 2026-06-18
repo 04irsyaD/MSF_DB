@@ -80,6 +80,7 @@ async def generate_from_ddl(
     Generate dokumentasi dari SQL DDL yang di-paste.
     Return job_id — gunakan GET /api/jobs/{job_id} untuk cek status.
     """
+    logger.info("Menerima request generate_from_ddl", payload=request.model_dump() if hasattr(request, 'model_dump') else request.dict())
     # Validasi SQL
     validation = SQLParser.validate_sql(request.sql_content)
     if not validation["valid"]:
@@ -112,12 +113,14 @@ async def generate_from_ddl(
     )
 
     estimated = len(tables) * 15  # ~15 detik per tabel
-    return GenerateJobResponse(
+    response = GenerateJobResponse(
         job_id=job.job_id,
         status=JobStatus.QUEUED,
         created_at=job.created_at,
         estimated_seconds=estimated,
     )
+    logger.info("Mengirim response generate_from_ddl", response=response.model_dump() if hasattr(response, 'model_dump') else response.dict())
+    return response
 
 
 @router.post("/generate/from-db", response_model=GenerateJobResponse)
@@ -128,6 +131,7 @@ async def generate_from_db(
     """
     Generate dokumentasi dari koneksi database langsung.
     """
+    logger.info("Menerima request generate_from_db", payload=request.model_dump() if hasattr(request, 'model_dump') else request.dict())
     # Test koneksi dulu
     test_result = await DBConnector.test_connection(request.connection)
     if not test_result.success:
@@ -169,12 +173,14 @@ async def generate_from_db(
         settings,
     )
 
-    return GenerateJobResponse(
+    response = GenerateJobResponse(
         job_id=job.job_id,
         status=JobStatus.QUEUED,
         created_at=job.created_at,
         estimated_seconds=60,  # estimasi kasar untuk live DB
     )
+    logger.info("Mengirim response generate_from_db", response=response.model_dump() if hasattr(response, 'model_dump') else response.dict())
+    return response
 
 
 @router.get("/jobs/{job_id}", response_model=JobStatusResponse)

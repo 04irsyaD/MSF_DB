@@ -10,10 +10,11 @@ import JobStatus from "@/components/generator/JobStatus";
 import DocPreview from "@/components/generator/DocPreview";
 import { FileText, Database, Sparkles, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { defaultSQL } from "@/components/generator/SqlEditor";
 
 export default function GeneratePage() {
   const [mode, setMode] = useState<InputMode>("ddl");
-  const [sqlContent, setSqlContent] = useState<string>("");
+  const [sqlContent, setSqlContent] = useState<string>(defaultSQL);
   const [dbConnection, setDbConnection] = useState<DBConnection>({
     engine: "postgresql",
     host: "localhost",
