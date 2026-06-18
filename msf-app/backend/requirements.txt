@@ -38,8 +38,8 @@ cryptography==44.0.0            # Required by pymysql untuk SSL
 # DOCUMENT GENERATION
 # --------------------------------------------------------------
 python-docx==1.1.2              # Generate / edit file Word (.docx)
-# weasyprint==62.3              # PDF generation (aktifkan di v2.2)
-# markdown==3.7                 # Parse Markdown ke HTML (untuk PDF)
+xhtml2pdf==0.2.17              # PDF generation (pure python/html based)
+markdown==3.7                 # Parse Markdown ke HTML (untuk PDF)
 
 # --------------------------------------------------------------
 # UTILITIES

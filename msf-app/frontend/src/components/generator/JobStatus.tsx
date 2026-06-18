@@ -60,12 +60,14 @@ export default function JobStatus({
               {status === "processing" && "Sedang Menghasilkan Dokumentasi..."}
               {status === "error" && "Terjadi Kesalahan!"}
               {status === "done" && "Dokumentasi Selesai!"}
+              {status === "cancelled" && "Proses Dibatalkan!"}
             </h3>
             <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">
               {status === "queued" && "Mempersiapkan parser SQL / metadata DB"}
-              {status === "processing" && currentTable ? `Memproses tabel: ${currentTable}` : "Menghubungkan ke LLM..."}
+              {status === "processing" && (currentTable ? `Memproses tabel: ${currentTable}` : "Menghubungkan ke LLM...")}
               {status === "error" && "Gagal memproses skema database"}
               {status === "done" && "File dokumen siap diunduh"}
+              {status === "cancelled" && "Pembuatan dokumentasi telah dibatalkan"}
             </p>
           </div>
         </div>

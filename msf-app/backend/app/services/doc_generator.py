@@ -77,6 +77,9 @@ class DocGenerator:
 
         for i, table in enumerate(tables):
             if job:
+                if job.status == JobStatus.CANCELLED:
+                    logger.info("Job dibatalkan oleh user", job_id=job.job_id)
+                    raise RuntimeError("Job dibatalkan oleh pengguna.")
                 job.update(
                     current_table=table.name,
                     tables_processed=i,

@@ -12,9 +12,8 @@ router = APIRouter(prefix="/api/shortcuts", tags=["Shortcuts"])
 SHORTCUTS_DIR = os.getenv("SHORTCUTS_DIR", "/app/shortcuts_data")
 
 
-@lru_cache(maxsize=1)
 def _load_all_shortcuts() -> List[dict]:
-    """Load semua shortcut dari file JSON (cached)"""
+    """Load semua shortcut dari file JSON"""
     all_shortcuts = []
 
     if not os.path.exists(SHORTCUTS_DIR):

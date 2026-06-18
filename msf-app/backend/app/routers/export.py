@@ -36,8 +36,26 @@ async def export_to_docx(request: ExportRequest):
 
 @router.post("/pdf")
 async def export_to_pdf(request: ExportRequest):
-    """Export ke PDF — tersedia di v2.2"""
-    raise HTTPException(
-        status_code=501,
-        detail="Export PDF belum tersedia. Akan dirilis di v2.2. Gunakan export DOCX untuk sekarang."
-    )
+    """Konversi Markdown ke PDF dan return file"""
+    try:
+        from app.services.exporters.pdf_exporter import PdfExporter
+        exporter = PdfExporter()
+        pdf_bytes = exporter.export(
+            markdown_content=request.markdown_content,
+            project_name=request.project_name,
+            author=request.author,
+        )
+
+        safe_name = "".join(
+            c if c.isalnum() or c in " -_" else "_"
+            for c in request.project_name
+        ).strip()
+        filename = f"{safe_name}.pdf"
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Export gagal: {str(e)}")

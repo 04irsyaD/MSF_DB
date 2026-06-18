@@ -58,7 +58,8 @@ export default function GeneratePage() {
         alert("SQL DDL konten kosong. Ketik atau tempel SQL Anda dahulu.");
         return;
       }
-      await generateFromDDL({
+      
+      const payload = {
         sql_content: sqlContent,
         project_name: settings.project_name,
         project_description: settings.business_context,
@@ -69,13 +70,18 @@ export default function GeneratePage() {
         ai_provider: settings.ai_provider,
         model: settings.model,
         output_format: settings.output_format,
-      });
+      };
+      
+      console.log("Selected Format:", settings.output_format);
+      console.log("Request Payload:", payload);
+      
+      await generateFromDDL(payload);
     } else {
       if (!isDbVerified) {
         alert("Pastikan Anda memverifikasi koneksi database dengan menekan tombol 'Test Koneksi' dahulu.");
         return;
       }
-      await generateFromDB({
+      const payload = {
         connection: dbConnection,
         project_name: settings.project_name,
         language: settings.language,
@@ -84,7 +90,12 @@ export default function GeneratePage() {
         ai_provider: settings.ai_provider,
         model: settings.model,
         output_format: settings.output_format,
-      });
+      };
+      
+      console.log("Selected Format:", settings.output_format);
+      console.log("Request Payload:", payload);
+      
+      await generateFromDB(payload);
     }
   };
 
@@ -112,6 +123,7 @@ export default function GeneratePage() {
           markdown={previewMarkdown}
           projectName={settings.project_name}
           downloadUrl={downloadUrl}
+          format={settings.output_format}
           onReset={resetState}
         />
       ) : (

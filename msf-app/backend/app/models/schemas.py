@@ -46,6 +46,7 @@ class JobStatus(str, Enum):
     PROCESSING = "processing"
     DONE = "done"
     ERROR = "error"
+    CANCELLED = "cancelled"
 
 
 class RiskLevel(str, Enum):
@@ -149,6 +150,13 @@ class FunctionMetadata(BaseModel):
     description: Optional[str] = None
 
 
+class DBMetadataRequest(BaseModel):
+    connection: DBConnection
+    schema_filter: Optional[str] = None
+    include_views: bool = False
+    include_functions: bool = False
+
+
 class DBMetadataResponse(BaseModel):
     engine: str
     database: str
@@ -234,6 +242,11 @@ class AIProviderInfo(BaseModel):
     is_available: bool
     base_url: Optional[str] = None
     reason: Optional[str] = None
+
+
+class AITestRequest(BaseModel):
+    provider: str
+    model: str
 
 
 class AITestResponse(BaseModel):

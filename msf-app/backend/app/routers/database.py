@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException
 from app.models.schemas import (
     DBTestConnectionRequest, DBTestConnectionResponse,
-    DBConnection, DBMetadataResponse,
+    DBConnection, DBMetadataResponse, DBMetadataRequest,
 )
 from app.services.db_connector import DBConnector
 
@@ -17,21 +17,16 @@ async def test_connection(request: DBTestConnectionRequest):
 
 
 @router.post("/metadata", response_model=DBMetadataResponse)
-async def get_metadata(
-    connection: DBConnection,
-    schema_filter: str = None,
-    include_views: bool = False,
-    include_functions: bool = False,
-):
+async def get_metadata(request: DBMetadataRequest):
     """Ambil metadata dari database (tabel, kolom, FK, index)"""
     # Test koneksi dulu
-    test = await DBConnector.test_connection(connection)
+    test = await DBConnector.test_connection(request.connection)
     if not test.success:
         raise HTTPException(status_code=400, detail=test.message)
 
     return await DBConnector.get_metadata(
-        conn=connection,
-        schema_filter=schema_filter,
-        include_views=include_views,
-        include_functions=include_functions,
+        conn=request.connection,
+        schema_filter=request.schema_filter,
+        include_views=request.include_views,
+        include_functions=request.include_functions,
     )

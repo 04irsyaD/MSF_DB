@@ -4,6 +4,7 @@ Support: PostgreSQL, MySQL, SQLite (MVP). SQL Server & MongoDB di v2.1.
 """
 
 from typing import List, Optional
+import re
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 import structlog
@@ -354,5 +355,4 @@ class DBConnector:
         return cleaned[:300]
 
 
-# Import re untuk _clean_error
-import re
+

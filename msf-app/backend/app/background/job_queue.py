@@ -90,6 +90,14 @@ class JobQueue:
             return True
         return False
 
+    def cancel_job(self, job_id: str) -> bool:
+        """Batalkan job yang sedang berjalan atau mengantre"""
+        job = self.get_job(job_id)
+        if job and job.status in (JobStatus.QUEUED, JobStatus.PROCESSING):
+            job.update(status=JobStatus.CANCELLED)
+            return True
+        return False
+
     async def run_job(
         self,
         job: Job,
@@ -104,18 +112,27 @@ class JobQueue:
         job.update(status=JobStatus.PROCESSING)
         try:
             await task_fn(job, *args, **kwargs)
-            if job.status != JobStatus.ERROR:
+            if job.status == JobStatus.CANCELLED:
+                job.update(
+                    completed_at=datetime.now(timezone.utc).isoformat()
+                )
+            elif job.status != JobStatus.ERROR:
                 job.update(
                     status=JobStatus.DONE,
                     progress=100,
                     completed_at=datetime.now(timezone.utc).isoformat()
                 )
         except Exception as e:
-            job.update(
-                status=JobStatus.ERROR,
-                error_message=str(e),
-                completed_at=datetime.now(timezone.utc).isoformat()
-            )
+            if job.status == JobStatus.CANCELLED:
+                job.update(
+                    completed_at=datetime.now(timezone.utc).isoformat()
+                )
+            else:
+                job.update(
+                    status=JobStatus.ERROR,
+                    error_message=str(e),
+                    completed_at=datetime.now(timezone.utc).isoformat()
+                )
 
     async def cleanup_old_jobs(self):
         """Hapus job lama yang sudah melebihi retention time"""

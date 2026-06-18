@@ -39,26 +39,41 @@ async def _run_generate_job(job, tables, settings: dict):
             job=job,
         )
 
-        # Export ke DOCX
-        job.update(progress=92, current_table=None)
-        exporter = DocxExporter()
-        docx_bytes = exporter.export(
-            markdown_content=markdown,
-            project_name=settings["project_name"],
-            author=settings.get("author"),
-        )
+        if job.status == JobStatus.CANCELLED:
+            raise RuntimeError("Job dibatalkan oleh pengguna.")
 
-        # Simpan hasil di job
-        safe_name = "".join(
-            c if c.isalnum() or c in " -_" else "_"
-            for c in settings["project_name"]
-        ).strip()
-        filename = f"{safe_name}.docx"
+        requested_format = settings.get("output_format", "docx").lower()
+        logger.info("Requested Format", format=requested_format)
+        
+        job.update(progress=92, current_table=None)
+        
+        safe_name = "".join(c if c.isalnum() or c in " -_" else "_" for c in settings["project_name"]).strip()
+        filename = f"{safe_name}.{requested_format}"
+        
+        if requested_format == "pdf":
+            logger.info("Export Engine", engine="pdf_exporter")
+            
+            from app.services.exporters.pdf_exporter import PdfExporter
+            exporter = PdfExporter()
+            result_bytes = exporter.export(
+                markdown_content=markdown, 
+                project_name=settings["project_name"], 
+                author=settings.get("author")
+            )
+            
+        else:
+            logger.info("Export Engine", engine="docx_exporter")
+            exporter = DocxExporter()
+            result_bytes = exporter.export(
+                markdown_content=markdown,
+                project_name=settings["project_name"],
+                author=settings.get("author"),
+            )
 
         job.update(
-            result_bytes=docx_bytes,
+            result_bytes=result_bytes,
             result_filename=filename,
-            output_format="docx",
+            output_format=requested_format,
             preview_markdown=markdown[:800],
             progress=100,
         )
@@ -156,6 +171,8 @@ async def generate_from_db(
 
     async def _run_from_db(job, conn_request, gen_settings):
         # Ambil metadata dari DB
+        if job.status == JobStatus.CANCELLED:
+            raise RuntimeError("Job dibatalkan oleh pengguna.")
         metadata = await DBConnector.get_metadata(
             conn=conn_request.connection,
             schema_filter=conn_request.schema_filter,
@@ -163,6 +180,8 @@ async def generate_from_db(
             include_views=conn_request.include_views,
             include_functions=conn_request.include_functions,
         )
+        if job.status == JobStatus.CANCELLED:
+            raise RuntimeError("Job dibatalkan oleh pengguna.")
         await _run_generate_job(job, metadata.tables, gen_settings)
 
     background_tasks.add_task(
@@ -192,6 +211,18 @@ async def get_job_status(job_id: str):
     return JobStatusResponse(**job.to_dict())
 
 
+@router.post("/jobs/{job_id}/cancel")
+async def cancel_job(job_id: str):
+    """Batalkan job generate"""
+    success = job_queue.cancel_job(job_id)
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Gagal membatalkan job '{job_id}'. Job mungkin sudah selesai, gagal, atau tidak ditemukan."
+        )
+    return {"success": True, "message": "Job berhasil dibatalkan"}
+
+
 @router.get("/jobs/{job_id}/download")
 async def download_job_result(job_id: str):
     """Download hasil dokumentasi (DOCX/PDF)"""
@@ -208,8 +239,11 @@ async def download_job_result(job_id: str):
     if not job.result_bytes:
         raise HTTPException(status_code=500, detail="File hasil tidak tersedia")
 
-    media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    filename = job.result_filename or "dokumentasi.docx"
+    if job.output_format == "pdf":
+        media_type = "application/pdf"
+    else:
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    filename = job.result_filename or ("dokumentasi.pdf" if job.output_format == "pdf" else "dokumentasi.docx")
 
     return Response(
         content=job.result_bytes,

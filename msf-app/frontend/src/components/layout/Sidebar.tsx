@@ -105,8 +105,13 @@ export default function Sidebar() {
             <span>API Server</span>
           </div>
           <div className="flex items-center gap-1.5 font-semibold">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-emerald-400">Connected</span>
+            <span className={cn(
+              "h-1.5 w-1.5 rounded-full animate-pulse",
+              health ? "bg-emerald-500" : "bg-red-500"
+            )} />
+            <span className={health ? "text-emerald-400" : "text-red-400"}>
+              {health ? "Connected" : "Offline"}
+            </span>
           </div>
         </div>
 

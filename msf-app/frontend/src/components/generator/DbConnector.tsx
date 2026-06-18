@@ -27,6 +27,8 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
     { label: "PostgreSQL", value: "postgresql", defaultPort: 5432 },
     { label: "MySQL / MariaDB", value: "mysql", defaultPort: 3306 },
     { label: "SQLite (Local File)", value: "sqlite", defaultPort: 0 },
+    { label: "SQL Server", value: "sqlserver", defaultPort: 1433 },
+    { label: "MongoDB", value: "mongodb", defaultPort: 27017 },
   ];
 
   const handleFieldChange = (key: keyof DBConnection, val: any) => {

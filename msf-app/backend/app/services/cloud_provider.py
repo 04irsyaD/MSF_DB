@@ -154,6 +154,8 @@ class OpenAIProvider(AIProvider):
             if e.response.status_code == 429:
                 raise RuntimeError("OpenAI rate limit tercapai. Coba lagi nanti.")
             raise RuntimeError(f"OpenAI error: {e.response.status_code}")
+        except Exception as e:
+            raise RuntimeError(f"OpenAI request gagal: {str(e)}")
 
     async def list_models(self) -> List[AIModelInfo]:
         if not self._is_configured():

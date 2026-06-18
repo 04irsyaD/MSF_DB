@@ -43,9 +43,30 @@ export function useGenerate() {
       return;
     }
 
+    let pollCount = 0;
+    let consecutiveErrors = 0;
+    const maxPolls = 150; // 5 menit (150 * 2s)
+    const maxErrors = 5;
+
     const fetchStatus = async () => {
+      pollCount++;
+      if (pollCount > maxPolls) {
+        setIsGenerating(false);
+        setJobId(null);
+        localStorage.removeItem("msf_active_job_id");
+        setStatus("error");
+        setErrorMessage("Waktu tunggu pembuatan dokumentasi habis (Timeout).");
+        toast.error("Waktu tunggu pembuatan dokumentasi habis.");
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        return;
+      }
+
       try {
         const response = await api.getJobStatus(jobId);
+        consecutiveErrors = 0;
         
         setStatus(response.status);
         setProgress(response.progress);
@@ -66,10 +87,28 @@ export function useGenerate() {
           setJobId(null);
           localStorage.removeItem("msf_active_job_id");
           toast.error(`Gagal membuat dokumentasi: ${response.error_message || "Unknown error"}`);
+        } else if (response.status === "cancelled") {
+          setIsGenerating(false);
+          setStatus("cancelled");
+          setJobId(null);
+          localStorage.removeItem("msf_active_job_id");
+          toast.warning("Pembuatan dokumentasi dibatalkan.");
         }
       } catch (err: any) {
         console.error("Gagal mengambil status job:", err);
-        // Jangan hentikan generator jika hanya network timeout sesekali
+        consecutiveErrors++;
+        if (consecutiveErrors >= maxErrors) {
+          setIsGenerating(false);
+          setJobId(null);
+          localStorage.removeItem("msf_active_job_id");
+          setStatus("error");
+          setErrorMessage("Koneksi ke API Server terputus.");
+          toast.error("Gagal terhubung ke API server.");
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+        }
       }
     };
 

@@ -141,7 +141,8 @@ class DocxExporter:
             # Heading 4
             if line.startswith("#### "):
                 p = doc.add_paragraph(line[5:].strip())
-                p.runs[0].bold = True if p.runs else None
+                if p.runs:
+                    p.runs[0].bold = True
                 i += 1
                 continue
 

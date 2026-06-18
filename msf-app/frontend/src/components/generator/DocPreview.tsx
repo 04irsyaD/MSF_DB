@@ -11,12 +11,13 @@ interface DocPreviewProps {
   markdown: string;
   projectName: string;
   downloadUrl?: string; // Dari job status response
+  format?: "docx" | "pdf";
   onReset: () => void;
 }
 
-export default function DocPreview({ markdown, projectName, downloadUrl, onReset }: DocPreviewProps) {
+export default function DocPreview({ markdown, projectName, downloadUrl, format = "docx", onReset }: DocPreviewProps) {
   const [copied, setCopied] = useState(false);
-  const [exportingWord, setExportingWord] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const handleCopyMarkdown = () => {
     if (!markdown) return;
@@ -26,34 +27,42 @@ export default function DocPreview({ markdown, projectName, downloadUrl, onReset
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadWord = async () => {
+  const handleDownload = async () => {
+    const isPdf = format === "pdf";
+    const label = isPdf ? "PDF" : "Word";
+
     // Jika ada downloadUrl dari job, langsung pakai
     if (downloadUrl) {
       window.open(downloadUrl, "_blank");
-      toast.success("Mengunduh document Word...");
+      toast.success(`Mengunduh dokumen ${label}...`);
       return;
     }
 
     // Fallback: Export langsung menggunakan content markdown di screen
-    setExportingWord(true);
+    setExporting(true);
     try {
-      const blob = await api.exportMarkdown(markdown, projectName || "Database Documentation");
+      const blob = isPdf 
+        ? await api.exportPdf(markdown, projectName || "Database Documentation")
+        : await api.exportMarkdown(markdown, projectName || "Database Documentation");
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${projectName ? projectName.toLowerCase().replace(/\s+/g, "_") : "db"}_docs.docx`;
+      const ext = isPdf ? "pdf" : "docx";
+      a.download = `${projectName ? projectName.toLowerCase().replace(/\s+/g, "_") : "db"}_docs.${ext}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      toast.success("Dokumen Word (.docx) berhasil dibuat!");
+      toast.success(`Dokumen ${label} (.${ext}) berhasil dibuat!`);
     } catch (err: any) {
       console.error(err);
-      toast.error("Gagal mengunduh dokumen Word.");
+      toast.error(`Gagal mengunduh dokumen ${label}.`);
     } finally {
-      setExportingWord(false);
+      setExporting(false);
     }
   };
+
+  const isPdf = format === "pdf";
 
   return (
     <div className="space-y-4">
@@ -64,7 +73,7 @@ export default function DocPreview({ markdown, projectName, downloadUrl, onReset
             Dokumentasi Selesai Dibuat
           </h3>
           <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">
-            Format: Markdown / Ekspor ke Word (.docx)
+            Format: Markdown / Ekspor ke {isPdf ? "PDF (.pdf)" : "Word (.docx)"}
           </p>
         </div>
 
@@ -83,12 +92,12 @@ export default function DocPreview({ markdown, projectName, downloadUrl, onReset
           </button>
 
           <button
-            onClick={handleDownloadWord}
-            disabled={exportingWord}
+            onClick={handleDownload}
+            disabled={exporting}
             className="p-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 text-white transition-all text-xs flex items-center gap-2 font-bold shadow-md shadow-indigo-500/10 active:scale-95 disabled:opacity-50"
           >
             <FileText className="h-4 w-4 text-white" />
-            <span>Unduh Word</span>
+            <span>Unduh {isPdf ? "PDF" : "Word"}</span>
           </button>
 
           <button

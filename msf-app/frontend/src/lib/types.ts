@@ -1,4 +1,4 @@
-export type JobStatus = "queued" | "processing" | "done" | "error";
+export type JobStatus = "queued" | "processing" | "done" | "error" | "cancelled";
 
 export type DetailLevel = "simple" | "detailed" | "comprehensive";
 

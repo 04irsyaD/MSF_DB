@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 from typing import List
-from app.models.schemas import AIModelsResponse, AIProviderInfo, AITestResponse, AIProviderType
+from app.models.schemas import AIModelsResponse, AIProviderInfo, AITestResponse, AIProviderType, AITestRequest
 from app.services.ollama_provider import ollama_provider
 from app.services.cloud_provider import deepseek_provider, openai_provider
 import time
@@ -54,8 +54,10 @@ async def list_providers():
 
 
 @router.post("/test", response_model=AITestResponse)
-async def test_provider(provider: str = "ollama", model: str = "llama3.2"):
+async def test_provider(request: AITestRequest):
     """Test koneksi ke AI provider dengan generate teks singkat"""
+    provider = request.provider
+    model = request.model
     prov_map = {
         "ollama": ollama_provider,
         "deepseek": deepseek_provider,

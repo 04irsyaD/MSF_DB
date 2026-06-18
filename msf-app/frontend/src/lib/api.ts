@@ -14,11 +14,13 @@ const BASE_URL = ""; // Karena kita menggunakan rewrite di next.config.js, path 
 export class ApiError extends Error {
   status: number;
   info: any;
+  errorCode?: string;
 
   constructor(message: string, status: number, info?: any) {
     super(message);
     this.status = status;
     this.info = info;
+    this.errorCode = info?.error_code || undefined;
   }
 }
 
@@ -83,9 +85,9 @@ export const api = {
 
   // DB Endpoints
   async testDBConnection(data: any): Promise<DBTestConnectionResponse> {
-    return request<DBTestConnectionResponse>("/api/db/test", {
+    return request<DBTestConnectionResponse>("/api/db/test-connection", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({ connection: data }),
     });
   },
 
@@ -160,16 +162,32 @@ export const api = {
 
   // Direct Export
   async exportMarkdown(markdown: string, title: string): Promise<Blob> {
-    const response = await fetch("/api/export", {
+    const response = await fetch("/api/export/docx", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ markdown, title }),
+      body: JSON.stringify({ markdown_content: markdown, project_name: title }),
     });
 
     if (!response.ok) {
       throw new Error("Gagal mengunduh file Word");
+    }
+
+    return response.blob();
+  },
+
+  async exportPdf(markdown: string, title: string): Promise<Blob> {
+    const response = await fetch("/api/export/pdf", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ markdown_content: markdown, project_name: title }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Gagal mengunduh file PDF");
     }
 
     return response.blob();

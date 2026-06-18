@@ -5,14 +5,20 @@ MSF-APP Backend — FastAPI Entry Point
 import os
 import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 import structlog
+from datetime import datetime, timezone
 
 from app.routers import generate, database, ai, shortcuts, export
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
+from app.utils.errors import AppDetailedException
+from app.utils.logger import setup_logger
 
+setup_logger()
 logger = structlog.get_logger()
 
 # ================================================================
@@ -83,6 +89,62 @@ app.add_middleware(
 )
 
 # ================================================================
+# EXCEPTION HANDLERS
+# ================================================================
+
+@app.exception_handler(AppDetailedException)
+async def app_detailed_exception_handler(request: Request, exc: AppDetailedException):
+    logger.error("App error occurred", detail=exc.detail, error_code=exc.error_code)
+    return exc.to_response()
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.error("HTTP error occurred", status_code=exc.status_code, detail=exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "detail": exc.detail,
+            "error_code": f"HTTP_{exc.status_code}",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    logger.error("Validation error occurred", errors=errors)
+    detail = "Input tidak valid"
+    if errors:
+        loc = " -> ".join(str(x) for x in errors[0]["loc"] if x != "body")
+        msg = errors[0]["msg"]
+        detail = f"Validasi gagal pada {loc}: {msg}" if loc else f"Validasi gagal: {msg}"
+
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": detail,
+            "error_code": "VALIDATION_ERROR",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    logger.exception("Internal server error occurred", error=str(exc))
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Terjadi kesalahan internal pada server.",
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    )
+
+
+# ================================================================
 # ROUTERS
 # ================================================================
 
@@ -98,6 +160,7 @@ app.include_router(export.router)
 # ================================================================
 
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 async def health_check():
     """Health check semua service"""
     ollama_ok = await ollama_provider.health_check()
