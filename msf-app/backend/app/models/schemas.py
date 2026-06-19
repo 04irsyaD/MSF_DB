@@ -3,7 +3,7 @@ Pydantic schemas — semua request/response models untuk MSF-APP API
 """
 
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List, Literal
+from typing import Optional, List, Literal, Dict
 from enum import Enum
 
 
@@ -93,6 +93,8 @@ class DBTestConnectionResponse(BaseModel):
     engine: str
     server_version: Optional[str] = None
     tables_count: Optional[int] = None
+    schemas: Optional[List[str]] = None
+    tables_by_schema: Optional[Dict[str, List[str]]] = None
 
 
 # ================================================================

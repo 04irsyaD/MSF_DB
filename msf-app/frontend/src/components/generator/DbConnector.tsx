@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DBConnection, DBEngine } from "@/lib/types";
+import { DBConnection, DBEngine, DBTestConnectionResponse } from "@/lib/types";
 import { api, getFriendlyErrorMessage } from "@/lib/api";
 import { Link2, Play, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,17 +11,25 @@ interface DbConnectorProps {
   connection: DBConnection;
   onChange: (conn: DBConnection) => void;
   onVerified: (isVerified: boolean) => void;
+  schemaFilter?: string;
+  onSchemaFilterChange?: (schema: string) => void;
+  tableFilter?: string[];
+  onTableFilterChange?: (tables: string[]) => void;
 }
 
-export default function DbConnector({ connection, onChange, onVerified }: DbConnectorProps) {
+export default function DbConnector({
+  connection,
+  onChange,
+  onVerified,
+  schemaFilter = "",
+  onSchemaFilterChange,
+  tableFilter = [],
+  onTableFilterChange,
+}: DbConnectorProps) {
   const [useConnString, setUseConnString] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{
-    success: boolean;
-    message: string;
-    server_version?: string;
-    tables_count?: number;
-  } | null>(null);
+  const [testResult, setTestResult] = useState<DBTestConnectionResponse | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const engines: { label: string; value: DBEngine; defaultPort: number }[] = [
     { label: "PostgreSQL", value: "postgresql", defaultPort: 5432 },
@@ -34,6 +42,9 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
   const handleFieldChange = (key: keyof DBConnection, val: any) => {
     onVerified(false);
     setTestResult(null);
+    onSchemaFilterChange?.("");
+    onTableFilterChange?.([]);
+    setSearchTerm("");
     onChange({
       ...connection,
       [key]: val,
@@ -43,6 +54,9 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
   const handleEngineChange = (engine: DBEngine) => {
     onVerified(false);
     setTestResult(null);
+    onSchemaFilterChange?.("");
+    onTableFilterChange?.([]);
+    setSearchTerm("");
     const selected = engines.find((e) => e.value === engine);
     onChange({
       ...connection,
@@ -59,16 +73,19 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
     setTestResult(null);
     try {
       const res = await api.testDBConnection(connection);
-      setTestResult({
-        success: res.success,
-        message: res.message,
-        server_version: res.server_version,
-        tables_count: res.tables_count,
-      });
+      setTestResult(res);
 
       if (res.success) {
         onVerified(true);
         toast.success("Koneksi database berhasil!");
+        
+        // Pilih schema default secara otomatis dari schemas yang dikembalikan
+        const defaultSchema = res.schemas && res.schemas.length > 0
+          ? (res.schemas.includes(connection.schema_name || "") ? connection.schema_name || "" : res.schemas[0])
+          : (connection.schema_name || "public");
+        
+        onSchemaFilterChange?.(defaultSchema);
+        onTableFilterChange?.([]);
       } else {
         onVerified(false);
         toast.error(`Koneksi gagal: ${res.message}`);
@@ -78,6 +95,7 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
       setTestResult({
         success: false,
         message: friendlyMsg,
+        engine: connection.engine,
       });
       onVerified(false);
       toast.error(`Error: ${friendlyMsg}`);
@@ -85,6 +103,12 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
       setTesting(false);
     }
   };
+
+  const currentSchema = schemaFilter || connection.schema_name || (testResult?.schemas && testResult.schemas.length > 0 ? testResult.schemas[0] : "public");
+  const tablesInSchema = testResult?.tables_by_schema?.[currentSchema] || [];
+  const filteredTables = tablesInSchema.filter((table) =>
+    table.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6 bg-card/40 backdrop-blur-md border border-border p-6 rounded-2xl">
@@ -321,6 +345,136 @@ export default function DbConnector({ connection, onChange, onVerified }: DbConn
           </div>
         )}
       </div>
+
+      {/* Schema and Table selection checklist */}
+      {testResult?.success && (
+        <div className="space-y-4 pt-4 border-t border-border/60">
+          <div className="flex flex-col gap-1">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              Filter Metadata
+            </h4>
+            <p className="text-[10px] text-muted-foreground leading-normal">
+              Pilih schema dan tabel spesifik yang ingin didokumentasikan untuk mempercepat proses generator.
+            </p>
+          </div>
+
+          {/* Schema Selector */}
+          {testResult.schemas && testResult.schemas.length > 0 && (
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                Pilih Schema
+              </label>
+              <select
+                value={currentSchema}
+                onChange={(e) => {
+                  const newSchema = e.target.value;
+                  onSchemaFilterChange?.(newSchema);
+                  onTableFilterChange?.([]);
+                  setSearchTerm("");
+                }}
+                className="w-full bg-secondary/20 border border-border focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/30 rounded-xl py-2 px-3 text-xs text-white focus:outline-none transition-all cursor-pointer"
+              >
+                {testResult.schemas.map((schema) => (
+                  <option key={schema} value={schema} className="bg-slate-900 text-white">
+                    {schema}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Table Checklist */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                Pilih Tabel ({tableFilter?.length || 0} terpilih)
+              </label>
+              <div className="text-[10px] text-muted-foreground">
+                Total: {tablesInSchema.length} tabel
+              </div>
+            </div>
+
+            {tablesInSchema.length > 0 ? (
+              <div className="space-y-2.5">
+                {/* Search & Select Actions */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Cari nama tabel..."
+                    className="flex-1 bg-secondary/20 border border-border focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/30 rounded-xl py-1.5 px-3 text-xs text-white placeholder-muted-foreground/60 focus:outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Select all tables in schema
+                      onTableFilterChange?.([...tablesInSchema]);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-secondary/30 hover:bg-secondary border border-border font-semibold text-[10px] text-indigo-400 hover:text-indigo-300 transition-all"
+                  >
+                    Semua
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Clear selection
+                      onTableFilterChange?.([]);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-secondary/30 hover:bg-secondary border border-border font-semibold text-[10px] text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    Bersihkan
+                  </button>
+                </div>
+
+                {/* Table List Container */}
+                <div className="max-h-52 overflow-y-auto space-y-0.5 border border-border/40 rounded-xl p-1.5 bg-secondary/5 scrollbar-thin scrollbar-thumb-indigo-500/20">
+                  {filteredTables.length > 0 ? (
+                    filteredTables.map((table) => {
+                      const isChecked = tableFilter?.includes(table) || false;
+                      return (
+                        <label
+                          key={table}
+                          className={cn(
+                            "flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer transition-all duration-150 text-xs font-mono",
+                            isChecked
+                              ? "bg-indigo-600/10 text-indigo-300 font-semibold"
+                              : "text-muted-foreground hover:text-foreground hover:bg-secondary/20"
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                onTableFilterChange?.([...(tableFilter || []), table]);
+                              } else {
+                                onTableFilterChange?.(
+                                  (tableFilter || []).filter((t) => t !== table)
+                                );
+                              }
+                            }}
+                            className="rounded border-border bg-secondary/30 text-indigo-600 focus:ring-indigo-500/30 h-3.5 w-3.5 cursor-pointer accent-indigo-500"
+                          />
+                          <span className="truncate">{table}</span>
+                        </label>
+                      );
+                    })
+                  ) : (
+                    <div className="py-8 text-center text-xs text-muted-foreground font-semibold">
+                      Tidak ada tabel yang cocok dengan pencarian.
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="py-6 text-center text-xs text-muted-foreground/80 border border-dashed border-border/40 rounded-xl font-medium">
+                Tidak ada tabel ditemukan di schema "{currentSchema}" ini.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

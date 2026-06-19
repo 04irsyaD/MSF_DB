@@ -84,10 +84,30 @@ class DBConnector:
                 result = connection.execute(text(version_query))
                 version = result.scalar()
 
-                # Hitung jumlah tabel
-                table_count_query = cls._get_table_count_query(conn.engine, conn.schema_name or "public")
-                count_result = connection.execute(text(table_count_query))
-                table_count = count_result.scalar() or 0
+                # Dapatkan daftar schema & tabel per schema
+                inspector = inspect(engine)
+                try:
+                    raw_schemas = inspector.get_schema_names()
+                except Exception:
+                    raw_schemas = []
+                
+                filtered_schemas = cls._filter_system_schemas(raw_schemas, conn.engine)
+                
+                tables_by_schema = {}
+                for s in filtered_schemas:
+                    try:
+                        tables_by_schema[s] = inspector.get_table_names(schema=s)
+                    except Exception:
+                        try:
+                            tables_by_schema[s] = inspector.get_table_names()
+                        except Exception:
+                            tables_by_schema[s] = []
+
+                active_schema = conn.schema_name or ("main" if conn.engine == "sqlite" else "public")
+                if active_schema not in tables_by_schema and filtered_schemas:
+                    active_schema = filtered_schemas[0]
+                
+                table_count = len(tables_by_schema.get(active_schema, []))
 
             engine.dispose()
 
@@ -96,7 +116,9 @@ class DBConnector:
                 message="Koneksi berhasil",
                 engine=conn.engine,
                 server_version=str(version)[:100] if version else None,
-                tables_count=int(table_count),
+                tables_count=table_count,
+                schemas=filtered_schemas,
+                tables_by_schema=tables_by_schema,
             )
 
         except OperationalError as e:
@@ -113,6 +135,28 @@ class DBConnector:
                 message=f"Error: {cls._clean_error(str(e))}",
                 engine=conn.engine,
             )
+
+    @classmethod
+    def _filter_system_schemas(cls, schemas: List[str], engine: str) -> List[str]:
+        """Menyaring schema bawaan sistem agar tidak muncul di pilihan"""
+        system_schemas = {
+            "postgresql": ["information_schema", "pg_catalog", "pg_toast", "pg_temp_1", "pg_toast_temp_1"],
+            "mysql": ["information_schema", "performance_schema", "sys", "mysql"],
+            "sqlite": ["main"],
+        }
+        filtered = []
+        for s in schemas:
+            s_lower = s.lower()
+            if engine == "postgresql" and (s_lower.startswith("pg_") or s_lower in system_schemas["postgresql"]):
+                continue
+            if engine == "mysql" and s_lower in system_schemas["mysql"]:
+                continue
+            filtered.append(s)
+        
+        # Jika SQLite atau kosong, kembalikan schema default
+        if not filtered:
+            filtered = ["main"] if engine == "sqlite" else ["public"]
+        return filtered
 
     @classmethod
     async def get_metadata(

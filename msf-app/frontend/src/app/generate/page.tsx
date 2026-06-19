@@ -24,6 +24,8 @@ export default function GeneratePage() {
     password: "",
   });
   const [isDbVerified, setIsDbVerified] = useState<boolean>(false);
+  const [schemaFilter, setSchemaFilter] = useState<string>("");
+  const [tableFilter, setTableFilter] = useState<string[]>([]);
 
   const [settings, setSettings] = useState<GeneratorSettings>({
     language: "Indonesian",
@@ -90,6 +92,8 @@ export default function GeneratePage() {
         ai_provider: settings.ai_provider,
         model: settings.model,
         output_format: settings.output_format,
+        schema_filter: schemaFilter || undefined,
+        table_filter: tableFilter.length > 0 ? tableFilter : undefined,
       };
       
       console.log("Selected Format:", settings.output_format);
@@ -171,6 +175,10 @@ export default function GeneratePage() {
                   connection={dbConnection}
                   onChange={setDbConnection}
                   onVerified={setIsDbVerified}
+                  schemaFilter={schemaFilter}
+                  onSchemaFilterChange={setSchemaFilter}
+                  tableFilter={tableFilter}
+                  onTableFilterChange={setTableFilter}
                 />
               )}
             </div>

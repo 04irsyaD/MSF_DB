@@ -109,6 +109,8 @@ export interface DBTestConnectionResponse {
   engine: DBEngine;
   server_version?: string;
   tables_count?: number;
+  schemas?: string[];
+  tables_by_schema?: Record<string, string[]>;
 }
 
 export interface DBMetadataResponse {
