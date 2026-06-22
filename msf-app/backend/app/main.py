@@ -33,10 +33,13 @@ async def lifespan(app: FastAPI):
     # Background task: cleanup job lama setiap 15 menit
     async def cleanup_loop():
         while True:
-            await asyncio.sleep(15 * 60)
-            cleaned = await job_queue.cleanup_old_jobs()
-            if cleaned > 0:
-                logger.info(f"Cleaned up {cleaned} old jobs")
+            try:
+                await asyncio.sleep(15 * 60)
+                cleaned = await job_queue.cleanup_old_jobs()
+                if cleaned > 0:
+                    logger.info(f"Cleaned up {cleaned} old jobs")
+            except Exception as e:
+                logger.error("Error in job cleanup loop", error=str(e))
 
     cleanup_task = asyncio.create_task(cleanup_loop())
 
@@ -55,6 +58,17 @@ async def lifespan(app: FastAPI):
 
     # Cleanup
     cleanup_task.cancel()
+    
+    # Close singleton clients
+    try:
+        from app.services.cloud_provider import deepseek_provider, openai_provider
+        await ollama_provider.close()
+        await deepseek_provider.close()
+        await openai_provider.close()
+        logger.info("AI Provider clients closed cleanly.")
+    except Exception as e:
+        logger.error("Error closing AI provider clients", error=str(e))
+
     logger.info("MSF-APP Backend shutting down.")
 
 
@@ -84,8 +98,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in cors_origins],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
 )
 
 # ================================================================

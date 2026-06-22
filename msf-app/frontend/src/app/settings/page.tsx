@@ -64,9 +64,15 @@ export default function SettingsPage() {
           <div className="space-y-2 text-xs">
             <div className="flex justify-between items-center py-1 border-b border-border/40">
               <span className="text-muted-foreground">API Status:</span>
-              <span className="font-semibold text-emerald-400 flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Online
+              <span className={cn(
+                "font-semibold flex items-center gap-1",
+                health ? "text-emerald-400" : "text-red-400"
+              )}>
+                <span className={cn(
+                  "h-1.5 w-1.5 rounded-full",
+                  health ? "bg-emerald-500 animate-pulse" : "bg-red-500"
+                )} />
+                {health ? "Online" : "Offline"}
               </span>
             </div>
             <div className="flex justify-between items-center py-1 border-b border-border/40">

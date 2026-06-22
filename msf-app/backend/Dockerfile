@@ -26,6 +26,13 @@ COPY . .
 # Buat direktori untuk output files
 RUN mkdir -p /app/outputs /app/templates /app/shortcuts_data
 
+# Create non-root user and group for security hardening
+RUN groupadd -r appuser && useradd -r -g appuser appuser \
+    && chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 # Port yang diekspos
 EXPOSE 8000
 

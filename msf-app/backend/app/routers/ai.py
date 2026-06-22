@@ -32,9 +32,11 @@ async def list_models(provider: str = "ollama"):
 @router.get("/providers", response_model=List[AIProviderInfo])
 async def list_providers():
     """List semua provider dan status ketersediaannya"""
+    import asyncio
+    providers_health = await asyncio.gather(*(prov.health_check() for prov in ALL_PROVIDERS))
+
     result = []
-    for prov in ALL_PROVIDERS:
-        is_available = await prov.health_check()
+    for prov, is_available in zip(ALL_PROVIDERS, providers_health):
         info = prov.get_info()
         reason = None
         if not is_available:

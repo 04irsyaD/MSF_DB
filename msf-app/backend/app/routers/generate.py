@@ -1,6 +1,7 @@
 """Router: Generate dokumentasi — /api/generate/* dan /api/jobs/*"""
 
 import asyncio
+import os
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import Response
 
@@ -146,7 +147,12 @@ async def generate_from_db(
     """
     Generate dokumentasi dari koneksi database langsung.
     """
-    logger.info("Menerima request generate_from_db", payload=request.model_dump() if hasattr(request, 'model_dump') else request.dict())
+    payload_dict = request.model_dump() if hasattr(request, 'model_dump') else request.dict()
+    if "connection" in payload_dict and isinstance(payload_dict["connection"], dict):
+        if "password" in payload_dict["connection"] and payload_dict["connection"]["password"]:
+            payload_dict["connection"] = payload_dict["connection"].copy()
+            payload_dict["connection"]["password"] = "***"
+    logger.info("Menerima request generate_from_db", payload=payload_dict)
     # Test koneksi dulu
     test_result = await DBConnector.test_connection(request.connection)
     if not test_result.success:
@@ -236,7 +242,7 @@ async def download_job_result(job_id: str):
             detail=f"Job belum selesai. Status: {job.status}"
         )
 
-    if not job.result_bytes:
+    if not job.result_filepath or not os.path.exists(job.result_filepath):
         raise HTTPException(status_code=500, detail="File hasil tidak tersedia")
 
     if job.output_format == "pdf":
@@ -245,11 +251,17 @@ async def download_job_result(job_id: str):
         media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     filename = job.result_filename or ("dokumentasi.pdf" if job.output_format == "pdf" else "dokumentasi.docx")
 
+    try:
+        with open(job.result_filepath, "rb") as f:
+            content = f.read()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal membaca file hasil: {str(e)}")
+
     return Response(
-        content=job.result_bytes,
+        content=content,
         media_type=media_type,
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
-            "Content-Length": str(len(job.result_bytes)),
+            "Content-Length": str(len(content)),
         },
     )

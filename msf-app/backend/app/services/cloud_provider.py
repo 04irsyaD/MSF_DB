@@ -24,6 +24,17 @@ class DeepSeekProvider(AIProvider):
         self.api_key = os.getenv("DEEPSEEK_API_KEY", "")
         self.base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1").rstrip("/")
         self.default_model = os.getenv("DEEPSEEK_DEFAULT_MODEL", "deepseek-chat")
+        self.timeout = int(os.getenv("DEEPSEEK_TIMEOUT", "120"))
+        self._client = None
+
+    def get_client(self) -> httpx.AsyncClient:
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
+
+    async def close(self):
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
 
     @property
     def name(self) -> str:
@@ -58,15 +69,16 @@ class DeepSeekProvider(AIProvider):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=120) as client:
-                response = await client.post(
-                    f"{self.base_url}/chat/completions",
-                    headers=headers,
-                    json=payload,
-                )
-                response.raise_for_status()
-                data = response.json()
-                return data["choices"][0]["message"]["content"].strip()
+            client = self.get_client()
+            response = await client.post(
+                f"{self.base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data["choices"][0]["message"]["content"].strip()
 
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
@@ -104,6 +116,17 @@ class OpenAIProvider(AIProvider):
         self.api_key = os.getenv("OPENAI_API_KEY", "")
         self.base_url = "https://api.openai.com/v1"
         self.default_model = os.getenv("OPENAI_DEFAULT_MODEL", "gpt-4o-mini")
+        self.timeout = int(os.getenv("OPENAI_TIMEOUT", "60"))
+        self._client = None
+
+    def get_client(self) -> httpx.AsyncClient:
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
+
+    async def close(self):
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
 
     @property
     def name(self) -> str:
@@ -138,15 +161,16 @@ class OpenAIProvider(AIProvider):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=60) as client:
-                response = await client.post(
-                    f"{self.base_url}/chat/completions",
-                    headers=headers,
-                    json=payload,
-                )
-                response.raise_for_status()
-                data = response.json()
-                return data["choices"][0]["message"]["content"].strip()
+            client = self.get_client()
+            response = await client.post(
+                f"{self.base_url}/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data["choices"][0]["message"]["content"].strip()
 
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:

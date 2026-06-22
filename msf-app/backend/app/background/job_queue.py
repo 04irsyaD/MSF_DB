@@ -4,6 +4,8 @@ Menyimpan status job generate dokumentasi.
 """
 
 import asyncio
+import os
+import tempfile
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional, Callable, Any
@@ -24,13 +26,13 @@ class Job:
         self.completed_at: Optional[str] = None
         self.error_message: Optional[str] = None
         self.preview_markdown: Optional[str] = None
-        self.result_bytes: Optional[bytes] = None        # File DOCX/PDF bytes
+        self.result_filepath: Optional[str] = None       # Path file DOCX/PDF di disk
         self.result_filename: Optional[str] = None       # Nama file untuk download
         self.output_format: str = "docx"
 
     def to_dict(self) -> dict:
         download_url = None
-        if self.status == JobStatus.DONE and self.result_bytes:
+        if self.status == JobStatus.DONE and self.result_filepath and os.path.exists(self.result_filepath):
             download_url = f"/api/jobs/{self.job_id}/download"
 
         return {
@@ -50,10 +52,33 @@ class Job:
         }
 
     def update(self, **kwargs):
+        # Intercept result_bytes dan simpan ke disk
+        if "result_bytes" in kwargs:
+            res_bytes = kwargs.pop("result_bytes")
+            if res_bytes is not None:
+                try:
+                    temp_dir = tempfile.gettempdir()
+                    fmt = kwargs.get("output_format", self.output_format)
+                    filepath = os.path.join(temp_dir, f"msf_doc_{self.job_id}.{fmt}")
+                    with open(filepath, "wb") as f:
+                        f.write(res_bytes)
+                    self.result_filepath = filepath
+                except Exception as e:
+                    # Log error if fail
+                    pass
+
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
         self.updated_at = datetime.now(timezone.utc).isoformat()
+
+    def cleanup_file(self):
+        """Hapus file dari disk jika ada"""
+        if self.result_filepath and os.path.exists(self.result_filepath):
+            try:
+                os.remove(self.result_filepath)
+            except Exception:
+                pass
 
 
 class JobQueue:
@@ -84,8 +109,10 @@ class JobQueue:
         return [job.to_dict() for job in self._jobs.values()]
 
     def delete_job(self, job_id: str) -> bool:
-        """Hapus job dari memory"""
+        """Hapus job dari memory dan hapus filenya"""
         if job_id in self._jobs:
+            job = self._jobs[job_id]
+            job.cleanup_file()
             del self._jobs[job_id]
             return True
         return False
@@ -140,7 +167,7 @@ class JobQueue:
         to_delete = []
 
         for job_id, job in self._jobs.items():
-            if job.status in (JobStatus.DONE, JobStatus.ERROR):
+            if job.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED):
                 if job.completed_at:
                     completed = datetime.fromisoformat(job.completed_at)
                     age_minutes = (now - completed).total_seconds() / 60
@@ -148,6 +175,8 @@ class JobQueue:
                         to_delete.append(job_id)
 
         for job_id in to_delete:
+            job = self._jobs[job_id]
+            job.cleanup_file()
             del self._jobs[job_id]
 
         return len(to_delete)

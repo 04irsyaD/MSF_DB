@@ -11,6 +11,7 @@ import DocPreview from "@/components/generator/DocPreview";
 import { FileText, Database, Sparkles, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { defaultSQL } from "@/components/generator/SqlEditor";
+import { toast } from "sonner";
 
 export default function GeneratePage() {
   const [mode, setMode] = useState<InputMode>("ddl");
@@ -55,9 +56,14 @@ export default function GeneratePage() {
   } = useGenerate();
 
   const handleGenerate = async () => {
+    if (!settings.model) {
+      toast.warning("Silakan pilih model AI yang akan digunakan terlebih dahulu.");
+      return;
+    }
+
     if (mode === "ddl") {
       if (!sqlContent.trim()) {
-        alert("SQL DDL konten kosong. Ketik atau tempel SQL Anda dahulu.");
+        toast.warning("SQL DDL konten kosong. Ketik atau tempel SQL Anda dahulu.");
         return;
       }
       
@@ -74,13 +80,10 @@ export default function GeneratePage() {
         output_format: settings.output_format,
       };
       
-      console.log("Selected Format:", settings.output_format);
-      console.log("Request Payload:", payload);
-      
       await generateFromDDL(payload);
     } else {
       if (!isDbVerified) {
-        alert("Pastikan Anda memverifikasi koneksi database dengan menekan tombol 'Test Koneksi' dahulu.");
+        toast.warning("Pastikan Anda memverifikasi koneksi database dengan menekan tombol 'Test Koneksi' dahulu.");
         return;
       }
       const payload = {
@@ -95,9 +98,6 @@ export default function GeneratePage() {
         schema_filter: schemaFilter || undefined,
         table_filter: tableFilter.length > 0 ? tableFilter : undefined,
       };
-      
-      console.log("Selected Format:", settings.output_format);
-      console.log("Request Payload:", payload);
       
       await generateFromDB(payload);
     }

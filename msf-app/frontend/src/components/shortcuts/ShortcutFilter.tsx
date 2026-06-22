@@ -17,22 +17,35 @@ interface ShortcutFilterProps {
 
 export default function ShortcutFilter({ onFilterChange, engines, categories }: ShortcutFilterProps) {
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [engine, setEngine] = useState("");
   const [category, setCategory] = useState("");
   const [riskLevel, setRiskLevel] = useState("");
 
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQ(q);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [q]);
+
   // Trigger filter change on state modification
   useEffect(() => {
     onFilterChange({
-      q,
+      q: debouncedQ,
       engine,
       category,
       risk_level: riskLevel,
     });
-  }, [q, engine, category, riskLevel]);
+  }, [debouncedQ, engine, category, riskLevel]);
 
   const handleReset = () => {
     setQ("");
+    setDebouncedQ("");
     setEngine("");
     setCategory("");
     setRiskLevel("");
@@ -40,7 +53,8 @@ export default function ShortcutFilter({ onFilterChange, engines, categories }: 
 
   const riskLevels = [
     { label: "Semua Tingkatan", value: "" },
-    { label: "Read Only / Safe", value: "safe" },
+    { label: "Safe", value: "safe" },
+    { label: "Read Only", value: "read-only" },
     { label: "Caution", value: "caution" },
     { label: "Dangerous / High Risk", value: "dangerous" },
   ];

@@ -27,6 +27,20 @@ class OllamaProvider(AIProvider):
     def __init__(self, base_url: str = None, timeout: int = None):
         self.base_url = (base_url or OLLAMA_BASE_URL).rstrip("/")
         self.timeout = timeout or OLLAMA_TIMEOUT
+        self._client = None
+        self._last_health_check = None
+        self._last_health_result = False
+
+    def get_client(self) -> httpx.AsyncClient:
+        """Dapatkan http client reuseable"""
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
+
+    async def close(self):
+        """Tutup http client secara bersih"""
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
 
     @property
     def name(self) -> str:
@@ -54,11 +68,11 @@ class OllamaProvider(AIProvider):
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(url, json=payload)
-                response.raise_for_status()
-                data = response.json()
-                return data.get("response", "").strip()
+            client = self.get_client()
+            response = await client.post(url, json=payload, timeout=self.timeout)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("response", "").strip()
 
         except httpx.ConnectError:
             raise ConnectionError(
@@ -83,33 +97,33 @@ class OllamaProvider(AIProvider):
         url = f"{self.base_url}/api/tags"
 
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
+            client = self.get_client()
+            response = await client.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
 
-                models = []
-                for model in data.get("models", []):
-                    # Format ukuran ke human-readable
-                    size_bytes = model.get("size", 0)
-                    size_str = cls_format_size(size_bytes) if size_bytes else None
+            models = []
+            for model in data.get("models", []):
+                # Format ukuran ke human-readable
+                size_bytes = model.get("size", 0)
+                size_str = cls_format_size(size_bytes) if size_bytes else None
 
-                    # Format tanggal
-                    modified = model.get("modified_at", "")
-                    if modified:
-                        try:
-                            dt = datetime.fromisoformat(modified.replace("Z", "+00:00"))
-                            modified = dt.strftime("%Y-%m-%d")
-                        except Exception:
-                            pass
+                # Format tanggal
+                modified = model.get("modified_at", "")
+                if modified:
+                    try:
+                        dt = datetime.fromisoformat(modified.replace("Z", "+00:00"))
+                        modified = dt.strftime("%Y-%m-%d")
+                    except Exception:
+                        pass
 
-                    models.append(AIModelInfo(
-                        name=model.get("name", ""),
-                        size=size_str,
-                        modified_at=modified,
-                    ))
+                models.append(AIModelInfo(
+                    name=model.get("name", ""),
+                    size=size_str,
+                    modified_at=modified,
+                ))
 
-                return models
+            return models
 
         except httpx.ConnectError:
             logger.warning("Ollama tidak tersedia", url=self.base_url)
@@ -119,13 +133,23 @@ class OllamaProvider(AIProvider):
             return []
 
     async def health_check(self) -> bool:
-        """Cek apakah Ollama bisa diakses"""
+        """Cek apakah Ollama bisa diakses (dengan cache TTL 30s)"""
+        now = datetime.now()
+        if self._last_health_check is not None:
+            age = (now - self._last_health_check).total_seconds()
+            if age < 30:  # Cache TTL 30 detik
+                return self._last_health_result
+
         try:
-            async with httpx.AsyncClient(timeout=5) as client:
-                response = await client.get(f"{self.base_url}/api/tags")
-                return response.status_code == 200
+            client = self.get_client()
+            response = await client.get(f"{self.base_url}/api/tags", timeout=5)
+            result = response.status_code == 200
         except Exception:
-            return False
+            result = False
+
+        self._last_health_check = now
+        self._last_health_result = result
+        return result
 
     def get_info(self) -> dict:
         return {

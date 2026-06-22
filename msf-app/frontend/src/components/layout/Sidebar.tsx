@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Database, FileText, Settings, Sparkles, Terminal, Activity } from "lucide-react";
+import { Database, FileText, Settings, Sparkles, Terminal, Activity, X } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   // Check health status to display live indicators
   const { data: health } = useSWR("/api/health", swrFetcher, {
-    refreshInterval: 10000, // reload every 10s
+    refreshInterval: 15000, // Sync to 15s to match Header and deduplicate
     errorRetryCount: 2,
   });
 
@@ -41,21 +46,44 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 border-r border-border bg-card/60 backdrop-blur-md flex flex-col min-h-screen shrink-0 relative z-20">
-      {/* Brand Logo */}
-      <div className="p-6 border-b border-border flex items-center gap-3">
-        <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-          <Database className="h-5 w-5 text-white" />
+    <>
+      {/* Backdrop overlay on mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
+          onClick={onClose}
+        />
+      )}
+
+      <div className={cn(
+        "fixed inset-y-0 left-0 w-64 border-r border-border bg-card/90 lg:bg-card/60 backdrop-blur-md flex flex-col min-h-screen shrink-0 z-50 transition-transform duration-300 lg:relative lg:translate-x-0 lg:z-20",
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        {/* Brand Logo & Mobile Close Button */}
+        <div className="p-6 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <Database className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <span className="font-extrabold text-lg bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent tracking-wide">
+                MSF_DB
+              </span>
+              <span className="text-[10px] block font-medium text-indigo-400/80 -mt-1 uppercase tracking-widest">
+                v2.0 Backend Core
+              </span>
+            </div>
+          </div>
+
+          {/* Close button for mobile */}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg bg-secondary/50 border border-border lg:hidden text-muted-foreground hover:text-foreground"
+            title="Tutup Menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <div>
-          <span className="font-extrabold text-lg bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent tracking-wide">
-            MSF_DB
-          </span>
-          <span className="text-[10px] block font-medium text-indigo-400/80 -mt-1 uppercase tracking-widest">
-            v2.0 Backend Core
-          </span>
-        </div>
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1.5">
@@ -141,5 +169,6 @@ export default function Sidebar() {
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }

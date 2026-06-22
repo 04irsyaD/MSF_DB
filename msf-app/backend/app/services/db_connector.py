@@ -5,6 +5,7 @@ Support: PostgreSQL, MySQL, SQLite (MVP). SQL Server & MongoDB di v2.1.
 
 from typing import List, Optional
 import re
+from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 import structlog
@@ -41,24 +42,26 @@ class DBConnector:
 
         engine = conn.engine
         port = conn.port or DEFAULT_PORTS.get(engine)
+        username_enc = quote_plus(conn.username) if conn.username else ""
+        password_enc = quote_plus(conn.password) if conn.password else ""
 
-        if engine == DBEngine.POSTGRESQL:
+        if engine == DBEngine.POSTGRESQL or engine == "postgresql":
             return (
-                f"postgresql+psycopg2://{conn.username}:{conn.password}"
+                f"postgresql+psycopg2://{username_enc}:{password_enc}"
                 f"@{conn.host}:{port}/{conn.database}"
             )
-        elif engine == DBEngine.MYSQL:
+        elif engine == DBEngine.MYSQL or engine == "mysql":
             return (
-                f"mysql+pymysql://{conn.username}:{conn.password}"
+                f"mysql+pymysql://{username_enc}:{password_enc}"
                 f"@{conn.host}:{port}/{conn.database}"
                 f"?charset=utf8mb4"
             )
-        elif engine == DBEngine.SQLITE:
+        elif engine == DBEngine.SQLITE or engine == "sqlite":
             # Untuk SQLite, database adalah path file
             return f"sqlite:///{conn.database}"
-        elif engine == DBEngine.SQLSERVER:
+        elif engine == DBEngine.SQLSERVER or engine == "sqlserver":
             return (
-                f"mssql+pyodbc://{conn.username}:{conn.password}"
+                f"mssql+pyodbc://{username_enc}:{password_enc}"
                 f"@{conn.host}:{port}/{conn.database}"
                 f"?driver=ODBC+Driver+17+for+SQL+Server"
             )
@@ -76,7 +79,14 @@ class DBConnector:
         """Test apakah koneksi ke database berhasil (blocking sync)"""
         try:
             url = cls.build_connection_url(conn)
-            engine = create_engine(url, connect_args={"connect_timeout": 10})
+            connect_args = {}
+            if conn.engine == DBEngine.POSTGRESQL or conn.engine == "postgresql":
+                connect_args = {"connect_timeout": 10}
+            elif conn.engine == DBEngine.MYSQL or conn.engine == "mysql":
+                connect_args = {"connect_timeout": 10}
+            elif conn.engine == DBEngine.SQLSERVER or conn.engine == "sqlserver":
+                connect_args = {"timeout": 10}
+            engine = create_engine(url, connect_args=connect_args)
 
             with engine.connect() as connection:
                 # Cek versi server
@@ -328,11 +338,45 @@ class DBConnector:
         # Row count (best effort)
         row_count = None
         try:
-            with db_engine.connect() as conn:
-                result = conn.execute(
-                    text(f'SELECT COUNT(*) FROM "{table_name}"')
-                )
-                row_count = result.scalar()
+            with db_engine.connect() as db_conn:
+                if engine_type == DBEngine.POSTGRESQL or engine_type == "postgresql":
+                    # PostgreSQL estimate query
+                    query = text("""
+                        SELECT reltuples::bigint
+                        FROM pg_class c
+                        JOIN pg_namespace n ON n.oid = c.relnamespace
+                        WHERE n.nspname = :schema AND c.relname = :table
+                    """)
+                    result = db_conn.execute(query, {"schema": schema, "table": table_name})
+                    row_count = result.scalar()
+                    if row_count is not None and row_count < 0:
+                        row_count = 0
+                elif engine_type == DBEngine.MYSQL or engine_type == "mysql":
+                    # MySQL estimate query
+                    query = text("""
+                        SELECT TABLE_ROWS
+                        FROM information_schema.tables
+                        WHERE TABLE_SCHEMA = :schema AND TABLE_NAME = :table
+                    """)
+                    result = db_conn.execute(query, {"schema": schema, "table": table_name})
+                    row_count = result.scalar()
+
+                # Fallback to SELECT COUNT(*) if not PostgreSQL/MySQL or estimate failed (e.g. returns None)
+                if row_count is None:
+                    if engine_type == DBEngine.MYSQL or engine_type == "mysql":
+                        escaped_table = table_name.replace('`', '``')
+                        escaped_schema = schema.replace('`', '``')
+                        quoted_table = f"`{escaped_schema}`.`{escaped_table}`"
+                    elif engine_type == DBEngine.POSTGRESQL or engine_type == "postgresql":
+                        escaped_table = table_name.replace('"', '""')
+                        escaped_schema = schema.replace('"', '""')
+                        quoted_table = f'"{escaped_schema}"."{escaped_table}"'
+                    else: # SQLite
+                        escaped_table = table_name.replace('"', '""')
+                        quoted_table = f'"{escaped_table}"'
+                    
+                    result = db_conn.execute(text(f"SELECT COUNT(*) FROM {quoted_table}"))
+                    row_count = result.scalar()
         except Exception:
             pass
 

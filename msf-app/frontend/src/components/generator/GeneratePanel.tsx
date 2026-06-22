@@ -26,36 +26,41 @@ export default function GeneratePanel({
   // Load models for current provider
   const { models, isAvailable, isLoading: modelsLoading } = useAIModels(provider);
 
-  // Sync provider setting changes
-  useEffect(() => {
-    handleFieldChange("ai_provider", provider);
-  }, [provider]);
-
-  // Set default model once models load
+  // Set default model once models load or provider changes
   useEffect(() => {
     if (models.length > 0) {
-      // Find default model based on provider or use first
-      let defaultModel = models[0].name;
-      
-      // Ollama defaults
-      if (provider === "ollama") {
-        const preferred = models.find(m => m.name.includes("deepseek") || m.name.includes("llama") || m.name.includes("mistral"));
-        if (preferred) defaultModel = preferred.name;
-      } 
-      // Deepseek defaults
-      else if (provider === "deepseek") {
-        defaultModel = "deepseek-chat";
-      } 
-      // OpenAI defaults
-      else if (provider === "openai") {
-        defaultModel = "gpt-4o-mini";
-      }
+      const modelNames = models.map(m => m.name);
+      if (!modelNames.includes(settings.model)) {
+        let defaultModel = models[0].name;
+        
+        // Ollama defaults
+        if (provider === "ollama") {
+          const preferred = models.find(m => m.name.includes("deepseek") || m.name.includes("llama") || m.name.includes("mistral"));
+          if (preferred) defaultModel = preferred.name;
+        } 
+        // Deepseek defaults
+        else if (provider === "deepseek") {
+          defaultModel = "deepseek-chat";
+        } 
+        // OpenAI defaults
+        else if (provider === "openai") {
+          defaultModel = "gpt-4o-mini";
+        }
 
-      handleFieldChange("model", defaultModel);
+        onChange({
+          ...settings,
+          model: defaultModel,
+        });
+      }
     } else {
-      handleFieldChange("model", "");
+      if (settings.model !== "") {
+        onChange({
+          ...settings,
+          model: "",
+        });
+      }
     }
-  }, [models, provider]);
+  }, [models, provider, settings, onChange]);
 
   const handleFieldChange = (key: keyof GeneratorSettings, val: any) => {
     onChange({
@@ -218,7 +223,14 @@ export default function GeneratePanel({
             </label>
             <select
               value={provider}
-              onChange={(e) => setProvider(e.target.value as AIProvider)}
+              onChange={(e) => {
+                const newProvider = e.target.value as AIProvider;
+                setProvider(newProvider);
+                onChange({
+                  ...settings,
+                  ai_provider: newProvider,
+                });
+              }}
               className="w-full bg-secondary/20 border border-border focus:border-indigo-500/80 rounded-xl py-2 px-3 text-xs text-white focus:outline-none transition-all cursor-pointer"
             >
               {providers.map((p) => (

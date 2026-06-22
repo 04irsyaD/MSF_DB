@@ -1,11 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Sparkles, Terminal, Settings, Database, Cpu, HelpCircle } from "lucide-react";
+import { Sparkles, Terminal, Settings, Database, Cpu, HelpCircle, Menu } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 
-export default function Header() {
+interface HeaderProps {
+  onMenuToggle: () => void;
+}
+
+export default function Header({ onMenuToggle }: HeaderProps) {
   const pathname = usePathname();
 
   const getPageInfo = () => {
@@ -41,6 +45,15 @@ export default function Header() {
     <header className="h-20 border-b border-border bg-background/50 backdrop-blur-md flex items-center justify-between px-8 z-10 shrink-0">
       {/* Title & Desc */}
       <div className="flex items-center gap-3">
+        {/* Burger Button for Mobile */}
+        <button
+          onClick={onMenuToggle}
+          className="p-2 rounded-lg bg-secondary/50 border border-border lg:hidden text-muted-foreground hover:text-foreground mr-1"
+          title="Buka Menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
         <div className="p-2 rounded-lg bg-secondary/50 border border-border">
           <Icon className="h-5 w-5 text-indigo-400" />
         </div>
