@@ -67,12 +67,12 @@ export default function DocPreview({ markdown, projectName, downloadUrl, format 
   return (
     <div className="space-y-4">
       {/* Control Actions bar */}
-      <div className="flex items-center justify-between bg-card/60 backdrop-blur-md border border-border px-5 py-3.5 rounded-2xl shrink-0">
+      <div className="flex items-center justify-between bg-card border border-border px-5 py-3.5 rounded-[4px] shrink-0">
         <div>
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-            Dokumentasi Selesai Dibuat
+          <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest">
+            DOKUMENTASI SELESAI DIBUAT
           </h3>
-          <p className="text-[11px] text-muted-foreground font-semibold mt-0.5">
+          <p className="text-[10px] text-muted-foreground font-mono font-semibold mt-0.5 uppercase tracking-wide">
             Format: Markdown / Ekspor ke {isPdf ? "PDF (.pdf)" : "Word (.docx)"}
           </p>
         </div>
@@ -80,40 +80,40 @@ export default function DocPreview({ markdown, projectName, downloadUrl, format 
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopyMarkdown}
-            className="p-2 rounded-xl bg-secondary/30 hover:bg-secondary/60 border border-border hover:border-indigo-500/20 text-muted-foreground hover:text-white transition-all text-xs flex items-center gap-2"
+            className="p-2 rounded-[4px] bg-secondary/30 hover:bg-secondary/60 border border-border hover:border-accent/40 text-muted-foreground hover:text-white transition-colors duration-150 text-xs font-mono flex items-center gap-2 uppercase font-semibold"
             title="Salin Markdown"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-emerald-400" />
+              <Check className="h-4 w-4 text-accent" />
             ) : (
               <Copy className="h-4 w-4" />
             )}
-            <span className="hidden sm:inline">Salin Markdown</span>
+            <span className="hidden sm:inline">COPY MARKDOWN</span>
           </button>
 
           <button
             onClick={handleDownload}
             disabled={exporting}
-            className="p-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 text-white transition-all text-xs flex items-center gap-2 font-bold shadow-md shadow-indigo-500/10 active:scale-95 disabled:opacity-50"
+            className="p-2 rounded-[4px] bg-accent hover:bg-accent/90 border border-transparent text-black transition-colors duration-150 text-xs font-mono flex items-center gap-2 font-bold disabled:opacity-50 uppercase active:scale-95"
           >
-            <FileText className="h-4 w-4 text-white" />
-            <span>Unduh {isPdf ? "PDF" : "Word"}</span>
+            <FileText className="h-4 w-4 text-black" />
+            <span>DOWNLOAD {isPdf ? "PDF" : "WORD"}</span>
           </button>
 
           <button
             onClick={onReset}
-            className="p-2 rounded-xl bg-secondary/30 hover:bg-secondary/60 border border-border hover:border-amber-500/20 text-muted-foreground hover:text-white transition-all text-xs flex items-center gap-2"
+            className="p-2 rounded-[4px] bg-secondary/30 hover:bg-secondary/60 border border-border hover:border-accent/40 text-muted-foreground hover:text-white transition-colors duration-150 text-xs font-mono flex items-center gap-2 uppercase font-semibold"
             title="Generate Ulang"
           >
             <RefreshCw className="h-4 w-4" />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline">RESET</span>
           </button>
         </div>
       </div>
 
       {/* Markdown Document Content Sheet */}
-      <div className="bg-card/30 border border-border rounded-2xl p-6 md:p-8 max-h-[750px] overflow-y-auto relative glass-panel">
-        <div className="prose prose-invert max-w-none prose-xs prose-headings:text-white prose-a:text-indigo-400 prose-code:text-indigo-300 prose-pre:bg-secondary/20 prose-pre:border prose-pre:border-border prose-table:border-collapse">
+      <div className="bg-[#0d1117] border border-border rounded-[4px] p-6 md:p-8 max-h-[750px] overflow-y-auto relative">
+        <div className="prose prose-invert max-w-none prose-xs prose-headings:text-white prose-a:text-accent prose-code:text-accent prose-pre:bg-secondary/10 prose-pre:border prose-pre:border-border prose-table:border-collapse font-sans prose-code:font-mono">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {markdown}
           </ReactMarkdown>

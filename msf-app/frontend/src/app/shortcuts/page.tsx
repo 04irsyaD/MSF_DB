@@ -48,21 +48,21 @@ export default function ShortcutsPage() {
   return (
     <div className="space-y-6">
       {/* Intro info bar */}
-      <div className="p-4 bg-indigo-600/5 border border-indigo-500/10 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 bg-card border border-border rounded-[4px] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <Terminal className="h-5 w-5 text-indigo-400 mt-0.5 shrink-0" />
+          <Terminal className="h-5 w-5 text-accent mt-0.5 shrink-0 animate-pulse" />
           <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Diagnostic & Administration Scripts
+            <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest">
+              DIAGNOSTIC & ADMINISTRATION SCRIPTS
             </h3>
-            <p className="text-[11px] text-muted-foreground font-semibold mt-0.5 leading-relaxed">
+            <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
               Use these pre-written queries to inspect tables size, detect index bloat, view active locks, and optimize database settings directly.
             </p>
           </div>
         </div>
 
-        <div className="text-[11px] font-bold text-muted-foreground bg-secondary/30 px-3 py-1.5 rounded-lg border border-border shrink-0 self-start md:self-auto font-mono">
-          Total: {total} Scripts
+        <div className="text-[11px] font-bold text-muted-foreground bg-secondary/30 px-3 py-1.5 rounded-[4px] border border-border shrink-0 self-start md:self-auto font-mono">
+          TOTAL: {total} SCRIPTS
         </div>
       </div>
 
@@ -73,48 +73,47 @@ export default function ShortcutsPage() {
         onFilterChange={setFilters}
       />
 
-      {/* Grid List */}
+      {/* List (Table/List Hybrid) */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-40 border border-border bg-card/10 rounded-2xl animate-pulse flex flex-col justify-between p-5"
+              className="h-20 border border-border bg-[#0d1117]/30 rounded-[4px] animate-pulse flex items-center justify-between p-4"
             >
-              <div className="space-y-3">
-                <div className="h-4 w-20 bg-secondary/50 rounded" />
-                <div className="h-5 w-3/4 bg-secondary/40 rounded" />
-                <div className="h-3.5 w-full bg-secondary/30 rounded" />
+              <div className="space-y-2 flex-1">
+                <div className="h-3.5 w-16 bg-secondary/50 rounded-[2px]" />
+                <div className="h-4 w-1/3 bg-secondary/40 rounded-[2px]" />
               </div>
-              <div className="h-3 w-1/3 bg-secondary/40 rounded" />
+              <div className="h-6 w-20 bg-secondary/30 rounded-[2px]" />
             </div>
           ))}
         </div>
       ) : error ? (
-        <div className="p-10 border border-red-500/20 bg-red-500/5 rounded-2xl flex flex-col items-center text-center gap-3">
+        <div className="p-10 border border-red-500/30 bg-red-500/5 rounded-[4px] flex flex-col items-center text-center gap-3">
           <AlertCircle className="h-8 w-8 text-red-400" />
-          <h4 className="text-sm font-bold text-white">Gagal Memuat Script</h4>
+          <h4 className="text-sm font-mono font-bold text-white uppercase tracking-wider">GAGAL MEMUAT SCRIPT</h4>
           <p className="text-xs text-muted-foreground max-w-sm">
             Terjadi masalah saat mengambil data SQL shortcuts dari server backend.
           </p>
           <button
             onClick={() => mutate()}
-            className="px-4 py-2 bg-secondary rounded-xl text-xs font-semibold hover:bg-secondary/80 border border-border flex items-center gap-2 text-white"
+            className="px-4 py-2 bg-secondary rounded-[4px] text-xs font-mono font-bold hover:bg-secondary/80 border border-border hover:border-accent/40 flex items-center gap-2 text-white transition-colors duration-150"
           >
             <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            Coba Lagi
+            COBA LAGI
           </button>
         </div>
       ) : shortcuts.length === 0 ? (
-        <div className="p-16 border border-border bg-card/20 rounded-2xl flex flex-col items-center text-center gap-3">
+        <div className="p-16 border border-border bg-[#0d1117] rounded-[4px] flex flex-col items-center text-center gap-3">
           <Terminal className="h-10 w-10 text-muted-foreground/50" />
-          <h4 className="text-sm font-bold text-white">Tidak Ada Script Ditemukan</h4>
-          <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+          <h4 className="text-sm font-mono font-bold text-white uppercase tracking-wider">TIDAK ADA SCRIPT DITEMUKAN</h4>
+          <p className="text-xs text-muted-foreground max-w-xs leading-relaxed font-mono">
             Tidak ada script yang cocok dengan filter atau kata kunci pencarian Anda. Coba reset filter.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-3">
           {shortcuts.map((shortcut) => (
             <ShortcutCard key={shortcut.id} shortcut={shortcut} />
           ))}

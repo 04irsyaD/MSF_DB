@@ -137,33 +137,33 @@ export default function GeneratePage() {
           <div className="lg:col-span-7 space-y-6 flex flex-col justify-between">
             <div className="space-y-4">
               {/* Input Mode Selector */}
-              <div className="flex bg-secondary/15 border border-border p-1 rounded-2xl max-w-sm shrink-0">
+              <div className="flex bg-secondary/15 border border-border p-0.5 rounded-[4px] max-w-sm shrink-0">
                 <button
                   type="button"
                   onClick={() => setMode("ddl")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold transition-all duration-200",
+                    "flex-1 flex items-center justify-center gap-2 py-2 px-3.5 rounded-[2px] text-xs font-mono font-bold transition-colors duration-150",
                     mode === "ddl"
-                      ? "bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 shadow-sm shadow-indigo-500/5"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/10"
+                      ? "bg-accent/15 border border-accent/20 text-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/20"
                   )}
                 >
                   <FileText className="h-4 w-4" />
-                  <span>SQL DDL Paste</span>
+                  <span>SQL DDL PASTE</span>
                 </button>
                 
                 <button
                   type="button"
                   onClick={() => setMode("database")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold transition-all duration-200",
+                    "flex-1 flex items-center justify-center gap-2 py-2 px-3.5 rounded-[2px] text-xs font-mono font-bold transition-colors duration-150",
                     mode === "database"
-                      ? "bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 shadow-sm shadow-indigo-500/5"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/10"
+                      ? "bg-accent/15 border border-accent/20 text-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/20"
                   )}
                 >
                   <Database className="h-4 w-4" />
-                  <span>Koneksi Live DB</span>
+                  <span>KONEKSI LIVE DB</span>
                 </button>
               </div>
 
@@ -185,10 +185,10 @@ export default function GeneratePage() {
             
             {/* Warning jika Live DB belum terverifikasi */}
             {mode === "database" && !isDbVerified && (
-              <div className="p-3.5 bg-amber-500/5 border border-amber-500/20 text-amber-400/90 rounded-2xl text-[11px] leading-relaxed flex items-start gap-2.5 font-semibold">
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div className="p-3.5 bg-amber-500/5 border border-amber-500/20 text-amber-400/90 rounded-[4px] text-[11px] leading-relaxed flex items-start gap-2.5 font-mono font-semibold">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
                 <span>
-                  Catatan: Sebelum menekan tombol generate, Anda wajib melakukan tes koneksi ke database dan memastikannya berhasil terhubung.
+                  CATATAN: SEBELUM GENERATE DOKUMENTASI, ANDA WAJIB VERIFIKASI KONEKSI DATABASE DENGAN MENEKAN TOMBOL 'TEST CONNECTION'.
                 </span>
               </div>
             )}
