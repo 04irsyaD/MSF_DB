@@ -42,7 +42,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   });
 
   return (
-    <header className="h-20 border-b border-border bg-background/50 backdrop-blur-md flex items-center justify-between px-8 z-10 shrink-0">
+    <header className="h-20 border-b border-border bg-background/90 lg:bg-background/50 backdrop-blur-md flex items-center justify-between px-8 z-20 shrink-0 sticky top-0">
       {/* Title & Desc */}
       <div className="flex items-center gap-3">
         {/* Burger Button for Mobile */}

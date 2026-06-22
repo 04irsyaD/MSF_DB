@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <div className={cn(
-        "fixed inset-y-0 left-0 w-64 border-r border-border bg-card/90 lg:bg-card/60 backdrop-blur-md flex flex-col min-h-screen shrink-0 z-50 transition-transform duration-300 lg:relative lg:translate-x-0 lg:z-20",
+        "fixed inset-y-0 left-0 w-64 border-r border-border bg-card/90 lg:bg-card/60 backdrop-blur-md flex flex-col h-screen shrink-0 z-50 transition-transform duration-300 lg:sticky lg:top-0 lg:translate-x-0 lg:z-20",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Brand Logo & Mobile Close Button */}
@@ -166,6 +166,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </span>
             </div>
           )}
+        </div>
+
+        {/* Powered by */}
+        <div className="text-center pt-2 border-t border-border/20 mt-1">
+          <span className="text-[9px] text-muted-foreground/50 font-medium">
+            Powered by <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent font-bold">MSF Team & Antigravity AI</span>
+          </span>
         </div>
       </div>
     </div>

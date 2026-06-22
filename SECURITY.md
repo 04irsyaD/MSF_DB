@@ -2,7 +2,7 @@
 
 ## Scope
 
-This repository contains database queries, documentation workflows, automation scripts, and application examples. Security issues may include exposed credentials, unsafe scripts, vulnerable dependencies, insecure workflow configuration, or documentation that reveals sensitive information.
+This repository contains database queries, documentation workflows, automation scripts, and application examples. Security issues may include exposed credentials, unsafe scripts, vulnerable dependencies, insecure workflow configuration, or documentation that reveals sensifiitive information.
 
 ## Supported Project State
 
