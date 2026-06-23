@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { GeneratorSettings, AIProvider, OutputLanguage, DetailLevel, ExportFormat } from "@/lib/types";
 import { useAIModels } from "@/hooks/useOllamaModels";
 import { Sparkles, Globe, FileText, BarChart, Settings, Loader2 } from "lucide-react";
@@ -26,11 +26,19 @@ export default function GeneratePanel({
   // Load models for current provider
   const { models, isAvailable, isLoading: modelsLoading } = useAIModels(provider);
 
-  // Set default model once models load or provider changes
+  // Ref untuk akses settings terbaru tanpa trigger re-render / infinite loop
+  const settingsRef = useRef(settings);
   useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  // Set default model once models load or provider changes
+  // Menggunakan settingsRef (bukan settings di deps) untuk menghindari infinite loop
+  useEffect(() => {
+    const currentSettings = settingsRef.current;
     if (models.length > 0) {
       const modelNames = models.map(m => m.name);
-      if (!modelNames.includes(settings.model)) {
+      if (!modelNames.includes(currentSettings.model)) {
         let defaultModel = models[0].name;
         
         // Ollama defaults
@@ -48,19 +56,19 @@ export default function GeneratePanel({
         }
 
         onChange({
-          ...settings,
+          ...currentSettings,
           model: defaultModel,
         });
       }
     } else {
-      if (settings.model !== "") {
+      if (currentSettings.model !== "") {
         onChange({
-          ...settings,
+          ...currentSettings,
           model: "",
         });
       }
     }
-  }, [models, provider, settings, onChange]);
+  }, [models, provider]); // Hapus settings dan onChange dari deps — pakai settingsRef
 
   const handleFieldChange = (key: keyof GeneratorSettings, val: any) => {
     onChange({

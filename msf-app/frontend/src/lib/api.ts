@@ -34,6 +34,11 @@ async function request<T>(
   if (options.body && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
+  // Tambah API Key header jika dikonfigurasi (untuk proteksi backend)
+  const apiKey = process.env.NEXT_PUBLIC_MSF_API_KEY;
+  if (apiKey) {
+    headers.set("X-API-Key", apiKey);
+  }
 
   const response = await fetch(url, {
     ...options,
@@ -100,8 +105,6 @@ export const api = {
 
   // Generate Endpoints
   async generateFromDDL(data: GenerateFromDDLRequest): Promise<GenerateJobResponse> {
-    console.log("Generate Request:", data);
-    console.log("API URL:", "/api/generate/from-ddl");
     return request<GenerateJobResponse>("/api/generate/from-ddl", {
       method: "POST",
       body: JSON.stringify(data),
@@ -109,8 +112,6 @@ export const api = {
   },
 
   async generateFromDB(data: GenerateFromDBRequest): Promise<GenerateJobResponse> {
-    console.log("Generate Request:", data);
-    console.log("API URL:", "/api/generate/from-db");
     return request<GenerateJobResponse>("/api/generate/from-db", {
       method: "POST",
       body: JSON.stringify(data),

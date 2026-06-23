@@ -6,7 +6,7 @@ import httpx
 import json
 import os
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 import structlog
 
 from app.services.ai_provider import AIProvider
@@ -134,7 +134,7 @@ class OllamaProvider(AIProvider):
 
     async def health_check(self) -> bool:
         """Cek apakah Ollama bisa diakses (dengan cache TTL 30s)"""
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         if self._last_health_check is not None:
             age = (now - self._last_health_check).total_seconds()
             if age < 30:  # Cache TTL 30 detik

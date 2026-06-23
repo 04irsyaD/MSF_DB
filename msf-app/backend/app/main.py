@@ -6,6 +6,8 @@ import os
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse as StarletteJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -20,6 +22,48 @@ from app.utils.logger import setup_logger
 
 setup_logger()
 logger = structlog.get_logger()
+
+# ================================================================
+# SECURITY CONFIGURATION
+# ================================================================
+
+API_KEY = os.getenv("MSF_API_KEY", "")
+
+# Paths yang diizinkan tanpa API Key (public endpoints)
+PUBLIC_PATHS = [
+    "/",
+    "/health",
+    "/api/health",
+    "/docs",
+    "/redoc",
+    "/openapi.json",
+]
+
+
+class APIKeyMiddleware(BaseHTTPMiddleware):
+    """Middleware untuk validasi API Key. Aktif hanya jika MSF_API_KEY di-set di env."""
+
+    async def dispatch(self, request: Request, call_next):
+        # Jika API_KEY tidak dikonfigurasi, lewati validasi (development mode)
+        if not API_KEY:
+            return await call_next(request)
+
+        # Izinkan public paths dan OPTIONS request (CORS preflight)
+        if request.method == "OPTIONS" or request.url.path in PUBLIC_PATHS:
+            return await call_next(request)
+
+        # Cek header X-API-Key
+        key = request.headers.get("X-API-Key", "")
+        if key != API_KEY:
+            return StarletteJSONResponse(
+                status_code=401,
+                content={
+                    "detail": "API Key tidak valid atau tidak ditemukan.",
+                    "error_code": "UNAUTHORIZED",
+                },
+            )
+
+        return await call_next(request)
 
 # ================================================================
 # LIFESPAN (startup/shutdown)
@@ -99,8 +143,9 @@ app.add_middleware(
     allow_origins=[o.strip() for o in cors_origins],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key"],
 )
+app.add_middleware(APIKeyMiddleware)
 
 # ================================================================
 # EXCEPTION HANDLERS
