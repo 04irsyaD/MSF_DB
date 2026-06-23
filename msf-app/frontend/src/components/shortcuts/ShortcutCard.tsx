@@ -29,24 +29,24 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
         return {
           label: "SAFE",
           border: "border-l-4 border-l-emerald-500",
-          text: "text-emerald-400",
-          bg: "bg-emerald-500/10",
+          text: "text-emerald-600",
+          bg: "bg-emerald-50 border-emerald-100",
           icon: ShieldCheck,
         };
       case "caution":
         return {
           label: "CAUTION",
           border: "border-l-4 border-l-amber-500",
-          text: "text-amber-400",
-          bg: "bg-amber-500/10",
+          text: "text-amber-600",
+          bg: "bg-amber-50 border-amber-100",
           icon: AlertTriangle,
         };
       case "dangerous":
         return {
           label: "HIGH RISK",
           border: "border-l-4 border-l-red-500",
-          text: "text-red-400",
-          bg: "bg-red-500/10",
+          text: "text-red-600",
+          bg: "bg-red-50 border-red-100",
           icon: AlertTriangle,
         };
       default:
@@ -54,7 +54,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
           label: level.toUpperCase(),
           border: "border-l-4 border-l-border",
           text: "text-muted-foreground",
-          bg: "bg-secondary/20",
+          bg: "bg-gray-50 border-gray-100",
           icon: Terminal,
         };
     }
@@ -67,7 +67,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
     <div
       onClick={() => setExpanded(!expanded)}
       className={cn(
-        "hover:cursor-pointer border border-border bg-card hover:border-accent/40 rounded-[4px] overflow-hidden transition-all duration-150 flex flex-col justify-between w-full",
+        "hover:cursor-pointer border border-border bg-card hover:border-accent/40 rounded-lg overflow-hidden transition-all duration-150 flex flex-col justify-between w-full shadow-sm hover:shadow",
         risk.border
       )}
     >
@@ -80,21 +80,21 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
               className={cn(
                 "px-1.5 py-0.5 rounded-[2px] text-[8px] font-mono font-bold uppercase tracking-wider border",
                 shortcut.engine === "postgresql"
-                  ? "bg-purple-500/10 text-purple-400 border-purple-500/25"
+                  ? "bg-purple-50 text-purple-700 border-purple-200"
                   : shortcut.engine === "mysql"
-                  ? "bg-sky-500/10 text-sky-400 border-sky-500/25"
-                  : "bg-neutral-500/10 text-neutral-400 border-neutral-500/25"
+                  ? "bg-sky-50 text-sky-700 border-sky-200"
+                  : "bg-gray-50 text-gray-600 border-gray-200"
               )}
             >
               {shortcut.engine}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground">/</span>
-            <span className="text-[9px] font-mono font-bold uppercase text-accent/80 tracking-wider">
+            <span className="text-[9px] font-mono font-bold uppercase text-accent tracking-wider">
               {shortcut.category}
             </span>
           </div>
 
-          <h4 className="text-sm font-bold text-white leading-tight">
+          <h4 className="text-sm font-bold text-gray-900 leading-tight">
             {shortcut.title}
           </h4>
           
@@ -107,7 +107,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
             {shortcut.tags.map((t) => (
               <span
                 key={t}
-                className="text-[9px] font-mono font-bold text-muted-foreground/60 bg-secondary/30 border border-border/60 px-1.5 py-0.5 rounded-[2px]"
+                className="text-[9px] font-mono font-bold text-muted-foreground/60 bg-gray-50 border border-border/60 px-1.5 py-0.5 rounded-[2px]"
               >
                 #{t.toUpperCase()}
               </span>
@@ -116,7 +116,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
         </div>
 
         {/* SQL Inline Preview (Dense, Mono snippet) */}
-        <div className="hidden lg:block w-80 shrink-0 font-mono text-[10px] text-accent/40 bg-black/30 border border-border/60 rounded-[2px] px-2.5 py-2 truncate select-none">
+        <div className="hidden lg:block w-80 shrink-0 font-mono text-[10px] text-gray-400 bg-gray-50 border border-border/60 rounded-[2px] px-2.5 py-2 truncate select-none">
           {shortcut.sql.replace(/\s+/g, " ")}
         </div>
 
@@ -125,7 +125,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
           <span
             className={cn(
               "px-2 py-0.5 rounded-[2px] text-[8px] font-mono font-bold uppercase tracking-wider border flex items-center gap-1.5 shrink-0",
-              risk.bg, risk.text, "border-current/20"
+              risk.bg, risk.text
             )}
           >
             <RiskIcon className="h-3 w-3" />
@@ -134,7 +134,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
 
           <button
             onClick={handleCopy}
-            className="p-1.5 rounded-[4px] bg-secondary/30 hover:bg-secondary border border-border hover:border-accent/40 text-muted-foreground hover:text-white transition-colors duration-150"
+            className="p-1.5 rounded-[4px] bg-gray-50 hover:bg-gray-100 border border-border hover:border-accent/40 text-muted-foreground hover:text-gray-900 transition-colors duration-150"
             title="Copy SQL Query"
           >
             {copied ? (
@@ -158,13 +158,13 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
       {expanded && (
         <div
           onClick={(e) => e.stopPropagation()} // Prevent collapse when clicking code box
-          className="border-t border-border bg-black/40 p-4 space-y-3"
+          className="border-t border-border bg-gray-50/50 p-4 space-y-3"
         >
           <div className="flex justify-between items-center text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
             <span>SQL SCRIPT PREVIEW</span>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-2.5 py-1 py-1.5 rounded-[4px] bg-secondary/80 hover:bg-secondary border border-border hover:border-accent/40 text-white transition-colors duration-150 font-mono font-bold text-[9px]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] bg-white hover:bg-gray-50 border border-border hover:border-accent/40 text-gray-700 transition-colors duration-150 font-mono font-bold text-[9px]"
             >
               {copied ? (
                 <>
@@ -179,7 +179,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
               )}
             </button>
           </div>
-          <pre className="p-3 bg-[#0d1117] border border-border rounded-[4px] text-xs font-mono text-accent/80 overflow-x-auto leading-relaxed max-h-60 scrollbar-thin scrollbar-thumb-accent/20">
+          <pre className="p-3 bg-gray-900 border border-border rounded-[4px] text-xs font-mono text-emerald-400 overflow-x-auto leading-relaxed max-h-60 scrollbar-thin scrollbar-thumb-accent/20">
             <code>{shortcut.sql}</code>
           </pre>
           {shortcut.notes && (

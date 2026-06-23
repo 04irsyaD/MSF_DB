@@ -67,9 +67,9 @@ export default function DocPreview({ markdown, projectName, downloadUrl, format 
   return (
     <div className="space-y-4">
       {/* Control Actions bar */}
-      <div className="flex items-center justify-between bg-card border border-border px-5 py-3.5 rounded-[4px] shrink-0">
+      <div className="flex items-center justify-between bg-white border border-border px-5 py-3.5 rounded-2xl shadow-sm shrink-0">
         <div>
-          <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest">
+          <h3 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">
             DOKUMENTASI SELESAI DIBUAT
           </h3>
           <p className="text-[10px] text-muted-foreground font-mono font-semibold mt-0.5 uppercase tracking-wide">
@@ -80,7 +80,7 @@ export default function DocPreview({ markdown, projectName, downloadUrl, format 
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopyMarkdown}
-            className="p-2 rounded-[4px] bg-secondary/30 hover:bg-secondary/60 border border-border hover:border-accent/40 text-muted-foreground hover:text-white transition-colors duration-150 text-xs font-mono flex items-center gap-2 uppercase font-semibold"
+            className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-border hover:border-accent/40 text-muted-foreground hover:text-gray-900 transition-colors duration-150 text-xs font-mono flex items-center gap-2 uppercase font-semibold"
             title="Salin Markdown"
           >
             {copied ? (
@@ -94,15 +94,15 @@ export default function DocPreview({ markdown, projectName, downloadUrl, format 
           <button
             onClick={handleDownload}
             disabled={exporting}
-            className="p-2 rounded-[4px] bg-accent hover:bg-accent/90 border border-transparent text-black transition-colors duration-150 text-xs font-mono flex items-center gap-2 font-bold disabled:opacity-50 uppercase active:scale-95"
+            className="p-2 rounded-xl bg-accent hover:bg-accent/90 border border-transparent text-white transition-colors duration-150 text-xs font-mono flex items-center gap-2 font-bold disabled:opacity-50 uppercase active:scale-95 shadow-sm"
           >
-            <FileText className="h-4 w-4 text-black" />
+            <FileText className="h-4 w-4 text-white" />
             <span>DOWNLOAD {isPdf ? "PDF" : "WORD"}</span>
           </button>
 
           <button
             onClick={onReset}
-            className="p-2 rounded-[4px] bg-secondary/30 hover:bg-secondary/60 border border-border hover:border-accent/40 text-muted-foreground hover:text-white transition-colors duration-150 text-xs font-mono flex items-center gap-2 uppercase font-semibold"
+            className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-border hover:border-accent/40 text-muted-foreground hover:text-gray-900 transition-colors duration-150 text-xs font-mono flex items-center gap-2 uppercase font-semibold"
             title="Generate Ulang"
           >
             <RefreshCw className="h-4 w-4" />
@@ -112,8 +112,8 @@ export default function DocPreview({ markdown, projectName, downloadUrl, format 
       </div>
 
       {/* Markdown Document Content Sheet */}
-      <div className="bg-[#0d1117] border border-border rounded-[4px] p-6 md:p-8 max-h-[750px] overflow-y-auto relative">
-        <div className="prose prose-invert max-w-none prose-xs prose-headings:text-white prose-a:text-accent prose-code:text-accent prose-pre:bg-secondary/10 prose-pre:border prose-pre:border-border prose-table:border-collapse font-sans prose-code:font-mono">
+      <div className="bg-white border border-border rounded-2xl p-6 md:p-8 max-h-[750px] overflow-y-auto relative shadow-sm">
+        <div className="prose max-w-none prose-emerald prose-headings:text-gray-900 prose-a:text-accent prose-code:text-emerald-700 prose-pre:bg-gray-50 prose-pre:border prose-pre:border-border prose-table:border-collapse font-sans prose-code:font-mono">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {markdown}
           </ReactMarkdown>

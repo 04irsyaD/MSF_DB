@@ -15,8 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MSF_DB — AI Database Documentation",
-  description: "Generate beautiful, comprehensive database documentation and run smart queries with local AI.",
+  title: "MSF DB — AI Database Documentation",
+  description:
+    "Generate dokumentasi database secara otomatis menggunakan AI lokal. Support PostgreSQL, MySQL, SQLite, dan SQL Server.",
 };
 
 export default function RootLayout({
@@ -25,14 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background text-foreground antialiased flex`}
+        className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
       >
         <AppLayout>{children}</AppLayout>
 
         {/* Sonner Toast Notifications */}
-        <Toaster position="bottom-right" theme="dark" closeButton richColors />
+        <Toaster position="bottom-right" theme="light" closeButton richColors />
       </body>
     </html>
   );

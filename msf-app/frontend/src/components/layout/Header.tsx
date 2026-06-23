@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Sparkles, Terminal, Settings, Database, Cpu, HelpCircle, Menu } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -13,81 +14,49 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const pathname = usePathname();
 
   const getPageInfo = () => {
-    if (pathname.startsWith("/shortcuts")) {
-      return {
-        title: "SQL Shortcuts",
-        desc: "Ready-to-use database diagnostics & analysis scripts",
-        icon: Terminal,
-      };
-    }
-    if (pathname.startsWith("/settings")) {
-      return {
-        title: "Settings",
-        desc: "Configure AI providers, LLMs, and default metadata settings",
-        icon: Settings,
-      };
-    }
-    return {
-      title: "AI Generator",
-      desc: "Parse SQL DDL or connect live DB to generate documentations",
-      icon: Sparkles,
-    };
+    if (pathname.startsWith("/dashboard")) return { title: "Dashboard", desc: "Ringkasan aktivitas dan statistik aplikasi", icon: LayoutDashboard };
+    if (pathname.startsWith("/shortcuts")) return { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi", icon: Terminal };
+    if (pathname.startsWith("/settings")) return { title: "Settings", desc: "Konfigurasi AI provider, model, dan preferensi", icon: Settings };
+    return { title: "AI Generator", desc: "Generate dokumentasi dari DDL atau koneksi database langsung", icon: Sparkles };
   };
 
   const { title, desc, icon: Icon } = getPageInfo();
 
-  // Load API Health details for information
-  const { data: health } = useSWR("/api/health", swrFetcher, {
-    refreshInterval: 15000,
-  });
+  const { data: health } = useSWR("/api/health", swrFetcher, { refreshInterval: 15000 });
 
   return (
-    <header className="h-20 border-b border-border bg-background/90 lg:bg-background/50 backdrop-blur-md flex items-center justify-between px-8 z-20 shrink-0 sticky top-0">
-      {/* Title & Desc */}
+    <header className="h-16 border-b border-border bg-sidebar flex items-center justify-between px-6 z-20 shrink-0 sticky top-0">
       <div className="flex items-center gap-3">
-        {/* Burger Button for Mobile */}
         <button
           onClick={onMenuToggle}
-          className="p-2 rounded-lg bg-secondary/50 border border-border lg:hidden text-muted-foreground hover:text-foreground mr-1"
+          className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground lg:hidden transition-colors"
           title="Buka Menu"
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        <div className="p-2 rounded-lg bg-secondary/50 border border-border">
-          <Icon className="h-5 w-5 text-indigo-400" />
+        <div className="p-2 rounded-lg bg-accent/10">
+          <Icon className="h-4 w-4 text-accent" />
         </div>
         <div>
-          <h1 className="text-base font-bold text-white leading-tight">{title}</h1>
-          <p className="text-[11px] text-muted-foreground font-medium hidden sm:block">
-            {desc}
-          </p>
+          <h1 className="text-sm font-semibold text-foreground leading-tight">{title}</h1>
+          <p className="text-[11px] text-muted-foreground hidden sm:block">{desc}</p>
         </div>
       </div>
 
-      {/* Stats/Badges right side */}
-      <div className="flex items-center gap-4">
-        {/* API Engine Status badge */}
+      <div className="flex items-center gap-3">
         {health?.services && (
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/30 border border-border text-[11px] font-medium text-muted-foreground">
-            <Cpu className="h-3.5 w-3.5 text-indigo-400" />
-            <span>AI Status:</span>
-            <span className="font-semibold text-white uppercase font-mono">
-              {health.services.ollama_model || "ollama (offline)"}
-            </span>
+          <div className={cn(
+            "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium border",
+            health.services.ollama === "up"
+              ? "bg-accent/10 text-accent border-accent/20"
+              : "bg-amber-50 text-amber-600 border-amber-200"
+          )}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", health.services.ollama === "up" ? "bg-accent pulse-dot" : "bg-amber-400")} />
+            <Cpu className="h-3 w-3" />
+            <span>{health.services.ollama_model ? health.services.ollama_model.split(":")[0] : "Ollama Offline"}</span>
           </div>
         )}
-
-        {/* Quick Help */}
-        <button
-          onClick={() => {
-            window.open("https://github.com", "_blank");
-          }}
-          className="p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border"
-          title="Bantuan & Dokumentasi"
-        >
-          <HelpCircle className="h-5 w-5" />
-        </button>
       </div>
     </header>
   );
