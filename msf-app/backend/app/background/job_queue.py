@@ -64,8 +64,11 @@ class Job:
                         f.write(res_bytes)
                     self.result_filepath = filepath
                 except Exception as e:
-                    # Log error if fail
-                    pass
+                    import structlog
+                    _log = structlog.get_logger()
+                    _log.error("Gagal menyimpan file hasil generate ke disk", job_id=self.job_id, error=str(e))
+                    self.error_message = f"Gagal menyimpan file: {str(e)}"
+                    self.status = JobStatus.ERROR
 
         for key, value in kwargs.items():
             if hasattr(self, key):
@@ -117,13 +120,14 @@ class JobQueue:
             return True
         return False
 
-    def cancel_job(self, job_id: str) -> bool:
-        """Batalkan job yang sedang berjalan atau mengantre"""
-        job = self.get_job(job_id)
-        if job and job.status in (JobStatus.QUEUED, JobStatus.PROCESSING):
-            job.update(status=JobStatus.CANCELLED)
-            return True
-        return False
+    async def cancel_job(self, job_id: str) -> bool:
+        """Batalkan job yang sedang berjalan atau mengantre (thread-safe)"""
+        async with self._lock:
+            job = self.get_job(job_id)
+            if job and job.status in (JobStatus.QUEUED, JobStatus.PROCESSING):
+                job.update(status=JobStatus.CANCELLED)
+                return True
+            return False
 
     async def run_job(
         self,

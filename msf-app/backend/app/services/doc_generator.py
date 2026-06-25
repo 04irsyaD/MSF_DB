@@ -108,7 +108,8 @@ class DocGenerator:
 
         # Simpan preview (500 karakter pertama)
         if job:
-            job.update(preview_markdown=full_doc[:500] + "..." if len(full_doc) > 500 else full_doc)
+            preview = full_doc[:2000] + "\n\n..." if len(full_doc) > 2000 else full_doc
+            job.update(preview_markdown=preview)
 
         return full_doc
 

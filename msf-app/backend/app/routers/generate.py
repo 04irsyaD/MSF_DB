@@ -75,7 +75,7 @@ async def _run_generate_job(job, tables, settings: dict):
             result_bytes=result_bytes,
             result_filename=filename,
             output_format=requested_format,
-            preview_markdown=markdown[:800],
+            preview_markdown=markdown[:2000],
             progress=100,
         )
 
@@ -97,6 +97,14 @@ async def generate_from_ddl(
     Return job_id — gunakan GET /api/jobs/{job_id} untuk cek status.
     """
     logger.info("Menerima request generate_from_ddl", payload=request.model_dump() if hasattr(request, 'model_dump') else request.dict())
+    # Rate limiting: cek jumlah job aktif
+    max_concurrent = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
+    active_jobs = [j for j in job_queue.list_jobs() if j["status"] in ("queued", "processing")]
+    if len(active_jobs) >= max_concurrent:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). Tunggu job sebelumnya selesai."
+        )
     # Validasi SQL
     validation = SQLParser.validate_sql(request.sql_content)
     if not validation["valid"]:
@@ -153,6 +161,14 @@ async def generate_from_db(
             payload_dict["connection"] = payload_dict["connection"].copy()
             payload_dict["connection"]["password"] = "***"
     logger.info("Menerima request generate_from_db", payload=payload_dict)
+    # Rate limiting: cek jumlah job aktif
+    max_concurrent = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
+    active_jobs = [j for j in job_queue.list_jobs() if j["status"] in ("queued", "processing")]
+    if len(active_jobs) >= max_concurrent:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). Tunggu job sebelumnya selesai."
+        )
     # Test koneksi dulu
     test_result = await DBConnector.test_connection(request.connection)
     if not test_result.success:
@@ -220,7 +236,7 @@ async def get_job_status(job_id: str):
 @router.post("/jobs/{job_id}/cancel")
 async def cancel_job(job_id: str):
     """Batalkan job generate"""
-    success = job_queue.cancel_job(job_id)
+    success = await job_queue.cancel_job(job_id)
     if not success:
         raise HTTPException(
             status_code=400,

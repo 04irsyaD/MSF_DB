@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 import structlog
 from datetime import datetime, timezone
 
-from app.routers import generate, database, ai, shortcuts, export
+from app.routers import generate, database, ai, shortcuts, export, stats
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
 from app.utils.errors import AppDetailedException
@@ -212,6 +212,7 @@ app.include_router(database.router)
 app.include_router(ai.router)
 app.include_router(shortcuts.router)
 app.include_router(export.router)
+app.include_router(stats.router)
 
 
 # ================================================================

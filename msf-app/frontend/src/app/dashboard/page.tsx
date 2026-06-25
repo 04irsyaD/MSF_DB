@@ -28,29 +28,34 @@ export default function DashboardPage() {
   const { data: shortcutsData } = useSWR("/api/shortcuts", () => api.listShortcuts({ limit: 1 }));
   const totalShortcuts = shortcutsData?.total || 48;
 
+  // Fetch real stats dari backend
+  const { data: statsData } = useSWR("/api/stats", swrFetcher, {
+    refreshInterval: 15000,
+  });
+
   const isApiUp = !!health;
   const isOllamaUp = health?.services?.ollama === "up";
   const ollamaModel = health?.services?.ollama_model || "None";
 
-  // Mock stats
+  // Stats dari data real backend
   const stats = [
     {
       label: "Total Jobs",
-      value: 12,
+      value: statsData?.total_jobs ?? '-',
       desc: "Antrean dokumentasi",
       icon: Layers,
       color: "text-blue-600 bg-blue-50 border-blue-100",
     },
     {
       label: "Selesai",
-      value: 9,
+      value: statsData?.jobs_done ?? '-',
       desc: "Berhasil digenerate",
       icon: CheckCircle2,
       color: "text-emerald-600 bg-emerald-50 border-emerald-100",
     },
     {
       label: "Tabel Terproses",
-      value: 147,
+      value: statsData?.tables_processed ?? '-',
       desc: "Skema teranalisis",
       icon: Database,
       color: "text-indigo-600 bg-indigo-50 border-indigo-100",

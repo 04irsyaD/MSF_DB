@@ -163,11 +163,15 @@ export const api = {
 
   // Direct Export
   async exportMarkdown(markdown: string, title: string): Promise<Blob> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const apiKey = process.env.NEXT_PUBLIC_MSF_API_KEY;
+    if (apiKey) headers["X-API-Key"] = apiKey;
+
     const response = await fetch("/api/export/docx", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ markdown_content: markdown, project_name: title }),
     });
 
@@ -179,11 +183,15 @@ export const api = {
   },
 
   async exportPdf(markdown: string, title: string): Promise<Blob> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const apiKey = process.env.NEXT_PUBLIC_MSF_API_KEY;
+    if (apiKey) headers["X-API-Key"] = apiKey;
+
     const response = await fetch("/api/export/pdf", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ markdown_content: markdown, project_name: title }),
     });
 

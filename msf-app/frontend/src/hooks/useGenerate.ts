@@ -24,12 +24,24 @@ export function useGenerate() {
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load active job from localstorage on mount
+  // Load active job from localstorage on mount — validasi status dulu
   useEffect(() => {
     const savedJobId = localStorage.getItem("msf_active_job_id");
     if (savedJobId) {
-      setJobId(savedJobId);
-      setIsGenerating(true);
+      api.getJobStatus(savedJobId)
+        .then((res) => {
+          if (res.status === "queued" || res.status === "processing") {
+            setJobId(savedJobId);
+            setIsGenerating(true);
+          } else {
+            // Job sudah selesai/error/cancelled — hapus dari localStorage
+            localStorage.removeItem("msf_active_job_id");
+          }
+        })
+        .catch(() => {
+          // Job tidak ditemukan di backend (mungkin sudah expired) — hapus dari localStorage
+          localStorage.removeItem("msf_active_job_id");
+        });
     }
   }, []);
 
