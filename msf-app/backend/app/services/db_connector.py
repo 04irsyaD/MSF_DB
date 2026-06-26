@@ -132,17 +132,19 @@ class DBConnector:
             )
 
         except OperationalError as e:
-            logger.error("DB connection failed", error=str(e))
+            cleaned_err = cls._clean_error(str(e))
+            logger.error("DB connection failed", error=cleaned_err)
             return DBTestConnectionResponse(
                 success=False,
-                message=f"Gagal konek: {cls._clean_error(str(e))}",
+                message=f"Gagal konek: {cleaned_err}",
                 engine=conn.engine,
             )
         except Exception as e:
-            logger.error("Unexpected DB error", error=str(e))
+            cleaned_err = cls._clean_error(str(e))
+            logger.error("Unexpected DB error", error=cleaned_err)
             return DBTestConnectionResponse(
                 success=False,
-                message=f"Error: {cls._clean_error(str(e))}",
+                message=f"Error: {cleaned_err}",
                 engine=conn.engine,
             )
 
@@ -470,6 +472,8 @@ class DBConnector:
         """Bersihkan pesan error dari info sensitif"""
         # Hilangkan password yang mungkin muncul di error message
         cleaned = re.sub(r"password=['\"]?[^'\"\s]+['\"]?", "password=***", error_msg, flags=re.IGNORECASE)
+        # Hilangkan password dalam connection URL (e.g. postgresql://user:password@host)
+        cleaned = re.sub(r"://([^:/]+):([^@/]+)@", r"://\1:***@", cleaned)
         # Batasi panjang
         return cleaned[:300]
 
