@@ -104,6 +104,27 @@ export const api = {
   },
 
   // Generate Endpoints
+  async parseSchema(sqlContent: string): Promise<{ valid: boolean; tables: any[]; table_count: number; message: string }> {
+    return request<{ valid: boolean; tables: any[]; table_count: number; message: string }>("/api/parse-schema", {
+      method: "POST",
+      body: JSON.stringify({ sql_content: sqlContent }),
+    });
+  },
+
+  async generateTable(data: {
+    table: any;
+    language: string;
+    detail_level: string;
+    business_context?: string;
+    ai_provider: string;
+    model: string;
+  }): Promise<{ markdown: string }> {
+    return request<{ markdown: string }>("/api/generate/table", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
   async generateFromDDL(data: GenerateFromDDLRequest): Promise<GenerateJobResponse> {
     return request<GenerateJobResponse>("/api/generate/from-ddl", {
       method: "POST",

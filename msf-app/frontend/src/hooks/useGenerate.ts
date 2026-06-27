@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { api, getFriendlyErrorMessage } from "@/lib/api";
 import {
   GenerateFromDDLRequest,
   GenerateFromDBRequest,
   JobStatus,
-  JobStatusResponse,
+  TableMetadata,
 } from "@/lib/types";
 import { toast } from "sonner";
 
 export function useGenerate() {
-  const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<JobStatus | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [tablesTotal, setTablesTotal] = useState<number>(0);
@@ -22,121 +21,158 @@ export function useGenerate() {
   const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Use a ref to track cancellation
+  const isCancelledRef = useRef<boolean>(false);
 
-  // Load active job from localstorage on mount — validasi status dulu
-  useEffect(() => {
-    const savedJobId = localStorage.getItem("msf_active_job_id");
-    if (savedJobId) {
-      api.getJobStatus(savedJobId)
-        .then((res) => {
-          if (res.status === "queued" || res.status === "processing") {
-            setJobId(savedJobId);
-            setIsGenerating(true);
-          } else {
-            // Job sudah selesai/error/cancelled — hapus dari localStorage
-            localStorage.removeItem("msf_active_job_id");
-          }
-        })
-        .catch(() => {
-          // Job tidak ditemukan di backend (mungkin sudah expired) — hapus dari localStorage
-          localStorage.removeItem("msf_active_job_id");
-        });
+  const resetState = () => {
+    setStatus(null);
+    setProgress(0);
+    setTablesTotal(0);
+    setTablesProcessed(0);
+    setCurrentTable(undefined);
+    setErrorMessage(null);
+    setPreviewMarkdown(undefined);
+    setDownloadUrl(undefined);
+    setIsGenerating(false);
+    isCancelledRef.current = false;
+  };
+
+  const cancelActiveJob = () => {
+    isCancelledRef.current = true;
+    setStatus("cancelled");
+    setIsGenerating(false);
+    toast.warning("Pembuatan dokumentasi dibatalkan oleh pengguna.");
+  };
+
+  /**
+   * Helper to build overview header section
+   */
+  const buildHeader = (projectName: string, tables: TableMetadata[], language: string): string => {
+    const now = new Date().toLocaleDateString(language === "Indonesian" ? "id-ID" : "en-US", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    const tableList = tables
+      .map(t => `- [${t.name}](#${t.name.toLowerCase().replace(/\s+/g, "-")})`)
+      .join("\n");
+
+    if (language === "Indonesian") {
+      return `# ${projectName}
+
+**Tanggal Generate:** ${now}
+**Total Tabel:** ${tables.length}
+**Dibuat dengan:** MSF-APP Serverless v2.0
+
+## Daftar Tabel
+
+${tableList}`;
+    } else {
+      return `# ${projectName}
+
+**Generated:** ${now}
+**Total Tables:** ${tables.length}
+**Created with:** MSF-APP Serverless v2.0
+
+## Table of Contents
+
+${tableList}`;
     }
-  }, []);
+  };
 
-  // Poll status when jobId is active
-  useEffect(() => {
-    if (!jobId) {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-      return;
-    }
-
-    let pollCount = 0;
-    let consecutiveErrors = 0;
-    const maxPolls = 150; // 5 menit (150 * 2s)
-    const maxErrors = 5;
-
-    const fetchStatus = async () => {
-      pollCount++;
-      if (pollCount > maxPolls) {
-        setIsGenerating(false);
-        setJobId(null);
-        localStorage.removeItem("msf_active_job_id");
-        setStatus("error");
-        setErrorMessage("Waktu tunggu pembuatan dokumentasi habis (Timeout).");
-        toast.error("Waktu tunggu pembuatan dokumentasi habis.");
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-          pollIntervalRef.current = null;
+  /**
+   * Helper to build relations summary section
+   */
+  const buildRelationsSummary = (tables: TableMetadata[], language: string): string => {
+    const fks: string[] = [];
+    for (const table of tables) {
+      if (table.foreign_keys) {
+        for (const fk of table.foreign_keys) {
+          fks.push(`- \`${table.name}.${fk.column}\` → \`${fk.references_table}.${fk.references_column}\``);
         }
+      }
+    }
+    if (fks.length === 0) return "";
+
+    if (language === "Indonesian") {
+      return `## Ringkasan Relasi Antar Tabel\n\n${fks.join("\n")}`;
+    } else {
+      return `## Table Relationships Summary\n\n${fks.join("\n")}`;
+    }
+  };
+
+  /**
+   * Orchestrate the table generation client-side
+   */
+  const runGeneration = async (
+    tables: TableMetadata[],
+    projectName: string,
+    language: string,
+    detailLevel: string,
+    businessContext: string,
+    aiProvider: string,
+    model: string
+  ) => {
+    isCancelledRef.current = false;
+    setTablesTotal(tables.length);
+    setTablesProcessed(0);
+    setProgress(5);
+    setStatus("processing");
+
+    const sections: string[] = [buildHeader(projectName, tables, language)];
+    
+    // Process tables sequentially
+    for (let i = 0; i < tables.length; i++) {
+      if (isCancelledRef.current) {
         return;
       }
 
+      const table = tables[i];
+      setCurrentTable(table.name);
+      toast.info(`Menganalisis tabel ${table.name}...`);
+
       try {
-        const response = await api.getJobStatus(jobId);
-        consecutiveErrors = 0;
-        
-        setStatus(response.status);
-        setProgress(response.progress);
-        setTablesTotal(response.tables_total);
-        setTablesProcessed(response.tables_processed);
-        setCurrentTable(response.current_table);
-        setErrorMessage(response.error_message || null);
-        setPreviewMarkdown(response.preview_markdown);
-        setDownloadUrl(response.download_url);
+        const res = await api.generateTable({
+          table,
+          language,
+          detail_level: detailLevel,
+          business_context: businessContext || undefined,
+          ai_provider: aiProvider as any,
+          model,
+        });
 
-        if (response.status === "done") {
-          setIsGenerating(false);
-          setJobId(null);
-          localStorage.removeItem("msf_active_job_id");
-          toast.success("Dokumentasi database berhasil dibuat!");
-        } else if (response.status === "error") {
-          setIsGenerating(false);
-          setJobId(null);
-          localStorage.removeItem("msf_active_job_id");
-          toast.error(`Gagal membuat dokumentasi: ${response.error_message || "Unknown error"}`);
-        } else if (response.status === "cancelled") {
-          setIsGenerating(false);
-          setStatus("cancelled");
-          setJobId(null);
-          localStorage.removeItem("msf_active_job_id");
-          toast.warning("Pembuatan dokumentasi dibatalkan.");
-        }
+        sections.push(res.markdown);
       } catch (err: any) {
-        console.error("Gagal mengambil status job:", err);
-        consecutiveErrors++;
-        if (consecutiveErrors >= maxErrors) {
-          setIsGenerating(false);
-          setJobId(null);
-          localStorage.removeItem("msf_active_job_id");
-          setStatus("error");
-          setErrorMessage("Koneksi ke API Server terputus.");
-          toast.error("Gagal terhubung ke API server.");
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
-        }
+        console.error(`Gagal generate tabel ${table.name}:`, err);
+        // Fallback representation if API fails
+        const fallbackMd = language === "Indonesian"
+          ? `## Tabel: \`${table.name}\`\n\n> ⚠️ AI description tidak tersedia: ${err.message || err}`
+          : `## Table: \`${table.name}\`\n\n> ⚠️ AI description not available: ${err.message || err}`;
+        sections.push(fallbackMd);
       }
-    };
 
-    // First fetch immediately
-    fetchStatus();
+      setTablesProcessed(i + 1);
+      setProgress(Math.round(((i + 1) / tables.length) * 90)); // 5% to 95%
+    }
 
-    // Set polling interval
-    pollIntervalRef.current = setInterval(fetchStatus, 2000);
+    if (isCancelledRef.current) return;
 
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
+    // Add relations summary
+    if (detailLevel !== "simple" && tables.length > 1) {
+      const relSummary = buildRelationsSummary(tables, language);
+      if (relSummary) {
+        sections.push(relSummary);
       }
-    };
-  }, [jobId]);
+    }
+
+    setProgress(100);
+    const finalMarkdown = sections.join("\n\n---\n\n");
+    setPreviewMarkdown(finalMarkdown);
+    setStatus("done");
+    setIsGenerating(false);
+    toast.success("Dokumentasi database berhasil dibuat!");
+  };
 
   const generateFromDDL = async (data: GenerateFromDDLRequest) => {
     setIsGenerating(true);
@@ -147,11 +183,23 @@ export function useGenerate() {
     setStatus("queued");
 
     try {
-      const res = await api.generateFromDDL(data);
-      setJobId(res.job_id);
-      localStorage.setItem("msf_active_job_id", res.job_id);
-      toast.info("Proses dokumentasi DDL dimulai...");
-      return res.job_id;
+      // 1. Parse DDL first to extract table metadata
+      toast.info("Mengurai SQL DDL...");
+      const parseResult = await api.parseSchema(data.sql_content);
+      if (!parseResult.valid || parseResult.tables.length === 0) {
+        throw new Error(parseResult.message || "Gagal mengurai DDL.");
+      }
+
+      // 2. Start single-table AI generation orchestration
+      await runGeneration(
+        parseResult.tables,
+        data.project_name || "My Project DB",
+        data.language,
+        data.detail_level,
+        data.business_context || "",
+        data.ai_provider,
+        data.model
+      );
     } catch (err: any) {
       setIsGenerating(false);
       const msg = getFriendlyErrorMessage(err);
@@ -170,11 +218,35 @@ export function useGenerate() {
     setStatus("queued");
 
     try {
-      const res = await api.generateFromDB(data);
-      setJobId(res.job_id);
-      localStorage.setItem("msf_active_job_id", res.job_id);
-      toast.info("Proses dokumentasi Live DB dimulai...");
-      return res.job_id;
+      // 1. Fetch metadata (tables list) from DB connection
+      toast.info("Menghubungkan ke database & mengambil schema...");
+      const metadata = await api.fetchDBMetadata({
+        connection: data.connection,
+        schema_filter: data.schema_filter,
+        include_views: data.include_views,
+        include_functions: data.include_functions,
+      });
+
+      if (!metadata.tables || metadata.tables.length === 0) {
+        throw new Error("Tidak ditemukan tabel di database tersebut.");
+      }
+
+      // If user selected specific tables, filter them
+      let targetTables = metadata.tables;
+      if (data.table_filter && data.table_filter.length > 0) {
+        targetTables = metadata.tables.filter(t => data.table_filter!.includes(t.name));
+      }
+
+      // 2. Start single-table AI generation orchestration
+      await runGeneration(
+        targetTables,
+        data.project_name || data.connection.database || "Database Docs",
+        data.language,
+        data.detail_level,
+        data.business_context || "",
+        data.ai_provider,
+        data.model
+      );
     } catch (err: any) {
       setIsGenerating(false);
       const msg = getFriendlyErrorMessage(err);
@@ -184,35 +256,8 @@ export function useGenerate() {
     }
   };
 
-  const cancelActiveJob = async () => {
-    if (!jobId) return;
-    try {
-      await api.cancelJob(jobId);
-      setIsGenerating(false);
-      setJobId(null);
-      localStorage.removeItem("msf_active_job_id");
-      toast.warning("Pembuatan dokumentasi dibatalkan oleh pengguna.");
-    } catch (err: any) {
-      toast.error(`Gagal membatalkan job: ${err.message}`);
-    }
-  };
-
-  const resetState = () => {
-    setJobId(null);
-    setStatus(null);
-    setProgress(0);
-    setTablesTotal(0);
-    setTablesProcessed(0);
-    setCurrentTable(undefined);
-    setErrorMessage(null);
-    setPreviewMarkdown(undefined);
-    setDownloadUrl(undefined);
-    setIsGenerating(false);
-    localStorage.removeItem("msf_active_job_id");
-  };
-
   return {
-    jobId,
+    jobId: null, // No background job ID needed in serverless
     status,
     progress,
     tablesTotal,
