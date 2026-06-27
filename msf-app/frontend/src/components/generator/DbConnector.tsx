@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DBConnection, DBEngine, DBTestConnectionResponse } from "@/lib/types";
 import { api, getFriendlyErrorMessage } from "@/lib/api";
-import { Link2, Play, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Link2, Play, CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +117,22 @@ export default function DbConnector({
         <p className="text-xs text-muted-foreground leading-normal">
           Connect directly to a live running database to extract the schema metadata.
         </p>
+      </div>
+
+      {/* Security Alert Banner */}
+      <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
+        <div className="flex gap-2">
+          <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-xs font-mono font-bold text-amber-800 uppercase tracking-wide">
+              PERINGATAN KEAMANAN (CLOUD DEPLOYMENT)
+            </h4>
+            <p className="text-[10px] text-amber-700 font-medium leading-relaxed mt-1">
+              Menghubungkan langsung ke database lokal/privat dari server cloud Vercel memerlukan pembukaan port publik atau tunnel yang berisiko.
+              <strong> Disarankan menggunakan mode "DDL SQL Editor" </strong> untuk mendokumentasikan skema database lokal secara 100% aman tanpa mengekspos database ke internet.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Engine Selection */}
