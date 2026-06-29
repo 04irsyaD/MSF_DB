@@ -123,6 +123,10 @@ export const api = {
     return request<JobStatusResponse>(`/api/jobs/${jobId}`);
   },
 
+  async getJobByAccessCode(accessCode: string): Promise<JobStatusResponse> {
+    return request<JobStatusResponse>(`/api/jobs/by-code/${accessCode}`);
+  },
+
   async cancelJob(jobId: string): Promise<{ success: boolean; message: string }> {
     return request<{ success: boolean; message: string }>(`/api/jobs/${jobId}/cancel`, {
       method: "POST",

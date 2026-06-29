@@ -7,6 +7,7 @@ import asyncio
 import os
 import tempfile
 import uuid
+import secrets
 from datetime import datetime, timezone
 from typing import Dict, Optional, Callable, Any
 from app.models.schemas import JobStatus
@@ -35,6 +36,7 @@ class Job:
         self.output_format: str = "docx"
         self.ai_provider: Optional[str] = None           # Tracking untuk statistik admin
         self.db_engine: Optional[str] = None             # Tracking untuk statistik admin
+        self.access_code: str = f"MSF-{secrets.token_hex(5).upper()}" # Kode pelacakan unik untuk user
 
     def to_dict(self) -> dict:
         download_url = None
@@ -57,6 +59,7 @@ class Job:
             "project_name": self.project_name,
             "ai_provider": self.ai_provider,
             "db_engine": self.db_engine,
+            "access_code": self.access_code,
         }
 
     def update(self, **kwargs):
@@ -113,6 +116,13 @@ class JobQueue:
     def get_job(self, job_id: str) -> Optional[Job]:
         """Ambil job berdasarkan ID"""
         return self._jobs.get(job_id)
+
+    def get_job_by_access_code(self, access_code: str) -> Optional[Job]:
+        """Ambil job berdasarkan kode akses pelacakan"""
+        for job in self._jobs.values():
+            if job.access_code == access_code:
+                return job
+        return None
 
     def list_jobs(self) -> list[dict]:
         """List semua job (untuk debugging)"""

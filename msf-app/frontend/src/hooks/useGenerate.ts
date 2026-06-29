@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 export function useGenerate() {
   const [jobId, setJobId] = useState<string | null>(null);
+  const [accessCode, setAccessCode] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<JobStatus | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [tablesTotal, setTablesTotal] = useState<number>(0);
@@ -32,6 +33,7 @@ export function useGenerate() {
         .then((res) => {
           if (res.status === "queued" || res.status === "processing") {
             setJobId(savedJobId);
+            setAccessCode(res.access_code);
             setIsGenerating(true);
           } else {
             // Job sudah selesai/error/cancelled — hapus dari localStorage
@@ -65,6 +67,7 @@ export function useGenerate() {
       if (pollCount > maxPolls) {
         setIsGenerating(false);
         setJobId(null);
+        setAccessCode(undefined);
         localStorage.removeItem("msf_active_job_id");
         setStatus("error");
         setErrorMessage("Waktu tunggu pembuatan dokumentasi habis (Timeout).");
@@ -88,6 +91,7 @@ export function useGenerate() {
         setErrorMessage(response.error_message || null);
         setPreviewMarkdown(response.preview_markdown);
         setDownloadUrl(response.download_url);
+        setAccessCode(response.access_code);
 
         if (response.status === "done") {
           setIsGenerating(false);
@@ -145,6 +149,7 @@ export function useGenerate() {
     setPreviewMarkdown(undefined);
     setDownloadUrl(undefined);
     setStatus("queued");
+    setAccessCode(undefined);
 
     try {
       const res = await api.generateFromDDL(data);
@@ -168,6 +173,7 @@ export function useGenerate() {
     setPreviewMarkdown(undefined);
     setDownloadUrl(undefined);
     setStatus("queued");
+    setAccessCode(undefined);
 
     try {
       const res = await api.generateFromDB(data);
@@ -184,12 +190,44 @@ export function useGenerate() {
     }
   };
 
+  const trackJob = async (code: string) => {
+    if (!code.trim()) return;
+    setIsGenerating(true);
+    setErrorMessage(null);
+    try {
+      const res = await api.getJobByAccessCode(code.trim().toUpperCase());
+      
+      // Simpan ke state
+      setJobId(res.job_id);
+      setAccessCode(res.access_code);
+      setStatus(res.status);
+      setProgress(res.progress);
+      setTablesTotal(res.tables_total);
+      setTablesProcessed(res.tables_processed);
+      setCurrentTable(res.current_table);
+      setErrorMessage(res.error_message || null);
+      setPreviewMarkdown(res.preview_markdown);
+      setDownloadUrl(res.download_url);
+      
+      // Simpan ke localStorage agar bisa dilacak terus
+      localStorage.setItem("msf_active_job_id", res.job_id);
+      toast.success("Pekerjaan ditemukan. Melanjutkan pelacakan...");
+      return res.job_id;
+    } catch (err: any) {
+      setIsGenerating(false);
+      const msg = getFriendlyErrorMessage(err);
+      toast.error(msg);
+      throw err;
+    }
+  };
+
   const cancelActiveJob = async () => {
     if (!jobId) return;
     try {
       await api.cancelJob(jobId);
       setIsGenerating(false);
       setJobId(null);
+      setAccessCode(undefined);
       localStorage.removeItem("msf_active_job_id");
       toast.warning("Pembuatan dokumentasi dibatalkan oleh pengguna.");
     } catch (err: any) {
@@ -199,6 +237,7 @@ export function useGenerate() {
 
   const resetState = () => {
     setJobId(null);
+    setAccessCode(undefined);
     setStatus(null);
     setProgress(0);
     setTablesTotal(0);
@@ -213,6 +252,7 @@ export function useGenerate() {
 
   return {
     jobId,
+    accessCode,
     status,
     progress,
     tablesTotal,
@@ -224,6 +264,7 @@ export function useGenerate() {
     isGenerating,
     generateFromDDL,
     generateFromDB,
+    trackJob,
     cancelActiveJob,
     resetState,
   };

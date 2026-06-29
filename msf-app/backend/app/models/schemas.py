@@ -226,6 +226,7 @@ class GenerateJobResponse(BaseModel):
     status: JobStatus
     created_at: str
     estimated_seconds: Optional[int] = None
+    access_code: Optional[str] = None
 
 
 class JobStatusResponse(BaseModel):
@@ -242,6 +243,7 @@ class JobStatusResponse(BaseModel):
     preview_markdown: Optional[str] = None
     download_url: Optional[str] = None
     project_name: Optional[str] = None
+    access_code: Optional[str] = None
 
 
 # ================================================================

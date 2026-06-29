@@ -3,6 +3,7 @@
 import { JobStatus as StatusType } from "@/lib/types";
 import { Loader2, AlertCircle, CheckCircle2, StopCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface JobStatusProps {
   status: StatusType | null;
@@ -13,6 +14,7 @@ interface JobStatusProps {
   errorMessage?: string | null;
   previewMarkdown?: string;
   onCancel: () => void;
+  accessCode?: string;
 }
 
 export default function JobStatus({
@@ -24,6 +26,7 @@ export default function JobStatus({
   errorMessage,
   previewMarkdown,
   onCancel,
+  accessCode,
 }: JobStatusProps) {
   if (!status) return null;
 
@@ -82,6 +85,28 @@ export default function JobStatus({
           </button>
         )}
       </div>
+
+      {/* Access Code Widget */}
+      {accessCode && isProcessing && (
+        <div className="p-3 bg-accent/5 border border-accent/15 rounded-xl flex items-center justify-between font-mono text-[10px] text-accent">
+          <div className="flex items-center gap-1.5">
+            <span>🔑 KODE AKSES PELACAKAN:</span>
+            <span className="font-bold bg-white px-2 py-0.5 border border-accent/20 rounded text-gray-900 select-all tracking-wider">
+              {accessCode}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(accessCode);
+              toast.success("Kode pelacakan berhasil disalin!");
+            }}
+            className="hover:underline font-bold uppercase shrink-0 text-accent/80 hover:text-accent"
+          >
+            SALIN KODE
+          </button>
+        </div>
+      )}
 
       {/* Progress Section */}
       <div className="space-y-2">

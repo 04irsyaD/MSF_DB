@@ -39,6 +39,8 @@ export default function GeneratePage() {
     author: "Developer",
   });
 
+  const [inputCode, setInputCode] = useState<string>("");
+
   const {
     status,
     progress,
@@ -53,6 +55,8 @@ export default function GeneratePage() {
     generateFromDB,
     cancelActiveJob,
     resetState,
+    accessCode,
+    trackJob,
   } = useGenerate();
 
   const handleGenerate = async () => {
@@ -119,6 +123,7 @@ export default function GeneratePage() {
             errorMessage={errorMessage}
             previewMarkdown={previewMarkdown}
             onCancel={cancelActiveJob}
+            accessCode={accessCode}
           />
         </div>
       ) : showPreview ? (
@@ -181,6 +186,35 @@ export default function GeneratePage() {
                   onTableFilterChange={setTableFilter}
                 />
               )}
+            </div>
+
+            {/* Pelacakan Pekerjaan Aktif */}
+            <div className="p-4 bg-white border border-border rounded-2xl shadow-sm space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+                <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">
+                  Lacak Pekerjaan Aktif
+                </h4>
+              </div>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Punya proses dokumentasi yang sedang berjalan? Masukkan kode pelacakan Anda di bawah ini untuk melihat progress atau hasil unduhan.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="CONTOH: MSF-A1B2C3D4..."
+                  value={inputCode}
+                  onChange={(e) => setInputCode(e.target.value)}
+                  className="flex-1 bg-gray-50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-1.5 px-3 text-xs text-gray-900 placeholder-muted-foreground/40 focus:outline-none transition-colors duration-150 font-mono tracking-wider uppercase"
+                />
+                <button
+                  type="button"
+                  onClick={() => trackJob(inputCode).then(() => setInputCode(""))}
+                  className="px-4 py-1.5 bg-accent hover:bg-accent/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm uppercase shrink-0 font-mono"
+                >
+                  Lacak
+                </button>
+              </div>
             </div>
             
             {/* Warning jika Live DB belum terverifikasi */}

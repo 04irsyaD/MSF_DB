@@ -150,6 +150,7 @@ async def generate_from_ddl(
         status=JobStatus.QUEUED,
         created_at=job.created_at,
         estimated_seconds=estimated,
+        access_code=job.access_code,
     )
     logger.info("Mengirim response generate_from_ddl", response=response.model_dump() if hasattr(response, 'model_dump') else response.dict())
     return response
@@ -235,7 +236,8 @@ async def generate_from_db(
         job_id=job.job_id,
         status=JobStatus.QUEUED,
         created_at=job.created_at,
-        estimated_seconds=60,  # estimasi kasar untuk live DB
+        estimated_seconds=60,
+        access_code=job.access_code,
     )
     logger.info("Mengirim response generate_from_db", response=response.model_dump() if hasattr(response, 'model_dump') else response.dict())
     return response
@@ -247,6 +249,18 @@ async def get_job_status(job_id: str):
     job = job_queue.get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' tidak ditemukan")
+    return JobStatusResponse(**job.to_dict())
+
+
+@router.get("/jobs/by-code/{access_code}", response_model=JobStatusResponse)
+async def get_job_by_code(access_code: str):
+    """Cek status job berdasarkan kode akses pelacakan"""
+    job = job_queue.get_job_by_access_code(access_code)
+    if not job:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Pekerjaan dengan kode akses '{access_code}' tidak ditemukan atau sudah kedaluwarsa."
+        )
     return JobStatusResponse(**job.to_dict())
 
 

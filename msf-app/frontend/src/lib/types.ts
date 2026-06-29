@@ -71,6 +71,7 @@ export interface JobStatusResponse {
   error_message?: string;
   preview_markdown?: string;
   download_url?: string;
+  access_code?: string;
 }
 
 export interface AIModelsResponse {
