@@ -122,6 +122,7 @@ async def generate_from_ddl(
 
     # Buat job
     job = job_queue.create_job(project_name=request.project_name)
+    job.update(ai_provider=request.ai_provider, db_engine="ddl")
 
     settings = {
         "ai_provider": request.ai_provider,
@@ -186,6 +187,7 @@ async def generate_from_db(
 
     # Buat job
     job = job_queue.create_job(project_name=request.project_name)
+    job.update(ai_provider=request.ai_provider, db_engine=request.connection.engine)
 
     settings = {
         "ai_provider": request.ai_provider,

@@ -19,6 +19,7 @@
 - [x] Tambahkan batas waktu job-level timeout (maksimum 30 menit) menggunakan `asyncio.wait_for`
 - [x] Tangani error status `429` (Rate Limit) dari DeepSeek secara spesifik dan berikan informasi yang jelas ke pengguna
 - [x] Pindahkan penyimpanan file output DOCX/PDF dari direktori temp sistem ke Docker volume persistent `/app/outputs`
+- [x] Admin Portal & Live Log Monitor (dengan rotasi log dan verifikasi passcode)
 
 ### Validasi & Security
 - [x] Batasi ukuran maksimum input `sql_content` (500KB) untuk mencegah eksploitasi memori

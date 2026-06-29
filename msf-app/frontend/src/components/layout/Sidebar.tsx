@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, ShieldAlert } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -48,6 +48,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/settings",
       icon: Settings,
       description: "Konfigurasi AI & koneksi",
+    },
+    {
+      label: "Admin Portal",
+      href: "/admin",
+      icon: ShieldAlert,
+      description: "Log & kontrol sistem",
     },
   ];
 

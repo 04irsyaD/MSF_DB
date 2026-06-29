@@ -49,10 +49,12 @@ services:
       - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-Indonesian}
       - DEFAULT_DETAIL_LEVEL=${DEFAULT_DETAIL_LEVEL:-detailed}
       - MAX_TABLES_PER_REQUEST=${MAX_TABLES_PER_REQUEST:-50}
+      - ADMIN_PASSCODE=${ADMIN_PASSCODE:-admin123}
       - MAX_JOB_RETENTION_MINUTES=${MAX_JOB_RETENTION_MINUTES:-60}
       - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-3}
       - OUTPUT_DIR=/app/outputs
       - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-1800}
+      - TZ=Asia/Jakarta
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - CORS_ORIGINS=http://localhost:3001,http://localhost:3000,http://frontend:3000,http://127.0.0.1:3001,https://msf-db.my.id

@@ -33,6 +33,8 @@ class Job:
         self.result_filepath: Optional[str] = None       # Path file DOCX/PDF di disk
         self.result_filename: Optional[str] = None       # Nama file untuk download
         self.output_format: str = "docx"
+        self.ai_provider: Optional[str] = None           # Tracking untuk statistik admin
+        self.db_engine: Optional[str] = None             # Tracking untuk statistik admin
 
     def to_dict(self) -> dict:
         download_url = None
@@ -53,6 +55,8 @@ class Job:
             "preview_markdown": self.preview_markdown,
             "download_url": download_url,
             "project_name": self.project_name,
+            "ai_provider": self.ai_provider,
+            "db_engine": self.db_engine,
         }
 
     def update(self, **kwargs):

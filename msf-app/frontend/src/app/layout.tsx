@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "../styles/globals.css";
 import AppLayout from "@/components/layout/AppLayout";
 import { Toaster } from "sonner";
+import UnderConstructionModal from "@/components/common/UnderConstructionModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,6 +32,9 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
       >
         <AppLayout>{children}</AppLayout>
+
+        {/* Under Construction Popup */}
+        <UnderConstructionModal />
 
         {/* Sonner Toast Notifications */}
         <Toaster position="bottom-right" theme="light" closeButton richColors />

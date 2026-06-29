@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 import structlog
 from datetime import datetime, timezone
 
-from app.routers import generate, database, ai, shortcuts, export, stats
+from app.routers import generate, database, ai, shortcuts, export, stats, admin
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
 from app.utils.errors import AppDetailedException
@@ -143,7 +143,7 @@ app.add_middleware(
     allow_origins=[o.strip() for o in cors_origins],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key", "X-Admin-Passcode"],
 )
 app.add_middleware(APIKeyMiddleware)
 
@@ -213,6 +213,7 @@ app.include_router(ai.router)
 app.include_router(shortcuts.router)
 app.include_router(export.router)
 app.include_router(stats.router)
+app.include_router(admin.router)
 
 
 # ================================================================

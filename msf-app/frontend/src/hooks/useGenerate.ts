@@ -57,7 +57,7 @@ export function useGenerate() {
 
     let pollCount = 0;
     let consecutiveErrors = 0;
-    const maxPolls = 150; // 5 menit (150 * 2s)
+    const maxPolls = 900; // 30 menit (900 * 2s) untuk mendukung banyak tabel pada LLM lokal
     const maxErrors = 5;
 
     const fetchStatus = async () => {

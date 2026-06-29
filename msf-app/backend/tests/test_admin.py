@@ -1,0 +1,89 @@
+"""
+Test suite untuk Admin Portal endpoints.
+"""
+import pytest
+import os
+from fastapi.testclient import TestClient
+
+
+@pytest.fixture(autouse=True)
+def setup_admin_passcode():
+    """Fixture untuk memaksa ADMIN_PASSCODE terkonfigurasi selama test."""
+    old_passcode = os.environ.get("ADMIN_PASSCODE")
+    os.environ["ADMIN_PASSCODE"] = "test-admin-secret-123"
+    # Re-import atau re-initialize module jika diperlukan, tetapi FastAPI membaca env secara dinamis via os.getenv
+    yield
+    if old_passcode is not None:
+        os.environ["ADMIN_PASSCODE"] = old_passcode
+    else:
+        del os.environ["ADMIN_PASSCODE"]
+
+
+def test_admin_endpoints_without_header_returns_401(client):
+    """Mengakses endpoint admin tanpa header passcode wajib mengembalikan 401."""
+    endpoints = [
+        ("/api/admin/verify", "POST"),
+        ("/api/admin/stats", "GET"),
+        ("/api/admin/jobs", "GET"),
+        ("/api/admin/logs", "GET"),
+    ]
+    for path, method in endpoints:
+        if method == "POST":
+            response = client.post(path)
+        else:
+            response = client.get(path)
+        assert response.status_code == 401
+        assert "detail" in response.json()
+
+
+def test_admin_endpoints_with_invalid_passcode_returns_401(client):
+    """Mengakses dengan passcode salah wajib mengembalikan 401."""
+    headers = {"X-Admin-Passcode": "wrong-passcode"}
+    response = client.get("/api/admin/stats", headers=headers)
+    assert response.status_code == 401
+    assert "tidak valid" in response.json()["detail"].lower()
+
+
+def test_admin_verify_success(client):
+    """Mengakses verify dengan passcode benar wajib mengembalikan 200."""
+    headers = {"X-Admin-Passcode": "test-admin-secret-123"}
+    response = client.post("/api/admin/verify", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+
+def test_admin_stats_success(client):
+    """Mengakses stats dengan passcode benar wajib mengembalikan struktur statistik yang lengkap."""
+    headers = {"X-Admin-Passcode": "test-admin-secret-123"}
+    response = client.get("/api/admin/stats", headers=headers)
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert "summary" in data
+    assert "ai_distribution" in data
+    assert "db_distribution" in data
+    
+    summary = data["summary"]
+    assert "total_jobs" in summary
+    assert "success_rate" in summary
+    assert "avg_duration_seconds" in summary
+
+
+def test_admin_logs_success(client):
+    """Mengakses logs dengan passcode benar wajib mengembalikan list log."""
+    headers = {"X-Admin-Passcode": "test-admin-secret-123"}
+    response = client.get("/api/admin/logs?limit=50", headers=headers)
+    assert response.status_code == 200
+    assert "logs" in response.json()
+    assert isinstance(response.json()["logs"], list)
+
+
+def test_admin_logs_invalid_limit(client):
+    """Mengirim limit log di luar batas (10-1000) wajib mengembalikan 400."""
+    headers = {"X-Admin-Passcode": "test-admin-secret-123"}
+    
+    response_low = client.get("/api/admin/logs?limit=5", headers=headers)
+    assert response_low.status_code == 400
+    
+    response_high = client.get("/api/admin/logs?limit=2000", headers=headers)
+    assert response_high.status_code == 400
