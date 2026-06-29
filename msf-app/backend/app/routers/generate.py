@@ -112,6 +112,13 @@ async def generate_from_ddl(
 
     # Parse tables
     tables = SQLParser.parse(request.sql_content)
+    
+    max_tables = int(os.getenv("MAX_TABLES_PER_REQUEST", "50"))
+    if len(tables) > max_tables:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Terlalu banyak tabel terdeteksi ({len(tables)} tabel). Maksimum yang diizinkan adalah {max_tables} tabel per request."
+        )
 
     # Buat job
     job = job_queue.create_job(project_name=request.project_name)
@@ -204,6 +211,14 @@ async def generate_from_db(
         )
         if job.status == JobStatus.CANCELLED:
             raise RuntimeError("Job dibatalkan oleh pengguna.")
+
+        max_tables = int(os.getenv("MAX_TABLES_PER_REQUEST", "50"))
+        if len(metadata.tables) > max_tables:
+            raise ValueError(
+                f"Terlalu banyak tabel terdeteksi ({len(metadata.tables)} tabel). "
+                f"Maksimum yang diizinkan adalah {max_tables} tabel per request."
+            )
+
         await _run_generate_job(job, metadata.tables, gen_settings)
 
     background_tasks.add_task(

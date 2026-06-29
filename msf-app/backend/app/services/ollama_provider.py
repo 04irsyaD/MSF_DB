@@ -55,6 +55,8 @@ class OllamaProvider(AIProvider):
         Generate teks menggunakan Ollama /api/generate endpoint.
         Menggunakan non-streaming mode untuk simplicity.
         """
+        from app.services.ai_provider import retry_with_backoff
+
         url = f"{self.base_url}/api/generate"
         payload = {
             "model": model,
@@ -67,30 +69,38 @@ class OllamaProvider(AIProvider):
             },
         }
 
-        try:
-            client = self.get_client()
-            response = await client.post(url, json=payload, timeout=self.timeout)
-            response.raise_for_status()
-            data = response.json()
-            return data.get("response", "").strip()
+        async def _call():
+            try:
+                client = self.get_client()
+                response = await client.post(url, json=payload, timeout=self.timeout)
+                response.raise_for_status()
+                data = response.json()
+                return data.get("response", "").strip()
 
-        except httpx.ConnectError:
-            raise ConnectionError(
-                f"Tidak bisa konek ke Ollama di {self.base_url}. "
-                "Pastikan Ollama sudah berjalan."
-            )
-        except httpx.TimeoutException:
-            raise TimeoutError(
-                f"Ollama timeout setelah {self.timeout} detik. "
-                "Coba model yang lebih kecil atau tingkatkan timeout."
-            )
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 404:
-                raise ValueError(
-                    f"Model '{model}' tidak ditemukan. "
-                    f"Jalankan: ollama pull {model}"
+            except httpx.ConnectError:
+                raise ConnectionError(
+                    f"Tidak bisa konek ke Ollama di {self.base_url}. "
+                    "Pastikan Ollama sudah berjalan."
                 )
-            raise RuntimeError(f"Ollama error: {e.response.status_code} — {e.response.text}")
+            except httpx.TimeoutException:
+                raise TimeoutError(
+                    f"Ollama timeout setelah {self.timeout} detik. "
+                    "Coba model yang lebih kecil atau tingkatkan timeout."
+                )
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    raise ValueError(
+                        f"Model '{model}' tidak ditemukan. "
+                        f"Jalankan: ollama pull {model}"
+                    )
+                raise RuntimeError(f"Ollama error: {e.response.status_code} — {e.response.text}")
+
+        return await retry_with_backoff(
+            _call,
+            max_retries=2,
+            base_delay=2.0,
+            exceptions=(ConnectionError, TimeoutError, httpx.TimeoutException, httpx.ConnectError),
+        )
 
     async def list_models(self) -> List[AIModelInfo]:
         """Ambil list model yang sudah di-pull di Ollama"""

@@ -11,6 +11,10 @@ from datetime import datetime, timezone
 from typing import Dict, Optional, Callable, Any
 from app.models.schemas import JobStatus
 
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", tempfile.gettempdir())
+if OUTPUT_DIR != tempfile.gettempdir():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 
 class Job:
     def __init__(self, job_id: str, project_name: str = "Database Documentation"):
@@ -57,9 +61,8 @@ class Job:
             res_bytes = kwargs.pop("result_bytes")
             if res_bytes is not None:
                 try:
-                    temp_dir = tempfile.gettempdir()
                     fmt = kwargs.get("output_format", self.output_format)
-                    filepath = os.path.join(temp_dir, f"msf_doc_{self.job_id}.{fmt}")
+                    filepath = os.path.join(OUTPUT_DIR, f"msf_doc_{self.job_id}.{fmt}")
                     with open(filepath, "wb") as f:
                         f.write(res_bytes)
                     self.result_filepath = filepath
@@ -141,8 +144,12 @@ class JobQueue:
         task_fn harus menerima job sebagai parameter pertama.
         """
         job.update(status=JobStatus.PROCESSING)
+        job_timeout = int(os.getenv("JOB_TIMEOUT_SECONDS", "1800"))
         try:
-            await task_fn(job, *args, **kwargs)
+            await asyncio.wait_for(
+                task_fn(job, *args, **kwargs),
+                timeout=job_timeout
+            )
             if job.status == JobStatus.CANCELLED:
                 job.update(
                     completed_at=datetime.now(timezone.utc).isoformat()
@@ -153,6 +160,12 @@ class JobQueue:
                     progress=100,
                     completed_at=datetime.now(timezone.utc).isoformat()
                 )
+        except asyncio.TimeoutError:
+            job.update(
+                status=JobStatus.ERROR,
+                error_message=f"Pekerjaan dibatalkan secara otomatis karena melebihi batas waktu {job_timeout // 60} menit.",
+                completed_at=datetime.now(timezone.utc).isoformat()
+            )
         except Exception as e:
             if job.status == JobStatus.CANCELLED:
                 job.update(

@@ -2,7 +2,7 @@
 Pydantic schemas — semua request/response models untuk MSF-APP API
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, List, Literal, Dict
 from enum import Enum
 
@@ -74,11 +74,29 @@ class DBConnection(BaseModel):
 
     @field_validator("port", mode="before")
     @classmethod
-    def set_default_port(cls, v, info):
-        if v is not None:
+    def validate_port(cls, v):
+        if v is None:
             return v
-        # Default port akan diset di db_connector berdasarkan engine
-        return v
+        try:
+            val = int(v)
+        except (ValueError, TypeError):
+            raise ValueError("Port harus berupa angka")
+        if val < 1 or val > 65535:
+            raise ValueError("Port harus berada di antara rentang 1-65535")
+        return val
+
+    @model_validator(mode="after")
+    def check_connection_mode(self) -> "DBConnection":
+        has_string = bool(self.connection_string and self.connection_string.strip())
+        has_manual = bool(self.host and self.database)
+
+        # SQLite bisa tidak mengisi host/database karena menggunakan local file
+        if not has_string and not has_manual and self.engine != DBEngine.SQLITE:
+            raise ValueError(
+                "Wajib mengisi salah satu: 'connection_string' atau "
+                "kombinasi 'host' + 'database'"
+            )
+        return self
 
     model_config = {"use_enum_values": True}
 
@@ -187,7 +205,12 @@ class GenerateSettings(BaseModel):
 
 
 class GenerateFromDDLRequest(GenerateSettings):
-    sql_content: str = Field(..., min_length=10, description="SQL DDL (CREATE TABLE statements)")
+    sql_content: str = Field(
+        ...,
+        min_length=10,
+        max_length=500_000,
+        description="SQL DDL (CREATE TABLE statements)"
+    )
 
 
 class GenerateFromDBRequest(GenerateSettings):

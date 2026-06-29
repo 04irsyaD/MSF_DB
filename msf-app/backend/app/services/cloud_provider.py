@@ -68,24 +68,41 @@ class DeepSeekProvider(AIProvider):
             "max_tokens": 2048,
         }
 
-        try:
-            client = self.get_client()
-            response = await client.post(
-                f"{self.base_url}/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["choices"][0]["message"]["content"].strip()
+        async def _call():
+            try:
+                client = self.get_client()
+                response = await client.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout,
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data["choices"][0]["message"]["content"].strip()
 
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 401:
-                raise ValueError("DeepSeek API key tidak valid.")
-            raise RuntimeError(f"DeepSeek error: {e.response.status_code}")
-        except Exception as e:
-            raise RuntimeError(f"DeepSeek request gagal: {str(e)}")
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 401:
+                    raise ValueError("DeepSeek API key tidak valid atau sudah expired.")
+                elif e.response.status_code == 429:
+                    raise RuntimeError(
+                        "DeepSeek rate limit tercapai. Quota API Anda habis atau terlalu banyak "
+                        "request dalam waktu singkat. Tunggu beberapa menit sebelum mencoba lagi."
+                    )
+                elif e.response.status_code == 503:
+                    raise RuntimeError("DeepSeek service sedang tidak tersedia (503). Coba lagi nanti.")
+                else:
+                    raise RuntimeError(f"DeepSeek error {e.response.status_code}: {e.response.text[:200]}")
+            except Exception as e:
+                raise RuntimeError(f"DeepSeek request gagal: {str(e)}")
+
+        from app.services.ai_provider import retry_with_backoff
+        return await retry_with_backoff(
+            _call,
+            max_retries=1,
+            base_delay=2.0,
+            exceptions=(RuntimeError, httpx.TimeoutException, httpx.ConnectError),
+        )
 
     async def list_models(self) -> List[AIModelInfo]:
         if not self._is_configured():
@@ -160,26 +177,35 @@ class OpenAIProvider(AIProvider):
             "max_tokens": 2048,
         }
 
-        try:
-            client = self.get_client()
-            response = await client.post(
-                f"{self.base_url}/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["choices"][0]["message"]["content"].strip()
+        async def _call():
+            try:
+                client = self.get_client()
+                response = await client.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout,
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data["choices"][0]["message"]["content"].strip()
 
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 401:
-                raise ValueError("OpenAI API key tidak valid.")
-            if e.response.status_code == 429:
-                raise RuntimeError("OpenAI rate limit tercapai. Coba lagi nanti.")
-            raise RuntimeError(f"OpenAI error: {e.response.status_code}")
-        except Exception as e:
-            raise RuntimeError(f"OpenAI request gagal: {str(e)}")
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 401:
+                    raise ValueError("OpenAI API key tidak valid.")
+                if e.response.status_code == 429:
+                    raise RuntimeError("OpenAI rate limit tercapai. Coba lagi nanti.")
+                raise RuntimeError(f"OpenAI error: {e.response.status_code}")
+            except Exception as e:
+                raise RuntimeError(f"OpenAI request gagal: {str(e)}")
+
+        from app.services.ai_provider import retry_with_backoff
+        return await retry_with_backoff(
+            _call,
+            max_retries=1,
+            base_delay=2.0,
+            exceptions=(RuntimeError, httpx.TimeoutException, httpx.ConnectError),
+        )
 
     async def list_models(self) -> List[AIModelInfo]:
         if not self._is_configured():
