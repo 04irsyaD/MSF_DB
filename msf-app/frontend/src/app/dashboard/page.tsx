@@ -245,6 +245,28 @@ export default function DashboardPage() {
                   </span>
                 </div>
               )}
+
+              {statsData !== undefined && (
+                <>
+                  <div className="flex items-center justify-between p-2.5 rounded-xl border border-gray-50 bg-gray-50/30">
+                    <span className="text-xs text-muted-foreground">Active Jobs</span>
+                    <span className="font-mono text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+                      {statsData.jobs_processing}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-2.5 rounded-xl border border-gray-50 bg-gray-50/30">
+                    <span className="text-xs text-muted-foreground">Failed Jobs</span>
+                    <span className={cn(
+                      "font-mono text-[10px] font-bold px-2 py-0.5 rounded-lg border",
+                      statsData.jobs_error > 0
+                        ? "text-red-600 bg-red-50 border-red-200 animate-pulse"
+                        : "text-gray-600 bg-gray-100 border-gray-200"
+                    )}>
+                      {statsData.jobs_error}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

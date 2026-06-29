@@ -18,7 +18,7 @@ interface ShortcutFilterProps {
 export default function ShortcutFilter({ onFilterChange, engines, categories }: ShortcutFilterProps) {
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
-  const [engine, setEngine] = useState("");
+  const [engine, setEngine] = useState("postgresql");
   const [category, setCategory] = useState("");
   const [riskLevel, setRiskLevel] = useState("");
 

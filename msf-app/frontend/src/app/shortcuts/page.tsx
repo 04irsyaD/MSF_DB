@@ -11,7 +11,7 @@ import { Terminal, AlertCircle, RefreshCw } from "lucide-react";
 export default function ShortcutsPage() {
   const [filters, setFilters] = useState({
     q: "",
-    engine: "",
+    engine: "postgresql",
     category: "",
     risk_level: "",
   });

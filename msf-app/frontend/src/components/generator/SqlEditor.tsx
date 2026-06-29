@@ -28,6 +28,62 @@ CREATE TABLE posts (
     published_at TIMESTAMP WITH TIME ZONE
 );`;
 
+const postgresTemplate = `-- PostgreSQL DDL Example
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(150) NOT NULL,
+    content TEXT,
+    is_published BOOLEAN DEFAULT false,
+    published_at TIMESTAMP WITH TIME ZONE
+);`;
+
+const mysqlTemplate = `-- MySQL DDL Example
+CREATE TABLE \`users\` (
+    \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+    \`username\` VARCHAR(50) UNIQUE NOT NULL,
+    \`email\` VARCHAR(255) UNIQUE NOT NULL,
+    \`password_hash\` VARCHAR(255) NOT NULL,
+    \`created_at\` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE \`posts\` (
+    \`id\` INT AUTO_INCREMENT PRIMARY KEY,
+    \`author_id\` INT,
+    \`title\` VARCHAR(150) NOT NULL,
+    \`content\` TEXT,
+    \`is_published\` TINYINT(1) DEFAULT 0,
+    \`published_at\` DATETIME,
+    FOREIGN KEY (\`author_id\`) REFERENCES \`users\`(\`id\`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
+const sqliteTemplate = `-- SQLite DDL Example
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    author_id INTEGER,
+    title TEXT NOT NULL,
+    content TEXT,
+    is_published INTEGER DEFAULT 0,
+    published_at DATETIME,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+);`;
+
 export default function SqlEditor({ value, onChange }: SqlEditorProps) {
   const [copied, setCopied] = useState(false);
 
@@ -57,6 +113,29 @@ export default function SqlEditor({ value, onChange }: SqlEditorProps) {
         </div>
         
         <div className="flex items-center gap-2">
+          <select
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "postgres") {
+                onChange(postgresTemplate);
+                toast.success("Template PostgreSQL di-insert");
+              } else if (val === "mysql") {
+                onChange(mysqlTemplate);
+                toast.success("Template MySQL di-insert");
+              } else if (val === "sqlite") {
+                onChange(sqliteTemplate);
+                toast.success("Template SQLite di-insert");
+              }
+              e.target.value = ""; // Reset
+            }}
+            className="px-2 py-1.5 rounded-xl bg-white hover:bg-gray-50 border border-border hover:border-accent/40 text-muted-foreground hover:text-gray-900 transition-all duration-150 text-xs font-mono uppercase shadow-sm cursor-pointer outline-none font-bold"
+          >
+            <option value="">INSERT TEMPLATE</option>
+            <option value="postgres">PostgreSQL</option>
+            <option value="mysql">MySQL</option>
+            <option value="sqlite">SQLite</option>
+          </select>
+
           {value && (
             <button
               onClick={handleCopy}

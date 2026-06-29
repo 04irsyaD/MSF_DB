@@ -85,7 +85,7 @@ export default function SettingsPage() {
             <div className="flex justify-between items-center py-1">
               <span className="text-muted-foreground uppercase text-[10px]">Endpoints:</span>
               <a
-                href="http://localhost:8000/docs"
+                href="https://msf-db.my.id/api/docs"
                 target="_blank"
                 rel="noreferrer"
                 className="text-accent hover:underline font-bold uppercase text-[10px]"
@@ -97,50 +97,60 @@ export default function SettingsPage() {
         </div>
 
         {/* Local Ollama Info */}
-        <div className="bg-white border border-border rounded-2xl p-5 space-y-3 shadow-sm">
-          <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">Local Ollama LLM</h4>
-          <div className="space-y-2 text-xs font-mono">
-            <div className="flex justify-between items-center py-1 border-b border-border/40">
-              <span className="text-muted-foreground uppercase text-[10px]">Ollama Connection:</span>
-              <span
-                className={cn(
-                  "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border flex items-center gap-1.5",
-                  health?.services?.ollama === "up"
-                    ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                    : "bg-amber-50 text-amber-600 border-amber-200"
-                )}
-              >
-                <span className={cn(
-                  "h-1.5 w-1.5 rounded-full",
-                  health?.services?.ollama === "up" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-                )} />
-                {health?.services?.ollama === "up" ? "CONNECTED" : "OFFLINE"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-border/40">
-              <span className="text-muted-foreground uppercase text-[10px]">Default Model:</span>
-              <span className="text-gray-900 truncate max-w-[150px]">
-                {health?.services?.ollama_model || "None"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center py-1">
-              <span className="text-muted-foreground uppercase text-[10px]">Verification:</span>
-              <button
-                onClick={handleTestOllama}
-                disabled={testingOllama}
-                className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-border hover:border-accent/40 text-[10px] font-mono font-bold flex items-center gap-1.5 transition-colors duration-150 disabled:opacity-50 uppercase"
-              >
-                {testingOllama ? (
-                  <>
-                    <Loader2 className="h-3 w-3 animate-spin text-accent" />
-                    <span>TESTING...</span>
-                  </>
-                ) : (
-                  <span>TEST CONNECTION</span>
-                )}
-              </button>
+        <div className="bg-white border border-border rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between">
+          <div>
+            <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest mb-3">Local Ollama LLM</h4>
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex justify-between items-center py-1 border-b border-border/40">
+                <span className="text-muted-foreground uppercase text-[10px]">Ollama Connection:</span>
+                <span
+                  className={cn(
+                    "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border flex items-center gap-1.5",
+                    health?.services?.ollama === "up"
+                      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                      : "bg-amber-50 text-amber-600 border-amber-200"
+                  )}
+                >
+                  <span className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    health?.services?.ollama === "up" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                  )} />
+                  {health?.services?.ollama === "up" ? "CONNECTED" : "OFFLINE"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-border/40">
+                <span className="text-muted-foreground uppercase text-[10px]">Default Model:</span>
+                <span className="text-gray-900 truncate max-w-[150px]">
+                  {health?.services?.ollama_model || "None"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-muted-foreground uppercase text-[10px]">Verification:</span>
+                <button
+                  onClick={handleTestOllama}
+                  disabled={testingOllama}
+                  className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl border border-border hover:border-accent/40 text-[10px] font-mono font-bold flex items-center gap-1.5 transition-colors duration-150 disabled:opacity-50 uppercase"
+                >
+                  {testingOllama ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin text-accent" />
+                      <span>TESTING...</span>
+                    </>
+                  ) : (
+                    <span>TEST CONNECTION</span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Installed Models Section */}
+          {health?.services?.ollama === "up" && (
+            <div className="pt-3 border-t border-border/40 space-y-2 mt-2">
+              <span className="text-muted-foreground uppercase text-[10px] font-bold block">Installed Models:</span>
+              <OllamaModelsList />
+            </div>
+          )}
         </div>
       </div>
 
@@ -228,6 +238,51 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function OllamaModelsList() {
+  const { data: modelsData, error, isLoading } = useSWR("/api/ai/models?provider=ollama", swrFetcher);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" />
+        <span>LOADING INSTALLED MODELS...</span>
+      </div>
+    );
+  }
+
+  if (error || !modelsData?.models) {
+    return (
+      <div className="text-[10px] text-red-500 font-mono font-bold uppercase">
+        Gagal memuat model.
+      </div>
+    );
+  }
+
+  const models = modelsData.models;
+
+  if (models.length === 0) {
+    return (
+      <div className="text-[10px] text-amber-600 font-mono font-bold uppercase">
+        Tidak ada model terinstall. Jalankan 'ollama pull'
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-h-[110px] overflow-y-auto space-y-1.5 pr-1 font-mono">
+      {models.map((m: any) => (
+        <div
+          key={m.name}
+          className="flex justify-between items-center bg-gray-50 hover:bg-gray-100/80 px-2.5 py-1.5 rounded-lg border border-border/60 text-[10px] transition-colors duration-150"
+        >
+          <span className="text-gray-900 font-bold truncate max-w-[155px]">{m.name}</span>
+          <span className="text-muted-foreground text-[9px]">{m.size || "Unknown size"}</span>
+        </div>
+      ))}
     </div>
   );
 }
