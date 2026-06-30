@@ -1,7 +1,6 @@
-"use client";
-
+import { useState, useEffect } from "react";
 import { JobStatus as StatusType } from "@/lib/types";
-import { Loader2, AlertCircle, CheckCircle2, StopCircle, RefreshCw } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, StopCircle, RefreshCw, Copy, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -28,12 +27,76 @@ export default function JobStatus({
   onCancel,
   accessCode,
 }: JobStatusProps) {
+  const [showSaveModal, setShowSaveModal] = useState(false);
+
+  useEffect(() => {
+    if (accessCode && (status === "queued" || status === "processing")) {
+      const storageKey = `msf_dismissed_code_${accessCode}`;
+      const isDismissed = localStorage.getItem(storageKey);
+      if (!isDismissed) {
+        setShowSaveModal(true);
+      }
+    }
+  }, [accessCode, status]);
+
   if (!status) return null;
 
   const isProcessing = status === "queued" || status === "processing";
 
+  const handleCopyAndClose = () => {
+    if (accessCode) {
+      navigator.clipboard.writeText(accessCode);
+      toast.success("Kode pelacakan berhasil disalin ke clipboard!");
+      localStorage.setItem(`msf_dismissed_code_${accessCode}`, "true");
+    }
+    setShowSaveModal(false);
+  };
+
   return (
-    <div className="space-y-5 bg-white border border-border p-6 rounded-2xl max-w-2xl mx-auto shadow-sm">
+    <div className="space-y-5 bg-white border border-border p-6 rounded-2xl max-w-2xl mx-auto shadow-sm relative">
+      {/* Save Code Modal Overlay */}
+      {showSaveModal && accessCode && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm animate-fade-in font-mono">
+          <div className="bg-white border border-border w-full max-w-sm rounded-2xl shadow-card-lg p-6 space-y-5 text-center animate-fade-in-up">
+            <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mx-auto">
+              <Key className="h-5 w-5" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">
+                SIMPAN KODE PELACAKAN
+              </h3>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Pekerjaan baru berhasil dibuat. Salin kode di bawah ini agar Anda bisa memantau kembali jika halaman tidak sengaja tertutup atau ter-refresh.
+              </p>
+            </div>
+
+            <div className="p-3 bg-gray-50 border border-border rounded-xl flex items-center justify-between font-bold">
+              <span className="text-gray-900 tracking-wider text-xs select-all">{accessCode}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(accessCode);
+                  toast.success("Kode berhasil disalin!");
+                }}
+                className="text-[10px] text-accent hover:underline flex items-center gap-1 uppercase"
+              >
+                <Copy className="h-3 w-3" />
+                <span>Salin</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCopyAndClose}
+              className="w-full py-2 bg-accent hover:bg-accent/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm uppercase tracking-wider"
+            >
+              Salin & Lanjutkan
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header Status */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
