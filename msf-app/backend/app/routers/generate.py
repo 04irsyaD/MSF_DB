@@ -8,6 +8,7 @@ from fastapi.responses import Response
 from app.models.schemas import (
     GenerateFromDDLRequest, GenerateFromDBRequest,
     GenerateJobResponse, JobStatusResponse, JobStatus,
+    ParseDDLRequest, TableMetadata,
 )
 from app.background.job_queue import job_queue
 from app.services.sql_parser import SQLParser
@@ -85,6 +86,19 @@ async def _run_generate_job(job, tables, settings: dict):
         logger.error("Job gagal", job_id=job.job_id, error=str(e))
         job.update(error_message=str(e))
         raise
+
+
+@router.post("/generate/parse-ddl", response_model=list[TableMetadata])
+async def parse_ddl_endpoint(request: ParseDDLRequest):
+    """
+    Parse SQL DDL string dan kembalikan struktur TableMetadata.
+    """
+    try:
+        tables = SQLParser.parse(request.sql_content)
+        return tables
+    except Exception as e:
+        logger.error("Gagal parse DDL", error=str(e))
+        raise HTTPException(status_code=400, detail=f"Gagal parse SQL DDL: {str(e)}")
 
 
 @router.post("/generate/from-ddl", response_model=GenerateJobResponse)

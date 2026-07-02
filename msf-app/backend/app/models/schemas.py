@@ -344,3 +344,8 @@ class ErrorResponse(BaseModel):
     detail: str
     error_code: Optional[str] = None
     timestamp: Optional[str] = None
+
+
+class ParseDDLRequest(BaseModel):
+    sql_content: str
+

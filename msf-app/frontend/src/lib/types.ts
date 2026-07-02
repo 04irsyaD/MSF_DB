@@ -190,3 +190,10 @@ export interface ActiveJob {
   status: JobStatus;
   started_at: string;
 }
+
+export interface TablePosition {
+  id: string;
+  x: number;
+  y: number;
+}
+

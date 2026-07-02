@@ -7,6 +7,7 @@ import {
   DBTestConnectionResponse,
   DBMetadataResponse,
   ShortcutsResponse,
+  TableMetadata,
 } from "./types";
 
 const BASE_URL = ""; // Karena kita menggunakan rewrite di next.config.js, path relative ke "/api" akan dialihkan ke backend
@@ -108,6 +109,13 @@ export const api = {
     return request<GenerateJobResponse>("/api/generate/from-ddl", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async parseDDL(sqlContent: string): Promise<TableMetadata[]> {
+    return request<TableMetadata[]>("/api/generate/parse-ddl", {
+      method: "POST",
+      body: JSON.stringify({ sql_content: sqlContent }),
     });
   },
 

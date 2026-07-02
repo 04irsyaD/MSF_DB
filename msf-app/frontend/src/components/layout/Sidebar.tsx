@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, ShieldAlert, Layers } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/generate",
       icon: Sparkles,
       description: "Generate dokumentasi DB",
+    },
+    {
+      label: "MSF Diagram",
+      href: "/diagram",
+      icon: Layers,
+      description: "Visualisasi skema & relasi",
     },
     {
       label: "SQL Shortcuts",
