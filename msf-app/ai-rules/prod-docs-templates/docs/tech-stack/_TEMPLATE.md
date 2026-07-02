@@ -9,7 +9,7 @@
 ## Overview
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Application | {app_name} |
 | Technology | {tech_stack} |
 | Version | {version} |
@@ -26,7 +26,7 @@
 ### Runtime
 
 | Component | Version | Purpose |
-|-----------|---------|---------|
+| ----------- | --------- | --------- |
 | {runtime} | {version} | {purpose} |
 | {framework} | {version} | {purpose} |
 | {database_driver} | {version} | {purpose} |
@@ -59,6 +59,7 @@ CMD [{cmd}]
 ```
 
 **Build command:**
+
 ```bash
 cd /opt/{app_name}
 docker build -t {image_name}:{tag} .
@@ -154,6 +155,7 @@ services:
 {Jelaskan bagaimana container ini berkomunikasi dengan container lain}
 
 Contoh:
+
 - Communicates with Redis via `{network_name}` network
 - Connects to database at `{db_host}:{db_port}`
 - Exposes API on port `{port}` for Nginx reverse proxy
@@ -194,7 +196,7 @@ server {
 ### Connection Details
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Database Type | {db_type} |
 | Host | {db_host} |
 | Port | {db_port} |
@@ -227,6 +229,7 @@ docker exec -it {container_name} {rollback_command}
 {Jelaskan proses deployment aplikasi ini}
 
 Contoh:
+
 1. Code di-push ke repository
 2. Auto-deploy script pull dari git setiap 1 menit
 3. Build Docker image baru
@@ -342,6 +345,7 @@ docker compose up -d
 **Symptoms:** Container exits immediately after start
 
 **Solutions:**
+
 ```bash
 # Check logs
 docker logs {container_name}
@@ -361,6 +365,7 @@ docker compose up
 **Symptoms:** Container using more memory than expected
 
 **Solutions:**
+
 ```bash
 # Check memory usage
 docker stats {container_name}
@@ -378,6 +383,7 @@ docker compose up -d
 **Symptoms:** Application cannot connect to database
 
 **Solutions:**
+
 ```bash
 # Check database connectivity
 docker exec -it {container_name} {ping_command} {db_host}
@@ -408,6 +414,7 @@ sudo ufw status
 {List rekomendasi optimasi jika diperlukan}
 
 Contoh:
+
 - Increase worker processes based on CPU cores
 - Enable caching for frequently accessed data
 - Optimize database queries with proper indexing
@@ -422,6 +429,7 @@ Contoh:
 {List security measures yang diterapkan}
 
 Contoh:
+
 - Container runs as non-root user
 - All capabilities dropped except necessary ones
 - Read-only filesystem where possible

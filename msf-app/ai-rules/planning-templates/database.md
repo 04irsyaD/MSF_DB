@@ -10,7 +10,7 @@
 ## 1. Database Topology
 
 | Connection | DB Engine | Database Name | Purpose |
-|-----------|----------|--------------|---------|
+| ----------- | ---------- | -------------- | --------- |
 | `{default}` | `{MySQL/PostgreSQL}` | `{nama_db}` | Primary data |
 | `{connection_2}` | `{engine}` | `{nama_db}` | `{purpose}` |
 
@@ -38,7 +38,7 @@
 ### `{nama_tabel}`
 
 | Column | Type | Constraints | Index | Notes |
-|--------|------|------------|-------|-------|
+| -------- | ------ | ------------ | ------- | ------- |
 | `id` | `{bigint}` | PK, auto-increment | PRIMARY | |
 | `{field}` | `{type}` | `{NOT NULL / nullable}` | `{INDEX / UNIQUE}` | `{catatan}` |
 | `created_at` | `timestamp` | | | |
@@ -67,7 +67,7 @@
 ## 6. Migration Plan
 
 | # | Migration | Table | Domain | Notes |
-|---|----------|-------|--------|-------|
+| --- | ---------- | ------- | -------- | ------- |
 | 1 | `create_users_table` | `users` | Core | |
 | 2 | `create_{nama}_table` | `{nama}` | `{modul}` | |
 

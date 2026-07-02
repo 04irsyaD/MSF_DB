@@ -4,9 +4,10 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  WebSocket Security
+### WebSocket Security
 
 **Requirements:**
+
 1. **Authentication:**
    - Authenticate WebSocket connections (token in query param atau first message)
    - Validate origin header (prevent CSRF)
@@ -23,6 +24,7 @@
    - Implement ping/pong untuk connection health
 
 **Implementation:**
+
 ```javascript
 // Server-side WebSocket security
 const wss = new WebSocketServer({ 

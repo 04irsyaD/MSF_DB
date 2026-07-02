@@ -35,6 +35,7 @@ Masalah disebabkan oleh:
 ### 3. **Technical Fixes Applied**
 
 #### **XML Safety Measures:**
+
 ```python
 def safe_xml_escape(self, text):
     text = saxutils.escape(text)  # Escape &, <, >
@@ -68,12 +69,14 @@ def safe_xml_escape(self, text):
 ### 5. **Usage Instructions**
 
 #### **Quick Fix (Minimal):**
+
 ```bash
 cd "AI OLLMA/summary/scripts"
 python fixed_docx_system.py
 ```
 
 #### **Enhanced Fix (Professional):**
+
 ```bash
 cd "AI OLLMA/summary/scripts"
 echo "1" | python enhanced_safe_docx.py  # 15 tables

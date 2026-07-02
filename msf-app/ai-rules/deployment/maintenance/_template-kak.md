@@ -9,7 +9,7 @@
 ## Informasi Umum
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Nama Proyek | `{nama project}` |
 | Tahun Anggaran | `{YYYY}` |
 | Periode Pelaksanaan | `{bulan mulai}–{bulan selesai} {YYYY}` |
@@ -21,6 +21,7 @@
 ## 1. Latar Belakang
 
 **Jelaskan mengapa maintenance diperlukan tahun ini:**
+
 - Kondisi aplikasi saat ini
 - Masalah yang perlu diselesaikan
 - Kebutuhan upgrade/migrasi
@@ -42,7 +43,7 @@
 ### Scope A — Backup Production (Wajib)
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Target | Backup seluruh aplikasi dan database dari server production |
 | Metode | Dump DB + gzip, zip aplikasi, download via SCP |
 | Output | File backup tersimpan di lokal dan Google Drive |
@@ -51,7 +52,7 @@
 ### Scope B — {Nama Scope}
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Target | `{deskripsi}` |
 | Metode | `{pendekatan teknis}` |
 | Output | `{hasil yang diharapkan}` |
@@ -59,7 +60,7 @@
 ### Scope C — {Nama Scope}
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Target | `{deskripsi}` |
 | Metode | `{pendekatan teknis}` |
 | Output | `{hasil yang diharapkan}` |
@@ -69,6 +70,7 @@
 ## 4. Metodologi
 
 **Pendekatan umum:**
+
 - `{pendekatan — contoh: remote via SSH, eksekusi bertahap per server}`
 - `{verifikasi setiap langkah sebelum lanjut}`
 
@@ -77,7 +79,7 @@
 ## 5. Timeline
 
 | Scope | Bulan 1 | Bulan 2 | Bulan 3 | Bulan 4 |
-|-------|---------|---------|---------|---------|
+| ------- | --------- | --------- | --------- | --------- |
 | A — Backup | █████ | | | |
 | B — {scope} | | █████ | | |
 | C — {scope} | | | █████ | |

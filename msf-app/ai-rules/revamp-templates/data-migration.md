@@ -10,7 +10,7 @@
 ## 1. Database Connection Map
 
 | Label | DB Engine | Host | Database | Role |
-|-------|----------|------|----------|------|
+| ------- | ---------- | ------ | ---------- | ------ |
 | Old DB | `{MySQL}` | `{host}` | `{nama_db_lama}` | Source (read-only) |
 | New DB | `{PostgreSQL}` | `{host}` | `{nama_db_baru}` | Target |
 
@@ -21,7 +21,7 @@
 **Urutan penting** — tabel master dulu, baru tabel transaksi:
 
 | # | Old Table | New Table | Rows (approx) | Strategy |
-|---|----------|----------|-------------|----------|
+| --- | ---------- | ---------- | ------------- | ---------- |
 | 1 | `{users}` | `{users}` | `{1000}` | Direct map |
 | 2 | `{roles}` | `{roles}` | `{10}` | Direct map |
 | 3 | `{categories}` | `{categories}` | `{50}` | Direct map |
@@ -34,7 +34,7 @@
 ### `{old_table}` → `{new_table}`
 
 | Old Column | Old Type | New Column | New Type | Transform Rule |
-|-----------|---------|-----------|---------|---------------|
+| ----------- | --------- | ----------- | --------- | --------------- |
 | `id` | `int(11)` | `id` | `bigint` | Direct |
 | `name` | `varchar(255)` | `name` | `text` | Direct |
 | `status` | `tinyint` (0/1) | `status` | `varchar(20)` | Map: `0→inactive, 1→active` |
@@ -46,6 +46,7 @@
 ## 4. Data Transform Rules
 
 ### Rule: Status Mapping
+
 ```text
 Old: tinyint (0=inactive, 1=active, 2=suspended)
 New: varchar (inactive, active, suspended)
@@ -57,6 +58,7 @@ Mapping:
 ```
 
 ### Rule: Password Migration
+
 ```text
 Old: MD5 hash (tidak aman)
 New: bcrypt
@@ -67,6 +69,7 @@ Strategi: Reset password untuk semua user.
 ```
 
 ### Rule: JSON Field Migration
+
 ```text
 Old: TEXT field berisi JSON string (unstructured)
 New: JSONB column
@@ -79,6 +82,7 @@ Transform: parse JSON string → validasi → simpan sebagai JSONB
 ## 5. Migration Scripts
 
 ### Script 1: `migrate_users.sh`
+
 ```bash
 #!/bin/bash
 # Migrasi table users dari old DB ke new DB
@@ -94,6 +98,7 @@ psql -h {new_host} -U {user} -d {new_db} \
 ```
 
 ### Script 2: `migrate_transactions.sh`
+
 ```bash
 # Export, transform status field, import
 ...
@@ -106,7 +111,7 @@ psql -h {new_host} -U {user} -d {new_db} \
 Setelah tiap migrasi tabel, verifikasi:
 
 | # | Check | Query | Expected |
-|---|-------|-------|----------|
+| --- | ------- | ------- | ---------- |
 | 1 | Row count match | `SELECT count(*) FROM {table}` | Sama dengan old |
 | 2 | No null in required fields | `SELECT count(*) FROM {table} WHERE {field} IS NULL` | 0 |
 | 3 | Status values valid | `SELECT DISTINCT status FROM {table}` | Hanya: 'active','inactive','suspended' |

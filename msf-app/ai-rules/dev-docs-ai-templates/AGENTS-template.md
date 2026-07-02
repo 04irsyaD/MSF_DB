@@ -5,11 +5,12 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  CRITICAL: Project Type
+### CRITICAL: Project Type
 
 **Lihat deklarasi di `PROJECT_CONTEXT.md` section "Project Type Declaration".** Jika project ini:
+
 - **Monolith** → hanya ada 1 repo (`apps/`) → isi 1 kontrak di bawah
 - **Fullstack** → ada 2 repo (`backend/` + `frontend/`) → isi **2 section terpisah**: Backend Rules dan Frontend Rules
 
@@ -20,7 +21,7 @@ Untuk fullstack, aturan coding backend dan frontend bisa sangat berbeda (framewo
 ## 1) Project Identity
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Project Type | `{Monolith / Fullstack}` |
 | Repo(s) | `{apps/ — monolith} / {backend/ + frontend/ — fullstack}` |
 | Git Folder | `{cd apps | cd backend + cd frontend}` |
@@ -32,6 +33,7 @@ Untuk fullstack, aturan coding backend dan frontend bisa sangat berbeda (framewo
 ### Branch and Git Policy
 
 **Isi oleh AI saat pertama kali menganalisis repo:**
+
 - Sebutkan branch aktif untuk development (`dev` atau lainnya)
 - Konfirmasi kebijakan branch yang berlaku
 - Tambahkan aturan git spesifik project (misal: signed commits, branch naming convention)

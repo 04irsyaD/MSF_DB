@@ -24,6 +24,7 @@
 - Command/script sudah ditest dan berjalan dengan benar
 
 **Check cron status:**
+
 ```bash
 # Ubuntu/Debian
 sudo systemctl status cron
@@ -37,6 +38,7 @@ sudo systemctl status crond
 ## Cronjob Entry
 
 **Edit crontab:**
+
 ```bash
 # Edit crontab untuk user saat ini
 crontab -e
@@ -46,11 +48,13 @@ sudo crontab -u {user} -e
 ```
 
 **Add entry:**
+
 ```bash
 {cron_expression} cd {project_path} && {command} >> {log_file} 2>&1
 ```
 
 **Contoh:**
+
 ```bash
 # Daily cleanup at 2 AM
 0 2 * * * cd /var/www/myapp && php artisan cleanup:old-records >> /var/www/myapp/storage/logs/cleanup.log 2>&1
@@ -77,6 +81,7 @@ sudo crontab -u {user} -e
 ```
 
 **Common patterns:**
+
 - `* * * * *` — Every minute
 - `*/5 * * * *` — Every 5 minutes
 - `0 * * * *` — Every hour (at minute 0)
@@ -122,16 +127,19 @@ crontab -e
 ## Verification
 
 **List all cronjobs:**
+
 ```bash
 crontab -l
 ```
 
 **Expected output:**
+
 ```
 {cron_expression} cd {project_path} && {command} >> {log_file} 2>&1
 ```
 
 **Check cron logs:**
+
 ```bash
 # Ubuntu/Debian
 grep CRON /var/log/syslog
@@ -141,6 +149,7 @@ grep CRON /var/log/cron
 ```
 
 **Check job output:**
+
 ```bash
 tail -f {log_file}
 ```
@@ -154,22 +163,27 @@ tail -f {log_file}
 **Symptom:** Job tidak dijalankan sesuai schedule
 
 **Solutions:**
+
 1. Check cron daemon is running:
+
    ```bash
    sudo systemctl status cron
    ```
 
 2. Check crontab syntax:
+
    ```bash
    crontab -l
    ```
 
 3. Check cron logs:
+
    ```bash
    grep CRON /var/log/syslog
    ```
 
 4. Test command manually:
+
    ```bash
    cd {project_path} && {command}
    ```
@@ -179,6 +193,7 @@ tail -f {log_file}
 **Symptom:** Log shows "command not found"
 
 **Solution:** Use full path to command
+
 ```bash
 # Wrong
 0 2 * * * cd /var/www/myapp && php artisan cleanup
@@ -188,6 +203,7 @@ tail -f {log_file}
 ```
 
 **Find full path:**
+
 ```bash
 which php
 which node
@@ -199,6 +215,7 @@ which go
 **Symptom:** Log shows "Permission denied"
 
 **Solution:** Check file permissions
+
 ```bash
 # Check ownership
 ls -la {project_path}
@@ -213,11 +230,13 @@ sudo chmod -R 755 {project_path}
 **Symptom:** Command works manually but not in cron
 
 **Solution:** Source environment in cronjob
+
 ```bash
 0 2 * * * . $HOME/.profile; cd {project_path} && {command}
 ```
 
 Or use full environment:
+
 ```bash
 0 2 * * * cd {project_path} && PATH=/usr/local/bin:/usr/bin:/bin {command}
 ```
@@ -283,11 +302,13 @@ echo "Cronjob setup completed for {job}"
 ```
 
 **Run (auto-setup mode):**
+
 ```bash
 bash {project_path}/docs/operations/scripts/setup-cronjob-{job}.sh
 ```
 
 **Run (manual-setup mode):**
+
 ```bash
 # Copy commands dari script dan jalankan manual
 ```

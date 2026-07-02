@@ -7,7 +7,7 @@
 
 ---
 
-##  Project Type Declaration
+## Project Type Declaration
 
 | Item | Value |
 |------|-------|
@@ -20,7 +20,7 @@
 ## 1. Milestone Overview
 
 | Milestone | Target Date | Status | Deliverables |
-|-----------|------------|--------|-------------|
+| ----------- | ------------ | -------- | ------------- |
 | `{M1}` | `{YYYY-MM-DD}` | `{Planned / In Progress / Done}` | `{output}` |
 | `{M2}` | `{YYYY-MM-DD}` | `{Planned}` | `{output}` |
 | `{M3}` | `{YYYY-MM-DD}` | `{Planned}` | `{output}` |
@@ -32,7 +32,7 @@
 ### Phase 1: Foundation
 
 | Task | Repo | Dependencies |
-|------|------|-------------|
+| ------ | ------ | ------------- |
 | Setup project & repo | `{both}` | — |
 | Auth system (login, role, permission) | `{backend}` | Core |
 | Auth pages (login, register) | `{frontend}` | Backend auth API |
@@ -49,7 +49,7 @@
 ### Phase 3: Polish & Launch
 
 | Task | Repo | Dependencies |
-|------|------|-------------|
+| ------ | ------ | ------------- |
 | UAT & bug fixing | `{both}` | All modules |
 | Production deployment — backend | `{backend}` | UAT passed |
 | Production deployment — frontend | `{frontend}` | Backend live |
@@ -60,7 +60,7 @@
 ## 3. Release Plan
 
 | Version | Date | Repo | Scope |
-|---------|------|------|-------|
+| --------- | ------ | ------ | ------- |
 | `v0.1.0` (Alpha) | `{YYYY-MM-DD}` | `{backend}` | Core API ready for frontend dev |
 | `v0.1.0` (Alpha) | `{YYYY-MM-DD}` | `{frontend}` | Skeleton pages, consume mock API |
 | `v0.5.0` (Beta) | `{YYYY-MM-DD}` | `{both}` | User acceptance testing |
@@ -71,7 +71,7 @@
 ## 4. Risk Register
 
 | Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|-----------|
+| ------ | ----------- | -------- | ----------- |
 | `{risiko}` | `{High/Med/Low}` | `{High/Med/Low}` | `{mitigasi}` |
 | API contract mismatch | `{Med}` | `{High}` | Contract freeze before FE starts |
 | Backend delay blocks frontend | `{Med}` | `{Med}` | Frontend uses mock API during early phase |

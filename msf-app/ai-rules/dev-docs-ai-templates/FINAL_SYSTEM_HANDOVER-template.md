@@ -6,16 +6,17 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Ini adalah dokumen "handover" — ringkasan kondisi akhir aplikasi untuk engineer atau AI agent yang akan melanjutkan pekerjaan.
 
-###  Dual-Repo: Handover Per Repo
+### Dual-Repo: Handover Per Repo
 
 - **Monolith** → isi 1 System Identity + 1 set module status
 - **Fullstack** → 2 baris di System Identity (backend + frontend), module status per repo
 
 **When to update:** Setiap selesai push ke `dev`, khususnya saat:
+
 - Selesai satu milestone/fitur besar
 - Akan handover ke engineer lain
 - Akan deploy ke production
@@ -39,6 +40,7 @@
 ## Current Architecture Summary
 
 **Jelaskan arsitektur sistem saat ini dalam 1-3 paragraf:**
+
 - Pola arsitektur
 - Komponen utama (backend, frontend, worker, dll)
 - Dependency kritis (database, cache, queue, external API)
@@ -85,7 +87,7 @@
 **Fullstack:** deployment bisa berbeda untuk backend dan frontend.
 
 | Repo | DB Migration | Config Baru | Restart Service | Notes |
-|------|-------------|------------|----------------|-------|
+| ------ | ------------- | ------------ | ---------------- | ------- |
 | `{backend}` | `{ada/tidak}` | `{ada/tidak}` | `{diperlukan/tidak}` | `{catatan}` |
 | `{frontend}` | N/A | `{ada/tidak}` | `{diperlukan/tidak}` | `{catatan}` |
 

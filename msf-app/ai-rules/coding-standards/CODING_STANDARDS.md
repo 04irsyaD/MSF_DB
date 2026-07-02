@@ -10,7 +10,7 @@
 ## Coding Standards Index
 
 | # | Section | File | Key Rules |
-|---|---------|------|-----------|
+| --- | --------- | ------ | ----------- |
 | 1 | File Size Limits | [01-file-size-limits.md](./coding-standards/01-file-size-limits.md) | Controller max 1000, Service max 800, Model max 300 |
 | 2 | Route Organization | [02-route-organization.md](./coding-standards/02-route-organization.md) | 1 route file = 1 module, max 200 baris |
 | 3 | View/UI Organization | [03-view-ui-organization.md](./coding-standards/03-view-ui-organization.md) | Split view >500 baris, component-based |
@@ -24,6 +24,7 @@
 | 11 | Enforcement | [11-enforcement.md](./coding-standards/11-enforcement.md) | Kapan dan bagaimana enforce |
 
 **WHEN TO READ WHAT:**
+
 - **Read CODING_STANDARDS.md** → overview, pick which section to read
 - **Read Section 1** → when starting new project (file size baseline)
 - **Read Section 6** → when reviewing code (anti-patterns)

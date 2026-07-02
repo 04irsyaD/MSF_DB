@@ -10,7 +10,7 @@
 ## Metadata Dokumen
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Kode Scope | `{A / B / C / ...}` |
 | Nama Scope | `{nama scope}` |
 | Tanggal Pelaksanaan | `{YYYY-MM-DD}` |
@@ -42,14 +42,17 @@
 ## 2. Tujuan dan Manfaat
 
 ### Tujuan Teknis
+
 - `{tujuan_teknis_1}`
 - `{tujuan_teknis_2}`
 
 ### Manfaat Operasional
+
 - `{manfaat_ops_1}`
 - `{manfaat_ops_2}`
 
 ### Manfaat Strategis
+
 - `{manfaat_strategis_1}`
 
 ---
@@ -63,11 +66,13 @@
 ### Langkah Eksekusi
 
 1. **`{langkah_1}`**
+
    ```bash
    {command}
    ```
 
 2. **`{langkah_2}`**
+
    ```bash
    {command}
    ```
@@ -81,16 +86,19 @@
 ## 4. Snapshot / Log Teknis (Wajib)
 
 ### Before
+
 ```
 {output sebelum — versi, status service, config, file size, dll}
 ```
 
 ### After
+
 ```
 {output sesudah — versi, status service, config, file size, dll}
 ```
 
 ### Output Command Penting
+
 ```
 {salin output command yang relevan}
 ```
@@ -124,6 +132,7 @@
 ## 8. Rollback Plan
 
 **Jika scope ini gagal, langkah rollback:**
+
 1. `{langkah_rollback_1}`
 2. `{langkah_rollback_2}`
 

@@ -10,14 +10,14 @@ Automation workflows for SQL-to-documentation pipelines, Telegram notifications,
 cp .env.example .env
 ```
 
-2. Start n8n:
+1. Start n8n:
 
 ```bash
 cd n8n
 docker-compose up -d
 ```
 
-3. Open n8n:
+1. Open n8n:
 
 ```text
 http://localhost:5678

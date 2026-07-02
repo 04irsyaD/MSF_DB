@@ -23,12 +23,14 @@ Model (Data structure)
 ### Controller Responsibilities
 
 **Controller HANYA boleh:**
+
 - ✅ Receive HTTP request
 - ✅ Validate input (gunakan Form Request)
 - ✅ Call Service layer
 - ✅ Return HTTP response
 
 **Controller TIDAK boleh:**
+
 - ❌ Business logic
 - ❌ Database queries langsung
 - ❌ File operations
@@ -38,23 +40,27 @@ Model (Data structure)
 ### Service Responsibilities
 
 **Service boleh:**
+
 - ✅ Business logic
 - ✅ Orchestrate multiple repositories
 - ✅ Call external services
 - ✅ Complex calculations
 
 **Service TIDAK boleh:**
+
 - ❌ HTTP request/response handling
 - ❌ Direct database queries (gunakan Repository)
 
 ### Repository Responsibilities
 
 **Repository HANYA boleh:**
+
 - ✅ Database queries
 - ✅ Data persistence
 - ✅ Query optimization
 
 **Repository TIDAK boleh:**
+
 - ❌ Business logic
 - ❌ HTTP handling
 - ❌ External API calls

@@ -54,11 +54,13 @@ docker logs --tail 50 {container_name}
 ### Issue: Container Won't Start
 
 **Symptoms:**
+
 - Container exits immediately after start
 - `docker ps` doesn't show container
 - Error: "Container exited with code 1"
 
 **Diagnosis:**
+
 ```bash
 # Check container logs
 docker logs {container_name}
@@ -73,7 +75,7 @@ docker compose up
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Port already in use | Check with `ss -tlnp \| grep {port}`, kill process or change port |
 | Missing environment variable | Check `.env` file, add missing variable |
 | Database connection failed | Verify DB credentials, check DB server status |
@@ -81,6 +83,7 @@ docker compose up
 | Out of memory | Increase memory limit in docker-compose.yml |
 
 **Solution Example:**
+
 ```bash
 # Kill process using port
 sudo lsof -ti:{port} | xargs kill -9
@@ -99,11 +102,13 @@ docker compose up -d
 ### Issue: High CPU Usage
 
 **Symptoms:**
+
 - System slow/unresponsive
 - `uptime` shows high load average
 - `top` shows high CPU%
 
 **Diagnosis:**
+
 ```bash
 # Check system CPU
 top -bn1 | head -20
@@ -121,7 +126,7 @@ ps aux --sort=-%cpu | head -10
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Runaway process | Kill process: `kill -9 {pid}` |
 | Infinite loop in code | Fix code bug, redeploy |
 | Too many workers | Reduce worker count in config |
@@ -129,6 +134,7 @@ ps aux --sort=-%cpu | head -10
 | Insufficient resources | Scale up server or add more instances |
 
 **Solution Example:**
+
 ```bash
 # Kill runaway process
 sudo kill -9 {pid}
@@ -148,11 +154,13 @@ watch -n 1 'docker stats --no-stream'
 ### Issue: High Memory Usage
 
 **Symptoms:**
+
 - System slow, swapping
 - `free -h` shows low available memory
 - OOM killer terminates processes
 
 **Diagnosis:**
+
 ```bash
 # Check memory usage
 free -h
@@ -170,7 +178,7 @@ docker exec {container_name} {memory_profiling_command}
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Memory leak in application | Fix leak, restart container |
 | Too many connections | Increase connection pool size or optimize queries |
 | Large cache | Reduce cache size or add more memory |
@@ -178,6 +186,7 @@ docker exec {container_name} {memory_profiling_command}
 | Too many containers | Remove unused containers, consolidate services |
 
 **Solution Example:**
+
 ```bash
 # Clear system cache
 sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
@@ -199,11 +208,13 @@ docker exec {container_name} php -d xdebug.mode=profile /path/to/script.php
 ### Issue: Disk Full
 
 **Symptoms:**
+
 - "No space left on device" errors
 - Applications crash or fail to write
 - `df -h` shows 100% usage
 
 **Diagnosis:**
+
 ```bash
 # Check disk usage
 df -h
@@ -224,7 +235,7 @@ docker system df
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Old log files | Rotate/compress logs, delete old ones |
 | Docker images/containers | Run `docker system prune` |
 | Backup files | Delete old backups, move to remote storage |
@@ -232,6 +243,7 @@ docker system df
 | Database growth | Archive old data, optimize tables |
 
 **Solution Example:**
+
 ```bash
 # Clean old logs
 sudo find /var/log -name "*.gz" -mtime +30 -delete
@@ -256,11 +268,13 @@ df -h
 ### Issue: Database Connection Failed
 
 **Symptoms:**
+
 - Application error: "Connection refused"
 - "Too many connections" error
 - Slow database queries
 
 **Diagnosis:**
+
 ```bash
 # Test database connection
 mysql -h {db_host} -u {user} -p -e "SELECT 1;"
@@ -281,7 +295,7 @@ tail -f /var/log/mysql/error.log
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Database server down | Start/restart database service |
 | Wrong credentials | Verify .env file, update credentials |
 | Max connections reached | Increase max_connections, optimize queries |
@@ -289,6 +303,7 @@ tail -f /var/log/mysql/error.log
 | Network issue | Ping database server, check routing |
 
 **Solution Example:**
+
 ```bash
 # Restart database
 sudo systemctl restart mysql
@@ -310,11 +325,13 @@ docker exec {container_name} mysql -h {db_host} -u {user} -p -e "SELECT 1;"
 ### Issue: Nginx 502 Bad Gateway
 
 **Symptoms:**
+
 - Users see "502 Bad Gateway" error
 - Nginx error log shows "upstream prematurely closed connection"
 - Backend application not responding
 
 **Diagnosis:**
+
 ```bash
 # Check Nginx status
 sudo systemctl status nginx
@@ -336,7 +353,7 @@ docker logs --tail 100 {container_name}
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Backend container down | Restart container |
 | Backend overloaded | Scale up, add more instances |
 | Wrong upstream configuration | Fix nginx.conf upstream block |
@@ -344,6 +361,7 @@ docker logs --tail 100 {container_name}
 | Backend crashing | Check application logs, fix errors |
 
 **Solution Example:**
+
 ```bash
 # Restart backend container
 cd /opt/{app_name}
@@ -367,11 +385,13 @@ docker compose up -d --scale app=3
 ### Issue: SSL Certificate Errors
 
 **Symptoms:**
+
 - Browser shows "Your connection is not private"
 - Certificate expired warning
 - SSL handshake errors
 
 **Diagnosis:**
+
 ```bash
 # Check certificate expiry
 sudo openssl x509 -in /etc/ssl/certs/{domain}.crt -noout -dates
@@ -389,7 +409,7 @@ curl -vI https://{domain}
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Certificate expired | Renew certificate |
 | Wrong certificate path | Fix path in nginx.conf |
 | Incomplete certificate chain | Add intermediate certificates |
@@ -397,6 +417,7 @@ curl -vI https://{domain}
 | Certificate mismatch | Ensure certificate matches domain |
 
 **Solution Example:**
+
 ```bash
 # Renew Let's Encrypt certificate
 sudo certbot renew
@@ -417,11 +438,13 @@ openssl s_client -connect {domain}:443 | grep "subject\|issuer"
 ### Issue: Application Errors (5xx)
 
 **Symptoms:**
+
 - Users see 500/502/503/504 errors
 - Application logs show errors
 - Monitoring alerts for high error rate
 
 **Diagnosis:**
+
 ```bash
 # Check application logs
 docker logs --tail 200 {container_name} | grep -i error
@@ -439,7 +462,7 @@ curl -f http://127.0.0.1:{port}/health
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Application bug | Fix code, redeploy |
 | Missing dependency | Install dependency, rebuild image |
 | Configuration error | Fix config file, restart |
@@ -447,6 +470,7 @@ curl -f http://127.0.0.1:{port}/health
 | Out of resources | Increase memory/CPU limits |
 
 **Solution Example:**
+
 ```bash
 # Check specific error
 docker logs {container_name} | grep -A 5 "Fatal error"
@@ -469,11 +493,13 @@ docker logs -f {container_name}
 ### Issue: Slow Response Time
 
 **Symptoms:**
+
 - Pages load slowly (> 2 seconds)
 - High latency in monitoring
 - User complaints about performance
 
 **Diagnosis:**
+
 ```bash
 # Test response time
 curl -w "@curl-format.txt" -o /dev/null -s https://{domain}
@@ -495,7 +521,7 @@ docker exec {container_name} {profiling_command}
 **Common Causes & Solutions:**
 
 | Cause | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Slow database queries | Add indexes, optimize queries |
 | No caching | Enable Redis/Memcached caching |
 | Large payloads | Compress responses, paginate results |
@@ -503,6 +529,7 @@ docker exec {container_name} {profiling_command}
 | Network latency | Use CDN, optimize assets |
 
 **Solution Example:**
+
 ```bash
 # Enable query caching
 mysql -e "SET GLOBAL query_cache_size = 67108864;"
@@ -763,6 +790,7 @@ docker compose restart
 ### Monitoring Alerts
 
 Set up alerts for:
+
 - High CPU/Memory/Disk usage
 - Service downtime
 - High error rates

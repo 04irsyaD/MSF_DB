@@ -10,10 +10,10 @@ Pastikan semua tools ini sudah terinstall sebelum mulai:
 
 | Tool | Versi Min | Cara Install | Cek |
 |------|-----------|--------------|-----|
-| Docker Desktop | 4.x | https://www.docker.com/products/docker-desktop | `docker --version` |
-| Node.js | 20 LTS | https://nodejs.org | `node --version` |
-| Python | 3.11+ | https://www.python.org | `python --version` |
-| Git | 2.x | https://git-scm.com | `git --version` |
+| Docker Desktop | 4.x | <https://www.docker.com/products/docker-desktop> | `docker --version` |
+| Node.js | 20 LTS | <https://nodejs.org> | `node --version` |
+| Python | 3.11+ | <https://www.python.org> | `python --version` |
+| Git | 2.x | <https://git-scm.com> | `git --version` |
 
 **Opsional tapi direkomendasikan:**
 
@@ -21,7 +21,7 @@ Pastikan semua tools ini sudah terinstall sebelum mulai:
 |------|--------|---------|
 | `uv` | Python package manager (lebih cepat dari pip) | `pip install uv` |
 | `pnpm` | Node package manager (lebih cepat dari npm) | `npm install -g pnpm` |
-| Ollama (host) | Jalankan Ollama langsung di host (tanpa Docker) | https://ollama.ai |
+| Ollama (host) | Jalankan Ollama langsung di host (tanpa Docker) | <https://ollama.ai> |
 
 ---
 
@@ -49,11 +49,13 @@ Edit `.env` — minimal ganti:
 > Butuh storage ~2GB untuk llama3.2
 
 **Opsi A — Ollama sudah terinstall di host:**
+
 ```bash
 ollama pull llama3.2
 ```
 
 **Opsi B — Pakai Docker (setelah docker-compose up):**
+
 ```bash
 docker exec -it msf-ollama ollama pull llama3.2
 ```
@@ -65,11 +67,13 @@ docker-compose up -d
 ```
 
 Cek semua service running:
+
 ```bash
 docker-compose ps
 ```
 
 Expected output:
+
 ```
 NAME            STATUS          PORTS
 msf-ollama      Up (healthy)    0.0.0.0:11434->11434/tcp
@@ -138,11 +142,11 @@ npm run dev
 
 | Service | URL | Keterangan |
 |---------|-----|------------|
-| **UI** | http://localhost:3000 | Aplikasi utama |
-| **API** | http://localhost:8000 | Backend REST API |
-| **Swagger** | http://localhost:8000/docs | API documentation interaktif |
-| **ReDoc** | http://localhost:8000/redoc | API documentation alternatif |
-| **Ollama** | http://localhost:11434 | Ollama API |
+| **UI** | <http://localhost:3000> | Aplikasi utama |
+| **API** | <http://localhost:8000> | Backend REST API |
+| **Swagger** | <http://localhost:8000/docs> | API documentation interaktif |
+| **ReDoc** | <http://localhost:8000/redoc> | API documentation alternatif |
+| **Ollama** | <http://localhost:11434> | Ollama API |
 | **PostgreSQL** | localhost:5432 | DB untuk testing |
 
 ---
@@ -333,6 +337,7 @@ docker logs msf-postgres
 ### Frontend tidak bisa connect ke backend
 
 Pastikan `NEXT_PUBLIC_API_URL` sudah benar di `.env` atau `.env.local`:
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```

@@ -33,7 +33,7 @@
 ## Shared Infrastructure
 
 | Component | Location | Used By |
-|-----------|----------|---------|
+| ----------- | ---------- | --------- |
 | `{Middleware}` | `{path}` | `{daftar modul}` |
 | `{Helper}` | `{path}` | `{daftar modul}` |
 | `{BaseClass}` | `{path}` | `{daftar modul}` |

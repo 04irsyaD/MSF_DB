@@ -19,21 +19,21 @@ docker compose build --no-cache
 docker compose up --exit-code-from app
 ```
 
-2) Jika Anda menggunakan docker-compose (v1):
+1) Jika Anda menggunakan docker-compose (v1):
 
 ```powershell
 docker-compose build --no-cache
 docker-compose up --abort-on-container-exit
 ```
 
-3) Menjalankan script tertentu tanpa rebuild (override command):
+1) Menjalankan script tertentu tanpa rebuild (override command):
 
 ```powershell
 # contoh: jalankan ai_writer.py
 docker compose run --rm app python summary/scripts/ai_writer.py
 ```
 
-4) Menjalankan tanpa Docker (native Python):
+1) Menjalankan tanpa Docker (native Python):
 
 ```powershell
 # install dependencies

@@ -31,28 +31,33 @@ Laravel Scheduler memungkinkan definisi cron jobs di dalam aplikasi (file `app/C
 ### Setup
 
 **1. Check if scheduler is configured:**
+
 ```bash
 cd {project_path}
 php artisan schedule:list
 ```
 
 **Expected output:**
+
 ```
 0 0 * * *  App\Console\Commands\CleanupOldRecords ..........  Next Due In 5 hours
 0 */6 * * *  App\Console\Commands\GenerateReports ..........  Next Due In 2 hours
 ```
 
 **2. Add single cronjob entry:**
+
 ```bash
 crontab -e
 ```
 
 **Add:**
+
 ```bash
 * * * * * cd {project_path} && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 **3. Verify cronjob:**
+
 ```bash
 crontab -l
 ```
@@ -167,6 +172,7 @@ console.log('Scheduler started');
 ```
 
 **Start scheduler:**
+
 ```bash
 # Development
 node src/scheduler/index.js
@@ -256,6 +262,7 @@ func Start() {
 ```
 
 **Start scheduler in main:**
+
 ```go
 package main
 
@@ -279,16 +286,19 @@ func main() {
 ### Laravel
 
 **List scheduled tasks:**
+
 ```bash
 php artisan schedule:list
 ```
 
 **Test scheduler manually:**
+
 ```bash
 php artisan schedule:run
 ```
 
 **Check scheduler logs:**
+
 ```bash
 tail -f storage/logs/laravel.log | grep -i schedule
 ```
@@ -296,6 +306,7 @@ tail -f storage/logs/laravel.log | grep -i schedule
 ### Node.js
 
 **Check PM2 status:**
+
 ```bash
 pm2 status
 pm2 logs scheduler
@@ -304,6 +315,7 @@ pm2 logs scheduler
 ### Go
 
 **Check application logs:**
+
 ```bash
 journalctl -u your-app -f | grep -i scheduler
 ```
@@ -317,22 +329,27 @@ journalctl -u your-app -f | grep -i scheduler
 **Symptom:** Scheduled tasks tidak dijalankan
 
 **Solutions:**
+
 1. Check cronjob exists:
+
    ```bash
    crontab -l
    ```
 
 2. Test manually:
+
    ```bash
    php artisan schedule:run
    ```
 
 3. Check logs:
+
    ```bash
    tail -f storage/logs/laravel.log
    ```
 
 4. Check timezone:
+
    ```php
    // config/app.php
    'timezone' => 'Asia/Jakarta',
@@ -343,17 +360,21 @@ journalctl -u your-app -f | grep -i scheduler
 **Symptom:** PM2 shows scheduler status "errored"
 
 **Solutions:**
+
 1. Check logs:
+
    ```bash
    pm2 logs scheduler --lines 100
    ```
 
 2. Restart scheduler:
+
    ```bash
    pm2 restart scheduler
    ```
 
 3. Check memory limit:
+
    ```bash
    pm2 show scheduler
    ```
@@ -363,9 +384,11 @@ journalctl -u your-app -f | grep -i scheduler
 **Symptom:** No scheduler logs in application
 
 **Solutions:**
+
 1. Check if `scheduler.Start()` is called in main
 2. Check application logs for errors
 3. Verify gocron package is installed:
+
    ```bash
    go list -m github.com/go-co-op/gocron
    ```
@@ -418,11 +441,13 @@ fi
 ```
 
 **Run (auto-setup mode):**
+
 ```bash
 bash {project_path}/docs/operations/scripts/setup-scheduler.sh
 ```
 
 **Run (manual-setup mode):**
+
 ```bash
 # Copy commands dari script dan jalankan manual
 ```

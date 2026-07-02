@@ -11,7 +11,7 @@
 
 **Database:** {Nama database}  
 **Type:** {MySQL / PostgreSQL / MongoDB / SQLite}  
-**Backup Schedule:** {cron expression, contoh: 0 2 * * *} (daily at 2 AM)  
+**Backup Schedule:** {cron expression, contoh: 0 2 ** *} (daily at 2 AM)  
 **Retention:** {jumlah hari, contoh: 30 days}  
 **Storage:** {Local / S3 / MinIO / FTP}
 
@@ -25,6 +25,7 @@
 - `gzip` atau compression tool sudah terinstall
 
 **Check prerequisites:**
+
 ```bash
 # Check database connection (credentials from .env)
 source {project_path}/.env && mysql -u$DB_USERNAME -p$DB_PASSWORD -e "SHOW DATABASES;"
@@ -95,6 +96,7 @@ echo "Backup completed at $(date)"
 ```
 
 **Make executable:**
+
 ```bash
 chmod +x {project_path}/docs/operations/scripts/backup-database.sh
 ```
@@ -117,6 +119,7 @@ bash {project_path}/docs/operations/scripts/backup-database.sh
 ```
 
 **Expected output:**
+
 ```
 Starting backup: {database_name} at {date}
 Backup successful: {backup_directory}/{database_name}-{date}.sql.gz
@@ -134,6 +137,7 @@ crontab -e
 ```
 
 **Add entry:**
+
 ```bash
 0 2 * * * {project_path}/docs/operations/scripts/backup-database.sh >> {project_path}/storage/logs/backup.log 2>&1
 ```
@@ -149,11 +153,13 @@ crontab -l
 ## Verification
 
 **Check backup files:**
+
 ```bash
 ls -lh {backup_directory}/*.sql.gz
 ```
 
 **Test restore (IMPORTANT - test on separate database):**
+
 ```bash
 # Create test database (credentials from .env)
 source {project_path}/.env && mysql -u$DB_USERNAME -p$DB_PASSWORD -e "CREATE DATABASE ${DB_DATABASE}_test;"
@@ -169,6 +175,7 @@ mysql -u$DB_USERNAME -p$DB_PASSWORD -e "DROP DATABASE ${DB_DATABASE}_test;"
 ```
 
 **Check backup logs:**
+
 ```bash
 tail -f {project_path}/storage/logs/backup.log
 ```
@@ -180,6 +187,7 @@ tail -f {project_path}/storage/logs/backup.log
 ### AWS S3
 
 **Install AWS CLI:**
+
 ```bash
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
@@ -187,6 +195,7 @@ sudo ./aws/install
 ```
 
 **Configure AWS credentials:**
+
 ```bash
 aws configure
 # AWS Access Key ID: See .env: AWS_ACCESS_KEY_ID
@@ -196,6 +205,7 @@ aws configure
 ```
 
 **Add to backup script:**
+
 ```bash
 # After local backup, upload to S3
 aws s3 cp $BACKUP_FILE s3://{bucket_name}/backups/
@@ -215,6 +225,7 @@ done
 ### MinIO
 
 **Install MinIO Client:**
+
 ```bash
 wget https://dl.min.io/client/mc/release/linux-amd64/mc
 chmod +x mc
@@ -222,12 +233,14 @@ sudo mv mc /usr/local/bin/
 ```
 
 **Configure MinIO:**
+
 ```bash
 # Credentials from .env: MINIO_ACCESS_KEY, MINIO_SECRET_KEY
 mc alias set myminio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
 ```
 
 **Add to backup script:**
+
 ```bash
 # Upload to MinIO
 mc cp $BACKUP_FILE myminio/{bucket_name}/backups/
@@ -247,17 +260,21 @@ done
 **Symptom:** Backup file created but size is 0
 
 **Solutions:**
+
 1. Check database credentials (from .env):
+
    ```bash
    source {project_path}/.env && mysql -u$DB_USERNAME -p$DB_PASSWORD -h$DB_HOST -e "SHOW DATABASES;"
    ```
 
 2. Check disk space:
+
    ```bash
    df -h
    ```
 
 3. Check mysqldump errors (credentials from .env):
+
    ```bash
    source {project_path}/.env && mysqldump -u$DB_USERNAME -p$DB_PASSWORD $DB_DATABASE > test.sql 2> error.log
    cat error.log
@@ -268,6 +285,7 @@ done
 **Symptom:** Script fails with "Permission denied"
 
 **Solution:**
+
 ```bash
 # Check script permissions
 ls -la {project_path}/docs/operations/scripts/backup-database.sh
@@ -287,22 +305,27 @@ chmod 700 {backup_directory}
 **Symptom:** Backup not created at scheduled time
 
 **Solutions:**
+
 1. Check cron is running:
+
    ```bash
    sudo systemctl status cron
    ```
 
 2. Check crontab:
+
    ```bash
    crontab -l
    ```
 
 3. Check cron logs:
+
    ```bash
    grep CRON /var/log/syslog | grep backup
    ```
 
 4. Test manually:
+
    ```bash
    bash {project_path}/docs/operations/scripts/backup-database.sh
    ```
@@ -312,6 +335,7 @@ chmod 700 {backup_directory}
 **Symptom:** Backup directory growing too large
 
 **Solution:**
+
 ```bash
 # Check retention logic in script
 nano {project_path}/docs/operations/scripts/backup-database.sh
@@ -389,11 +413,13 @@ echo "Backup setup completed"
 ```
 
 **Run (auto-setup mode):**
+
 ```bash
 bash {project_path}/docs/operations/scripts/setup-backup.sh
 ```
 
 **Run (manual-setup mode):**
+
 ```bash
 # Copy commands dari script dan jalankan manual
 ```

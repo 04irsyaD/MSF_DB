@@ -15,7 +15,7 @@
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ------- | ----------- |
 | Runtime | `{Go / PHP / Node.js / ...}` |
 | Framework | `{Fiber / Laravel / Express / ...}` |
 | Database | `{PostgreSQL / MySQL / ...}` |

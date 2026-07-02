@@ -11,18 +11,18 @@ Commit: {hash}
 
 {deskripsi detail apa yang diubah — fitur, fix, refactor, dll. Jelaskan dengan kalimat jelas dan ringkas.}
 
-2) Tujuan dan Manfaat
+1) Tujuan dan Manfaat
 
 - {tujuan_1}
 - {tujuan_2}
 - {manfaat_1}
 
-3) Daftar File yang Diubah
+1) Daftar File yang Diubah
 
 - {path/file_1}
 - {path/file_2}
 
-4) Snapshot Kode (Before → After)
+1) Snapshot Kode (Before → After)
 
 > **SECURITY:** DILARANG menyertakan .env values, credential, password, token, atau secret di code snapshot. Mask semua sensitive value: `DB_PASSWORD=***REDACTED***`.
 
@@ -31,11 +31,13 @@ Commit: {hash}
 File: {path/file}
 
 Before:
+
 ```
 {kode sebelum perubahan — dari git history atau deskripsi}
 ```
 
 After:
+
 ```
 {kode setelah perubahan}
 ```
@@ -45,16 +47,18 @@ After:
 File: {path/file}
 
 Before:
+
 ```
 {kode sebelum}
 ```
 
 After:
+
 ```
 {kode setelah}
 ```
 
-5) Verifikasi UAT (User Acceptance Test)
+1) Verifikasi UAT (User Acceptance Test)
 
 | # | Tes | Hasil | Detail |
 |---|-----|-------|--------|

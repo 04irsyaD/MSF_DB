@@ -7,7 +7,7 @@
 
 ---
 
-##  Project Type Declaration
+## Project Type Declaration
 
 | Item | Value |
 |------|-------|
@@ -32,7 +32,7 @@
 ### {Nama Modul 1}
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Repo | `{backend / frontend / both}` |
 | Route Prefix | `/{prefix}` (Backend: API route, Frontend: page route) |
 | Middleware | `{auth, role:xxx}` |
@@ -47,11 +47,12 @@
 **Frontend (jika ada):**
 
 | Key Pages | Key Components |
-|-----------|---------------|
+| ----------- | --------------- |
 | `{halaman_index}` — `{fungsi}` | `{NamaKomponen}` |
 | `{halaman_form}` — `{fungsi}` | `{NamaKomponen}` |
 
 **External Dependencies:**
+
 - `{API apa, package apa}`
 
 ---
@@ -82,7 +83,7 @@ Modul C (FE) → Modul A (BE) — lintas repo
 ## 4. Build Order
 
 | Phase | Modul | Repo | Urutan | Alasan |
-|-------|-------|------|--------|--------|
+| ------- | ------- | ------ | -------- | -------- |
 | 1 | `{auth, core}` | `{both}` | Paling dasar | Semua modul depend ke ini |
 | 2 | `{modul_a}` | `{backend}` | Setelah core | |
 | 3 | `{modul_a}` | `{frontend}` | Paralel dgn BE | FE bisa jalan paralel setelah API contract fix |

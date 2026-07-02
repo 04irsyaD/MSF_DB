@@ -8,7 +8,7 @@
 ---
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | State | {Planned / In Progress / Beta / Production} |
 | Route Prefix | `/{prefix}` |
 | Middleware | `{auth}, {role:xxx}` |

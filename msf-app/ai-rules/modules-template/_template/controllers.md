@@ -21,7 +21,7 @@
 **Path:** `{app/Http/Controllers/Modules/NamaModul/NamaController.php}`
 
 | Method | Request Class | Purpose |
-|--------|-------------|---------|
+| -------- | ------------- | --------- |
 | `index()` | — | Menampilkan daftar data dengan DataTables |
 | `create()` | — | Menampilkan form create |
 | `store()` | `{StoreRequest}` | Menyimpan data baru |

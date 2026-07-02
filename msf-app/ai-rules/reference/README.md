@@ -5,9 +5,9 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  CRITICAL: Read-Only Primary Sources
+### CRITICAL: Read-Only Primary Sources
 
 **DILARANG KERAS mengubah file di folder ini.** File di sini adalah artifact asli dari user — primary source of truth untuk development. AI hanya boleh **membaca**, bukan mengubah.
 
@@ -16,7 +16,7 @@ Jika ada data/struktur yang perlu di-update, minta user untuk memberikan file ba
 ### Bedanya dengan folder lain
 
 | Aspek | `temp/` | `reference/` |
-|-------|---------|-------------|
+| ------- | --------- | ------------- |
 | Sumber | AI (hasil analisis sendiri) | User / stakeholder |
 | Sifat | Sementara, dibuang setelah task | Permanen, acuan development |
 | Contoh isi | Draft rencana, log debug | DB Excel user, SOP, form manual |
@@ -29,7 +29,7 @@ Jika ada data/struktur yang perlu di-update, minta user untuk memberikan file ba
 ## What Goes Here
 
 | Kategori | Contoh File | Untuk Apa |
-|----------|-----------|----------|
+| ---------- | ----------- | ---------- |
 | **Data Source** | `data-pegawai.xlsx`, `daftar-wajib-pajak.csv` | Acuan struktur database & migrasi data |
 | **SOP / Aturan Bisnis** | `sop-pengadaan-2025.pdf`, `alur-persetujuan.docx` | Acuan workflow & business logic |
 | **Form Manual** | `form-pendaftaran.pdf`, `surat-keputusan.docx` | Acuan desain form input & output |
@@ -69,12 +69,14 @@ reference/
 **WAJIB ada jika user menyediakan HTML template** (lihat `planning/PROJECT_BRIEF.md` section "UI/UX Template & Design System").
 
 **Isi folder ini:**
+
 - HTML template lengkap dari vendor (Metronic, AdminLTE, Stisla, dll)
 - Dokumentasi template (README.md yang menjelaskan struktur, komponen available, cara customize)
 - Source files (HTML, CSS, JS, assets)
 - Contoh implementasi komponen (jika ada)
 
 **Aturan AI saat menggunakan template:**
+
 1. **BACA** `template/{nama}/README.md` sebelum mulai membuat UI
 2. **GUNAKAN** komponen yang sudah ada di template (jangan buat ulang)
 3. **IKUTI** struktur HTML dan naming convention dari template
@@ -98,6 +100,7 @@ reference/
 **AI wajib mencatat jejak:** dari file reference mana → jadi fitur/modul apa. Ini penting untuk traceability.
 
 Contoh:
+
 - `data-sources/data-pegawai.xlsx` → `modules/kepegawaian/database.md` (struktur tabel)
 - `sop-dan-aturan/sop-pengadaan.pdf` → `modules/pengadaan/services.md` (business logic)
 - `form-dan-dokumen/form-pendaftaran.pdf` → `modules/pendaftaran/views.md` (desain form)

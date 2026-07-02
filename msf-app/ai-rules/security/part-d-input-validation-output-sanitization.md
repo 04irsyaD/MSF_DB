@@ -7,7 +7,7 @@
 ### Input
 
 | Rule | Detail |
-|------|--------|
+| ------ | -------- |
 | Validasi input | Semua input dari user WAJIB divalidasi (FormRequest, Zod, Joi) |
 | Whitelist approach | Definisikan apa yang BOLEH, bukan apa yang TIDAK BOLEH |
 | File upload | Max size, allowed extensions (`jpg,png,pdf` — bukan blacklist), scan MIME type |
@@ -27,7 +27,7 @@
 ### Output
 
 | Rule | Detail |
-|------|--------|
+| ------ | -------- |
 | XSS prevention | Escape output (`{{ }}` di Blade, `v-text` di Vue, jangan `v-html` tanpa sanitasi) |
 | JSON response | Jangan expose stack trace di production (`APP_DEBUG=false`) |
 | Error message | Generic di production ("Server error"), detail di development |

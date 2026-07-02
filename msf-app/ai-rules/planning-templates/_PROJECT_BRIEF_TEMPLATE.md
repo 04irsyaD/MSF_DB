@@ -3,6 +3,7 @@
 > **IMMUTABLE -- AI TIDAK BOLEH mengubah file ini. Baca sebagai panduan. Untuk output, lihat mapping di ai-rules/README.md.**
 
 > **Status:** OPTIONAL — Tiga cara pakai:
+>
 > - **Mode A (Manual):** Copy & isi file ini → prompt AI: "baca PROJECT_BRIEF.md dan isi planning docs"
 > - **Mode B (Interaktif):** Biarkan file ini kosong/tidak ada → prompt AI bebas. AI akan mendeteksi tidak ada brief lalu bertanya interaktif, menulis file ini, lalu memproses planning.
 > - **Mode C (Hybrid):** Isi section yang kamu tahu saja, kosongkan sisanya — AI akan bertanya untuk mengisi kekosongan.
@@ -30,7 +31,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 ### Target Users ⭐
 
 | Role | Deskripsi | Kebutuhan Utama |
-|------|----------|----------------|
+| ------ | ---------- | ---------------- |
 | `{role_1}` | `{deskripsi}` | `{kebutuhan — apa yang mereka butuhkan dari sistem ini}` |
 | `{role_2}` | `{deskripsi}` | `{kebutuhan}` |
 
@@ -39,7 +40,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 ## 2. Project Type & Tech Stack ⭐
 
 | Item | Pilih |
-|------|-------|
+| ------ | ------- |
 | Project Type | `{Monolith / Fullstack}` |
 | Backend | `{Go-Fiber / Laravel / Node.js-Express / NestJS / Python-FastAPI / lainnya}` |
 | Framework Version | `{versi}` |
@@ -75,7 +76,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 ### Jika YA — Detail Template HTML
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Nama Template | `{contoh: Metronic 8, AdminLTE 3, Stisla}` |
 | Versi | `{versi template}` |
 | Lokasi Template | `{path ke folder template — contoh: dev-docs/reference/template/metronic/}` |
@@ -84,6 +85,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 | Komponen yang Akan Dipakai | `{contoh: Dashboard, Tables, Forms, Charts, Auth pages}` |
 
 **Aturan untuk AI:**
+
 - **WAJIB** menggunakan struktur HTML, CSS, dan komponen dari template
 - **WAJIB** mengikuti naming convention dan class names dari template
 - **DILARANG** membuat UI components sendiri yang sudah ada di template
@@ -93,13 +95,14 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 ### Jika TIDAK — Framework UI yang Harus Dipakai
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Framework UI | `{Bootstrap 5 / Tailwind CSS / Material UI / Ant Design / Bulma / Foundation}` |
 | Versi | `{versi framework}` |
 | Theme/Style Guide | `{jika ada — contoh: "Gunakan Bootstrap dengan style default"}` |
 | Custom Components | `{jika perlu — contoh: "Buat custom navbar dan sidebar"}` |
 
 **Aturan untuk AI:**
+
 - **WAJIB** menggunakan framework UI yang dipilih
 - **WAJIB** mengikuti best practices framework (contoh: Bootstrap grid system, Tailwind utility classes)
 - **DILARANG** membuat CSS framework custom dari nol
@@ -144,7 +147,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 ## 5. User Roles & Permissions ⭐
 
 | Role | Deskripsi | Level Akses | Module Scope |
-|------|----------|------------|-------------|
+| ------ | ---------- | ------------ | ------------- |
 | `{role_1}` | `{deskripsi}` | `{Full / Admin / Write / Read}` | `{semua modul / modul tertentu}` |
 | `{role_2}` | `{deskripsi}` | | |
 | `{role_3}` | `{deskripsi}` | | |
@@ -194,7 +197,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 
 `{penjelasan singkat}`
 
-### Contoh arsitektur (jika membantu):
+### Contoh arsitektur (jika membantu)
 
 ```text
 {Layer 1} → {Layer 2} → {Layer 3} → {Layer 4}
@@ -254,7 +257,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 **{Bagaimana kita tahu project ini sukses? Gunakan metrik yang terukur.}**
 
 | Metric | Target | Cara Ukur |
-|--------|--------|----------|
+| -------- | -------- | ---------- |
 | `{metrik_1}` | `{target — contoh: "Provider lock-in = 0%"}` | `{bagaimana diverifikasi}` |
 | `{metrik_2}` | `{target}` | |
 | `{metrik_3}` | `{target}` | |
@@ -274,7 +277,7 @@ Contoh: "EAG adalah platform Virtual Engineering Team yang memungkinkan satu dev
 ## 14. Timeline & Constraints
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Target rilis MVP | `{YYYY-MM-DD — opsional}` |
 | Jumlah user (estimasi) | `{angka}` |
 | Batasan budget | `{opsional}` |

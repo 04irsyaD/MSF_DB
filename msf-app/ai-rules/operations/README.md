@@ -5,13 +5,14 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  CRITICAL: Operations Documentation is Mandatory
+### CRITICAL: Operations Documentation is Mandatory
 
 Setiap kali AI membuat fitur yang **butuh setup di server**, AI **WAJIB** membuat dokumentasi operations yang lengkap.
 
 **Fitur yang WAJIB punya dokumentasi operations:**
+
 - Queue worker (Redis, RabbitMQ, SQS)
 - Scheduler / Cronjob (daily cleanup, report generation, dll)
 - Supervisor / Process manager
@@ -30,6 +31,7 @@ Setiap kali AI membuat fitur yang **butuh setup di server**, AI **WAJIB** membua
 ### Kapan Dokumentasi Dibuat?
 
 **AI WAJIB membuat dokumentasi operations saat:**
+
 1. Membuat fitur baru yang butuh background process
 2. Menambahkan scheduler / cronjob
 3. Setup queue worker
@@ -40,12 +42,14 @@ Setiap kali AI membuat fitur yang **butuh setup di server**, AI **WAJIB** membua
 ### Dimana Dokumentasi Disimpan?
 
 > **PERINGATAN LOKASI — BACA SEBELUM MEMBUAT DOKUMENTASI:**
+>
 > - Folder operations `{apps|backend|frontend}/docs/operations/` adalah **PENGECUALIAN KHUSUS** — HANYA untuk config server (supervisor, systemd, cronjob) yang harus ship bersama kode.
 > - **SECURITY BOUNDARY:** File di `{apps}/docs/operations/` berada DI DALAM git repo dan WILL di-push ke GitHub. **DILARANG menulis credential aktual** (password, token, API key, SSH key, database username, connection string, server IP). Gunakan referensi ke `.env` atau `prod-docs/`.
 > - File ini (`ai-rules/operations/README.md`) dan template di `_templates/` berada di **IMMUTABLE `ai-rules/`** — AI HANYA MEMBACA.
 > - `dev-docs/`, `planning/`, `AGENTS.md` **TETAP di PROJECT ROOT sejajar dengan `apps/`** — JANGAN PERNAH dipindahkan ke dalam `apps/`.
 
 **Struktur folder (DI DALAM folder kode — HANYA untuk operations output):**
+
 ```
 {apps|backend|frontend}/
 ├── docs/
@@ -82,6 +86,7 @@ Setiap dokumentasi operations **WAJIB** include:
 **Default:** Manual-setup (AI buat docs, user yang jalankan)
 
 **Cara specify:**
+
 - Di `PROJECT_BRIEF.md` section "Deployment & Operations"
 - Atau di `dev-docs/deployment/ssh-access.md` (field `AUTO_SETUP_OPERATIONS: true/false`)
 
@@ -105,6 +110,7 @@ stdout_logfile=/path/to/project/storage/logs/queue.log
 ```
 
 **Setup:**
+
 ```bash
 sudo cp docs/operations/supervisor/queue.conf /etc/supervisor/conf.d/
 sudo supervisorctl reread
@@ -113,6 +119,7 @@ sudo supervisorctl start {project}-queue:*
 ```
 
 **Verifikasi:**
+
 ```bash
 sudo supervisorctl status {project}-queue:*
 ```
@@ -131,6 +138,7 @@ crontab -e
 ```
 
 **Verifikasi:**
+
 ```bash
 crontab -l
 ```
@@ -157,6 +165,7 @@ WantedBy=multi-user.target
 ```
 
 **Setup:**
+
 ```bash
 sudo cp docs/operations/systemd/worker.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -165,6 +174,7 @@ sudo systemctl start {project}-worker
 ```
 
 **Verifikasi:**
+
 ```bash
 sudo systemctl status {project}-worker
 ```
@@ -197,6 +207,7 @@ echo "Backup completed: $DB_NAME-$DATE.sql.gz"
 ```
 
 **Setup cronjob:**
+
 ```bash
 0 2 * * * /path/to/project/docs/operations/scripts/backup-database.sh
 ```
@@ -221,6 +232,7 @@ echo "Backup completed: $DB_NAME-$DATE.sql.gz"
 ## Template Files
 
 Lihat folder `_templates/` untuk template dokumentasi:
+
 - `supervisor.md` — template dokumentasi supervisor
 - `cronjob.md` — template dokumentasi cronjob
 - `scheduler.md` — template dokumentasi scheduler

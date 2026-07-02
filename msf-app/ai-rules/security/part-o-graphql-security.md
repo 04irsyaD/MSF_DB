@@ -7,12 +7,14 @@
 ## GraphQL-Specific Security
 
 **Vulnerabilities:**
+
 1. **Introspection Query:** Exposes schema (disable di production)
 2. **Deep Nesting:** DoS via deeply nested queries
 3. **Batch Attacks:** Multiple queries dalam 1 request
 4. **Field-Level Authorization:** Bypass via nested fields
 
 **Mitigations:**
+
 ```javascript
 // 1. Disable introspection di production
 const server = new ApolloServer({

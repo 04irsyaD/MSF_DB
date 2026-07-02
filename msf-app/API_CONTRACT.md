@@ -1,7 +1,7 @@
 # MSF-APP — API Contract Reference
 
 Dokumentasi lengkap semua endpoint API backend.
-Versi Swagger interaktif tersedia di: http://localhost:8000/docs
+Versi Swagger interaktif tersedia di: <http://localhost:8000/docs>
 
 ---
 
@@ -21,6 +21,7 @@ Docker:      http://backend:8000  (internal)
 Generate dokumentasi dari SQL DDL yang di-paste langsung.
 
 **Request Body:**
+
 ```json
 {
   "sql_content": "CREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  email VARCHAR(255) NOT NULL\n);",
@@ -37,6 +38,7 @@ Generate dokumentasi dari SQL DDL yang di-paste langsung.
 ```
 
 **Response (200):**
+
 ```json
 {
   "job_id": "01234567-89ab-cdef-0123-456789abcdef",
@@ -53,6 +55,7 @@ Generate dokumentasi dari SQL DDL yang di-paste langsung.
 Generate dokumentasi dengan koneksi langsung ke database.
 
 **Request Body:**
+
 ```json
 {
   "connection": {
@@ -77,6 +80,7 @@ Generate dokumentasi dengan koneksi langsung ke database.
 ```
 
 **Atau dengan connection string:**
+
 ```json
 {
   "connection": {
@@ -96,6 +100,7 @@ Generate dokumentasi dengan koneksi langsung ke database.
 Cek status job yang sedang berjalan (untuk polling).
 
 **Response (200):**
+
 ```json
 {
   "job_id": "01234567-89ab-cdef-0123-456789abcdef",
@@ -114,6 +119,7 @@ Cek status job yang sedang berjalan (untuk polling).
 ```
 
 **Saat status = "done":**
+
 ```json
 {
   "status": "done",
@@ -130,6 +136,7 @@ Cek status job yang sedang berjalan (untuk polling).
 Download file hasil dokumentasi (DOCX/PDF).
 
 **Response:** File binary dengan header:
+
 ```
 Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
 Content-Disposition: attachment; filename="Dokumentasi_DB_Produksi.docx"
@@ -144,6 +151,7 @@ Content-Disposition: attachment; filename="Dokumentasi_DB_Produksi.docx"
 Test apakah koneksi ke database berhasil.
 
 **Request Body:**
+
 ```json
 {
   "engine": "postgresql",
@@ -156,6 +164,7 @@ Test apakah koneksi ke database berhasil.
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -175,6 +184,7 @@ Ambil metadata dari database (list tabel, kolom, FK, dll).
 **Request Body:** sama seperti `/test-connection` + optional filters
 
 **Response (200):**
+
 ```json
 {
   "engine": "postgresql",
@@ -216,6 +226,7 @@ Ambil metadata dari database (list tabel, kolom, FK, dll).
 List model yang tersedia untuk provider tertentu.
 
 **Response (200):**
+
 ```json
 {
   "provider": "ollama",
@@ -242,6 +253,7 @@ List model yang tersedia untuk provider tertentu.
 List semua provider yang dikonfigurasi dan status ketersediaannya.
 
 **Response (200):**
+
 ```json
 [
   {
@@ -279,6 +291,7 @@ List semua shortcut SQL dengan filter opsional.
 | `offset` | int | 0 | Pagination |
 
 **Response (200):**
+
 ```json
 {
   "total": 25,
@@ -307,6 +320,7 @@ List semua shortcut SQL dengan filter opsional.
 Health check semua service.
 
 **Response (200):**
+
 ```json
 {
   "status": "healthy",
@@ -320,6 +334,7 @@ Health check semua service.
 ```
 
 **Response (503) jika ada service down:**
+
 ```json
 {
   "status": "degraded",

@@ -5,20 +5,21 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Ini adalah halaman onboarding untuk AI agent baru. Setelah menganalisis repository, AI WAJIB mengBUAT section di bawah ini di FILE OUTPUT (bukan di template ini):
+
 1. **Best reading order** — urutan baca file dokumentasi agar agent baru paham project secepat mungkin
 2. **Repository quick facts** — fakta penting dalam format tabel
 3. **High-priority current work** — apa yang sedang dikerjakan sekarang
 4. **Safety notes** — hal-hal yang harus dihindari
 
-###  Onboarding Mode: Project Baru vs Adopsi
+### Onboarding Mode: Project Baru vs Adopsi
 
 **Lihat apakah `planning/`, `revamp/`, dan `planning/PROJECT_BRIEF.md` ada di root project.**
 
 | Kondisi | Mode | Yang Dilakukan AI |
-|---------|------|------------------|
+| --------- | ------ | ------------------ |
 | `planning/` ada tapi kosong, tidak ada `PROJECT_BRIEF.md` | **New (Interaktif)** | AI WAJIB bertanya ke user (lihat Mode B di bawah) |
 | `planning/PROJECT_BRIEF.md` sudah terisi | **New via Brief** | Baca brief → isi planning + dev-docs/ai → mulai coding |
 | `planning/` terisi + `revamp/` ada | **Revamp** | Baca planning + revamp docs dulu, baru mulai coding |
@@ -77,6 +78,7 @@ Jika project ini adalah project existing yang baru di-adopsi ke vibe coding (tid
 Setelah onboarding selesai, AI baru boleh mulai coding task.
 
 **When to update:**
+
 - Pertama kali setup project (new atau adopsi)
 - Saat ada modul besar baru
 - Saat ada perubahan arsitektur fundamental
@@ -87,7 +89,7 @@ Setelah onboarding selesai, AI baru boleh mulai coding task.
 ## Quick Facts
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Repository | `{nama_repository}` |
 | Project Type | `{Monolith / Fullstack}` |
 | Git Location | `{apps/ | backend/ + frontend/}` |

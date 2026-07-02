@@ -18,7 +18,7 @@ Server ini menggunakan **automated daily backup** untuk database dan application
 ## Backup Strategy
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Frequency | {daily/hourly/real-time} |
 | Retention | {X days/weeks/months} |
 | Storage | {local/remote/S3/GCS} |
@@ -31,7 +31,7 @@ Server ini menggunakan **automated daily backup** untuk database dan application
 ## What Gets Backed Up
 
 | Component | Backup Method | Frequency | Retention |
-|-----------|---------------|-----------|-----------|
+| ----------- | --------------- | ----------- | ----------- |
 | Database | {mysqldump/pg_dump} | {daily} | {30 days} |
 | Application Code | {git/tar} | {daily} | {7 days} |
 | User Uploads | {tar/rsync} | {daily} | {30 days} |
@@ -325,9 +325,11 @@ sudo systemctl status nginx
 1. **Provision new server** with same specs
 2. **Install base software** (Docker, Nginx, etc.)
 3. **Restore from backup**
+
    ```bash
    rsync -avz user@backup-server:/backups/latest/ /opt/
    ```
+
 4. **Restore database** from latest backup
 5. **Update DNS** to point to new server (if needed)
 6. **Verify all services** are running
@@ -374,6 +376,7 @@ tail -f /var/log/backup.log
 {Jelaskan alerting untuk backup failures}
 
 Contoh:
+
 - Email alert if backup fails
 - Slack notification on backup completion
 - PagerDuty if backup missing for > 24 hours
@@ -383,7 +386,7 @@ Contoh:
 ## Backup Retention Policy
 
 | Backup Type | Retention | Storage |
-|-------------|-----------|---------|
+| ------------- | ----------- | --------- |
 | Daily Database | 30 days | Local + Remote |
 | Daily Application | 7 days | Local |
 | Weekly Full | 90 days | Remote |
@@ -439,6 +442,7 @@ chmod 600 {backup_directory}/*.tar.gz
 {Jelaskan bagaimana backup credentials/secrets dikelola}
 
 Contoh:
+
 - Database password di environment variable
 - Cloud storage credentials di ~/.aws/credentials (permission 600)
 - Encryption key di secure location, rotated yearly
@@ -452,6 +456,7 @@ Contoh:
 {Jelaskan disaster recovery drill yang dilakukan}
 
 Contoh:
+
 1. Restore full backup ke test server
 2. Verify all services running
 3. Test critical user flows

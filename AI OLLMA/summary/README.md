@@ -22,7 +22,7 @@ Quick start (assumes Python, PostgreSQL, and Ollama are installed):
 
 4. Make sure Ollama is running and llama3 model is available:
    ollama pull llama3
-   # Optionally test:
+   # Optionally test
    ollama run llama3
 
 5. Run the main script:

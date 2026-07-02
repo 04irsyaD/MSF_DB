@@ -5,7 +5,7 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Pindahkan issue dari `README.md` ke sini setelah fix stabil >1 bulan. Format ringkas — hanya yang penting untuk referensi masa depan.
 

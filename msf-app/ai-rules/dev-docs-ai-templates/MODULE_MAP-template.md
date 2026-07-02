@@ -5,11 +5,11 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Peta hubungan antara modul bisnis dan file kode aktual.
 
-###  CRITICAL: Dual-Repo Support
+### CRITICAL: Dual-Repo Support
 
 **Lihat deklarasi project type di `PROJECT_CONTEXT.md`.**
 
@@ -19,6 +19,7 @@
 Contoh fullstack: modul "Auth" bisa punya controller di backend (`backend/app/Controllers/Auth`) dan halaman login di frontend (`frontend/pages/login.vue`).
 
 **When to update:**
+
 - Saat modul baru dibuat
 - Saat struktur file modul berubah
 - Saat ada shared infrastructure baru
@@ -52,7 +53,7 @@ Contoh fullstack: modul "Auth" bisa punya controller di backend (`backend/app/Co
 ## Shared Infrastructure Map
 
 | Area | Path | Repo | Notes |
-|------|------|------|-------|
+| ------ | ------ | ------ | ------- |
 | `{Middleware}` | `{path}` | `{backend / apps}` | `{catatan}` |
 | `{Auth/Guard}` | `{path}` | `{backend / apps}` | `{catatan}` |
 | `{Helpers}` | `{path}` | `{backend / apps}` | `{catatan}` |

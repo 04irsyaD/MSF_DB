@@ -5,11 +5,12 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Setelah menganalisis codebase, BUAT semua section di bawah ini di FILE OUTPUT (bukan di template ini):. Gunakan format tabel untuk data terstruktur.
 
 **When to update:**
+
 - Pertama kali analisis project
 - Saat ada penambahan/penggantian teknologi
 - Saat ada restrukturisasi folder besar
@@ -22,6 +23,7 @@
 ## System Overview
 
 **Isi dengan 1-3 paragraf yang menjelaskan:**
+
 - Apa aplikasi ini
 - Siapa penggunanya
 - Tujuan bisnis/teknis utama
@@ -29,7 +31,7 @@
 
 ---
 
-##  Project Type Declaration
+## Project Type Declaration
 
 | Item | Value |
 |------|-------|
@@ -43,7 +45,7 @@
 ## Runtime Stack
 
 | Layer | Technology |
-|-------|-----------|
+| ------- | ----------- |
 | Backend | `{framework_bahasa}` |
 | Frontend | `{framework_ui}` |
 | Database Primary | `{db_utama}` |
@@ -63,7 +65,7 @@
 ### Template Status
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Template HTML Provided? | `{YA / TIDAK}` |
 | Template Name | `{nama template atau "N/A"}` |
 | Template Version | `{versi atau "N/A"}` |
@@ -74,6 +76,7 @@
 ### AI Rules (Based on Template Status)
 
 **Jika Template HTML = YA:**
+
 - ✅ **WAJIB** menggunakan struktur HTML, CSS, dan komponen dari template
 - ✅ **WAJIB** mengikuti naming convention dan class names dari template
 - ❌ **DILARANG** membuat UI components sendiri yang sudah ada di template
@@ -81,6 +84,7 @@
 - ✅ **BOLEH** extend/customize komponen template jika fitur tidak tersedia
 
 **Jika Template HTML = TIDAK:**
+
 - ✅ **WAJIB** menggunakan framework UI yang dipilih (lihat tabel di atas)
 - ✅ **WAJIB** mengikuti best practices framework
 - ❌ **DILARANG** membuat CSS framework custom dari nol
@@ -92,7 +96,7 @@
 **Isi setelah analisis template:**
 
 | Component Needed | Template Component | Location in Template |
-|------------------|-------------------|---------------------|
+| ------------------ | ------------------- | --------------------- |
 | `{contoh: Login Page}` | `{contoh: authentication/login.html}` | `{path}` |
 | `{contoh: Dashboard}` | `{contoh: dashboards/default.html}` | `{path}` |
 | `{contoh: Data Table}` | `{contoh: tables/datatables.html}` | `{path}` |
@@ -118,6 +122,7 @@
 ## Current Architecture Direction
 
 **Isi dengan arah arsitektur saat ini:**
+
 - Apakah monolith, modular monolith, microservices?
 - Apakah sedang dalam transisi?
 - Pola komunikasi antar komponen?

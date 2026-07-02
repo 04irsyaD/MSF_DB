@@ -37,6 +37,7 @@
    - Firewall rule violations
 
 **Alerting:**
+
 ```yaml
 # Example: Prometheus alerting rules
 groups:
@@ -68,12 +69,14 @@ groups:
 ```
 
 **Logging:**
+
 - Centralized logging (ELK Stack, Splunk, Datadog)
 - Immutable logs (append-only, tamper-evident)
 - Log retention: 1 year (minimal), 7 years (financial/healthcare)
 - Log format: structured (JSON) dengan timestamp, user_id, IP, action, result
 
 **SIEM Integration:**
+
 - Forward security logs ke SIEM (Security Information and Event Management)
 - Correlate events across systems
 - Automated incident response (SOAR - Security Orchestration, Automation, and Response)

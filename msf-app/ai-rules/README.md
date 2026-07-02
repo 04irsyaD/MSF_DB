@@ -15,7 +15,7 @@
 ### Folder Output: `planning/` (New / Revamp / Merger)
 
 | File Output | Template Source | Keterangan |
-|-------------|----------------|------------|
+| ------------- | ---------------- | ------------ |
 | `planning/PROJECT_BRIEF.md` | `ai-rules/planning-templates/_PROJECT_BRIEF_TEMPLATE.md` | Brief project (13 section) |
 | `planning/prd.md` | `ai-rules/planning-templates/prd.md` | Product Requirements Document |
 | `planning/architecture.md` | `ai-rules/planning-templates/architecture.md` | Tech stack + system design |
@@ -28,7 +28,7 @@
 ### Folder Output: `dev-docs/` (Semua Skenario)
 
 | File/Folder Output | Template Source | Keterangan |
-|--------------------|----------------|------------|
+| -------------------- | ---------------- | ------------ |
 | `dev-docs/CHANGELOG.md` | `ai-rules/CHANGELOG-template.md` | Log perubahan kronologis |
 | `dev-docs/ai/PROJECT_CONTEXT.md` | `ai-rules/dev-docs-ai-templates/PROJECT_CONTEXT-template.md` | System overview |
 | `dev-docs/ai/PROJECT_MENTAL_MODEL.md` | `ai-rules/dev-docs-ai-templates/PROJECT_MENTAL_MODEL-template.md` | Architectural patterns |
@@ -59,7 +59,7 @@
 ### Folder Output: `revamp/` (Revamp / Merger)
 
 | File Output | Template Source | Keterangan |
-|-------------|----------------|------------|
+| ------------- | ---------------- | ------------ |
 | `revamp/old-system.md` | `ai-rules/revamp-templates/old-system.md` | Audit sistem lama |
 | `revamp/gap-analysis.md` | `ai-rules/revamp-templates/gap-analysis.md` | Gap old vs new |
 | `revamp/migration-strategy.md` | `ai-rules/revamp-templates/migration-strategy.md` | Strategi migrasi |
@@ -69,7 +69,7 @@
 ### Folder Output: `prod-docs/` (Production-ready)
 
 | File/Folder Output | Template Source | Keterangan |
-|--------------------|----------------|------------|
+| -------------------- | ---------------- | ------------ |
 | `prod-docs/AGENTS.md` | `ai-rules/prod-docs-templates/AGENTS.md` | Kontrak AI di server |
 | `prod-docs/README.md` | `ai-rules/prod-docs-templates/README.md` | Panduan penggunaan |
 | `prod-docs/docs/*` | `ai-rules/prod-docs-templates/docs/*` | Dokumentasi teknis server |
@@ -78,7 +78,7 @@
 ### Folder Output: `reports/` (Maintenance + Task Reports)
 
 | File/Folder Output | Template Source | Keterangan |
-|--------------------|----------------|------------|
+| -------------------- | ---------------- | ------------ |
 | `reports/task/backend/YYYY-MM-DD-{task}.md` | `ai-rules/TASK_REPORT_TEMPLATE.md` | Laporan task backend |
 | `reports/task/frontend/YYYY-MM-DD-{task}.md` | `ai-rules/TASK_REPORT_TEMPLATE.md` | Laporan task frontend |
 | `reports/maintenance/{tahun}/KAK/*` | `ai-rules/reports-templates/README.md` | KAK maintenance |
@@ -86,7 +86,7 @@
 ### Skenario: Docs Migration (Existing Unstructured Docs)
 
 | File/Folder Output | Template Source | Keterangan |
-|--------------------|----------------|------------|
+| -------------------- | ---------------- | ------------ |
 | `dev-docs/ai/DOCS_MIGRATION_REPORT.md` | `ai-rules/migration/_OLD_DOCS_AUDIT_TEMPLATE.md` | Laporan audit + mapping + status |
 | `dev-docs/ai/START_HERE.md` | `ai-rules/dev-docs-ai-templates/START_HERE-template.md` | Diupdate dengan info migrasi |
 | `backup/old-docs/` | (tanpa template — copy dari existing) | Backup semua dokumen existing |

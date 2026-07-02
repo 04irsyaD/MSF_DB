@@ -10,7 +10,7 @@
 ## 1. API Conventions
 
 | Item | Convention |
-|------|-----------|
+| ------ | ----------- |
 | Base URL | `{https://api.example.com/v1}` |
 | Content Type | `application/json` |
 | Auth Header | `Authorization: Bearer {token}` |
@@ -23,6 +23,7 @@
 ## 2. Standard Response Formats
 
 ### Success (200 / 201)
+
 ```json
 {
     "data": { ... },
@@ -31,6 +32,7 @@
 ```
 
 ### Success with Pagination
+
 ```json
 {
     "data": [ ... ],
@@ -44,6 +46,7 @@
 ```
 
 ### Error
+
 ```json
 {
     "message": "Error description",
@@ -54,6 +57,7 @@
 ```
 
 ### Unauthorized (401)
+
 ```json
 {
     "message": "Unauthenticated."
@@ -61,6 +65,7 @@
 ```
 
 ### Forbidden (403)
+
 ```json
 {
     "message": "This action is unauthorized."
@@ -68,6 +73,7 @@
 ```
 
 ### Not Found (404)
+
 ```json
 {
     "message": "Resource not found."
@@ -75,6 +81,7 @@
 ```
 
 ### Server Error (500)
+
 ```json
 {
     "message": "Internal server error."
@@ -88,6 +95,7 @@
 ### Module: {Nama Modul}
 
 **List**
+
 ```
 GET /api/v1/{prefix}
 Query: ?page=1&per_page=20&search={keyword}&sort={field}&order={asc|desc}
@@ -113,6 +121,7 @@ Response 200:
 ```
 
 **Show**
+
 ```
 GET /api/v1/{prefix}/{id}
 Auth: required
@@ -129,6 +138,7 @@ Response 200:
 ```
 
 **Create**
+
 ```
 POST /api/v1/{prefix}
 Auth: required
@@ -150,6 +160,7 @@ Response 201:
 ```
 
 **Update**
+
 ```
 PUT /api/v1/{prefix}/{id}
 Auth: required
@@ -170,6 +181,7 @@ Response 200:
 ```
 
 **Delete**
+
 ```
 DELETE /api/v1/{prefix}/{id}
 Auth: required

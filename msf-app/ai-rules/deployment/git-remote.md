@@ -6,23 +6,25 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 ### CRITICAL: Auto-Detection (Wajib Dilakukan AI Pertama Kali)
 
 **Sebelum meminta user mengisi credential, AI WAJIB mencoba auto-detection:**
 
 | Step | Command | Output yang Dicari |
-|------|---------|-------------------|
+| ------ | --------- | ------------------- |
 | 1 | `cd {apps\|backend\|frontend} && git remote -v` | URL remote origin (fetch & push) |
 | 2 | `cd {apps\|backend\|frontend} && git config --get remote.origin.url` | URL origin (alternatif) |
 | 3 | `cd {apps\|backend\|frontend} && cat .git/config` | Full git config (jika steps di atas gagal) |
 
 **Jika berhasil mendeteksi:**
+
 - AI langsung mengisi kolom "Remote Repository" di bawah
 - AI menganalisis tipe remote (SSH vs HTTPS) dan mengisi kolom Auth Mode
 
 **Jika gagal (belum ada remote):**
+
 - AI meminta user: "Repository belum terhubung ke remote. Apakah sudah ada repo di GitHub/GitLab?"
 - Jika sudah: user memberikan URL, AI setup `git remote add origin`
 - Jika belum: AI meminta user membuat repo dulu, baru lanjut
@@ -52,7 +54,7 @@ Untuk fullstack, deteksi di masing-masing folder:
 ### Detected / Manual Input
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Platform** | `{GitHub / GitLab / Bitbucket / Self-hosted}` |
 | **Repository Name** | `{owner/repo}` |
 | **Remote Name** | `{origin}` — default: `origin` |
@@ -66,7 +68,7 @@ Untuk fullstack, deteksi di masing-masing folder:
 > **Diisi AI setelah `git remote -v`:**
 
 | Remote | Fetch URL | Push URL |
-|--------|-----------|----------|
+| -------- | ----------- | ---------- |
 | `{origin}` | `{url}` | `{url}` |
 | `{upstream}` | `{url — jika ada fork}` | `{url}` |
 | `{release}` | `{url — jika ada}` | `{url}` |
@@ -74,11 +76,11 @@ Untuk fullstack, deteksi di masing-masing folder:
 ### Multiple Remotes (Jika Ada)
 
 | Scenario | Remote | Purpose | URL |
-|----------|--------|---------|-----|
+| ---------- | -------- | --------- | ----- |
 | Fork | `origin` | Repo pribadi (push) | `{url}` |
-|  | `upstream` | Repo sumber (fetch sync) | `{url}` |
+| | `upstream` | Repo sumber (fetch sync) | `{url}` |
 | Separate BE/FE | `origin` (backend) | Backend repository | `{url}` |
-|  | `origin` (frontend) | Frontend repository | `{url}` |
+| | `origin` (frontend) | Frontend repository | `{url}` |
 
 ### Fullstack: Backend & Frontend Remote
 
@@ -98,7 +100,7 @@ Untuk fullstack, deteksi di masing-masing folder:
 **Terdeteksi jika:** URL remote diawali `git@` (contoh: `git@github.com:owner/repo.git`)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Mode | SSH |
 | SSH Key Path (local) | `{~/.ssh/id_ed25519 / ~/.ssh/id_rsa}` |
 | SSH Config Host (jika ada) | `{github.com / gitlab.com}` |
@@ -133,7 +135,7 @@ ssh -T git@gitlab.com    # GitLab
 **Terdeteksi jika:** URL remote diawali `https://` (contoh: `https://github.com/owner/repo.git`)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Mode | HTTPS + Token |
 | Username | `{github/gitlab username}` |
 | Token | `{token — JANGAN COMMIT KE REPO}` |
@@ -145,11 +147,11 @@ ssh -T git@gitlab.com    # GitLab
 **Cara Membuat Token:**
 
 | Platform | URL | Minimal Scopes |
-|----------|-----|---------------|
-| GitHub (classic) | https://github.com/settings/tokens | `repo`, `workflow` |
-| GitHub (fine-grained) | https://github.com/settings/tokens?type=beta | Repository access, Contents: Read & Write |
-| GitLab | https://gitlab.com/-/profile/personal_access_tokens | `read_repository`, `write_repository` |
-| Bitbucket | https://bitbucket.org/account/settings/app-passwords/ | Repository: Read, Write |
+| ---------- | ----- | --------------- |
+| GitHub (classic) | <https://github.com/settings/tokens> | `repo`, `workflow` |
+| GitHub (fine-grained) | <https://github.com/settings/tokens?type=beta> | Repository access, Contents: Read & Write |
+| GitLab | <https://gitlab.com/-/profile/personal_access_tokens> | `read_repository`, `write_repository` |
+| Bitbucket | <https://bitbucket.org/account/settings/app-passwords/> | Repository: Read, Write |
 
 **Setup token di local (opsional — untuk AI jika akses via HTTPS):**
 
@@ -285,7 +287,7 @@ echo "SUCCESS: Repository accessible, git-based deploy ready"
 **Keunggulan vs SFTP Drag-Drop:**
 
 | Aspek | SFTP Drag-Drop | Git-Based Deploy |
-|-------|---------------|-----------------|
+| ------- | --------------- | ----------------- |
 | Akurasi | Manual, rawan missed file | Otomatis, semua file dari commit |
 | Rollback | Tidak bisa (kecuali manual backup) | `git checkout <hash>` instan |
 | History | Tidak ada | `git log` — tahu siapa, kapan, kenapa |

@@ -12,6 +12,7 @@
 Template ini menyediakan **struktur dokumentasi yang komprehensif** untuk server production. Dirancang agar AI agent dan tim teknis dapat dengan cepat memahami kondisi server, melakukan troubleshooting, dan melakukan perubahan dengan aman.
 
 **Target Users:**
+
 - AI Agent (CommandCode, dll) yang melakukan maintenance server
 - DevOps Engineers
 - System Administrators
@@ -61,30 +62,34 @@ nano docs-ai/docs/README.md
 Ikuti checklist berikut untuk mengisi dokumentasi:
 
 #### Phase 1: Basic Setup (Hari 1)
+
 - [ ] Update `AGENTS.md` dengan server name, IP, domain
 - [ ] Update `docs/README.md` dengan quick reference
 - [ ] Fill `docs/architecture/overview.md` dengan arsitektur server
 - [ ] Fill `docs/architecture/network-topology.md` dengan network setup
 
 #### Phase 2: Tech Stack Documentation (Hari 2-3)
+
 - [ ] Copy `docs/tech-stack/_TEMPLATE.md` untuk setiap aplikasi
 - [ ] Rename ke nama aplikasi (e.g., `besma-laravel.md`, `nginx.md`)
 - [ ] Fill in setiap file dengan informasi komponen
 
 #### Phase 3: Operations Documentation (Hari 3-4)
+
 - [ ] Fill `docs/operations/deployment.md` dengan deployment process
 - [ ] Fill `docs/operations/backup.md` dengan backup strategy
 - [ ] Fill `docs/operations/monitoring.md` dengan monitoring setup
 - [ ] Fill `docs/operations/security.md` dengan security measures
 
 #### Phase 4: Troubleshooting & History (Hari 4-5)
+
 - [ ] Fill `docs/troubleshooting.md` dengan common issues
 - [ ] Initialize `docs/changelog.md` dengan initial setup entry
 - [ ] Initialize `reports-agents/changelog.md` untuk audit log
 
 ---
 
-##  Integrasi dengan Development Documentation (dev-docs/)
+## Integrasi dengan Development Documentation (dev-docs/)
 
 **Template ini tidak berdiri sendiri.** Ada informasi dari development yang harus mengalir ke production.
 
@@ -104,6 +109,7 @@ dev-docs/ (development)          prod-docs/ (production)
 ```
 
 **File kunci:** `ai-rules/deployment/production-readiness.md`
+
 - Berisi semua informasi yang harus di-transfer dari development ke production
 - Checklist lengkap requirements server, tech stack, architecture, security
 - Step-by-step deployment process
@@ -125,6 +131,7 @@ ssh user@server
 ```
 
 **Keuntungan:**
+
 - AI sudah paham tech stack, architecture, security requirements
 - Tidak perlu transfer knowledge manual
 - Lebih cepat dan akurat
@@ -148,6 +155,7 @@ cat production-readiness.md
 ```
 
 **Keuntungan:**
+
 - Tidak perlu akses ke dev-docs/
 - Semua informasi sudah di-extract ke satu file
 - Bisa di-handover ke tim operations
@@ -155,7 +163,7 @@ cat production-readiness.md
 ### Informasi yang Harus Di-Transfer
 
 | Kategori | Sumber (dev-docs) | Target (prod-docs) |
-|----------|-------------------|-------------------|
+| ---------- | ------------------- | ------------------- |
 | **Tech Stack** | `ai/PROJECT_CONTEXT.md` | `docs/tech-stack/*.md` |
 | **Architecture** | `architecture/` | `docs/architecture/overview.md` |
 | **Database** | `architecture/database.md` | `docs/tech-stack/database.md` |
@@ -244,6 +252,7 @@ prod-docs/
 ### 1. AI Agent Integration
 
 **AGENTS.md** adalah entry point untuk AI agent. File ini berisi:
+
 - Server information (nama, IP, domain)
 - Rules dan protocols yang harus diikuti AI
 - Safety guidelines (READ-FIRST, SAFETY FIRST)
@@ -255,6 +264,7 @@ AI agent akan membaca file ini di setiap sesi baru dan mengikuti rules yang dide
 ### 2. Comprehensive Documentation
 
 **docs/** berisi dokumentasi teknis lengkap:
+
 - **Architecture:** Overview sistem dan network topology
 - **Tech Stack:** Dokumentasi per komponen (aplikasi, database, web server, dll)
 - **Operations:** Deployment, backup, monitoring, security
@@ -264,6 +274,7 @@ AI agent akan membaca file ini di setiap sesi baru dan mengikuti rules yang dide
 ### 3. Task Reporting System
 
 **reports-agents/** berisi audit log semua task:
+
 - **changelog.md:** Index semua task dengan status dan link ke detail
 - **YYYY-MM-DD/:** Folder per tanggal berisi laporan detail
 - **00-summary.md:** Daily summary setiap hari ada task
@@ -272,6 +283,7 @@ AI agent akan membaca file ini di setiap sesi baru dan mengikuti rules yang dide
 ### 4. Safety First Approach
 
 Template ini menekankan **safety first** dengan:
+
 - READ-FIRST protocol (wajib baca docs sebelum action)
 - Backup before change (wajib backup sebelum modify)
 - Test after change (wajib verify setelah perubahan)
@@ -285,12 +297,14 @@ Template ini menekankan **safety first** dengan:
 ### For AI Agents
 
 **WAJIB baca sebelum setiap task:**
+
 1. `AGENTS.md` - Rules dan protocols
 2. `docs/README.md` - Index dokumentasi
 3. `reports-agents/changelog.md` - Audit log
 4. File tech-stack terkait komponen yang akan diubah
 
 **WAJIB lakukan setelah setiap task:**
+
 1. Tulis laporan di `reports-agents/YYYY-MM-DD/{task-name}.md`
 2. Update `reports-agents/changelog.md` dengan entry baru
 3. Update `docs/changelog.md` jika ada perubahan teknologi
@@ -300,6 +314,7 @@ Template ini menekankan **safety first** dengan:
 ### For Human Team Members
 
 **Best practices:**
+
 - Review task reports secara berkala
 - Update troubleshooting.md saat menemukan issue baru
 - Maintain changelog.md untuk track perubahan besar
@@ -315,6 +330,7 @@ Template ini menekankan **safety first** dengan:
 **File:** `reports-agents/_TASK_TEMPLATE.md`
 
 Gunakan template ini untuk setiap task. Template mencakup:
+
 - Latar belakang & tujuan
 - Kondisi sebelum (BEFORE)
 - Rencana (PLAN)
@@ -331,6 +347,7 @@ Gunakan template ini untuk setiap task. Template mencakup:
 **File:** `reports-agents/_DAILY_SUMMARY_TEMPLATE.md`
 
 Gunakan template ini untuk daily summary. Template mencakup:
+
 - Overview hari ini
 - Tasks completed
 - System health summary
@@ -347,6 +364,7 @@ Gunakan template ini untuk daily summary. Template mencakup:
 **File:** `docs/tech-stack/_TEMPLATE.md`
 
 Gunakan template ini untuk dokumentasi setiap komponen. Template mencakup:
+
 - Overview komponen
 - Configuration
 - Deployment process
@@ -362,6 +380,7 @@ Gunakan template ini untuk dokumentasi setiap komponen. Template mencakup:
 ## Maintenance
 
 ### Daily Tasks
+
 - [ ] Check system health (CPU, memory, disk)
 - [ ] Review alerts dan notifications
 - [ ] Check backup status
@@ -369,6 +388,7 @@ Gunakan template ini untuk dokumentasi setiap komponen. Template mencakup:
 - [ ] Update task reports jika ada task
 
 ### Weekly Tasks
+
 - [ ] Review weekly summary
 - [ ] Update troubleshooting.md dengan issue baru
 - [ ] Verify backups working
@@ -376,6 +396,7 @@ Gunakan template ini untuk dokumentasi setiap komponen. Template mencakup:
 - [ ] Review security logs
 
 ### Monthly Tasks
+
 - [ ] Review changelog.md untuk pattern
 - [ ] Update architecture docs jika ada perubahan besar
 - [ ] Test disaster recovery procedure
@@ -391,6 +412,7 @@ Gunakan template ini untuk dokumentasi setiap komponen. Template mencakup:
 Template ini bisa disesuaikan dengan kebutuhan server:
 
 **Tambah section baru:**
+
 ```bash
 # Contoh: Tambah section untuk compliance
 mkdir docs/compliance
@@ -399,12 +421,14 @@ nano docs/compliance/pci-dss.md
 ```
 
 **Modifikasi template:**
+
 ```bash
 # Edit template task report
 nano reports-agents/_TASK_TEMPLATE.md
 ```
 
 **Tambah automation:**
+
 ```bash
 # Contoh: Auto-generate daily summary
 nano /opt/docs/generate-daily-summary.sh
@@ -413,14 +437,17 @@ nano /opt/docs/generate-daily-summary.sh
 ### Integration dengan Tools
 
 **Prometheus + Grafana:**
+
 - Link dashboard URLs di `docs/operations/monitoring.md`
 - Document alert rules di `docs/operations/monitoring.md`
 
 **ELK Stack:**
+
 - Document Kibana URLs di `docs/operations/monitoring.md`
 - Document log patterns di `docs/tech-stack/{app}.md`
 
 **CI/CD Pipeline:**
+
 - Document deployment triggers di `docs/operations/deployment.md`
 - Document rollback procedures di `docs/operations/deployment.md`
 
@@ -431,6 +458,7 @@ nano /opt/docs/generate-daily-summary.sh
 ### Issue: AI Agent tidak mengikuti rules
 
 **Solution:**
+
 - Pastikan `AGENTS.md` ada di root (`/root/AGENTS.md`)
 - Check AI agent logs untuk melihat apakah rules dibaca
 - Reinforce rules di setiap sesi
@@ -438,6 +466,7 @@ nano /opt/docs/generate-daily-summary.sh
 ### Issue: Documentation tidak up-to-date
 
 **Solution:**
+
 - Setup reminder untuk review docs weekly
 - Assign ownership untuk setiap section
 - Use changelog.md untuk track updates
@@ -445,6 +474,7 @@ nano /opt/docs/generate-daily-summary.sh
 ### Issue: Reports terlalu verbose
 
 **Solution:**
+
 - Focus pada key information di summary
 - Use templates untuk konsistensi
 - Archive old reports (> 6 months)
@@ -454,26 +484,31 @@ nano /opt/docs/generate-daily-summary.sh
 ## Best Practices
 
 ### 1. Consistency is Key
+
 - Gunakan format yang sama untuk semua reports
 - Follow naming conventions (YYYY-MM-DD, snake_case)
 - Update semua related docs saat ada perubahan
 
 ### 2. Evidence-Based Documentation
+
 - Sertakan command output sebagai evidence
 - Screenshot/dashboard untuk visual proof
 - Log snippets untuk troubleshooting
 
 ### 3. Actionable Information
+
 - Dokumentasi harus actionable (bisa langsung digunakan)
 - Include exact commands, not just concepts
 - Provide copy-paste ready solutions
 
 ### 4. Regular Reviews
+
 - Review docs monthly untuk accuracy
 - Update saat ada perubahan besar
 - Archive outdated information
 
 ### 5. Collaborative Approach
+
 - Multiple team members should contribute
 - Peer review important changes
 - Share knowledge through documentation
@@ -483,18 +518,21 @@ nano /opt/docs/generate-daily-summary.sh
 ## Support & Resources
 
 ### Internal Resources
+
 - **AGENTS.md:** Rules untuk AI agent
 - **docs/README.md:** Index dokumentasi teknis
 - **docs/troubleshooting.md:** Common issues & solutions
 - **reports-agents/:** Audit log semua tasks
 
 ### External Resources
+
 - **Server Monitoring:** {Grafana URL}
 - **Log Management:** {Kibana URL}
 - **Alerting:** {PagerDuty/Slack}
 - **Backup Storage:** {S3/NFS location}
 
 ### Contacts
+
 - **DevOps Lead:** {name} - {email}
 - **Backend Lead:** {name} - {email}
 - **System Admin:** {name} - {email}

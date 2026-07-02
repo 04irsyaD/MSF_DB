@@ -5,7 +5,7 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output — JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output — JANGAN ubah template ini
 
 ---
 
@@ -22,7 +22,7 @@ Skenario ini digunakan jika:
 ### Perbedaan dengan Revamp
 
 | Aspek | Revamp | Docs Migration |
-|-------|--------|---------------|
+| ------- | -------- | --------------- |
 | Yang di-migrasi | Kode + data | Dokumen |
 | Old system | Kode existing (READ-ONLY) | Folder dokumen existing (READ-ONLY) |
 | Output utama | Kode baru di apps/backend/frontend | File baru di planning/, dev-docs/, prod-docs/ |
@@ -45,7 +45,7 @@ Skenario ini digunakan jika:
 ### Struktur Folder Migration (AI OUTPUT, di project root)
 
 | # | File Output | Purpose | Wajib? |
-|---|-------------|---------|--------|
+| --- | ------------- | --------- | -------- |
 | 1 | `dev-docs/ai/DOCS_MIGRATION_REPORT.md` | Laporan audit + mapping + status migrasi | ✅ |
 | 2 | `dev-docs/ai/START_HERE.md` | Dibuat/diupdate dari template — entry point setelah migrasi | ✅ |
 | 3 | `backup/old-docs/` | Copy semua dokumen existing ke sini SEBELUM migrasi | ✅ |
@@ -75,7 +75,7 @@ ls -d docs/ wiki/ dokumentasi/ README* 2>/dev/null
 Untuk setiap file, catat di `DOCS_MIGRATION_REPORT.md`:
 
 | File | Tipe Konten | Relevan? | Target Folder Output |
-|------|------------|----------|---------------------|
+| ------ | ------------ | ---------- | --------------------- |
 | `docs/README.md` | Overview project | ✅ | `dev-docs/ai/PROJECT_CONTEXT.md` |
 | `docs/api.md` | API documentation | ✅ | `dev-docs/integrations/`, `dev-docs/modules/` |
 | `wiki/setup.md` | Setup guide | 🔶 | Lihat mapping |
@@ -154,5 +154,6 @@ Fil ini adalah laporan lengkap hasil migrasi. Lihat `_OLD_DOCS_AUDIT_TEMPLATE.md
 ## Template Files
 
 Lihat file template di folder ini:
+
 - `_OLD_DOCS_AUDIT_TEMPLATE.md` — template untuk DOCS_MIGRATION_REPORT.md
 - `_DOCS_MAPPING_TEMPLATE.md` — panduan kategorisasi konten old docs ke folder output

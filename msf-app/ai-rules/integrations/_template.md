@@ -10,7 +10,7 @@
 ## Service Identity
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Provider | `{nama penyedia}` |
 | Purpose | `{untuk apa}` |
 | Docs URL | `{link dokumentasi}` |
@@ -21,7 +21,7 @@
 ## Authentication
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Method | `{API Key / OAuth2 / Basic Auth / IP Whitelist}` |
 | Location | `{header X-Api-Key / Bearer token / .env variable}` |
 | `.env` Key | `{SERVICE_API_KEY}` |
@@ -49,12 +49,13 @@
 ## Error Handling
 
 | Scenario | Behavior | User Message |
-|----------|----------|-------------|
+| ---------- | ---------- | ------------- |
 | Timeout | `{retry 3x}` | `{pesan ke user}` |
 | Invalid response | `{log + fallback}` | `{pesan ke user}` |
 | Rate limited | `{queue job / retry later}` | `{pesan ke user}` |
 
 **Fallback behavior jika gagal total:**
+
 - `{retry 3x / queue job / fail silently / throw exception}`
 
 ---
@@ -62,6 +63,7 @@
 ## Testing
 
 **Mock approach:**
+
 ```php
 // {contoh kode mock dari test yg sudah ada}
 ```

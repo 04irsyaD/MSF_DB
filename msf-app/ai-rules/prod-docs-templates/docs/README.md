@@ -42,7 +42,7 @@ docs/
 ### Server Overview
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Hostname | {hostname} |
 | IP Address | {ip_address} |
 | OS | {os_version} |
@@ -54,7 +54,7 @@ docs/
 ### Applications
 
 | App | Tech | Port | Container | Compose File |
-|-----|------|------|-----------|--------------|
+| ----- | ------ | ------ | ----------- | -------------- |
 | {app-1} | {tech_stack} | {port} | {container_name} | {compose_path} |
 | {app-2} | {tech_stack} | {port} | {container_name} | {compose_path} |
 | nginx | Nginx {version} | 80/443 | {container_or_system} | {config_path} |
@@ -70,7 +70,7 @@ docs/
 ## Referensi Dokumentasi Lain
 
 | Lokasi | Isi |
-|--------|-----|
+| -------- | ----- |
 | `~/reports-agents/YYYY-MM-DD/` | Laporan per-task oleh AI agent (format deskriptif + evidence) |
 | `~/reports-agents/changelog.md` | Audit log per-task (apa yang dikerjakan, oleh siapa, status) |
 | `~/docs/changelog.md` | Log perubahan teknologi & arsitektur (apa yang berubah di sistem) |
@@ -79,7 +79,7 @@ docs/
 
 ---
 
-##  Sumber Informasi dari Development (dev-docs/)
+## Sumber Informasi dari Development (dev-docs/)
 
 **Dokumentasi di folder ini diisi berdasarkan informasi dari development team.**
 
@@ -90,6 +90,7 @@ Saat pertama kali setup server, gunakan **`production-readiness.md`** dari devel
 **Lokasi:** `ai-rules/deployment/production-readiness.md` (immutable template)
 
 **Isi bridge document:**
+
 - Tech stack versions yang harus diinstall
 - Architecture diagram dan komponen
 - Database schema dan requirements
@@ -101,7 +102,7 @@ Saat pertama kali setup server, gunakan **`production-readiness.md`** dari devel
 ### Cara Mengisi Dokumentasi dari Bridge Document
 
 | File di `~/docs/` | Sumber dari `production-readiness.md` |
-|-------------------|--------------------------------------|
+| ------------------- | -------------------------------------- |
 | `architecture/overview.md` | Section "Architecture Diagram" + "Component Overview" |
 | `architecture/network-topology.md` | Section "Network Requirements" + "Firewall rules" |
 | `tech-stack/{app}.md` | Section "Tech Stack" + "Software Requirements" |
@@ -145,6 +146,7 @@ Saat pertama kali setup server, gunakan **`production-readiness.md`** dari devel
 ### Contoh: Mengisi tech-stack/nginx.md
 
 **Dari production-readiness.md:**
+
 ```markdown
 ## Software Requirements
 | Software | Version | Purpose |
@@ -153,6 +155,7 @@ Saat pertama kali setup server, gunakan **`production-readiness.md`** dari devel
 ```
 
 **Ke ~/docs/tech-stack/nginx.md:**
+
 ```markdown
 # Nginx — Web Server & Reverse Proxy
 
@@ -185,6 +188,7 @@ Jika development team tidak menyediakan `production-readiness.md`:
    - Environment variables (`.env.example`)
 
 2. **Atau akses dev-docs/ langsung** (jika punya akses):
+
    ```bash
    # Di project repository
    cat dev-docs/ai/PROJECT_CONTEXT.md        # Tech stack
@@ -195,6 +199,7 @@ Jika development team tidak menyediakan `production-readiness.md`:
    ```
 
 3. **Dokumentasikan asumsi** jika informasi tidak lengkap:
+
    ```markdown
    ## Assumptions (perlu konfirmasi)
    - Nginx version: 1.24 (assumed, perlu konfirmasi)
@@ -208,7 +213,7 @@ Jika development team tidak menyediakan `production-readiness.md`:
 1. **Sesi baru**: Baca `~/AGENTS.md` (entry point) → `~/docs/README.md` (index) → `~/reports-agents/changelog.md` (audit log)
 2. **Sebelum task**: Baca file terkait di `~/docs/tech-stack/` untuk memahami komponen yang akan diubah
 3. **Saat task**: Ikuti format laporan di `~/AGENTS.md` — deskriptif, teknis, dengan evidence
-4. **Setelah task**: 
+4. **Setelah task**:
    - Tulis laporan di `~/reports-agents/YYYY-MM-DD/<task-name>.md`
    - Update `~/reports-agents/changelog.md` (tambah entry audit log)
    - Update `~/docs/changelog.md` jika ada perubahan teknologi/arsitektur
@@ -276,7 +281,7 @@ mysql -u user -p database < backup.sql
 ## Emergency Contacts
 
 | Role | Contact | When to Call |
-|------|---------|--------------|
+| ------ | --------- | -------------- |
 | DevOps Lead | {contact} | Infrastructure issues, security incidents |
 | Backend Lead | {contact} | Application bugs, database issues |
 | System Admin | {contact} | OS-level issues, network problems |

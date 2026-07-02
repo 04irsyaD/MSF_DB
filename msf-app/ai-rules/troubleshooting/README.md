@@ -5,7 +5,7 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Setiap kali AI menemukan error yang tidak obvious dan menghabiskan waktu debugging, catat di sini.
 
@@ -21,6 +21,7 @@
 | `resolved.md` | Issue yang sudah resolved — arsip permanen |
 
 **Kapan pindah ke resolved.md:**
+
 - Issue sudah di-fix dan fix-nya sudah terverifikasi berjalan stabil >1 bulan
 - Issue yang sudah tidak relevan (environment berubah, dependency di-upgrade)
 

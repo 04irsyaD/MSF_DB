@@ -89,7 +89,8 @@ Untuk membuat template yang optimal, gunakan placeholder ini:
 {TABLE_LIST}       - Placeholder untuk daftar tabel
 ```
 
-### Contoh Template Content:
+### Contoh Template Content
+
 ```
 DOKUMENTASI DATABASE {DB_NAME}
 
@@ -146,6 +147,7 @@ Ringkasan:
 3. Format template sesuka hati (colors, fonts, logo, layout)
 
 ### **Step 2: Run System**
+
 ```bash
 cd "AI OLLMA/summary/scripts"
 python template_filler_docx.py
@@ -178,6 +180,7 @@ python template_filler_docx.py
 ### **Menambah Placeholder Baru:**
 1. Edit function `fill_template_with_data()`
 2. Tambah ke dictionary `replacements`:
+
 ```python
 replacements = {
     # ... existing placeholders ...

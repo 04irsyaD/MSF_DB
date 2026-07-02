@@ -4,10 +4,12 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  Backup Security
+### Backup Security
 
 **Requirements:**
+
 1. **Encryption:** Semua backup WAJIB encrypted (AES-256)
+
    ```bash
    # Example: encrypt database dump
    mysqldump -u root -p"$DB_PASSWORD" dbname | \

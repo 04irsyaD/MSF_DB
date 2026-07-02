@@ -4,7 +4,7 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  HARD RULES — Jangan Dilanggar
+### HARD RULES — Jangan Dilanggar
 
 1. **SEMUA credential WAJIB di `.env`** — API keys, DB password, token, secret key, OAuth client secret, SMTP password, S3 access key. Tidak ada pengecualian.
 2. **`.env` WAJIB di `.gitignore`** — pastikan tidak pernah ter-commit. Cek: `cd {folder_kode} && git status` tidak menampilkan `.env`.
@@ -73,6 +73,7 @@ const apiKey = process.env.API_KEY; // BUKAN: const apiKey = 'sk-abc123...'
 ```
 
 **6. File sensitif yang WAJIB di `.gitignore`:**
+
 ```gitignore
 # Environment
 .env
@@ -108,7 +109,7 @@ Thumbs.db
 /.commandcode/
 ```
 
-7. **AI WAJIB memeriksa** sebelum commit: `cd {folder_kode} && git diff --cached` — pastikan tidak ada credential atau file sensitif yang ter-stage.
+1. **AI WAJIB memeriksa** sebelum commit: `cd {folder_kode} && git diff --cached` — pastikan tidak ada credential atau file sensitif yang ter-stage.
 
 ---
 

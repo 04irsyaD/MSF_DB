@@ -7,7 +7,7 @@
 ### Batas Maksimal Baris per File
 
 | Jenis File | Maksimal Baris | Rekomendasi |
-|------------|----------------|-------------|
+| ------------ | ---------------- | ------------- |
 | Controller | 1000 baris | 500 baris |
 | Service/Business Logic | 800 baris | 400 baris |
 | Model/Entity | 300 baris | 150 baris |
@@ -19,6 +19,7 @@
 | Partial/Component | 300 baris | 150 baris |
 
 **Catatan Penting:**
+
 - Batas di atas adalah **maksimal absolut**. Jika file mendekati batas, pertimbangkan refactor.
 - **Separation of Concerns lebih penting dari line count**. Controller 800 baris dengan logic yang terstruktur lebih baik dari controller 200 baris yang campur aduk.
 - Untuk project kompleks (multi-tenant, many roles, complex workflows), controller bisa lebih panjang selama tetap maintainable.

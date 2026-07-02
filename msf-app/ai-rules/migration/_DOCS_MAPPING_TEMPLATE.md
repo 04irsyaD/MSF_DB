@@ -11,7 +11,7 @@ Gunakan tabel ini untuk mengkategorikan setiap konten dari old docs ke folder ou
 ### Planning (project masih dalam perencanaan)
 
 | Jenis Konten | Indikator | Target File |
-|-------------|-----------|-------------|
+| ------------- | ----------- | ------------- |
 | Deskripsi project, goals, scope | "Tentang aplikasi ini", "Project overview", "Latar belakang" | `planning/PROJECT_BRIEF.md` |
 | Product requirements, fitur list | "Fitur yang dibutuhkan", "User story", "Requirement" | `planning/prd.md` |
 | Pemilihan teknologi, stack | "Tech stack", "Mengapa pakai framework X", "Library yang dipakai" | `planning/architecture.md` |
@@ -26,7 +26,7 @@ Gunakan tabel ini untuk mengkategorikan setiap konten dari old docs ke folder ou
 #### dev-docs/ai/ (AI internal docs)
 
 | Jenis Konten | Indikator | Target File |
-|-------------|-----------|-------------|
+| ------------- | ----------- | ------------- |
 | System overview, apa aplikasi ini | "About", "System description", "How it works" | `dev-docs/ai/PROJECT_CONTEXT.md` |
 | Architectural patterns, design patterns | "Architecture", "Pattern", "Design decision" | `dev-docs/ai/PROJECT_MENTAL_MODEL.md` |
 | Mapping: modul → file code | "Module X ada di folder Y", "Struktur folder" | `dev-docs/ai/MODULE_MAP.md` |
@@ -41,7 +41,7 @@ Gunakan tabel ini untuk mengkategorikan setiap konten dari old docs ke folder ou
 #### dev-docs/architecture/ (system design)
 
 | Jenis Konten | Indikator | Target File |
-|-------------|-----------|-------------|
+| ------------- | ----------- | ------------- |
 | API flow, request lifecycle | "API flow", "Request path", "Middleware" | `dev-docs/architecture/api-flow.md` |
 | Backend folder structure | "Backend structure", "Folder organization" | `dev-docs/architecture/backend-structure.md` |
 | Database schema, migrations | "Database design", "Schema", "Table relationship" | `dev-docs/architecture/database.md` |
@@ -50,7 +50,7 @@ Gunakan tabel ini untuk mengkategorikan setiap konten dari old docs ke folder ou
 #### dev-docs/modules/ (per-module docs)
 
 | Jenis Konten | Indikator | Target File |
-|-------------|-----------|-------------|
+| ------------- | ----------- | ------------- |
 | Dokumentasi spesifik modul | "Module X", "Fitur Y", nama modul/fitur | `dev-docs/modules/{modul}/README.md` |
 | Permissions/gates per modul | "Permission", "Gate", "Access control" | `dev-docs/modules/{modul}/permissions.md` |
 | API routes per modul | "Route", "Endpoint modul" | `dev-docs/modules/{modul}/routes.md` |
@@ -70,7 +70,7 @@ Gunakan tabel ini untuk mengkategorikan setiap konten dari old docs ke folder ou
 ### prod-docs/ (server infrastructure)
 
 | Jenis Konten | Indikator | Target File |
-|-------------|-----------|-------------|
+| ------------- | ----------- | ------------- |
 | Server specs, IP, hostname | "Server", "Production", "Infra", "Deployment" | `prod-docs/AGENTS.md` atau `prod-docs/docs/architecture/overview.md` |
 | Network topology | "Network", "IP range", "Firewall", "Load balancer" | `prod-docs/docs/architecture/network-topology.md` |
 | Tech stack per komponen (nginx, docker, db) | "Nginx config", "Docker compose", "Database setup" | `prod-docs/docs/tech-stack/{component}.md` |
@@ -82,7 +82,7 @@ Gunakan tabel ini untuk mengkategorikan setiap konten dari old docs ke folder ou
 ### REPORTS (maintenance + task reports)
 
 | Jenis Konten | Indikator | Target File |
-|-------------|-----------|-------------|
+| ------------- | ----------- | ------------- |
 | Historical changelog/version | "Change log", "Release notes", "History" | `dev-docs/CHANGELOG.md` |
 | Maintenance records | "Maintenance log", "Server audit", "Security scan" | `reports/maintenance/{tahun}/` |
 

@@ -7,7 +7,7 @@
 ### Auth Flow
 
 | Item | Standard |
-|------|----------|
+| ------ | ---------- |
 | Password hashing | `bcrypt` (cost ≥ 10) atau `argon2id` |
 | Password complexity | Min 8 char, 1 uppercase, 1 number, 1 special char |
 | Rate limit login | `throttle:login` — max 5 attempt per minute |

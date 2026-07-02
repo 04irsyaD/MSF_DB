@@ -3,6 +3,7 @@
 ## 🎯 3 Langkah Utama
 
 ### 1️⃣ Analyze Data Issues
+
 ```python
 from databricks_data_cleaner import DatabricksDataCleaner
 
@@ -15,6 +16,7 @@ cleaner.display_data_quality_report()
 ```
 
 ### 2️⃣ Clean Data
+
 ```python
 # Option A: Date Inconsistencies
 from date_format_handler import DateFormatAnalyzer
@@ -35,6 +37,7 @@ df = AdvancedDataCleaner.fill_missing_values(df, fill_strategy)
 ```
 
 ### 3️⃣ Save & Export
+
 ```python
 cleaner.df = df
 cleaner.save_cleaned_data('./output/cleaned.csv', format='csv')
@@ -46,6 +49,7 @@ cleaner.save_cleaned_data('./output/cleaned.csv', format='csv')
 ## 📋 Cheat Sheet - Common Tasks
 
 ### ❌ Detect Issues
+
 ```python
 # Date format inconsistencies
 cleaner.detect_inconsistent_dates()
@@ -66,6 +70,7 @@ df.isnull().sum()
 ### ✅ Fix Issues
 
 #### Date Problems
+
 ```python
 # Find date columns
 from date_format_handler import DateFormatAnalyzer
@@ -80,6 +85,7 @@ df, report = analyzer.standardize_date_column(df, 'date_col', target_format='%Y-
 ```
 
 #### Text Problems
+
 ```python
 # Standardize email
 df = AdvancedDataCleaner.standardize_email(df, ['email'])
@@ -93,12 +99,14 @@ df = AdvancedDataCleaner.standardize_text_case(df, ['col1', 'col2'], case_type='
 ```
 
 #### Numeric Problems
+
 ```python
 # Standardize numeric columns
 df = AdvancedDataCleaner.standardize_numerics(df, ['price', 'quantity'])
 ```
 
 #### Duplicates & Missing Values
+
 ```python
 # Remove duplicates
 df, removed_count = AdvancedDataCleaner.remove_duplicates(df)
@@ -128,30 +136,35 @@ df = AdvancedDataCleaner.fill_missing_values(df, strategy)
 ## 🎯 Use Case Scenarios
 
 ### Scenario A: Quick Analysis Only
+
 ```python
 from usage_guide import scenario_1_basic_analysis
 scenario_1_basic_analysis()
 ```
 
 ### Scenario B: Complete Cleaning
+
 ```python
 from usage_guide import scenario_2_complete_cleaning
 df_clean = scenario_2_complete_cleaning()
 ```
 
 ### Scenario C: Focus on Dates
+
 ```python
 from usage_guide import scenario_3_focused_date_cleaning
 df_clean = scenario_3_focused_date_cleaning()
 ```
 
 ### Scenario D: Quality Report
+
 ```python
 from usage_guide import scenario_4_advanced_quality_report
 scenario_4_advanced_quality_report()
 ```
 
 ### Scenario E: Export Data
+
 ```python
 from usage_guide import scenario_5_export_cleaned_data
 scenario_5_export_cleaned_data()

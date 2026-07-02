@@ -5,9 +5,9 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  CRITICAL: Anti-Monster Rule + Daily Split
+### CRITICAL: Anti-Monster Rule + Daily Split
 
 **DILARANG** menulis detail commit di file ini. File ini hanya **indeks**.
 
@@ -18,13 +18,14 @@
 | `COMMIT_LOG.md` (this file) | Hanya indeks — daftar hari + link ke file harian |
 | `commit-logs/YYYY-MM-DD.md` | Detail commit untuk hari itu (1 file per hari) |
 
-###  Dual-Repo: Tanda Repo di Setiap Entry
+### Dual-Repo: Tanda Repo di Setiap Entry
 
 Untuk fullstack, tiap entry commit wajib mencantumkan repo (`backend` / `frontend`). AI harus tahu repo mana yang di-commit.
 
 ### Rollback Reference
 
 **Cara mencari commit untuk rollback:**
+
 1. Lihat tabel indeks di bawah — cari rentang tanggal + repo
 2. Buka file harian yang sesuai
 3. Copy hash dari entry commit

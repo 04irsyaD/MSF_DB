@@ -18,7 +18,7 @@ Server ini menggunakan **pull-based deployment** dengan auto-deploy script yang 
 ## Deployment Strategy
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Strategy | {pull-based / push-based / manual} |
 | Automation | {systemd timer / cron / GitHub Actions} |
 | Frequency | {every 1 minute / on-demand / manual} |
@@ -338,6 +338,7 @@ docker compose up -d
 {Jelaskan bagaimana secrets dikelola}
 
 Contoh:
+
 - Secrets disimpan di `.env` file dengan permission 600
 - Tidak di-commit ke git
 - Backup encrypted di secure location
@@ -348,7 +349,7 @@ Contoh:
 ## Deployment Windows
 
 | Window | Time | Purpose |
-|--------|------|---------|
+| -------- | ------ | --------- |
 | Regular Deploy | {time} | Normal deployments |
 | Maintenance Window | {time} | Major updates, migrations |
 | Emergency Deploy | Anytime | Critical bug fixes, security patches |
@@ -370,6 +371,7 @@ Contoh:
 {Jelaskan alerting yang aktif selama deployment}
 
 Contoh:
+
 - Slack notification on deployment start
 - Email alert if error rate > 5%
 - PagerDuty if service down > 5 minutes
@@ -383,6 +385,7 @@ Contoh:
 **Symptoms:** Docker build fails
 
 **Solutions:**
+
 ```bash
 # Check build logs
 docker compose build --no-cache
@@ -402,6 +405,7 @@ docker system prune -a
 **Symptoms:** Container exits immediately
 
 **Solutions:**
+
 ```bash
 # Check logs
 docker logs {container_name}
@@ -421,6 +425,7 @@ docker compose up
 **Symptoms:** Application error after migration
 
 **Solutions:**
+
 ```bash
 # Check migration status
 docker exec -it {container_name} {status_command}

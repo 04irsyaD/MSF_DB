@@ -10,7 +10,7 @@
 ## 1. Migration Approach
 
 | Approach | Deskripsi | Dipilih? |
-|----------|----------|---------|
+| ---------- | ---------- | --------- |
 | **Big Bang** | Switch sekaligus — old system mati, new system live | |
 | **Phased** | Modul per modul dipindahkan bertahap | |
 | **Parallel** | Kedua sistem jalan bareng, user dialihkan bertahap | |
@@ -27,7 +27,7 @@
 ### Phase 0: Preparation
 
 | Task | Detail | Status |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | Audit old system | `old-system.md` | ✅ / ❌ |
 | Gap analysis | `gap-analysis.md` | ✅ / ❌ |
 | Setup new repo & CI/CD | `{backend/` + `frontend/` | ✅ / ❌ |
@@ -37,7 +37,7 @@
 ### Phase 1: Foundation
 
 | Task | Repo | Detail |
-|------|------|--------|
+| ------ | ------ | -------- |
 | Auth system | `backend` | JWT-based, role & permission |
 | Auth pages | `frontend` | Login, register, forgot password |
 | Layout & navigation | `frontend` | Admin + public layout |
@@ -58,7 +58,7 @@
 ### Phase 4: Cutover
 
 | Task | Detail |
-|------|--------|
+| ------ | -------- |
 | Data migration final | Full sync dari old DB ke new DB |
 | DNS switch | Arahkan domain ke new server |
 | Old system freeze | Read-only mode atau shutdown |
@@ -71,13 +71,14 @@
 **Jika new system gagal setelah cutover:**
 
 | Step | Action | Time Estimate |
-|------|--------|-------------|
+| ------ | -------- | ------------- |
 | 1 | DNS switch back ke old server | 5 menit |
 | 2 | Restart old system (jika perlu) | 2 menit |
 | 3 | Verifikasi old system berjalan normal | 10 menit |
 | 4 | Investigasi new system, perbaiki, jadwal ulang cutover | — |
 
 **Rollback trigger:**
+
 - Error rate >5%
 - User tidak bisa login
 - Data corruption terdeteksi
@@ -87,7 +88,7 @@
 ## 4. Timeline Summary
 
 | Phase | Duration | Target |
-|-------|----------|--------|
+| ------- | ---------- | -------- |
 | Phase 0: Preparation | `{durasi}` | `{tanggal}` |
 | Phase 1: Foundation | `{durasi}` | `{tanggal}` |
 | Phase 2: Core Migration | `{durasi}` | `{tanggal}` |
@@ -99,7 +100,7 @@
 ## 5. Risk Register
 
 | Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|-----------|
+| ------ | ----------- | -------- | ----------- |
 | Data loss saat migrasi | `{Med}` | `{Critical}` | Backup old DB sebelum tiap migrasi |
 | User bingung UI baru | `{High}` | `{Med}` | Training + dokumentasi |
 | Old system crash sebelum cutover | `{Low}` | `{High}` | Read-only mode, daily backup |

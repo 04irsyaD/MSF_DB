@@ -4,7 +4,7 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  Incident Response Plan
+### Incident Response Plan
 
 **WAJIB dokumentasikan dan test:**
 
@@ -35,6 +35,7 @@
    - Notify affected users (jika PII compromised, < 72 jam sesuai GDPR)
 
 **Incident Severity Levels:**
+
 ```
 CRITICAL: Data breach, ransomware, production compromise → Response time: 15 menit
 HIGH: Unauthorized access, privilege escalation → Response time: 1 jam

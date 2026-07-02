@@ -9,7 +9,7 @@
 ## 1. Migration Metadata
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Project | `{nama project}` |
 | Migration Date | `{YYYY-MM-DD HH:mm}` |
 | AI Model | `{model_AI}` |
@@ -24,7 +24,7 @@
 ### File Inventarisasi
 
 | # | File Path | Tipe | Size | Konten Utama | Kualitas | Kategori |
-|---|-----------|------|------|-------------|----------|----------|
+| --- | ----------- | ------ | ------ | ------------- | ---------- | ---------- |
 | 1 | `docs/README.md` | .md | {n} KB | {deskripsi} | {baik/sedang/kurang} | {planning/dev-docs/prod-docs/reports/orphan} |
 | 2 | `wiki/api-spec.md` | .md | {n} KB | {deskripsi} | {baik/sedang/kurang} | {planning/dev-docs/prod-docs/reports/orphan} |
 | 3 | `{file}` | {type} | {n} KB | {deskripsi} | {baik/sedang/kurang} | {planning/dev-docs/prod-docs/reports/orphan} |
@@ -32,7 +32,7 @@
 ### Statistik
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Total files found | {n} |
 | Files migrated | {n} |
 | Files partially migrated | {n} |
@@ -46,7 +46,7 @@
 ### Planning Output
 
 | Target File | Source File(s) | Content Extracted | Missing Info |
-|-------------|----------------|--------------------|--------------|
+| ------------- | ---------------- | -------------------- | -------------- |
 | `planning/PROJECT_BRIEF.md` | {source} | {apa yg diextract} | {apa yg kurang} |
 | `planning/architecture.md` | {source} | {apa yg diextract} | {apa yg kurang} |
 | `planning/database.md` | {source} | {apa yg diextract} | {apa yg kurang} |
@@ -55,7 +55,7 @@
 ### dev-docs/ Output
 
 | Target File | Source File(s) | Content Extracted | Missing Info |
-|-------------|----------------|--------------------|--------------|
+| ------------- | ---------------- | -------------------- | -------------- |
 | `dev-docs/ai/START_HERE.md` | {source} | {apa yg diextract} | {apa yg kurang} |
 | `dev-docs/ai/PROJECT_CONTEXT.md` | {source} | {apa yg diextract} | {apa yg kurang} |
 | `dev-docs/ai/MODULE_MAP.md` | {source} | {apa yg diextract} | {apa yg kurang} |
@@ -68,7 +68,7 @@
 ### prod-docs/ Output
 
 | Target File | Source File(s) | Content Extracted | Missing Info |
-|-------------|----------------|--------------------|--------------|
+| ------------- | ---------------- | -------------------- | -------------- |
 | `prod-docs/AGENTS.md` | {source} | {apa yg diextract} | {apa yg kurang} |
 | `prod-docs/docs/architecture/overview.md` | {source} | {apa yg diextract} | {apa yg kurang} |
 | `prod-docs/docs/tech-stack/*` | {source} | {apa yg diextract} | {apa yg kurang} |
@@ -81,6 +81,7 @@
 ### Checklist per Folder Output
 
 #### planning/
+
 - [ ] `PROJECT_BRIEF.md` — {status: done / partial / n/a}
 - [ ] `prd.md` — {status}
 - [ ] `architecture.md` — {status}
@@ -91,6 +92,7 @@
 - [ ] `timeline.md` — {status}
 
 #### dev-docs/ai/
+
 - [ ] `START_HERE.md` — {status}
 - [ ] `PROJECT_CONTEXT.md` — {status}
 - [ ] `PROJECT_MENTAL_MODEL.md` — {status}
@@ -105,19 +107,23 @@
 - [ ] `VERSION.md` — {status}
 
 #### dev-docs/architecture/
+
 - [ ] `api-flow.md` — {status}
 - [ ] `backend-structure.md` — {status}
 - [ ] `database.md` — {status}
 - [ ] `frontend-structure.md` — {status}
 
 #### dev-docs/modules/
+
 - [ ] `{modul_a}/` — {status}
 - [ ] `{modul_b}/` — {status}
 
 #### dev-docs/integrations/
+
 - [ ] `{service_a}.md` — {status}
 
 #### prod-docs/
+
 - [ ] `AGENTS.md` — {status}
 - [ ] `docs/architecture/overview.md` — {status}
 - [ ] `docs/tech-stack/*` — {status}
@@ -146,7 +152,7 @@ Content dari old docs yang tidak bisa di-mapping ke folder output manapun:
 ## 6. Backup Info
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Backup Path | `backup/old-docs/` |
 | Original Location | `{path asli old docs}` |
 | Backup Created | `{YYYY-MM-DD HH:mm}` |

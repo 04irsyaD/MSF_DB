@@ -16,7 +16,7 @@
 ## 2. Base URL & Environment
 
 | Environment | Base URL |
-|------------|----------|
+| ------------ | ---------- |
 | Local | `http://localhost:{port}` |
 | Staging | `https://staging-api.{domain}` |
 | Production | `https://api.{domain}` |
@@ -26,7 +26,7 @@
 ## 3. Authentication
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Method | `{Bearer Token / JWT / Sanctum / Session}` |
 | Token Header | `Authorization: Bearer {your_token}` |
 | Token Source | `POST /api/v1/auth/login` |
@@ -51,6 +51,7 @@ curl -X POST {{base_url}}/api/v1/auth/login \
 ```
 
 Response:
+
 ```json
 {
   "data": {
@@ -65,6 +66,7 @@ Response:
 ## 4. Standard Response Format
 
 ### Success
+
 ```json
 {
   "data": { ... },
@@ -73,6 +75,7 @@ Response:
 ```
 
 ### Paginated
+
 ```json
 {
   "data": [ ... ],
@@ -86,6 +89,7 @@ Response:
 ```
 
 ### Error
+
 ```json
 {
   "message": "Error description",
@@ -96,8 +100,9 @@ Response:
 ```
 
 ### HTTP Status Codes
+
 | Code | Meaning |
-|------|---------|
+| ------ | --------- |
 | 200 | OK |
 | 201 | Created |
 | 401 | Unauthorized (token invalid/expired) |
@@ -114,7 +119,7 @@ Response:
 ### Auth
 
 | Method | Endpoint | Purpose |
-|--------|----------|---------|
+| -------- | ---------- | --------- |
 | POST | `/api/v1/auth/login` | Login, dapat token |
 | GET | `/api/v1/auth/profile` | Lihat profile user |
 | PUT | `/api/v1/auth/profile` | Update profile |
@@ -125,7 +130,7 @@ Response:
 {jelaskan setiap modul — endpoint list, special notes, business logic yang perlu diketahui developer}
 
 | Method | Endpoint | Purpose | Notes |
-|--------|----------|---------|-------|
+| -------- | ---------- | --------- | ------- |
 | GET | `/api/v1/{prefix}` | List | Pagination: `?page=&per_page=` |
 | GET | `/api/v1/{prefix}/{id}` | Detail | |
 | POST | `/api/v1/{prefix}` | Create | |
@@ -137,6 +142,7 @@ Response:
 ## 6. Special Notes / Gotchas
 
 **Hal-hal penting yang harus diketahui developer:**
+
 - `{catatan_1 — contoh: "Field status menggunakan enum: active, inactive, suspended"}`
 - `{catatan_2 — contoh: "Upload file max 5MB, format: jpg, png, pdf"}`
 - `{catatan_3 — contoh: "Rate limit: 60 req/min per token"}`

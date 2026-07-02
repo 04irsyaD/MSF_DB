@@ -22,7 +22,7 @@ Contoh: "SIWASJADA v2 adalah sistem informasi wajib pajak daerah untuk BAPENDA K
 ### Target Users
 
 | Role | Deskripsi | Kebutuhan Utama |
-|------|----------|----------------|
+| ------ | ---------- | ---------------- |
 | `{role_1}` | `{deskripsi}` | `{kebutuhan}` |
 | `{role_2}` | `{deskripsi}` | `{kebutuhan}` |
 
@@ -63,11 +63,13 @@ Contoh: "SIWASJADA v2 adalah sistem informasi wajib pajak daerah untuk BAPENDA K
 ## 4. Constraints & Assumptions
 
 ### Constraints
+
 - `{batasan_teknis}`
 - `{batasan_bisnis}`
 - `{batasan_waktu}`
 
 ### Assumptions
+
 - `{asumsi_1}`
 - `{asumsi_2}`
 
@@ -84,5 +86,6 @@ Contoh: "SIWASJADA v2 adalah sistem informasi wajib pajak daerah untuk BAPENDA K
 ## 6. Out of Scope
 
 **Yang TIDAK akan dibangun di versi ini:**
+
 - `{item_1}`
 - `{item_2}`

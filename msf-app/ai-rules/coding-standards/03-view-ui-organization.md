@@ -35,6 +35,7 @@ resources/views/pages/hris/employee/
 ```
 
 **Contoh form.blade.php:**
+
 ```blade
 @extends('layouts.app')
 
@@ -68,6 +69,7 @@ resources/views/pages/hris/employee/
 ```
 
 **Contoh partials/form_personal.blade.php:**
+
 ```blade
 <div class="card mb-4">
     <div class="card-header">
@@ -122,6 +124,7 @@ src/pages/hris/employee/
 ```
 
 **Contoh EmployeeForm.tsx:**
+
 ```tsx
 import { useForm } from 'react-hook-form';
 import PersonalDataSection from './components/PersonalDataSection';
@@ -156,6 +159,7 @@ export default function EmployeeForm({ employee, onSubmit }: EmployeeFormProps) 
 ```
 
 **Contoh components/PersonalDataSection.tsx:**
+
 ```tsx
 import { Control, Controller } from 'react-hook-form';
 import { EmployeeFormData } from '../types';
@@ -206,6 +210,7 @@ src/pages/hris/employee/
 ```
 
 **Contoh EmployeeForm.vue:**
+
 ```vue
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">

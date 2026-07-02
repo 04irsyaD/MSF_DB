@@ -37,6 +37,7 @@ routes/
 ```
 
 **Contoh hris_web.php:**
+
 ```php
 <?php
 
@@ -55,6 +56,7 @@ Route::middleware(['auth', 'verified'])->prefix('hris')->name('hris.')->group(fu
 ```
 
 **Contoh partials/hris/employee.php:**
+
 ```php
 <?php
 
@@ -93,6 +95,7 @@ routes/
 ```
 
 **Contoh routes/index.js:**
+
 ```javascript
 const express = require('express');
 const router = express.Router();
@@ -105,6 +108,7 @@ module.exports = router;
 ```
 
 **Contoh routes/hris/employee.js:**
+
 ```javascript
 const express = require('express');
 const router = express.Router();
@@ -134,6 +138,7 @@ routes/
 ```
 
 **Contoh routes/routes.go:**
+
 ```go
 package routes
 
@@ -147,6 +152,7 @@ func SetupRoutes(app *fiber.App) {
 ```
 
 **Contoh routes/hris_employee.go:**
+
 ```go
 package routes
 

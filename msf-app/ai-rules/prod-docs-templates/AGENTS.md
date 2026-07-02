@@ -11,7 +11,7 @@
 ## Server Information
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Server Name | `{server_name}` |
 | Hostname | `{hostname}` |
 | IP Address | `{ip_address}` |
@@ -21,7 +21,7 @@
 
 ---
 
-##  PRE-DEPLOYMENT: Informasi dari Development
+## PRE-DEPLOYMENT: Informasi dari Development
 
 **WAJIB dibaca SEBELUM setup server atau deployment pertama kali.**
 
@@ -70,7 +70,7 @@ Jika kamu AI agent yang hanya handle server production (tidak terlibat developme
 ### Informasi Kunci yang Harus Didapat
 
 | Kategori | Sumber (dev-docs) | Target (prod-docs) |
-|----------|-------------------|-------------------|
+| ---------- | ------------------- | ------------------- |
 | Tech stack versions | `ai/PROJECT_CONTEXT.md` | `docs/tech-stack/*.md` |
 | Architecture | `architecture/` | `docs/architecture/overview.md` |
 | Database schema | `architecture/database.md` | `docs/tech-stack/database.md` |
@@ -97,7 +97,7 @@ Jika kamu AI agent yang hanya handle server production (tidak terlibat developme
 
 ---
 
-##  CRITICAL: Production Environment Rules
+## CRITICAL: Production Environment Rules
 
 ### 1. READ-FIRST Protocol (WAJIB Setiap Sesi Baru)
 
@@ -121,6 +121,7 @@ Sebelum menjalankan task APAPUN, WAJIB baca:
 ### 3. Documentation is MANDATORY (Non-Negotiable)
 
 Setiap task WAJIB menghasilkan:
+
 - Laporan task di `~/reports-agents/YYYY-MM-DD/<task-name>.md`
 - Update `~/reports-agents/changelog.md` (audit log entry)
 - Update `~/docs/changelog.md` jika ada perubahan teknologi/arsitektur
@@ -206,7 +207,7 @@ Setiap hari ada task, WAJIB:
 Saat ada perubahan sistem, WAJIB update **SEMUA file yang relevan** di `~/docs/`:
 
 | Perubahan | File yang diupdate |
-|-----------|-------------------|
+| ----------- | ------------------- |
 | Arsitektur (service baru/hapus, topology) | `~/docs/architecture/overview.md`, `network-topology.md`, `~/docs/changelog.md` |
 | Tech stack (upgrade, ganti versi) | `~/docs/tech-stack/<komponen>.md`, `~/docs/changelog.md` |
 | Konfigurasi (rate limit, resource, port) | File terkait di `~/docs/`, `~/docs/changelog.md` |
@@ -255,6 +256,7 @@ tail -f /var/log/nginx/error.log  # Ada error?
 ### 4. Update Documentation
 
 Setelah task selesai:
+
 1. Tulis laporan task
 2. Update changelog
 3. Update docs yang terdampak
@@ -265,7 +267,7 @@ Setelah task selesai:
 ## COMMANDS YANG BERBAHAYA (JANGAN JALANKAN TANPA APPROVAL)
 
 | Command | Risiko | Alternatif |
-|---------|--------|-----------|
+| --------- | -------- | ----------- |
 | `rm -rf` | Data loss permanent | Gunakan `trash` atau backup dulu |
 | `docker system prune -a` | Hapus semua unused images | Gunakan `docker image prune` saja |
 | `DROP TABLE/DATABASE` | Data loss | Selalu backup dulu |
@@ -357,7 +359,7 @@ htop
 ## FILE LOCATIONS
 
 | Item | Location |
-|------|----------|
+| ------ | ---------- |
 | Server documentation | `~/docs/` |
 | Task reports | `~/reports-agents/` |
 | Application code | `/opt/<app-name>/` |
@@ -372,7 +374,7 @@ htop
 ## CONTACT & ESCALATION
 
 | Role | Contact | When to Escalate |
-|------|---------|------------------|
+| ------ | --------- | ------------------ |
 | DevOps Lead | `{contact}` | Infrastructure issues, security incidents |
 | Backend Lead | `{contact}` | Application bugs, database issues |
 | Frontend Lead | `{contact}` | UI issues, frontend bugs |

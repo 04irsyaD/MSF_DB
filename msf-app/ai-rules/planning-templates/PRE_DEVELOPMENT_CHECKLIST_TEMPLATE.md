@@ -5,20 +5,22 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **Kapan checklist ini diisi:**
+
 - Sebelum mulai development (setelah `planning/PROJECT_BRIEF.md` selesai)
 - Saat ada perubahan template atau UI framework
 - Saat onboarding ke project existing yang menggunakan template
 
 **Siapa yang mengisi:**
+
 - AI agent (berdasarkan analisis `PROJECT_BRIEF.md` dan `PROJECT_CONTEXT.md`)
 - Verifikasi oleh user jika ada ambiguitas
 
 ---
 
-##  CRITICAL: UI/UX Template Readiness
+## CRITICAL: UI/UX Template Readiness
 
 ### A. Template Declaration Check
 
@@ -43,6 +45,7 @@
 - [ ] Assets (images, fonts, icons) sudah lengkap
 
 **Jika file tidak lengkap:**
+
 - [ ] User sudah dihubungi untuk provide file yang kurang
 - [ ] Development **DITUNDA** sampai file template lengkap
 
@@ -66,6 +69,7 @@
 - [ ] Identifikasi komponen yang perlu di-customize (jika fitur tidak tersedia di template)
 
 **Contoh mapping:**
+
 ```
 Halaman: Dashboard Admin
 - Layout: template/layouts/default.html (sidebar + header + content)
@@ -102,6 +106,7 @@ Halaman: Dashboard Admin
 - [ ] Framework sudah di-install di project (atau akan di-install saat setup)
 
 **Framework yang diperbolehkan:**
+
 - ✅ Bootstrap 5 (atau versi terbaru)
 - ✅ Tailwind CSS
 - ✅ Material UI (React)
@@ -168,7 +173,7 @@ Halaman: Dashboard Admin
 
 ---
 
-##  Referensi
+## Referensi
 
 - **Template Declaration:** `planning/PROJECT_BRIEF.md` section "2b. UI/UX Template & Design System"
 - **Template Context:** `dev-docs/ai/PROJECT_CONTEXT.md` section "UI/UX Template & Framework"

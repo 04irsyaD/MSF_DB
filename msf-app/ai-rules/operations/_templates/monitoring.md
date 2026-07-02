@@ -102,8 +102,9 @@ docker-compose up -d
 ```
 
 **4. Access:**
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (credentials: See .env: GRAFANA_ADMIN_USER / GRAFANA_ADMIN_PASSWORD)
+
+- Prometheus: <http://localhost:9090>
+- Grafana: <http://localhost:3000> (credentials: See .env: GRAFANA_ADMIN_USER / GRAFANA_ADMIN_PASSWORD)
 
 ---
 
@@ -112,12 +113,14 @@ docker-compose up -d
 ### Laravel (with spatie/laravel-prometheus)
 
 **Installation:**
+
 ```bash
 composer require spatie/laravel-prometheus
 php artisan vendor:publish --provider="Spatie\Prometheus\PrometheusServiceProvider"
 ```
 
 **Config:** `config/prometheus.php`
+
 ```php
 return [
     'enabled' => env('PROMETHEUS_ENABLED', true),
@@ -127,6 +130,7 @@ return [
 ```
 
 **Add custom metrics:**
+
 ```php
 // app/Providers/AppServiceProvider.php
 use Spatie\Prometheus\Collectors\Collector;
@@ -159,11 +163,13 @@ class AppServiceProvider extends ServiceProvider
 ### Node.js (with prom-client)
 
 **Installation:**
+
 ```bash
 npm install prom-client
 ```
 
 **Setup:**
+
 ```javascript
 // src/metrics/index.js
 const client = require('prom-client');
@@ -211,6 +217,7 @@ module.exports = { metricsMiddleware, metricsHandler, ordersTotal };
 ```
 
 **Use in Express:**
+
 ```javascript
 // src/app.js
 const express = require('express');
@@ -231,12 +238,14 @@ app.get('/metrics', metricsHandler);
 ### Go (with prometheus/client_golang)
 
 **Installation:**
+
 ```bash
 go get github.com/prometheus/client_golang/prometheus
 go get github.com/prometheus/client_golang/prometheus/promhttp
 ```
 
 **Setup:**
+
 ```go
 // internal/metrics/metrics.go
 package metrics
@@ -267,6 +276,7 @@ var (
 ```
 
 **Use in HTTP handler:**
+
 ```go
 // cmd/server/main.go
 package main
@@ -307,17 +317,20 @@ func main() {
 ### Import Pre-built Dashboards
 
 **1. Access Grafana:**
+
 ```
 http://localhost:3000
 ```
 
 **2. Add Prometheus data source:**
+
 - Configuration → Data Sources → Add data source
 - Select Prometheus
-- URL: http://prometheus:9090
+- URL: <http://prometheus:9090>
 - Save & Test
 
 **3. Import dashboards:**
+
 - Create → Import
 - Use dashboard ID from grafana.com:
   - Node Exporter Full: 1860
@@ -442,21 +455,25 @@ receivers:
 ## Verification
 
 **1. Check Prometheus targets:**
+
 ```
 http://localhost:9090/targets
 ```
 
 **2. Check metrics endpoint:**
+
 ```bash
 curl http://localhost:{metrics_port}/metrics
 ```
 
 **3. Check Grafana dashboards:**
+
 ```
 http://localhost:3000
 ```
 
 **4. Test alert:**
+
 ```bash
 # Trigger test alert
 curl -X POST http://localhost:9090/api/v1/alerts \
@@ -473,6 +490,7 @@ curl -X POST http://localhost:9090/api/v1/alerts \
 **Symptom:** curl returns 404 or connection refused
 
 **Solutions:**
+
 1. Check if metrics endpoint is configured
 2. Check firewall rules
 3. Check application logs
@@ -482,6 +500,7 @@ curl -X POST http://localhost:9090/api/v1/alerts \
 **Symptom:** Targets show "DOWN" in Prometheus UI
 
 **Solutions:**
+
 1. Check prometheus.yml configuration
 2. Check if metrics endpoint is accessible from Prometheus container
 3. Check network connectivity
@@ -491,6 +510,7 @@ curl -X POST http://localhost:9090/api/v1/alerts \
 **Symptom:** Data source test fails
 
 **Solutions:**
+
 1. Check Prometheus URL (use container name, not localhost)
 2. Check if Prometheus is running
 3. Check network connectivity
@@ -529,11 +549,13 @@ echo "Grafana: http://localhost:3000 (credentials: See .env)"
 ```
 
 **Run (auto-setup mode):**
+
 ```bash
 bash {project_path}/docs/operations/scripts/setup-monitoring.sh
 ```
 
 **Run (manual-setup mode):**
+
 ```bash
 # Copy commands dari script dan jalankan manual
 ```

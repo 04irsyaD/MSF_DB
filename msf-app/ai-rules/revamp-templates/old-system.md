@@ -10,7 +10,7 @@
 ## 1. System Identity
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Nama Sistem | `{nama}` |
 | Tahun Dibangun | `{YYYY}` |
 | URL Production | `{url}` |
@@ -22,7 +22,7 @@
 ## 2. Tech Stack (Old)
 
 | Layer | Technology | Version |
-|-------|-----------|---------|
+| ------- | ----------- | --------- |
 | Backend | `{Laravel, CodeIgniter, dll}` | `{versi}` |
 | Frontend | `{Blade, jQuery, Vue, dll}` | `{versi}` |
 | Database | `{MySQL, PostgreSQL}` | `{versi}` |
@@ -44,7 +44,7 @@
 ## 4. Database Inventory
 
 | Table | Rows (approx) | Size | Critical? | Notes |
-|-------|-------------|------|----------|-------|
+| ------- | ------------- | ------ | ---------- | ------- |
 | `{users}` | `{jumlah}` | `{ukuran}` | ✅ | |
 | `{tabel_lain}` | `{jumlah}` | `{ukuran}` | | |
 
@@ -86,6 +86,7 @@ apps/
 | 1 | `{masalah}` | `{dampak}` | `{High/Med/Low}` |
 
 **Kenapa revamp (bukan refactor):**
+
 - `{alasan — contoh: "Laravel versi lama tidak didukung, sulit upgrade"}`
 - `{alasan — contoh: "Ingin pisah BE dan FE untuk scalability"}`
 - `{alasan — contoh: "Framework tidak cocok untuk use case baru"}`
@@ -95,7 +96,7 @@ apps/
 ## 7. Integration Points (Existing)
 
 | Integration | Type | Critical? | Notes |
-|-----------|------|----------|-------|
+| ----------- | ------ | ---------- | ------- |
 | `{payment gateway}` | API | ✅ | `{catatan}` |
 | `{email service}` | SMTP | | `{catatan}` |
 

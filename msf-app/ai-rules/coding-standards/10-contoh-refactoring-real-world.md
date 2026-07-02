@@ -35,6 +35,7 @@ app/
 ```
 
 **Hasil:**
+
 - 1 file 3580 baris → 10+ files dengan masing-masing < 300 baris
 - Setiap file punya 1 tanggung jawab
 - Mudah di-test

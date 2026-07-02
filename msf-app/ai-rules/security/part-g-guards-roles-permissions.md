@@ -15,7 +15,7 @@
 ### Role & Permission Matrix
 
 | Role | Permissions | Access Scope |
-|------|------------|-------------|
+| ------ | ------------ | ------------- |
 | `{Super Admin}` | `{*}` | `{semua}` |
 | `{role_2}` | `{perm_1, perm_2}` | `{scope}` |
 

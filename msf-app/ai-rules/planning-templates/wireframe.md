@@ -10,7 +10,7 @@
 ## 1. Visual Identity
 
 | Item | Detail |
-|------|--------|
+| ------ | -------- |
 | Font | `{font family}` |
 | Primary Color | `{hex code}` |
 | Secondary Color | `{hex code}` |
@@ -42,6 +42,7 @@
 ## 3. Page Layouts
 
 ### Admin Layout
+
 ```
 ┌─────────────────────────────────────┐
 │  [Logo]           [User Menu]       │ ← Top Navbar
@@ -55,6 +56,7 @@
 ```
 
 ### Public Layout
+
 ```
 ┌─────────────────────────────────────┐
 │  [Logo]    [Menu Items]    [CTA]    │ ← Navbar
@@ -76,14 +78,17 @@
 **URL:** `/{prefix}` atau `/{prefix}/{id}`
 
 **Komponen:**
+
 - `{komponen_1}` — `{fungsi}`
 - `{komponen_2}` — `{fungsi}`
 
 **Interaksi:**
+
 - `{interaksi_1}` — contoh: "Klik tombol Create → muncul modal form"
 - `{interaksi_2}` — contoh: "Klik row table → navigasi ke detail"
 
 **State yang perlu ditangani:**
+
 - Loading: skeleton / spinner
 - Empty: pesan "Belum ada data" + CTA
 - Error: alert dengan pesan error
@@ -94,7 +99,7 @@
 ## 5. Common Components
 
 | Komponen | Deskripsi | Tempat Dipakai |
-|----------|----------|---------------|
+| ---------- | ---------- | --------------- |
 | `{DataTable}` | Tabel dengan server-side processing | Semua list page |
 | `{ModalForm}` | Form dalam modal untuk create/edit | Form yang simple |
 | `{DeleteConfirm}` | Konfirmasi sebelum hapus (SweetAlert) | Semua delete action |
@@ -106,10 +111,11 @@
 ## 6. Responsive Breakpoints
 
 | Breakpoint | Width | Target |
-|-----------|-------|--------|
+| ----------- | ------- | -------- |
 | Mobile | `< 768px` | Smartphone |
 | Tablet | `768px - 1024px` | iPad |
 | Desktop | `> 1024px` | Laptop/Monitor |
 
 **Responsive strategy:**
+
 - `{stack vertical / hide sidebar / collapse menu}`

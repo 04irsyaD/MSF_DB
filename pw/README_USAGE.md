@@ -13,8 +13,10 @@
 cd pw
 python quick.py
 ```
+
 cd pw
 python quick.py
+
 ```
 
 **Output:**
@@ -22,10 +24,12 @@ python quick.py
 1️⃣  Generate 3 Password Random:
     1. 9APvyglW5GMZ
 ```
+
 1️⃣  Generate 3 Password Random:
    1. 9APvyglW5GMZ
    2. f2nSg35snxl3
    3. aBg4gcZcWYkk
+
 ```
     2. f2nSg35snxl3
     3. aBg4gcZcWYkk
@@ -35,6 +39,7 @@ python quick.py
 ## 📖 File yang Tersedia
 
 ### 1. `quick.py` - Untuk penggunaan cepat
+
 ```python
  # Import fungsi
  from quick import quick_password, quick_hash, verify
@@ -69,7 +74,9 @@ print(hashed)  # Output: $2b$10$...
 is_match = verify("example-password", hashed)
 print(is_match)  # True atau False
 ```
+
 print(is_match)  # True atau False
+
 ```
 
 ### 2. `example_usage.py` - Contoh berbagai use case
@@ -117,13 +124,16 @@ python create_generation.py
 ## 🔧 Cara Praktis Sesuai Kebutuhan
 
 ### ✅ Kebutuhan 1: Generate 1 Password Random
+
 ```python
 from quick import quick_password
 
 password = quick_password(length=12)
 print(f"Password: {password}")
 ```
+
 print(f"Password: {password}")
+
 ```
 
 ### ✅ Kebutuhan 2: Hash untuk Database
@@ -153,7 +163,9 @@ hashed_password = quick_hash(plain_password, rounds=10)
 sql = f"INSERT INTO users (username, email, password) VALUES ('{username}', '{email}', '{hashed_password}');"
 print(sql)
 ```
+
 print(sql)
+
 ```
 
 ### ✅ Kebutuhan 3: Verifikasi Login
@@ -178,10 +190,12 @@ if is_correct:
 else:
     print("Password salah!")
 ```
+
 if is_correct:
     print("Login berhasil!")
 else:
     print("Password salah!")
+
 ```
 
 ### ✅ Kebutuhan 4: Generate Banyak Password
@@ -198,8 +212,10 @@ for i in range(1, 6):
     pwd = quick_password(14)
     print(f"User {i}: {pwd}")
 ```
+
     pwd = quick_password(14)
     print(f"User {i}: {pwd}")
+
 ```
 
 ### ✅ Kebutuhan 5: Verifikasi Hash yang Diberikan
@@ -219,10 +235,12 @@ if verify(test_password, given_hash):
 else:
     print("✗ Password tidak cocok")
 ```
+
 if verify(test_password, given_hash):
     print("✓ Password cocok!")
 else:
     print("✗ Password tidak cocok")
+
 ```
 
 
@@ -236,7 +254,9 @@ Agar bisa hash dengan format `$2b$10$...`, install bcrypt:
 ```powershell
 pip install bcrypt
 ```
+
 pip install bcrypt
+
 ```
 
 
@@ -283,8 +303,10 @@ from quick import quick_hash
 password = quick_hash("user_password", rounds=10)
 # Gunakan di database: DB::table('users')->insert(['password' => password])
 ```
+
 password = quick_hash("user_password", rounds=10)
 # Gunakan di database: DB::table('users')->insert(['password' => password])
+
 ```
 
 ### Node.js kompatibel:
@@ -300,7 +322,9 @@ from quick import quick_hash
 hash_result = quick_hash("password123")
 print(hash_result)
 ```
+
 print(hash_result)
+
 ```
 
 

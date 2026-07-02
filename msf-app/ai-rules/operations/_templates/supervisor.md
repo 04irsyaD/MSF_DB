@@ -24,6 +24,7 @@
 - PHP/Node.js/Go sudah terinstall sesuai requirement
 
 **Install supervisor (jika belum):**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
@@ -53,6 +54,7 @@ stopwaitsecs=3600
 ```
 
 **Penjelasan:**
+
 - `process_name` — nama process (otomatis numbering jika numprocs > 1)
 - `command` — command yang dijalankan
 - `autostart` — auto start saat server boot
@@ -91,17 +93,20 @@ sudo supervisorctl start {project}-{service}:*
 ## Verification
 
 **Check status:**
+
 ```bash
 sudo supervisorctl status {project}-{service}:*
 ```
 
 **Expected output:**
+
 ```
 {project}-{service}:{project}-{service}_00   RUNNING   pid 12345, uptime 0:05:23
 {project}-{service}:{project}-{service}_01   RUNNING   pid 12346, uptime 0:05:23
 ```
 
 **Check logs:**
+
 ```bash
 tail -f {project_path}/storage/logs/{service}.log
 ```
@@ -136,6 +141,7 @@ sudo supervisorctl tail -f {project}-{service}:{project}-{service}_00
 **Symptom:** Status FATAL atau BACKOFF
 
 **Solution:**
+
 ```bash
 # Check log
 sudo supervisorctl tail {project}-{service}:{project}-{service}_00 stderr
@@ -151,6 +157,7 @@ sudo supervisorctl tail {project}-{service}:{project}-{service}_00 stderr
 **Symptom:** Status RUNNING tapi uptime reset terus
 
 **Solution:**
+
 - Check application logs untuk error
 - Increase `stopwaitsecs` jika graceful shutdown butuh waktu lama
 - Check memory limit (OOM killer)
@@ -160,6 +167,7 @@ sudo supervisorctl tail {project}-{service}:{project}-{service}_00 stderr
 **Symptom:** Log file kosong atau tidak ada
 
 **Solution:**
+
 ```bash
 # Check log directory exists and writable
 ls -la {project_path}/storage/logs/
@@ -229,11 +237,13 @@ echo "Supervisor setup completed for $SERVICE_NAME"
 ```
 
 **Run (auto-setup mode):**
+
 ```bash
 bash {project_path}/docs/operations/scripts/setup-supervisor-{service}.sh
 ```
 
 **Run (manual-setup mode):**
+
 ```bash
 # Copy commands dari script dan jalankan manual
 ```

@@ -18,7 +18,7 @@ Server ini mengikuti **security best practices** dengan defense-in-depth approac
 ## Security Layers
 
 | Layer | Measures |
-|-------|----------|
+| ------- | ---------- |
 | **Network** | Firewall, private network, VPN, DDoS protection |
 | **OS** | Minimal packages, automatic updates, file permissions |
 | **SSH** | Key-only auth, no root login, fail2ban |
@@ -48,7 +48,7 @@ sudo ufw default allow outgoing
 ### Allowed Ports
 
 | Port | Protocol | Source | Purpose |
-|------|----------|--------|---------|
+| ------ | ---------- | -------- | --------- |
 | 22 | TCP | {admin_ips} | SSH access |
 | 80 | TCP | Load Balancer | HTTP |
 | 443 | TCP | Load Balancer | HTTPS |
@@ -210,6 +210,7 @@ docker inspect {container_name} | grep -A 10 "NetworkSettings"
 {Jelaskan jika menggunakan WAF}
 
 Contoh:
+
 - **ModSecurity**: Open-source WAF dengan OWASP Core Rule Set
 - **Cloudflare WAF**: Cloud-based WAF dengan custom rules
 - **AWS WAF**: Managed WAF service
@@ -472,6 +473,7 @@ oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_standard /usr/sh
 {Jelaskan penetration testing yang dilakukan}
 
 Contoh:
+
 - **Internal**: Quarterly security review by DevOps team
 - **External**: Annual penetration test by third-party security firm
 - **Continuous**: Automated security scanning in CI/CD pipeline
@@ -491,7 +493,7 @@ Contoh:
 ### Emergency Contacts
 
 | Role | Contact | When to Call |
-|------|---------|--------------|
+| ------ | --------- | -------------- |
 | Security Lead | {contact} | Security incidents, breaches |
 | DevOps Lead | {contact} | Infrastructure compromise |
 | Legal | {contact} | Data breach, compliance issues |

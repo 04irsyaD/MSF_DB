@@ -51,7 +51,7 @@ Internet
 ## IP Addressing
 
 | Server/Service | IP Address | Purpose |
-|----------------|------------|---------|
+| ---------------- | ------------ | --------- |
 | Load Balancer | {public_ip} | Public endpoint, SSL termination |
 | App Server | {app_ip} | Application server (this server) |
 | Database Server | {db_ip} | Database servers |
@@ -72,7 +72,7 @@ Internet
 ### Internal (antara services)
 
 | Port | Service | Bind Address | Purpose |
-|------|---------|--------------|---------|
+| ------ | --------- | -------------- | --------- |
 | 9000 | {app_1} FPM | 127.0.0.1 | PHP-FPM for {app_1} |
 | 3000 | {app_2} | 0.0.0.0 | Node.js app (host network) |
 | 3001 | {app_3} | 127.0.0.1 | Analytics app |
@@ -81,7 +81,7 @@ Internet
 ### Outbound (ke external services)
 
 | Destination | Port | Purpose |
-|-------------|------|---------|
+| ------------- | ------ | --------- |
 | {db_ip} | 3306 | MariaDB connection |
 | {db_ip} | 5432 | PostgreSQL connection |
 | api.github.com | 443 | Auto-deploy webhook |
@@ -102,7 +102,7 @@ sudo ufw status verbose
 ### Active Rules
 
 | Rule | Direction | Port | Source | Action | Purpose |
-|------|-----------|------|--------|--------|---------|
+| ------ | ----------- | ------ | -------- | -------- | --------- |
 | 1 | IN | 22 | {admin_cidr} | ALLOW | SSH access |
 | 2 | IN | 80 | {lb_ip} | ALLOW | HTTP from LB |
 | 3 | IN | 443 | {lb_ip} | ALLOW | HTTPS from LB |
@@ -113,7 +113,7 @@ sudo ufw status verbose
 ## Docker Networks
 
 | Network | Container | Subnet | Purpose |
-|---------|-----------|--------|---------|
+| --------- | ----------- | -------- | --------- |
 | {app_1}-net | {app_1}, redis | 172.20.0.0/16 | Internal {app_1} communication |
 | host | {app_2} | Host network | Performance (no NAT overhead) |
 | bridge | {app_3} | 172.17.0.0/16 | Default Docker bridge |
@@ -125,7 +125,7 @@ sudo ufw status verbose
 ### Internal DNS
 
 | Hostname | IP | Purpose |
-|----------|-----|---------|
+| ---------- | ----- | --------- |
 | {hostname} | {ip} | This server |
 | db.{domain} | {db_ip} | Database server |
 | backup.{domain} | {backup_ip} | Backup server |
@@ -154,6 +154,7 @@ cat /etc/resolv.conf
 SSL termination dilakukan di **Load Balancer**, bukan di Nginx. Nginx hanya menerima HTTP traffic.
 
 Header yang di-forward:
+
 - `X-Forwarded-Proto: https` — Indicate original protocol
 - `X-Forwarded-For: {client_ip}` — Original client IP
 - `X-Real-IP: {client_ip}` — Real client IP
@@ -163,6 +164,7 @@ Header yang di-forward:
 {Jelaskan proses renewal certificate}
 
 Contoh:
+
 - Certificate dari Let's Encrypt
 - Auto-renewal via certbot cronjob
 - Renewal 30 hari sebelum expired
@@ -177,6 +179,7 @@ Contoh:
 {Jelaskan konfigurasi load balancer}
 
 Contoh:
+
 - **Algorithm**: Round Robin / Least Connections
 - **Health Check**: GET /health setiap 10 detik
 - **Session Persistence**: None (stateless)
@@ -187,7 +190,7 @@ Contoh:
 {Jelaskan routing rules di Nginx}
 
 | Domain/Path | Upstream | Purpose |
-|-------------|----------|---------|
+| ------------- | ---------- | --------- |
 | {domain} | {app_2}:3000 | Frontend |
 | {domain}/admin | {app_1}:9000 | CMS admin |
 | {domain}/api | {app_1}:9000 | API endpoints |
@@ -231,7 +234,7 @@ sudo fail2ban-client status sshd
 ### Common Issues
 
 | Issue | Symptoms | Solution |
-|-------|----------|----------|
+| ------- | ---------- | ---------- |
 | Cannot connect to DB | Connection timeout | Check firewall, security group, DB server status |
 | Nginx 502 Bad Gateway | Upstream not responding | Check container status, logs, resource usage |
 | SSL certificate error | Browser warning | Check certificate validity, renewal status |

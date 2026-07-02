@@ -11,6 +11,7 @@
 File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yang dilakukan di server ini. Setiap perubahan harus didokumentasikan dengan tanggal, deskripsi, alasan, dan dampak.
 
 **Format Entry:**
+
 ```markdown
 ### YYYY-MM-DD — {Judul Perubahan}
 **Kategori:** {Architecture/Tech Stack/Security/Operations/Configuration}
@@ -40,7 +41,8 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 
 {Catat perubahan arsitektur seperti: penambahan service baru, perubahan topology, scaling, dll}
 
-#### Template:
+#### Template
+
 ```markdown
 ### YYYY-MM-DD — {Judul}
 **Kategori:** Architecture
@@ -58,7 +60,8 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 
 {Catat perubahan tech stack seperti: upgrade versi, ganti library, tambah dependency, dll}
 
-#### Template:
+#### Template
+
 ```markdown
 ### YYYY-MM-DD — {Judul}
 **Kategori:** Tech Stack
@@ -75,7 +78,8 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 
 {Catat perubahan security seperti: hardening, patch, firewall rules, dll}
 
-#### Template:
+#### Template
+
 ```markdown
 ### YYYY-MM-DD — {Judul}
 **Kategori:** Security
@@ -92,7 +96,8 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 
 {Catat perubahan operational seperti: backup strategy, monitoring, deployment, dll}
 
-#### Template:
+#### Template
+
 ```markdown
 ### YYYY-MM-DD — {Judul}
 **Kategori:** Operations
@@ -109,7 +114,8 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 
 {Catat perubahan konfigurasi seperti: environment variables, resource limits, dll}
 
-#### Template:
+#### Template
+
 ```markdown
 ### YYYY-MM-DD — {Judul}
 **Kategori:** Configuration
@@ -176,7 +182,7 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 ### Change Approval
 
 | Change Type | Approval Required |
-|-------------|-------------------|
+| ------------- | ------------------- |
 | Configuration (minor) | Self-approve |
 | Configuration (major) | DevOps Lead |
 | Tech Stack | Backend Lead + DevOps Lead |
@@ -190,7 +196,7 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 ### Changes by Category (Last 6 Months)
 
 | Category | Count | Percentage |
-|----------|-------|------------|
+| ---------- | ------- | ------------ |
 | Architecture | {count} | {%} |
 | Tech Stack | {count} | {%} |
 | Security | {count} | {%} |
@@ -201,7 +207,7 @@ File ini mencatat **semua perubahan teknologi, arsitektur, dan konfigurasi** yan
 ### Changes by Month
 
 | Month | Count |
-|-------|-------|
+| ------- | ------- |
 | 2026-06 | {count} |
 | 2026-05 | {count} |
 | 2026-04 | {count} |

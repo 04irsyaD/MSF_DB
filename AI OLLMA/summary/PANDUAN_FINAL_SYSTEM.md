@@ -7,7 +7,7 @@ Sistem ini adalah **solusi final** yang menghasilkan **DOCX profesional SAJA** (
 ### ✅ YANG SUDAH BERHASIL
 
 1. **Template-Compliant Output**: DOCX dengan format profesional yang konsisten
-2. **AI-Enhanced Descriptions**: Deskripsi bisnis yang cerdas dan kontekstual 
+2. **AI-Enhanced Descriptions**: Deskripsi bisnis yang cerdas dan kontekstual
 3. **Categorization**: Pengelompokan tabel berdasarkan fungsi (Auth, Logging, System, etc.)
 4. **Executive Summary**: Ringkasan dengan tabel statistik yang profesional
 5. **Batch Processing**: Opsi untuk memproses 15, 75, atau semua 170 tabel
@@ -36,32 +36,38 @@ Sistem ini adalah **solusi final** yang menghasilkan **DOCX profesional SAJA** (
 ### 🚀 CARA MENGGUNAKAN
 
 #### Option 1: Quick Sample (Direkomendasikan untuk testing)
+
 ```bash
 cd "AI OLLMA/summary/scripts"
 echo "1" | python final_template_system.py
 ```
+
 - Memproses 15 tabel (2-3 menit)
 - Output: `Template_Sample_Documentation.docx`
 
 #### Option 2: Medium Batch (Untuk dokumentasi lengkap)  
+
 ```bash
 cd "AI OLLMA/summary/scripts"
 echo "2" | python final_template_system.py
 ```
+
 - Memproses 75 tabel (~30-40 menit)
 - Output: `Template_Medium_Documentation.docx`
 
 #### Option 3: Complete Database (Untuk dokumentasi penuh)
+
 ```bash
 cd "AI OLLMA/summary/scripts"  
 echo "3" | python final_template_system.py
 ```
+
 - Memproses semua 170 tabel (~60-90 menit)
 - Output: `Template_Complete_All_Tables.docx`
 
 ### 📊 HASIL YANG DIDAPAT
 
-#### Format DOCX Profesional:
+#### Format DOCX Profesional
 - **Cover Page**: Header dengan nama database dan tanggal
 - **Executive Summary**: Ringkasan dengan tabel statistik
 - **Category Breakdown**: Pengelompokan berdasarkan fungsi
@@ -71,7 +77,7 @@ echo "3" | python final_template_system.py
   - Deskripsi bisnis (AI-generated)
   - Detail kolom dengan tipe dan relasi
 
-#### AI Descriptions Quality:
+#### AI Descriptions Quality
 - Menggunakan **deepseek-r1:8b** untuk deskripsi yang lebih akurat
 - Context-aware berdasarkan kategori tabel
 - Fokus pada **business value** dan fungsi dalam sistem
@@ -97,8 +103,9 @@ echo "3" | python final_template_system.py
 
 ### 🔧 CUSTOMIZATION
 
-#### Mengubah jumlah tabel:
+#### Mengubah jumlah tabel
 Edit parameter `max_tables` di dalam fungsi:
+
 ```python
 result = system.generate_final_template_documentation(
     max_tables=50,  # Ubah angka ini
@@ -106,14 +113,16 @@ result = system.generate_final_template_documentation(
 )
 ```
 
-#### Mengubah AI model:
+#### Mengubah AI model
 Edit baris di `generate_template_aware_ai_description`:
+
 ```python
 ["ollama", "run", "llama3", prompt],  # Ganti dengan model lain
 ```
 
-#### Mengubah database config:
+#### Mengubah database config
 Edit di `__init__`:
+
 ```python
 self.db_config = {
     'host': 'localhost',
@@ -145,6 +154,7 @@ self.db_config = {
 ### 📁 OUTPUT LOCATION
 
 Semua file hasil akan disimpan di:
+
 ```
 AI OLLMA/summary/output/
 ```

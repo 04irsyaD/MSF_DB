@@ -5,16 +5,16 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  CRITICAL: Split-Per-Concern Rule
+### CRITICAL: Split-Per-Concern Rule
 
 **DILARANG** membuat satu file `README.md` raksasa per modul. AI akan kehabisan context window saat membaca file panjang untuk mencari info spesifik.
 
 **WAJIB** — setiap modul di-split menjadi file-file kecil berdasarkan aspek:
 
 | File | Isi | Kapan Dibuat |
-|------|-----|-------------|
+| ------ | ----- | ------------- |
 | `README.md` | **Indeks pendek** — overview modul + daftar file dengan link (jangan tumpuk semua isi di sini) | Selalu |
 | `routes.md` | Route prefix, middleware, daftar endpoint | Jika modul punya route |
 | `controllers.md` | Daftar controller, method, tanggung jawab masing-masing | Jika modul punya controller |
@@ -25,6 +25,7 @@
 | `dependencies.md` | Modul lain yang di-depend, external API yang dipakai | Jika ada dependency |
 
 **Aturan:**
+
 - File `README.md` per modul cukup **indeks + overview 1 paragraf** — jangan tumpuk semua isi modul di satu README, itu memberatkan context window AI
 - Setiap file aspek **fokus pada 1 hal** — jangan campur routes + controllers + models
 - Jika satu aspek masih terlalu besar, split lagi (contoh: `controllers-auth.md`, `controllers-report.md`)

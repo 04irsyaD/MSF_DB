@@ -8,9 +8,9 @@ Sistem lengkap untuk menghasilkan dokumentasi database profesional menggunakan A
 Template_Documentasi.docx  ➜  AI + DB  ➜  Hasil_Dokumentasi.docx
 ```
 
-### Kemampuan Utama:
+### Kemampuan Utama
 - ✅ **AI Vision Template Analysis** - Membaca struktur visual template Word
-- ✅ **Enhanced Database Reader** - Ekstrak metadata lengkap (tabel, kolom, relasi) 
+- ✅ **Enhanced Database Reader** - Ekstrak metadata lengkap (tabel, kolom, relasi)
 - ✅ **Context-Aware AI Generator** - Deskripsi berkualitas berdasarkan konteks
 - ✅ **Format Preserving Generator** - Mempertahankan format asli template
 - ✅ **Production Ready** - Sistem terintegrasi siap produksi
@@ -18,6 +18,7 @@ Template_Documentasi.docx  ➜  AI + DB  ➜  Hasil_Dokumentasi.docx
 ## 🚀 Quick Start
 
 ### 1. Persiapan Environment
+
 ```bash
 # Masuk ke folder proyek
 cd "AI OLLMA/summary"
@@ -31,6 +32,7 @@ ollama list
 
 ### 2. Konfigurasi Database
 Edit file `.env`:
+
 ```env
 DB_HOST=localhost
 DB_PORT=5414
@@ -42,13 +44,15 @@ DB_SCHEMA=public
 
 ### 3. Jalankan Sistem
 
-#### Mode Testing (5 tabel):
+#### Mode Testing (5 tabel)
+
 ```bash
 python scripts/production_system.py
 ```
 
-#### Mode Full Processing:
+#### Mode Full Processing
 Edit `production_system.py` line 310:
+
 ```python
 success = system.run_production_process(max_tables=None)  # Semua tabel
 ```
@@ -156,6 +160,7 @@ Kolom (2):
 
 ### 2. **AI Model Customization**
 Edit di `production_system.py`:
+
 ```python
 # Ganti model Ollama
 result = subprocess.run(["ollama", "run", "deepseek-r1:8b", prompt], ...)
@@ -174,12 +179,14 @@ result = subprocess.run(["ollama", "run", "deepseek-r1:8b", prompt], ...)
 ## 🛠️ Troubleshooting
 
 ### 1. **Database Connection Issues**
+
 ```bash
 # Test koneksi manual
 psql -h localhost -p 5414 -U postgres -d deverm
 ```
 
 ### 2. **Ollama Issues**
+
 ```bash
 # Cek Ollama
 ollama list
@@ -224,7 +231,8 @@ ollama run llama3 "Test connection"
 
 ## 📞 Support
 
-### Quick Commands:
+### Quick Commands
+
 ```bash
 # Testing mode (5 tabel)
 python scripts/production_system.py
@@ -237,7 +245,7 @@ python scripts/ai_description_generator.py  # Test AI generator
 python scripts/db_reader.py                # Test DB connection
 ```
 
-### Konfigurasi Cepat:
+### Konfigurasi Cepat
 1. **Database**: Edit `.env` atau langsung di `production_system.py`
 2. **Template**: Ganti file di `template/`  
 3. **Output**: Hasil di folder `output/`

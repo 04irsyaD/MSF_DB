@@ -5,11 +5,12 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  Kapan Folder Ini Dibuat
+### Kapan Folder Ini Dibuat
 
 Folder `revamp/` HANYA untuk skenario:
+
 - Migrasi dari monolith → fullstack (1 old → 1 new)
 - Rewrite dari framework lama → framework baru
 - Re-architect dari legacy → modern stack
@@ -20,7 +21,7 @@ Folder `revamp/` HANYA untuk skenario:
 ### Dua Sub-Skenario
 
 | Skenario | Deskripsi | File Utama |
-|----------|----------|-----------|
+| ---------- | ---------- | ----------- |
 | **Revamp 1:1** | 1 old system di-rewrite ke 1 new system | `old-system.md` + `gap-analysis.md` + `migration-strategy.md` |
 | **Merger N:1** | Beberapa aplikasi terpisah digabung ke 1 aplikasi utama | `merger-plan.md` (gantikan `old-system.md`) |
 
@@ -43,7 +44,7 @@ Merger N:1:
 ### Struktur Folder
 
 | # | File | Purpose | Skenario | Wajib? |
-|---|------|---------|---------|--------|
+| --- | ------ | --------- | --------- | -------- |
 | 1 | `old-system.md` | Audit sistem lama — fitur, DB, arsitektur, pain points | Revamp 1:1 | ✅ (untuk revamp) |
 | 2 | `gap-analysis.md` | Gap: apa yang berubah, apa yang di-improve dari old ke new | Revamp 1:1 | ✅ (untuk revamp) |
 | 3 | `migration-strategy.md` | Strategi: paralel, big-bang, phased, rollback plan | Revamp 1:1 | ✅ (untuk revamp) |

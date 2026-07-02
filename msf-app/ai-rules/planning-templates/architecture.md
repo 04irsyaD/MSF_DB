@@ -7,7 +7,7 @@
 
 ---
 
-##  Project Type Declaration
+## Project Type Declaration
 
 | Item | Value |
 |------|-------|
@@ -19,7 +19,7 @@
 ## 1. Tech Stack
 
 | Layer | Technology | Version | Rationale |
-|-------|-----------|---------|----------|
+| ------- | ----------- | --------- | ---------- |
 | Backend | `{framework}` | `{versi}` | `{alasan pemilihan}` |
 | Frontend | `{framework}` | `{versi}` | `{alasan pemilihan}` |
 | Database | `{engine}` | `{versi}` | `{alasan pemilihan}` |
@@ -56,7 +56,7 @@
 ## 3. Component Breakdown
 
 | Komponen | Tipe | Tanggung Jawab | Teknologi |
-|----------|------|---------------|----------|
+| ---------- | ------ | --------------- | ---------- |
 | `{API Server}` | Backend | `{deskripsi}` | `{tek}` |
 | `{Admin Panel}` | Frontend | `{deskripsi}` | `{tek}` |
 | `{Public Site}` | Frontend | `{deskripsi}` | `{tek}` |
@@ -67,11 +67,13 @@
 ## 4. Routing & Middleware Strategy
 
 ### Monolith (Laravel/Node)
+
 - Route groups per module
 - Middleware: auth, role, permission
 - Namespace convention
 
 ### Fullstack (API + SPA)
+
 - API prefix: `/api/v1`
 - Auth: token-based (Sanctum/JWT/Session)
 - CORS policy
@@ -93,7 +95,7 @@
 ## 6. Security Plan
 
 | Area | Strategy |
-|------|----------|
+| ------ | ---------- |
 | Authentication | `{strategy}` |
 | Authorization | `{RBAC / ABAC / custom}` |
 | CSRF | `{protection}` |
@@ -110,7 +112,7 @@
 ```
 
 | Environment | Server | Domain | Branch |
-|------------|--------|--------|--------|
+| ------------ | -------- | -------- | -------- |
 | Local | `{localhost}` | — | `dev/feat` |
 | Staging | `{server}` | `{staging.example.com}` | `dev` |
 | Production | `{server}` | `{example.com}` | `main` |

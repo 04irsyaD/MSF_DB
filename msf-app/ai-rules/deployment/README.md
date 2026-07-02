@@ -3,6 +3,7 @@
 > **Status:** GUIDANCE + DATA FILE — AI mengisi data deployment spesifik project, tapi TIDAK mengubah instruksi di bawah "---" divider.
 > **Purpose:** Panduan deployment agar AI agent paham environment, build steps, dan prosedur release.
 > **Related:**
+>
 > - Git remote & repo credentials → [git-remote.md](./git-remote.md) (WAJIB — auto-detection dari local project atau manual input)
 > - SSH access rules → [ssh-access.md](./ssh-access.md) (hanya jika project punya server)
 > - Production readiness checklist → [production-readiness.md](./production-readiness.md)
@@ -10,15 +11,16 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Semua informasi tentang bagaimana aplikasi ini di-deploy. AI harus tahu ini sebelum menyarankan atau melakukan deployment.
 
-###  Dual-Repo: Deploy Per Repo
+### Dual-Repo: Deploy Per Repo
 
 Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda pipeline). Isi environment matrix dan build steps untuk masing-masing.
 
 **When to update:**
+
 - Saat environment baru ditambahkan
 - Saat build/deploy command berubah
 - Saat infrastruktur bermigrasi
@@ -29,7 +31,7 @@ Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda
 ## Environment Matrix
 
 | Environment | Backend URL | Frontend URL | Branch | Purpose |
-|------------|------------|-------------|--------|---------|
+| ------------ | ------------ | ------------- | -------- | --------- |
 | `{local}` | `{http://localhost:8000}` | `{http://localhost:3000}` | `{dev/feat/*}` | Development |
 | `{staging}` | `{https://api-staging.example.com}` | `{https://staging.example.com}` | `{dev}` | Testing |
 | `{production}` | `{https://api.example.com}` | `{https://example.com}` | `{main}` | Live |
@@ -39,7 +41,7 @@ Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda
 ## Infrastructure
 
 | Component | Technology | Notes |
-|-----------|-----------|-------|
+| ----------- | ----------- | ------- |
 | Web Server | `{Nginx / Apache / Caddy}` | `{catatan}` |
 | Backend Runtime | `{PHP-FPM / Node / Go}` | `{versi}` |
 | Database | `{MySQL / PostgreSQL / SQLite}` | `{versi + host}` |
@@ -56,6 +58,7 @@ Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda
 > **Gunakan command sesuai stack project.**
 
 ### Local Dev
+
 ```bash
 # Backend
 { composer install | npm install | go mod download }
@@ -68,6 +71,7 @@ Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda
 ```
 
 ### Production Build
+
 ```bash
 # Backend
 { composer install --no-dev --optimize-autoloader | npm ci | ... }
@@ -82,7 +86,7 @@ Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda
 ## CI/CD Pipeline
 
 | Stage | Repo | What Happens |
-|-------|------|-------------|
+| ------- | ------ | ------------- |
 | `{lint}` | `{backend}` | `{phpstan / eslint / pint}` |
 | `{test}` | `{backend}` | `{PHPUnit / Jest}` |
 | `{lint}` | `{frontend}` | `{eslint / prettier}` |
@@ -93,6 +97,7 @@ Untuk fullstack, backend dan frontend mungkin deploy terpisah (beda server, beda
 ## Pre-Deploy Checklist
 
 Sebelum deploy ke production, AI WAJIB verifikasi:
+
 - [ ] All tests pass di branch `dev`
 - [ ] Lint pass (backend + frontend)
 - [ ] Build sukses (frontend)
@@ -105,6 +110,7 @@ Sebelum deploy ke production, AI WAJIB verifikasi:
 ## Post-Deploy Verification
 
 Setelah deploy:
+
 ```bash
 # Backend smoke test
 { curl https://api.example.com/health }

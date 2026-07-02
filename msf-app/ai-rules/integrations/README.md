@@ -5,11 +5,11 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Semua integrasi dengan layanan eksternal — API, webhook, SDK, database eksternal.
 
-###  CRITICAL: Anti-Monster Rule
+### CRITICAL: Anti-Monster Rule
 
 **DILARANG** menumpuk semua detail integrasi dalam satu file ini. `README.md` hanya berisi **indeks + ringkasan 1 baris per integrasi**. Detail lengkap di file terpisah.
 
@@ -19,11 +19,13 @@
 | `{service-slug}.md` | Detail satu integrasi: credential pattern, endpoints, fallback | Satu file per service |
 
 **Aturan:**
+
 - README.md = indeks, bukan ensiklopedia
 - Setiap integrasi dapat file sendiri (`midtrans.md`, `sendgrid.md`, `aws-s3.md`)
 - AI hanya membaca file integrasi yang relevan, bukan semua
 
 **When to update:**
+
 - Saat integrasi baru ditambahkan → tambah baris di indeks + buat file detail
 - Saat integrasi dihapus → hapus baris + arsip/delete file detail
 - Saat endpoint/credential pattern berubah → update file detail
@@ -41,6 +43,7 @@
 ## Integration Coding Rules
 
 **Saat menambah atau memodifikasi integrasi, AI WAJIB:**
+
 - [ ] Simpan credential di `.env` — jangan hardcode
 - [ ] Tambahkan `.env` key ke `.env.example` (tanpa nilai real)
 - [ ] Gunakan HTTP client yang sudah ada

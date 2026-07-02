@@ -20,6 +20,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ## Tasks Completed
 
 ### {Task 1 Title}
+
 **Status:** SUCCESS / FAILED / PARTIAL
 **Time:** {HH:MM} - {HH:MM}
 **Executor:** {AI Agent / Nama Teknisi}
@@ -28,6 +29,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 {Ringkasan singkat 1-2 kalimat}
 
 **Impact:**
+
 - {Impact 1}
 - {Impact 2}
 
@@ -36,6 +38,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ---
 
 ### {Task 2 Title}
+
 **Status:** SUCCESS / FAILED / PARTIAL
 **Time:** {HH:MM} - {HH:MM}
 **Executor:** {AI Agent / Nama Teknisi}
@@ -44,6 +47,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 {Ringkasan singkat 1-2 kalimat}
 
 **Impact:**
+
 - {Impact 1}
 - {Impact 2}
 
@@ -56,7 +60,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ### Beginning of Day
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Uptime | {uptime} |
 | Memory Usage | {%} |
 | Disk Usage | {%} |
@@ -66,7 +70,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ### End of Day
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Uptime | {uptime} |
 | Memory Usage | {%} |
 | Disk Usage | {%} |
@@ -76,7 +80,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ### Changes
 
 | Metric | Change |
-|--------|--------|
+| -------- | -------- |
 | Memory Usage | {before}% → {after}% |
 | Disk Usage | {before}% → {after}% |
 | Response Time | {before}ms → {after}ms |
@@ -162,7 +166,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ### Key Metrics
 
 | Metric | Morning | Afternoon | Evening | Average |
-|--------|---------|-----------|---------|---------|
+| -------- | --------- | ----------- | --------- | --------- |
 | Response Time (P95) | {ms} | {ms} | {ms} | {ms} |
 | Error Rate | {%} | {%} | {%} | {%} |
 | Active Users | {count} | {count} | {count} | {count} |
@@ -180,7 +184,7 @@ Hari ini fokus pada performance optimization setelah users melaporkan applicatio
 ### Backups Completed
 
 | Time | Type | Size | Status |
-|------|------|------|--------|
+| ------ | ------ | ------ | -------- |
 | {HH:MM} | Database | {GB} | SUCCESS |
 | {HH:MM} | Application | {GB} | SUCCESS |
 | {HH:MM} | Full System | {GB} | SUCCESS |

@@ -63,6 +63,7 @@ $ docker logs {container_name} --tail 50
 {Jelaskan pendekatan yang dipilih dan kenapa}
 
 Contoh:
+
 1. Analisis memory usage per container
 2. Identifikasi container dengan memory leak
 3. Restart container dengan memory leak
@@ -114,6 +115,7 @@ $ {command_that_failed}
 **Error:** {Deskripsi error}
 
 **Solution:**
+
 ```bash
 $ {fix_command}
 {output}
@@ -181,7 +183,7 @@ Memory usage turun dari 85% ke 45%. Semua containers running stable. Application
 ### Changes Made
 
 | Item | Before | After |
-|------|--------|-------|
+| ------ | -------- | ------- |
 | Memory Usage | 85% | 45% |
 | Response Time | 2-5s | < 200ms |
 | Error Rate | 5% | 0.1% |
@@ -222,6 +224,7 @@ Tidak ada impact ke service lain. Semua services tetap running normal.
 {Impact terhadap performa sistem}
 
 Contoh:
+
 - Response time: 2-5s → < 200ms (95% improvement)
 - Memory usage: 85% → 45% (47% reduction)
 - Error rate: 5% → 0.1% (98% reduction)
@@ -254,6 +257,7 @@ Tidak ada impact security. Perubahan hanya bersifat performance optimization.
 {Apa yang perlu dimonitor setelah perubahan ini}
 
 Contoh:
+
 - Monitor memory usage setiap 1 jam selama 24 jam
 - Alert jika memory > 70%
 - Check logs setiap pagi selama 3 hari
@@ -322,6 +326,7 @@ Ditemukan juga bahwa Redis cache tidak dikonfigurasi dengan benar. Cache hit rat
 {Rekomendasi untuk task atau improvement selanjutnya}
 
 Contoh:
+
 1. Implement proper pagination di semua list endpoints (HIGH PRIORITY)
 2. Fix Redis cache configuration (MEDIUM PRIORITY)
 3. Add memory usage monitoring dashboard (LOW PRIORITY)
@@ -335,6 +340,7 @@ Contoh:
 ### Documentation Updates
 
 File dokumentasi yang perlu diupdate:
+
 - [ ] `~/docs/tech-stack/{app_name}.md` - Update memory limit
 - [ ] `~/docs/troubleshooting.md` - Add memory leak troubleshooting
 - [ ] `~/docs/changelog.md` - Log this change

@@ -5,7 +5,7 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Versi saat ini dan rekomendasi versi berikutnya berdasarkan analisis `[Unreleased]` di CHANGELOG.
 
@@ -14,7 +14,7 @@
 Untuk fullstack, backend dan frontend **bisa punya versi berbeda**. Gunakan format:
 
 | Repo | Current Version |
-|------|----------------|
+| ------ | ---------------- |
 | `backend` | `1.2.0` |
 | `frontend` | `1.0.0` |
 
@@ -23,7 +23,7 @@ Untuk monolith, hanya 1 baris.
 ### Kapan AI WAJIB Mengisi Rekomendasi Versi?
 
 | Trigger | Action |
-|---------|--------|
+| --------- | -------- |
 | `[Unreleased]` di CHANGELOG sudah berisi entry signifikan | AI WAJIB membuat rekomendasi versi di file output `dev-docs/ai/VERSION.md` |
 | Sebelum merge `dev` → `main` | AI WAJIB menentukan versi final dan menutup `[Unreleased]` |
 | Saat milestone/sprint selesai | AI WAJIB review dan rekomendasikan versi |
@@ -57,7 +57,7 @@ Untuk monolith, hanya 1 baris.
 
 Gunakan [Semantic Versioning 2.0.0](https://semver.org/): **MAJOR.MINOR.PATCH** (`1.2.3`)
 
-### MAJOR (`X.0.0`) — Bump jika:
+### MAJOR (`X.0.0`) — Bump jika
 
 - **Breaking change** — API endpoint berubah signature, response format berubah, field dihapus/direname
 - **Database** — migrasi yang tidak backward-compatible (drop kolom/tabel, rename kolom)
@@ -65,14 +65,14 @@ Gunakan [Semantic Versioning 2.0.0](https://semver.org/): **MAJOR.MINOR.PATCH** 
 - **Dependency** — upgrade framework versi mayor (Laravel 10 → 11, Nuxt 3 → 4)
 - **Rilis stabil pertama** — dari `0.x.x` ke `1.0.0` saat aplikasi production-ready
 
-### MINOR (`x.Y.0`) — Bump jika:
+### MINOR (`x.Y.0`) — Bump jika
 
 - **Fitur baru** — penambahan fitur yang backward-compatible (endpoint baru, halaman baru, modul baru)
 - **Deprecation** — menandai fitur lama sebagai deprecated (tapi belum dihapus)
 - **Significant enhancement** — refactor besar yang tidak mengubah behavior eksternal
 - **New integration** — integrasi dengan third-party service baru
 
-### PATCH (`x.y.Z`) — Bump jika:
+### PATCH (`x.y.Z`) — Bump jika
 
 - **Bug fix** — perbaikan bug yang backward-compatible
 - **Security fix** — perbaikan celah keamanan
@@ -100,6 +100,7 @@ Saat versi `0.x.x` (development/alpha/beta):
 ### Langkah 1: Baca `[Unreleased]` di CHANGELOG
 
 Lihat kategori entry yang ada:
+
 - `Added` → cenderung MINOR (atau MAJOR jika breaking)
 - `Changed` → bisa MINOR atau MAJOR (tergantung backward-compatible)
 - `Fixed` → PATCH
@@ -112,7 +113,7 @@ Lihat kategori entry yang ada:
 **Aturan:** Pilih versi berdasarkan entry dengan impact tertinggi.
 
 | Ada Entry... | Versi Bump |
-|--------------|-----------|
+| -------------- | ----------- |
 | `Removed` atau breaking `Changed` | **MAJOR** |
 | `Added` atau `Deprecated` (tanpa breaking) | **MINOR** |
 | Hanya `Fixed` + `Security` | **PATCH** |
@@ -165,7 +166,7 @@ Jelaskan kenapa versi tersebut dipilih, sebutkan entry changelog mana yang menen
 ## Integration dengan File Lain
 
 | File | Hubungan | Kapan Diupdate |
-|------|---------|---------------|
+| ------ | --------- | --------------- |
 | `../CHANGELOG.md` | Sumber input — `[Unreleased]` menentukan versi | Sebelum VERSION.md diisi |
 | `FINAL_SYSTEM_HANDOVER.md` | Destination — versi terbaru dicatat di System Identity | Setelah versi di-release |
 | `REPO_README_TEMPLATE.md` | Versi bisa dicantumkan di repo README | Saat rilis stabil |

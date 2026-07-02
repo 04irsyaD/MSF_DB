@@ -79,10 +79,10 @@ docker exec -it msf-ollama ollama pull llama3.2
 
 | Service | URL |
 |---------|-----|
-| Frontend (UI) | http://localhost:3000 |
-| Backend API | http://localhost:8000 |
-| API Docs (Swagger) | http://localhost:8000/docs |
-| Ollama | http://localhost:11434 |
+| Frontend (UI) | <http://localhost:3000> |
+| Backend API | <http://localhost:8000> |
+| API Docs (Swagger) | <http://localhost:8000/docs> |
+| Ollama | <http://localhost:11434> |
 
 ---
 

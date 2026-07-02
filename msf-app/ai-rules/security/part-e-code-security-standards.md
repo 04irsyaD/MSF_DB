@@ -4,15 +4,17 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  AI WAJIB mengikuti saat menulis kode:
+### AI WAJIB mengikuti saat menulis kode
 
 1. **Dependency audit:** Jalankan audit sebelum install package baru.
+
    ```bash
    npm audit    # Node.js
    composer audit  # PHP
    ```
 
 2. **No eval / dynamic execution:**
+
    ```php
    // ❌ JANGAN
    eval($userInput);
@@ -32,7 +34,7 @@
 
 5. **Rate limiting:** Semua endpoint API WAJIB pakai rate limit. Default: 60 req/min.
 
-6. **Logging:** 
+6. **Logging:**
    - Jangan log credential, token, atau data sensitif user
    - **Specific sensitive data yang TIDAK BOLEH di-log:**
      - Passwords, API keys, tokens
@@ -48,6 +50,7 @@
 9. **Dependencies up-to-date:** AI WAJIB cek `composer outdated` / `npm outdated` setiap milestone dan usulkan upgrade jika ada security patch.
 
 10. **SAST (Static Application Security Testing):**
+
     ```bash
     # PHP
     ./vendor/bin/phpstan analyse --level=max src/
@@ -68,6 +71,7 @@
     - Integrate ke CI/CD pipeline
 
 12. **Secure random number generation:**
+
     ```php
     // ❌ JANGAN (predictable)
     $token = rand();
@@ -77,6 +81,7 @@
     $token = bin2hex(random_bytes(32));
     $id = random_int(1, PHP_INT_MAX);
     ```
+
     ```javascript
     // ❌ JANGAN
     const token = Math.random().toString(36);
@@ -86,6 +91,7 @@
     ```
 
 13. **Timing attacks prevention:**
+
     ```php
     // ❌ JANGAN (timing leak)
     if ($userInput === $secretToken) { // short-circuit evaluation

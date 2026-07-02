@@ -4,12 +4,12 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  AI WAJIB Setup di Setiap Project
+### AI WAJIB Setup di Setiap Project
 
 Security headers HARUS dikonfigurasi di web server atau middleware framework. AI WAJIB mengaktifkannya tanpa diminta user.
 
 | Header | Value | Purpose |
-|--------|-------|---------|
+| -------- | ------- | --------- |
 | `X-Content-Type-Options` | `nosniff` | Mencegah MIME sniffing |
 | `X-Frame-Options` | `DENY` atau `SAMEORIGIN` | Mencegah clickjacking |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Kontrol referrer info |
@@ -20,6 +20,7 @@ Security headers HARUS dikonfigurasi di web server atau middleware framework. AI
 | `Cross-Origin-Resource-Policy` | `same-origin` | Mencegah cross-origin resource theft |
 
 **Additional headers:**
+
 | Header | Value | Purpose |
 |--------|-------|---------|
 | `X-Permitted-Cross-Domain-Policies` | `none` | Mencegah Flash/PDF cross-domain access |
@@ -28,8 +29,9 @@ Security headers HARUS dikonfigurasi di web server atau middleware framework. AI
 ### Cookie Security Attributes
 
 Semua cookie WAJIB memiliki atribut security:
+
 | Attribute | Purpose |
-|-----------|---------|
+| ----------- | --------- |
 | `Secure` | Cookie hanya dikirim via HTTPS |
 | `HttpOnly` | JavaScript TIDAK bisa access cookie (XSS protection) |
 | `SameSite=Strict` atau `Lax` | Mencegah CSRF via cross-site request |
@@ -46,18 +48,21 @@ Semua cookie WAJIB memiliki atribut security:
 ### Content Security Policy (CSP)
 
 **Production (Strict):**
+
 ```nginx
 # Nginx example — Production
 add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
 ```
 
 **Development/Testing (Report-Only):**
+
 ```nginx
 # Testing CSP sebelum enforce
 add_header Content-Security-Policy-Report-Only "default-src 'self'; report-uri /csp-violation-report;" always;
 ```
 
 **Jika butuh inline scripts (misal: analytics):**
+
 ```nginx
 # Gunakan nonce atau hash, JANGAN unsafe-inline
 add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'nonce-{random}';" always;
@@ -78,6 +83,7 @@ add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'nonce
 ```
 
 **Generate SRI hash:**
+
 ```bash
 curl https://cdn.example.com/library.js | openssl dgst -sha384 -binary | openssl base64 -A
 ```

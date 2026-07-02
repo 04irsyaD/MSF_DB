@@ -6,11 +6,11 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Update setiap selesai task/batch. Ini adalah "dashboard" kondisi project saat ini.
 
-###  Dual-Repo: Snapshot Per Repo
+### Dual-Repo: Snapshot Per Repo
 
 **Lihat deklarasi project type di `PROJECT_CONTEXT.md`.**
 
@@ -49,6 +49,7 @@ Untuk fullstack, module maturity juga butuh kolom extra: module mana di backend,
 | `{nama_modul}` | `{backend / frontend / apps}` | `{Planned / In Progress / Beta / Production / Deprecated}` | `{catatan}` |
 
 **State definitions:**
+
 - **Planned:** Belum ada kode, baru rencana
 - **In Progress:** Kode ada, masih aktif dikembangkan
 - **Beta:** Kode ada, fitur lengkap, belum production-ready
@@ -68,7 +69,7 @@ Untuk fullstack, module maturity juga butuh kolom extra: module mana di backend,
 ## Test / QA State
 
 | Repo | Area | Coverage | Status |
-|------|------|----------|--------|
+| ------ | ------ | ---------- | -------- |
 | `{apps/backend}` | `{unit_test}` | `{estimasi %}` | `{Passing / Failing / Not Run}` |
 | `{apps/backend}` | `{lint}` | — | `{Passing / Failing / Not Run}` |
 | `{frontend}` | `{lint}` | — | `{Passing / Failing / Not Run}` |
@@ -79,5 +80,6 @@ Untuk fullstack, module maturity juga butuh kolom extra: module mana di backend,
 ## Important Nuance
 
 **Isi dengan hal-hal yang tidak obvious tapi penting diketahui:**
+
 - Assumption based on repository analysis: `{asumsi}`
 - `{catatan_penting_lainnya}`

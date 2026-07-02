@@ -20,7 +20,7 @@
 ### `{nama_tabel}`
 
 | Column | Type | Constraints | Notes |
-|--------|------|------------|-------|
+| -------- | ------ | ------------ | ------- |
 | `id` | bigint | PK, auto-increment | |
 | `{field}` | `{type}` | `{nullable / unique / default}` | `{catatan}` |
 | `created_at` | timestamp | | |

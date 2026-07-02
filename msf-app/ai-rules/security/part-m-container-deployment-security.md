@@ -4,9 +4,10 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  Container Security
+### Container Security
 
 **Docker:**
+
 ```dockerfile
 # ✅ DO: Use specific version, non-root user
 FROM node:18-alpine
@@ -26,6 +27,7 @@ USER root
 ```
 
 **Requirements:**
+
 1. **Image Security:**
    - Use official images, specific versions (no `latest`)
    - Scan images: `trivy image myapp:latest`

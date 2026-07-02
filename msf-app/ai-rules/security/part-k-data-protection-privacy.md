@@ -4,9 +4,10 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  GDPR & PII Compliance
+### GDPR & PII Compliance
 
 **Personally Identifiable Information (PII) yang WAJIB dilindungi:**
+
 - Nama lengkap + alamat/phone/email
 - NIK/KTP, passport number
 - Financial data (credit card, bank account)
@@ -15,6 +16,7 @@
 - Location data (GPS coordinates)
 
 **Requirements:**
+
 1. **Data Minimization:** Collect hanya data yang necessary
 2. **Purpose Limitation:** Use data hanya untuk tujuan yang stated
 3. **Storage Limitation:** Delete data setelah retention period
@@ -24,6 +26,7 @@
 7. **Data Portability:** Export dalam format machine-readable (JSON/CSV)
 
 **Implementation:**
+
 ```php
 // Data retention policy
 class RetentionPolicy {
@@ -47,6 +50,7 @@ DELETE /api/user/account
 ```
 
 **Data Breach Notification:**
+
 - Notify supervisory authority: < 72 jam setelah discovery
 - Notify affected users: < 72 jam jika high risk
 - Document: nature of breach, data categories, likely consequences, mitigation measures

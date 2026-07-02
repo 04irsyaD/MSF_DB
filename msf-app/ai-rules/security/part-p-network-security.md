@@ -7,6 +7,7 @@
 ## Network Security Controls
 
 **Requirements:**
+
 1. **Firewall Rules:**
    - Default deny (block all, allow explicit)
    - Whitelist IP ranges untuk admin access
@@ -36,6 +37,7 @@
    - MFA untuk VPN authentication
 
 **Example: AWS Security Groups**
+
 ```
 # Web server (public)
 Inbound:

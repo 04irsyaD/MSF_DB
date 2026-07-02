@@ -22,7 +22,7 @@ Dokumen ini adalah **jembatan** antara dokumentasi development (`dev-docs/`) dan
 **Sumber:** `dev-docs/ai/PROJECT_CONTEXT.md`
 
 | Item | Value |
-|------|-------|
+| ------ | ------- |
 | Project Name | {nama_project} |
 | Project Type | {Monolith / Fullstack} |
 | Backend Framework | {Laravel / Express / Go Fiber / ...} |
@@ -40,7 +40,7 @@ Dokumen ini adalah **jembatan** antara dokumentasi development (`dev-docs/`) dan
 **Minimum requirements:**
 
 | Resource | Minimum | Recommended |
-|----------|---------|-------------|
+| ---------- | --------- | ------------- |
 | CPU | {2 cores} | {4 cores} |
 | RAM | {4 GB} | {8 GB} |
 | Disk | {50 GB} | {100 GB} |
@@ -52,7 +52,7 @@ Dokumen ini adalah **jembatan** antara dokumentasi development (`dev-docs/`) dan
 **Sumber:** `dev-docs/ai/PROJECT_CONTEXT.md` (Runtime Stack)
 
 | Software | Version | Purpose |
-|----------|---------|---------|
+| ---------- | --------- | --------- |
 | Docker | {24.x} | Container runtime |
 | Docker Compose | {2.x} | Container orchestration |
 | Nginx | {1.24} | Reverse proxy |
@@ -66,12 +66,13 @@ Dokumen ini adalah **jembatan** antara dokumentasi development (`dev-docs/`) dan
 **Sumber:** `dev-docs/architecture/api-flow.md`
 
 | Port | Service | Protocol | Notes |
-|------|---------|----------|-------|
+| ------ | --------- | ---------- | ------- |
 | 80 | HTTP | TCP | Redirect to HTTPS |
 | 443 | HTTPS | TCP | Main application |
 | 22 | SSH | TCP | Server access (restrict IP) |
 
 **Firewall rules:**
+
 - Allow inbound: 80, 443, 22 (restricted IPs only)
 - Allow outbound: all (for package updates, external APIs)
 
@@ -92,7 +93,7 @@ Dokumen ini adalah **jembatan** antara dokumentasi development (`dev-docs/`) dan
 **Sumber:** `dev-docs/architecture/backend-structure.md`, `dev-docs/architecture/frontend-structure.md`
 
 | Container | Image | Port | Network | Volume |
-|-----------|-------|------|---------|--------|
+| ----------- | ------- | ------ | --------- | -------- |
 | {backend} | {php:8.2-fpm} | {9000} | {app-net} | {./backend:/var/www} |
 | {frontend} | {node:20} | {3000} | {app-net} | {./frontend:/app} |
 | {nginx} | {nginx:1.24} | {80,443} | {app-net} | {./nginx:/etc/nginx} |
@@ -104,7 +105,7 @@ Dokumen ini adalah **jembatan** antara dokumentasi development (`dev-docs/`) dan
 **Sumber:** `dev-docs/architecture/database.md`
 
 | Table | Purpose | Size Estimate |
-|-------|---------|---------------|
+| ------- | --------- | --------------- |
 | {users} | User accounts | {1000 rows} |
 | {sessions} | Active sessions | {5000 rows} |
 | {logs} | Activity logs | {100K rows/month} |
@@ -257,6 +258,7 @@ stdout_logfile=/var/log/{project}/queue.log
 ```
 
 **Setup:**
+
 ```bash
 sudo cp /opt/{project_name}/docs/supervisor/queue.conf /etc/supervisor/conf.d/
 sudo supervisorctl reread
@@ -288,6 +290,7 @@ crontab -e
 **Sumber:** `dev-docs/operations/README.md` (Backup section)
 
 **Backup script:**
+
 ```bash
 #!/bin/bash
 # /opt/{project_name}/scripts/backup-database.sh
@@ -311,6 +314,7 @@ echo "Backup completed: $DATE"
 ```
 
 **Setup:**
+
 ```bash
 chmod +x /opt/{project_name}/scripts/backup-database.sh
 # Tambahkan ke crontab (lihat section 6.2)
@@ -502,7 +506,7 @@ journalctl -u docker -f
 ### 10.3 Emergency Contacts
 
 | Role | Name | Contact | When to Contact |
-|------|------|---------|-----------------|
+| ------ | ------ | --------- | ----------------- |
 | Developer | {name} | {email/phone} | Application bugs, code issues |
 | DevOps | {name} | {email/phone} | Server issues, deployment problems |
 | Security | {name} | {email/phone} | Security incidents |
@@ -538,6 +542,7 @@ journalctl -u docker -f
 ## References
 
 **Development documentation:**
+
 - `dev-docs/ai/PROJECT_CONTEXT.md` — Project overview dan tech stack
 - `dev-docs/architecture/` — Application architecture
 - `dev-docs/deployment/` — Deployment process
@@ -545,6 +550,7 @@ journalctl -u docker -f
 - `dev-docs/security/README.md` — Security requirements
 
 **Production documentation:**
+
 - `prod-docs/AGENTS.md` — AI agent contract untuk server
 - `prod-docs/docs/` — Technical documentation server
 - `prod-docs/reports-agents/` — Audit log tasks di server

@@ -114,7 +114,7 @@ rclone copy {path-backup-lokal}/ "gdrive:{folder-backup}/" --progress
 ## Target Backup
 
 | Item | Server Path | Local Path | Expected Size |
-|------|-----------|------------|-------------|
+| ------ | ----------- | ------------ | ------------- |
 | DB: `{nama_db}` | `/tmp/{nama_db}_*.sql.gz` | `{path-backup-lokal}/DB/` | `{ukuran}` |
 | Apps: `{app-name}` | `/tmp/{app-name}_*.tar.gz` | `{path-backup-lokal}/APPS/` | `{ukuran}` |
 

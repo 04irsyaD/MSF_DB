@@ -10,7 +10,7 @@
 ## 1. Repository Access Status
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | **Access Method** | `{SSH Deploy Key / HTTPS Token / SSH Agent Forwarding}` |
 | **Setup Date** | `{YYYY-MM-DD}` |
 | **Setup By** | `{AI Agent / nama_orang}` |
@@ -26,7 +26,7 @@
 ### (Jika Menggunakan SSH Deploy Key)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Key Path (Server) | `/home/{user}/.ssh/id_ed25519_deploy` |
 | Key Type | `{ed25519 / rsa}` |
 | Passphrase | `{none / ada — tersimpan di ...}` |
@@ -57,7 +57,7 @@ ssh -T git@github.com
 ### (Jika Menggunakan HTTPS + Personal Access Token)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Token Type | `{GitHub classic / GitHub fine-grained / GitLab PAT}` |
 | Token Location | `{Git credential store: ~/.git-credentials}` |
 | Token Last Rotated | `{YYYY-MM-DD}` |
@@ -147,7 +147,7 @@ git remote -v
 ### (Jika Diaktifkan)
 
 | Field | Value |
-|-------|-------|
+| ------- | ------- |
 | Webhook URL | `{https://server.example.com/webhook/deploy}` |
 | Webhook Secret | `{tersimpan di .env}` |
 | Trigger Event | `{Push / Pull Request Merge}` |

@@ -17,6 +17,7 @@ Main script untuk read data dari Databricks dan analyze quality.
 - ✅ Save cleaned data (CSV, Parquet, Excel)
 
 **Class Utama:**
+
 ```python
 DatabricksDataCleaner(catalog, schema, table)
 ```
@@ -32,6 +33,7 @@ DatabricksDataCleaner(catalog, schema, table)
 - `save_cleaned_data(path, format)` - Export data
 
 **Contoh Penggunaan:**
+
 ```python
 from databricks_data_cleaner import DatabricksDataCleaner
 
@@ -72,6 +74,7 @@ Advanced cleaning techniques untuk specific data quality issues.
 - ✅ Validate data types
 
 **Static Methods:**
+
 ```python
 AdvancedDataCleaner.standardize_phone_numbers()
 AdvancedDataCleaner.standardize_email()
@@ -83,6 +86,7 @@ AdvancedDataCleaner.validate_data_types()
 ```
 
 **Contoh Penggunaan:**
+
 ```python
 from advanced_data_cleaner import AdvancedDataCleaner
 
@@ -142,6 +146,7 @@ Specialized module untuk detect dan fix date format inconsistencies.
 2. `DateAnalysisReporter` - Generate report dalam format readable
 
 **Static Methods DateFormatAnalyzer:**
+
 ```python
 detect_date_format()      # Detect format single date string
 analyze_date_column()     # Analyze column untuk format distribution
@@ -151,6 +156,7 @@ find_date_columns()       # Auto-find date columns dalam DataFrame
 ```
 
 **Contoh Penggunaan:**
+
 ```python
 from date_format_handler import DateFormatAnalyzer, DateAnalysisReporter
 
@@ -187,37 +193,47 @@ Complete scenarios dan examples untuk menggunakan semua 3 modules.
 **5 Built-in Scenarios:**
 
 #### Scenario 1: Basic Analysis
+
 ```python
 scenario_1_basic_analysis()
 ```
+
 - Quick analysis tanpa modification
 - Best untuk: Initial data exploration
 
 #### Scenario 2: Complete Cleaning Pipeline
+
 ```python
 scenario_2_complete_cleaning()
 ```
+
 - Full cleaning pipeline dengan semua steps
 - Best untuk: Production data cleaning
 
 #### Scenario 3: Focused Date Cleaning
+
 ```python
 scenario_3_focused_date_cleaning()
 ```
+
 - Fokus pada date/time fields
 - Best untuk: Database dengan banyak date format issues
 
 #### Scenario 4: Advanced Quality Report
+
 ```python
 scenario_4_advanced_quality_report()
 ```
+
 - Comprehensive quality checks (duplicates, outliers, missing values)
 - Best untuk: Data validation sebelum production
 
 #### Scenario 5: Export Cleaned Data
+
 ```python
 scenario_5_export_cleaned_data()
 ```
+
 - Clean dan export ke berbagai format
 - Best untuk: Final output untuk stakeholders
 
@@ -226,6 +242,7 @@ scenario_5_export_cleaned_data()
 ## 🚀 Quick Start
 
 ### Step 1: Install Dependencies
+
 ```bash
 pip install pandas pyspark scipy
 ```
@@ -234,6 +251,7 @@ pip install pandas pyspark scipy
 Pastikan sudah configure Databricks credentials di environment.
 
 ### Step 3: Run Analysis
+
 ```python
 # Contoh sederhana
 from databricks_data_cleaner import DatabricksDataCleaner
@@ -271,6 +289,7 @@ Script automatic support untuk format-format ini:
 ## 🔧 Common Use Cases
 
 ### Use Case 1: Detect & Fix Date Inconsistencies
+
 ```python
 from date_format_handler import DateFormatAnalyzer
 
@@ -290,6 +309,7 @@ for col in date_columns:
 ```
 
 ### Use Case 2: Complete Data Cleanup
+
 ```python
 from databricks_data_cleaner import DatabricksDataCleaner
 from advanced_data_cleaner import AdvancedDataCleaner
@@ -319,6 +339,7 @@ cleaner.save_cleaned_data('./output/cleaned.csv')
 ```
 
 ### Use Case 3: Data Quality Validation
+
 ```python
 from advanced_data_cleaner import AdvancedDataCleaner
 
@@ -347,6 +368,7 @@ outliers = AdvancedDataCleaner.detect_outliers(
 ## 📈 Output Examples
 
 ### Data Quality Report
+
 ```
 ================================================================================
 DATA QUALITY REPORT
@@ -370,6 +392,7 @@ DATA QUALITY REPORT
 ```
 
 ### Standardization Report
+
 ```
 ================================================================================
 DATE STANDARDIZATION REPORT: created_date
@@ -391,7 +414,7 @@ DATE STANDARDIZATION REPORT: created_date
 ## 🛠️ Troubleshooting
 
 ### Error: "Could not parse date"
-**Solusi:** 
+**Solusi:**
 - Check format yang tidak terdeteksi
 - Tambah custom format ke `COMMON_DATE_FORMATS` di `date_format_handler.py`
 - Gunakan parameter `hint_format` saat standardize

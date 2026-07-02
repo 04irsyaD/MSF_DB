@@ -12,6 +12,7 @@
 File ini mencatat **semua task yang dikerjakan oleh AI agent** di server ini. Setiap entry berisi ringkasan singkat task dengan link ke laporan detail.
 
 **Format Entry:**
+
 ```markdown
 | {YYYY-MM-DD HH:MM} | {AI Agent/Teknisi} | {Judul Task} | {SUCCESS/FAILED/PARTIAL} | [Detail]({YYYY-MM-DD}/{task-name}.md) |
 ```
@@ -45,7 +46,7 @@ File ini mencatat **semua task yang dikerjakan oleh AI agent** di server ini. Se
 ### This Month (2026-06)
 
 | Status | Count |
-|--------|-------|
+| -------- | ------- |
 | SUCCESS | {count} |
 | FAILED | {count} |
 | PARTIAL | {count} |
@@ -54,7 +55,7 @@ File ini mencatat **semua task yang dikerjakan oleh AI agent** di server ini. Se
 ### By Executor
 
 | Executor | Tasks | Success Rate |
-|----------|-------|--------------|
+| ---------- | ------- | -------------- |
 | AI Agent | {count} | {%} |
 | {Teknisi 1} | {count} | {%} |
 | {Teknisi 2} | {count} | {%} |

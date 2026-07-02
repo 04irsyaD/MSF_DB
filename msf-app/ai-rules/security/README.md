@@ -5,13 +5,14 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 ## CRITICAL: Security is NOT Optional
 
 Standar di bawah ini adalah **minimum security baseline**. AI WAJIB menerapkannya tanpa diminta. Jika ada yang belum diterapkan di project existing, AI WAJIB mengusulkan ke user.
 
 **When to update:**
+
 - Saat ada role/permission baru
 - Saat auth flow berubah
 - Saat ada security vulnerability yang ditemukan dan difix
@@ -22,7 +23,7 @@ Standar di bawah ini adalah **minimum security baseline**. AI WAJIB menerapkanny
 ## Security Standard Index — Part A-Q
 
 | Part | Focus | File | Key Rules |
-|------|-------|------|-----------|
+| ------ | ------- | ------ | ----------- |
 | **A** | Credential & Secret Management | [part-a-credential-management.md](./part-a-credential-management.md) | Semua secret di `.env`, DILARANG hardcode, DILARANG credential di .md di folder kode |
 | **B** | HTTP Security Headers | [part-b-http-security-headers.md](./part-b-http-security-headers.md) | CSP, HSTS, X-Frame-Options — auto-setup by AI |
 | **C** | Authentication & Authorization | [part-c-authentication-authorization.md](./part-c-authentication-authorization.md) | Password hashing, MFA, RBAC |
@@ -42,6 +43,7 @@ Standar di bawah ini adalah **minimum security baseline**. AI WAJIB menerapkanny
 | **Q** | Security Monitoring & Alerting | [part-q-security-monitoring-alerting.md](./part-q-security-monitoring-alerting.md) | Logging, alerting, SIEM |
 
 **WHEN TO READ WHAT:**
+
 - **Read README.md** → understand the overview, pick which Part to read
 - **Read specific Part** → when implementing that security aspect
 - **Read Part I** → before every merge to main (pre-merge checklist)

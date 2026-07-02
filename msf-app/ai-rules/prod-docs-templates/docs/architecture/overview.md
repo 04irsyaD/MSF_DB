@@ -51,7 +51,7 @@ Server ini menjalankan **{nama_sistem}** dengan arsitektur **{monorepo_terpisah/
 ## Komponen Utama
 
 | Komponen | Tech | Fungsi |
-|----------|------|--------|
+| ---------- | ------ | -------- |
 | **{App 1}** | {tech_stack} | {fungsi} |
 | **{App 2}** | {tech_stack} | {fungsi} |
 | **Nginx** | Nginx {version} | Reverse proxy, SSL, caching, rate limiting |
@@ -63,7 +63,7 @@ Server ini menjalankan **{nama_sistem}** dengan arsitektur **{monorepo_terpisah/
 ## Server Specs
 
 | Atribut | Nilai |
-|---------|-------|
+| --------- | ------- |
 | Hostname | {hostname} |
 | IP Internal | {ip_internal} |
 | IP Database | {ip_database} |
@@ -81,6 +81,7 @@ Server ini menjalankan **{nama_sistem}** dengan arsitektur **{monorepo_terpisah/
 {List prinsip arsitektur yang diterapkan di server ini}
 
 Contoh:
+
 1. **Containerization**: Semua aplikasi berjalan di Docker dengan hardening (cap_drop ALL, no-new-privileges, resource limits)
 2. **Separation of Concerns**: Kode, storage, secrets, dan logs dipisah ke direktori terpisah
 3. **Single Proxy Authority**: Nginx adalah satu-satunya otoritas untuk security headers, rate limiting, dan routing
@@ -95,6 +96,7 @@ Contoh:
 {Jelaskan bagaimana data mengalir melalui sistem}
 
 Contoh:
+
 1. User mengakses `https://domain.com`
 2. Request masuk ke Load Balancer (SSL termination)
 3. LB forward ke Nginx (HTTP + X-Forwarded-Proto: https)
@@ -109,6 +111,7 @@ Contoh:
 {Jelaskan strategi deployment yang digunakan}
 
 Contoh:
+
 - **Blue-Green**: Dua environment identik, switch traffic setelah deploy
 - **Rolling Update**: Update container satu per satu tanpa downtime
 - **Pull-based**: Server auto-pull dari git repository setiap 1 menit
@@ -121,6 +124,7 @@ Contoh:
 {Jelaskan bagaimana sistem bisa di-scale jika diperlukan}
 
 Contoh:
+
 - **Horizontal**: Tambah instance container (docker compose up --scale)
 - **Vertical**: Increase resource limits di docker-compose.yml
 - **Database**: Read replicas, connection pooling

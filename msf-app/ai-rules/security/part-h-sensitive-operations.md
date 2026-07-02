@@ -4,12 +4,12 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  Audit Trail & Logging
+### Audit Trail & Logging
 
 **WAJIB log semua sensitive operations dengan detail:**
 
 | Operation | Log Details | Retention |
-|-----------|-------------|-----------|
+| ----------- | ------------- | ----------- |
 | Login/logout | User ID, IP, timestamp, success/failure, user agent | 1 year |
 | Password change | User ID, timestamp, IP | 1 year |
 | Data export | User ID, data type, record count, timestamp, IP | 2 years |
@@ -19,6 +19,7 @@
 | Failed auth attempts | IP, username/email, timestamp, failure reason | 90 days |
 
 **Log format:**
+
 ```
 [2026-06-09 14:30:45] SECURITY.INFO: User login successful {"user_id":123,"ip":"192.168.1.1","user_agent":"Mozilla/5.0..."}
 [2026-06-09 14:31:20] SECURITY.WARNING: Failed login attempt {"email":"admin@example.com","ip":"10.0.0.5","reason":"invalid_password"}
@@ -28,6 +29,7 @@
 ### Two-Step Verification for Critical Operations
 
 **WAJIB implement untuk:**
+
 - Bulk data deletion (> 10 records)
 - Export sensitive data (PII, financial)
 - Permission/role changes
@@ -36,6 +38,7 @@
 - Database schema changes
 
 **Implementation:**
+
 ```php
 // Step 1: Request verification
 POST /api/admin/users/bulk-delete
@@ -75,6 +78,7 @@ POST /api/admin/users/bulk-delete
 ### Data Masking in UI & Logs
 
 **Masking rules:**
+
 ```javascript
 // Email: show first char + domain
 "john.doe@example.com" → "j*******@example.com"
@@ -93,6 +97,7 @@ POST /api/admin/users/bulk-delete
 ```
 
 **Implementation:**
+
 ```php
 // Backend masking helper
 class DataMasker {
@@ -114,7 +119,7 @@ class DataMasker {
 ### Sensitive Operations Table
 
 | Area | Risk | Guard |
-|------|------|-------|
+| ------ | ------ | ------- |
 | `{form delete}` | `{HIGH — data loss}` | `{konfirmasi + POST method + CSRF + permission check + audit log}` |
 | `{export data}` | `{MEDIUM — data leak}` | `{permission check + rate limit + two-step verification + audit log}` |
 | `{upload file}` | `{MEDIUM — malicious file}` | `{file validation + size limit + MIME check + virus scan}` |

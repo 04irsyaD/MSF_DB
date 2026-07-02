@@ -13,7 +13,7 @@ cd "sql-docs-app"
 streamlit run app.py
 ```
 
-Browser akan otomatis terbuka di **http://localhost:8501**
+Browser akan otomatis terbuka di **<http://localhost:8501>**
 
 ## 🎯 Cara Pakai
 

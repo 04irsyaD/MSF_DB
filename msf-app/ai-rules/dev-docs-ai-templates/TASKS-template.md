@@ -5,11 +5,11 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Tracking board untuk semua task development.
 
-###  CRITICAL: Anti-Monster Rule
+### CRITICAL: Anti-Monster Rule
 
 **DILARANG** menumpuk task history di file ini. Hanya task **aktif** yang dicatat di sini. Task yang sudah **Done >1 minggu** → pindahkan ke arsip.
 
@@ -21,12 +21,14 @@
 **Pindahkan ke arsip:** setelah task Done dan kondisi stabil >1 minggu.
 
 **Priority definitions:**
+
 - **P0:** Critical — harus diselesaikan sebelum merge ke main
 - **P1:** High — harus diselesaikan dalam milestone ini
 - **P2:** Medium — bagus diselesaikan
 - **P3:** Low — nice to have
 
 **Status definitions:**
+
 - **Todo:** Belum dimulai
 - **In Progress:** Sedang dikerjakan
 - **Blocked:** Terhambat dependency

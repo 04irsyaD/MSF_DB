@@ -18,7 +18,7 @@ Server ini menggunakan **centralized logging** dengan semua container logs di-co
 ## Monitoring Stack
 
 | Component | Technology | Purpose |
-|-----------|-----------|---------|
+| ----------- | ----------- | --------- |
 | Metrics Collection | {Prometheus/Telegraf} | Collect system and application metrics |
 | Visualization | {Grafana} | Dashboards and graphs |
 | Alerting | {Alertmanager/PagerDuty} | Notifications for issues |
@@ -64,6 +64,7 @@ docker system events
 {Jelaskan metrics spesifik aplikasi yang dimonitor}
 
 Contoh:
+
 - **Response Time**: Average, P95, P99
 - **Error Rate**: 4xx, 5xx errors per minute
 - **Throughput**: Requests per second
@@ -90,7 +91,7 @@ http_requests_total{method="POST",status="201"} 567
 ### Log Locations
 
 | Service | Log Location | Rotation |
-|---------|--------------|----------|
+| --------- | -------------- | ---------- |
 | Nginx Access | `/var/log/nginx/access.log` | Daily, 14 days |
 | Nginx Error | `/var/log/nginx/error.log` | Daily, 14 days |
 | {app_1} | `/opt/{app_1}/logs/app.log` | Daily, 30 days |
@@ -128,6 +129,7 @@ docker logs {container_name} 2>&1 | grep "ERROR"
 ```
 
 Example:
+
 ```
 192.168.1.100 - - [09/Jun/2026:10:30:45 +0000] "GET /api/users HTTP/1.1" 200 1234 "-" "Mozilla/5.0"
 ```
@@ -200,7 +202,7 @@ cat /var/lib/logrotate/status
 {List alert rules yang dikonfigurasi}
 
 | Alert | Condition | Severity | Notification |
-|-------|-----------|----------|--------------|
+| ------- | ----------- | ---------- | -------------- |
 | High CPU | CPU > 90% for 5m | Warning | Slack |
 | High Memory | Memory > 85% for 5m | Warning | Slack |
 | Disk Full | Disk > 90% | Critical | Email + PagerDuty |
@@ -278,7 +280,7 @@ receivers:
 {List dashboards yang tersedia}
 
 | Dashboard | URL | Purpose |
-|-----------|-----|---------|
+| ----------- | ----- | --------- |
 | System Overview | {url} | CPU, memory, disk, network |
 | Docker Containers | {url} | Container metrics |
 | Nginx | {url} | Request rate, response time, errors |
@@ -323,6 +325,7 @@ done
 {Jelaskan external monitoring services}
 
 Contoh:
+
 - **UptimeRobot**: Checks https://{domain} every 5 minutes
 - **Pingdom**: Multi-location checks every 1 minute
 - **StatusPage**: Public status page at status.{domain}
@@ -480,7 +483,7 @@ docker ps --format "{{.Names}}: {{.Status}}"
 ### SLA Targets
 
 | Metric | Target | Current |
-|--------|--------|---------|
+| -------- | -------- | --------- |
 | Uptime | 99.9% | {current}% |
 | Response Time (P95) | < 500ms | {current}ms |
 | Error Rate | < 0.1% | {current}% |

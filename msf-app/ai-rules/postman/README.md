@@ -5,11 +5,12 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
-###  Kapan Folder Ini Dibuat
+### Kapan Folder Ini Dibuat
 
 Folder `dev-docs/postman/` HANYA dibuat jika:
+
 1. **User meminta secara eksplisit:** "buatkan postman collection untuk API ini"
 2. **Ada developer eksternal** yang akan consume API (mobile app developer, frontend developer di repo berbeda, third-party integrator)
 
@@ -20,7 +21,7 @@ Folder `dev-docs/postman/` HANYA dibuat jika:
 ### Isi Folder
 
 | File | Purpose | Wajib? |
-|------|---------|--------|
+| ------ | --------- | -------- |
 | `README.md` | Panduan setup Postman + aturan sinkronisasi | ✅ |
 | `{project}-API.postman_collection.json` | Collection semua endpoint | ✅ |
 | `{project}-API.local.postman_environment.json` | Environment variables (base_url, token, credentials) | ✅ |

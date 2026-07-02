@@ -17,7 +17,7 @@
 ## Endpoint Registry
 
 | Method | URI | Name | Controller@Action | Auth | Notes |
-|--------|-----|------|-------------------|------|-------|
+| -------- | ----- | ------ | ------------------- | ------ | ------- |
 | `GET` | `/{prefix}` | `{modul}.index` | `{NamaController}@index` | `{role}` | `{catatan}` |
 | `GET` | `/{prefix}/create` | `{modul}.create` | `{NamaController}@create` | `{role}` | |
 | `POST` | `/{prefix}` | `{modul}.store` | `{NamaController}@store` | `{role}` | |
@@ -31,7 +31,7 @@
 ## Special Routes (AJAX / DataTables / Import / Export)
 
 | Method | URI | Name | Controller@Action | Purpose |
-|--------|-----|------|-------------------|---------|
+| -------- | ----- | ------ | ------------------- | --------- |
 | `GET` | `/{prefix}/data` | `{modul}.data` | `{NamaController}@data` | DataTables server-side |
 | `POST` | `/{prefix}/import` | `{modul}.import` | `{NamaController}@import` | Import data |
 | `GET` | `/{prefix}/export` | `{modul}.export` | `{NamaController}@export` | Export data |

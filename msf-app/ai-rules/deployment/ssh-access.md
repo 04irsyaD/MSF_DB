@@ -6,21 +6,23 @@
 
 ---
 
-## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
+## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini
 
 **What to CREATE in output folder:** Isi hanya jika project ini memiliki server production yang bisa diakses via SSH dari local.
 
 **When this file exists:**
+
 - AI BOLEH mengakses server sesuai aturan di bawah
 - AI WAJIB mematuhi semua batasan yang tertulis
 
 **When this file does NOT exist:**
+
 - AI TIDAK BOLEH mengakses server manapun
 - Semua kerja development hanya di local
 
 ---
 
-##  CRITICAL: SSH Context
+## CRITICAL: SSH Context
 
 SSH config terdaftar di `~/.ssh/config` local MacBook. AI bisa mengakses server langsung dengan perintah `ssh <config-name>`.
 
@@ -36,6 +38,7 @@ MAINTENANCE_YEAR: 2026
 ```
 
 **Aturan Maintenance:**
+
 1. Semua scope dan aturan maintenance berlaku **selama `MAINTENANCE_ACTIVE: true`**.
 2. Jika `MAINTENANCE_ACTIVE: false`, AI **tidak boleh** mengakses server atau menjalankan scope maintenance, **kecuali** user meminta secara eksplisit.
 3. Setiap tahun maintenance memiliki scope yang berbeda tergantung kondisi infrastruktur.
@@ -148,6 +151,7 @@ Folder maintenance ada di **root project** (bukan di dalam `dev-docs/`):
 > **Untuk setup repository di server** (clone, pull, deploy key, token), lihat: **[git-remote.md](./git-remote.md)**
 
 File `git-remote.md` mengatur bagaimana server production mengakses git repository:
+
 - Auto-detection remote URL dari local project
 - Pilihan auth: SSH deploy key vs HTTPS token
 - Setup credential store di server
@@ -161,6 +165,7 @@ File `git-remote.md` mengatur bagaimana server production mengakses git reposito
 | `git-remote.md` | Server → Git Repo | Server clone/pull kode dari GitHub/GitLab |
 
 **Kapan keduanya dibutuhkan:**
+
 - AI butuh SSH ke server **dan** server butuh akses ke git repo → pakai keduanya
 - Server sudah punya akses ke git, AI tinggal SSH → cukup `ssh-access.md`
 - Server belum ada, AI setup dari nol → pakai keduanya
