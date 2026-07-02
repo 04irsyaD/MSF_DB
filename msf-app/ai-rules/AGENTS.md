@@ -624,5 +624,5 @@ Setiap akhir task, AI WAJIB mengecek dan mengupdate file-file berikut (bila terd
 
 **Reminder:**
 * `main` harus tetap bersih & stabil. Semua kerja AI = `dev` / `feat/*`.
-* **GIT SELALU dari dalam `apps/` (monolith) atau `backend/`/`frontend/` (fullstack).** Jangan dari root!
+* **GIT SELALU dari ROOT (`msf-app/`).** Jangan dari sub-folder!
 * **AI-rules/ adalah IMMUTABLE** — AI HANYA membaca, TIDAK BOLEH mengubah. Output AI di `planning/` dan `dev-docs/`.
