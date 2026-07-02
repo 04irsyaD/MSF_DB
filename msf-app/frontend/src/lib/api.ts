@@ -112,10 +112,10 @@ export const api = {
     });
   },
 
-  async parseDDL(sqlContent: string): Promise<TableMetadata[]> {
+  async parseDDL(sqlContent: string, dialect: string): Promise<TableMetadata[]> {
     return request<TableMetadata[]>("/api/generate/parse-ddl", {
       method: "POST",
-      body: JSON.stringify({ sql_content: sqlContent }),
+      body: JSON.stringify({ sql_content: sqlContent, dialect }),
     });
   },
 

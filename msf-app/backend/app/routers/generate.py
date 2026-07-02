@@ -94,7 +94,7 @@ async def parse_ddl_endpoint(request: ParseDDLRequest):
     Parse SQL DDL string dan kembalikan struktur TableMetadata.
     """
     try:
-        tables = SQLParser.parse(request.sql_content)
+        tables = SQLParser.parse(request.sql_content, dialect=request.dialect)
         return tables
     except Exception as e:
         logger.error("Gagal parse DDL", error=str(e))

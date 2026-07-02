@@ -348,4 +348,5 @@ class ErrorResponse(BaseModel):
 
 class ParseDDLRequest(BaseModel):
     sql_content: str
+    dialect: Optional[str] = "postgresql"
 

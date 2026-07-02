@@ -39,7 +39,7 @@ class SQLParser:
     )
 
     @classmethod
-    def parse(cls, sql: str) -> List[TableMetadata]:
+    def parse(cls, sql: str, dialect: str = "postgresql") -> List[TableMetadata]:
         """
         Entry point: parse SQL DDL string, return list TableMetadata.
         """
@@ -47,12 +47,34 @@ class SQLParser:
         sql = cls._remove_comments(sql)
         tables = []
 
-        for match in cls.TABLE_PATTERN.finditer(sql):
-            table_name = match.group(1)
-            body = match.group(2)
+        # Cari 'CREATE TABLE [IF NOT EXISTS] [schema.]table_name ('
+        create_pattern = re.compile(
+            r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?"
+            r"(?:[\w`\"]+\.)?[`\"']?([\w]+)[`\"']?\s*\(",
+            re.IGNORECASE,
+        )
 
-            table = cls._parse_table_body(table_name, body)
-            tables.append(table)
+        for match in create_pattern.finditer(sql):
+            table_name = match.group(1)
+            start_idx = match.end()  # Index setelah '('
+
+            # Cari matching closing parenthesis ')' terluar
+            depth = 1
+            end_idx = -1
+            for idx in range(start_idx, len(sql)):
+                char = sql[idx]
+                if char == '(':
+                    depth += 1
+                elif char == ')':
+                    depth -= 1
+                    if depth == 0:
+                        end_idx = idx
+                        break
+
+            if end_idx != -1:
+                body = sql[start_idx:end_idx]
+                table = cls._parse_table_body(table_name, body, dialect=dialect)
+                tables.append(table)
 
         return tables
 
@@ -66,7 +88,7 @@ class SQLParser:
         return sql
 
     @classmethod
-    def _parse_table_body(cls, table_name: str, body: str) -> TableMetadata:
+    def _parse_table_body(cls, table_name: str, body: str, dialect: str = "postgresql") -> TableMetadata:
         """Parse isi dalam kurung CREATE TABLE"""
         columns: List[ColumnMetadata] = []
         primary_keys: List[str] = []
@@ -83,8 +105,8 @@ class SQLParser:
 
             upper = line.upper().lstrip()
 
-            # PRIMARY KEY constraint (table-level)
-            if upper.startswith("PRIMARY KEY"):
+            # PRIMARY KEY constraint (table-level, including CONSTRAINT name PRIMARY KEY)
+            if upper.startswith("PRIMARY KEY") or (upper.startswith("CONSTRAINT") and "PRIMARY KEY" in upper):
                 cols = cls._extract_column_list(line)
                 primary_keys.extend(cols)
                 # Tandai kolom yang merupakan PK

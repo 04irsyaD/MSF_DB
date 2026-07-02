@@ -7,6 +7,7 @@ import DbConnector from "@/components/generator/DbConnector";
 import DiagramCanvas from "@/components/diagram/DiagramCanvas";
 import { Play, Sparkles, RefreshCw, Layers, Terminal, ArrowRight, Info } from "lucide-react";
 import { toast } from "sonner";
+import { DDL_TEMPLATES } from "./templates";
 
 export default function DiagramPage() {
   const [mode, setMode] = useState<"ddl" | "database">("ddl");
@@ -29,20 +30,26 @@ export default function DiagramPage() {
 
   const [tables, setTables] = useState<TableMetadata[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [dialect, setDialect] = useState<string>("postgresql");
 
   // Auto visualize default DDL on mount
   useEffect(() => {
-    handleVisualizeDDL(true);
+    handleVisualizeDDL(true, "postgresql");
   }, []);
 
-  const handleVisualizeDDL = async (isInitial = false) => {
-    if (!sqlContent || sqlContent.trim().length < 10) {
+  const handleVisualizeDDL = async (
+    isInitial = false,
+    currentDialect = dialect,
+    currentSql = sqlContent
+  ) => {
+    const sqlToParse = currentSql || sqlContent;
+    if (!sqlToParse || sqlToParse.trim().length < 10) {
       if (!isInitial) toast.error("Silakan masukkan skrip SQL DDL yang valid (minimal 10 karakter).");
       return;
     }
     setLoading(true);
     try {
-      const res = await api.parseDDL(sqlContent);
+      const res = await api.parseDDL(sqlToParse, currentDialect);
       if (res.length === 0) {
         if (!isInitial) toast.error("Tidak ada tabel yang terdeteksi di dalam DDL SQL.");
       } else {
@@ -53,6 +60,15 @@ export default function DiagramPage() {
       if (!isInitial) toast.error(`Error: ${getFriendlyErrorMessage(err)}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    const template = DDL_TEMPLATES.find((t) => t.id === templateId);
+    if (template) {
+      setSqlContent(template.sql);
+      setDialect(template.dialect);
+      handleVisualizeDDL(false, template.dialect, template.sql);
     }
   };
 
@@ -130,16 +146,52 @@ export default function DiagramPage() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {mode === "ddl" ? (
               <div className="h-full flex flex-col justify-between space-y-3 min-h-0">
-                <div className="flex-1 flex flex-col min-h-0 space-y-1.5">
-                  <label className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-wider block">
-                    KODE SQL DDL:
-                  </label>
-                  <textarea
-                    placeholder="Masukkan skrip SQL CREATE TABLE di sini..."
-                    value={sqlContent}
-                    onChange={(e) => setSqlContent(e.target.value)}
-                    className="flex-1 w-full bg-gray-50 border border-border focus:border-accent rounded-xl p-3.5 text-[10px] font-mono text-gray-900 focus:outline-none transition-colors duration-150 resize-none min-h-[250px]"
-                  />
+                <div className="flex-1 flex flex-col min-h-0 space-y-3">
+                  <div className="space-y-1.5 shrink-0">
+                    <label className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-wider block">
+                      Pilih Template Contoh DDL:
+                    </label>
+                    <select
+                      onChange={(e) => handleSelectTemplate(e.target.value)}
+                      defaultValue=""
+                      className="w-full bg-gray-50 border border-border focus:border-accent rounded-xl px-3 py-2 text-[10px] font-mono text-gray-900 focus:outline-none transition-colors duration-150"
+                    >
+                      <option value="" disabled>-- Pilih Skenario DB --</option>
+                      {DDL_TEMPLATES.map((tmpl) => (
+                        <option key={tmpl.id} value={tmpl.id}>
+                          {tmpl.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5 shrink-0">
+                    <label className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-wider block">
+                      Dialek Database:
+                    </label>
+                    <select
+                      value={dialect}
+                      onChange={(e) => setDialect(e.target.value)}
+                      className="w-full bg-gray-50 border border-border focus:border-accent rounded-xl px-3 py-2 text-[10px] font-mono text-gray-900 focus:outline-none transition-colors duration-150"
+                    >
+                      <option value="postgresql">PostgreSQL</option>
+                      <option value="mysql">MySQL / MariaDB</option>
+                      <option value="sqlite">SQLite</option>
+                      <option value="sqlserver">SQL Server (MSSQL)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex-1 flex flex-col min-h-0 space-y-1.5">
+                    <label className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-wider block">
+                      KODE SQL DDL:
+                    </label>
+                    <textarea
+                      placeholder="Masukkan skrip SQL CREATE TABLE di sini..."
+                      value={sqlContent}
+                      onChange={(e) => setSqlContent(e.target.value)}
+                      className="flex-1 w-full bg-gray-50 border border-border focus:border-accent rounded-xl p-3.5 text-[10px] font-mono text-gray-900 focus:outline-none transition-colors duration-150 resize-none min-h-[250px]"
+                    />
+                  </div>
                 </div>
 
                 <button
