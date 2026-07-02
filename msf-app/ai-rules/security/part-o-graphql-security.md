@@ -4,7 +4,7 @@
 
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  GraphQL-Specific Security
+## GraphQL-Specific Security
 
 **Vulnerabilities:**
 1. **Introspection Query:** Exposes schema (disable di production)

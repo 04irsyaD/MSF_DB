@@ -1,7 +1,7 @@
 # TASKS ARCHIVE
 
 > **IMMUTABLE -- AI TIDAK BOLEH mengubah file ini. Baca sebagai panduan. Untuk output, lihat mapping di ai-rules/README.md.**
-
+>
 > **Status:** DATA FILE — Arsip task yang sudah selesai.
 > **Purpose:** Referensi historis. Jangan hapus — untuk audit dan context.
 

@@ -7,7 +7,7 @@
 
 ## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
 
-###  CRITICAL: Setiap Selesai Push/PR/Merge, WAJIB Buat Laporan
+## CRITICAL: Setiap Selesai Push/PR/Merge, WAJIB Buat Laporan
 
 **PR/merge ke main** adalah milestone. Setiap kali AI:
 - push ke `dev`

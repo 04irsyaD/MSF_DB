@@ -1,10 +1,10 @@
 # Network Security (Mandatory)
 
 > **IMMUTABLE -- AI TIDAK BOLEH mengubah file ini. Baca sebagai panduan. Untuk output, lihat mapping di ai-rules/README.md.**
-
+>
 > **Status:** GUIDANCE — Bagian dari security standard. Lihat [README.md](./README.md) untuk index lengkap.
 
-###  Network Security Controls
+## Network Security Controls
 
 **Requirements:**
 1. **Firewall Rules:**

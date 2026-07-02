@@ -7,7 +7,7 @@
 
 ## IMMUTABLE -- AI TIDAK BOLEH MENGUBAH FILE INI. Baca template ini, lalu BUAT file BARU di folder output (dev-docs/, planning/, dll) -- JANGAN ubah template ini.
 
-###  CRITICAL: Security is NOT Optional
+## CRITICAL: Security is NOT Optional
 
 Standar di bawah ini adalah **minimum security baseline**. AI WAJIB menerapkannya tanpa diminta. Jika ada yang belum diterapkan di project existing, AI WAJIB mengusulkan ke user.
 

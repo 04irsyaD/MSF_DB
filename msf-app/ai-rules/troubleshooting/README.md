@@ -9,7 +9,7 @@
 
 **What to CREATE in output folder:** Setiap kali AI menemukan error yang tidak obvious dan menghabiskan waktu debugging, catat di sini.
 
-###  CRITICAL: Anti-Monster Rule
+## CRITICAL: Anti-Monster Rule
 
 **DILARANG** membuat satu file issue raksasa. Setelah satu issue ter-resolve dan stable selama >1 bulan, **pindahkan ke arsip**.
 
