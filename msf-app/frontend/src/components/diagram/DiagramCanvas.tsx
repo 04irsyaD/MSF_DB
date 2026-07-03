@@ -99,7 +99,9 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
             const dx = nodes[i].x - nodes[j].x;
             const dy = nodes[i].y - nodes[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const force = repScale / (dist * dist);
+            // Bounding box collision booster to prevent card overlapping
+            const isOverlap = Math.abs(dx) < (CARD_WIDTH + 40) && Math.abs(dy) < (heightSpacing - 40);
+            const force = isOverlap ? (repScale * 3) / (dist * dist) : repScale / (dist * dist);
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
             nodes[i].fx += fx;
@@ -196,7 +198,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         };
       }
 
-      const innerRadius = 260;
+      const innerRadius = Math.max(260, directNeighbors.length * 60);
       directNeighbors.forEach((name, index) => {
         const angle = (index / directNeighbors.length) * 2 * Math.PI;
         newPositions[name] = {
@@ -205,13 +207,81 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         };
       });
 
-      const outerRadius = 480;
+      const outerRadius = Math.max(innerRadius + 220, independent.length * 65);
       independent.forEach((name, index) => {
         const angle = (index / Math.max(1, independent.length)) * 2 * Math.PI + Math.PI / 4;
         newPositions[name] = {
           x: Math.max(50, center.x + outerRadius * Math.cos(angle) - CARD_WIDTH / 2),
           y: Math.max(50, center.y + outerRadius * Math.sin(angle) - 100),
         };
+      });
+    } else if (style === "smart-grid") {
+      // Grid + Pusat Relasi (Smart Grid)
+      const degrees: Record<string, number> = {};
+      currentTables.forEach((t) => {
+        degrees[t.name] = 0;
+      });
+      currentTables.forEach((t) => {
+        t.foreign_keys?.forEach((fk) => {
+          degrees[t.name]++;
+          if (degrees[fk.references_table] !== undefined) {
+            degrees[fk.references_table]++;
+          }
+        });
+      });
+
+      let hubTable = "";
+      let maxDegree = -1;
+      currentTables.forEach((t) => {
+        if (degrees[t.name] > maxDegree) {
+          maxDegree = degrees[t.name];
+          hubTable = t.name;
+        }
+      });
+
+      // Assign columns (0 = Left, 1 = Center, 2 = Right)
+      const colAssignments: Record<string, number> = {};
+      currentTables.forEach((t) => {
+        if (t.name === hubTable) {
+          colAssignments[t.name] = 1;
+        } else {
+          const pointsToHub = t.foreign_keys?.some((fk) => fk.references_table === hubTable);
+          const hubPointsToIt = currentTables.find((ct) => ct.name === hubTable)?.foreign_keys?.some((fk) => fk.references_table === t.name);
+
+          if (pointsToHub && !hubPointsToIt) {
+            colAssignments[t.name] = 0;
+          } else if (hubPointsToIt && !pointsToHub) {
+            colAssignments[t.name] = 2;
+          } else {
+            // Distribute remaining tables
+            colAssignments[t.name] = (degrees[t.name] % 2 === 0) ? 0 : 2;
+          }
+        }
+      });
+
+      const colRows: Record<number, string[]> = { 0: [], 1: [], 2: [] };
+      currentTables.forEach((t) => {
+        const col = colAssignments[t.name];
+        colRows[col].push(t.name);
+      });
+
+      // Keep Hub table centered in Column 1 list
+      const col1List = colRows[1];
+      if (col1List.includes(hubTable)) {
+        const filtered = col1List.filter((n) => n !== hubTable);
+        const midIdx = Math.floor(filtered.length / 2);
+        filtered.splice(midIdx, 0, hubTable);
+        colRows[1] = filtered;
+      }
+
+      [0, 1, 2].forEach((col) => {
+        const list = colRows[col] || [];
+        list.forEach((name, row) => {
+          newPositions[name] = {
+            x: 80 + col * widthSpacing,
+            y: 80 + row * heightSpacing,
+          };
+        });
       });
     } else {
       // Hierarchical Layout (horizontal / vertical)
@@ -526,6 +596,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
           <option value="horizontal">↔ Horizontal</option>
           <option value="vertical">↕ Vertikal</option>
           <option value="grid">⊞ Grid</option>
+          <option value="smart-grid">🧱 Grid + Pusat Relasi</option>
           <option value="radial">⬤ Lingkaran</option>
           <option value="centric">🎯 Pusat Relasi</option>
           <option value="organic">🌀 Organik (Force)</option>

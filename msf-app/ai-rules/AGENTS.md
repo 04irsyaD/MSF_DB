@@ -277,19 +277,6 @@ Ini adalah aturan LOKASI paling penting. Salah tempat = project kacau. AI WAJIB 
       * Cache warming / preloading
       * File storage sync (S3, MinIO)
       * Email queue / notification worker
-12. **DILARANG menggunakan icons/emojis di kode atau dokumentasi**, kecuali:
-    * ✅ dan ❌ **HANYA boleh** di dokumentasi untuk checklist/status
-    * ❌ **DILARANG** menggunakan icons di kode (comments, variable names, UI text, dll)
-    * ❌ **DILARANG** menggunakan decorative emojis (🔗🔒🛠️🎨📮🔄📊🚀📝🤖👨‍💻⛔🗑️⚠️ dll)
-    * **Alasan:** Konsistensi, profesionalisme, dan compatibility lintas platform
-13. **WAJIB mengikuti Coding Standards** (`ai-rules/coding-standards/CODING_STANDARDS.md`) untuk clean code:
-    * **File size limits:** Controller max 1000, Service max 800, Model max 300, Route max 200
-    * **Separation of Concerns:** Controller → Service → Repository → Model
-    * **Framework conventions:** WAJIB ikuti pattern framework (Laravel Resource Controller, Express middleware, dll)
-    * **Refactoring checklist:** WAJIB check sebelum commit (file size, function size, class responsibilities)
-    * **Anti-patterns:** DILARANG God Controller, Fat Model, deep nesting, magic numbers
-    * AI WAJIB **proaktif refactor** jika menemukan code smell
-    * Jika file existing melanggar standar, laporkan di task report dan usulkan refactoring plan
       * WebSocket server
       * Real-time event processor
     * **Dokumentasi WAJIB include:**
@@ -304,6 +291,19 @@ Ini adalah aturan LOKASI paling penting. Salah tempat = project kacau. AI WAJIB 
     * **Template:** Gunakan template di `ai-rules/operations/_templates/`
     * **Mode:** Default manual-setup (AI buat docs, user jalankan). Auto-setup hanya jika `AUTO_SETUP_OPERATIONS: true` di `ai-rules/deployment/ssh-access.md`
     * AI WAJIB **proaktif** membuat dokumentasi operations — bukan menunggu user meminta.
+12. **DILARANG menggunakan icons/emojis di kode atau dokumentasi**, kecuali:
+    * ✅ dan ❌ **HANYA boleh** di dokumentasi untuk checklist/status
+    * ❌ **DILARANG** menggunakan icons di kode (comments, variable names, UI text, dll)
+    * ❌ **DILARANG** menggunakan decorative emojis (🔗🔒🛠️🎨📮🔄📊🚀📝🤖👨‍💻⛔🗑️⚠️ dll)
+    * **Alasan:** Konsistensi, profesionalisme, dan compatibility lintas platform
+13. **WAJIB mengikuti Coding Standards** (`ai-rules/coding-standards/CODING_STANDARDS.md`) untuk clean code:
+    * **File size limits:** Controller max 1000, Service max 800, Model max 300, Route max 200
+    * **Separation of Concerns:** Controller → Service → Repository → Model
+    * **Framework conventions:** WAJIB ikuti pattern framework (Laravel Resource Controller, Express middleware, dll)
+    * **Refactoring checklist:** WAJIB check sebelum commit (file size, function size, class responsibilities)
+    * **Anti-patterns:** DILARANG God Controller, Fat Model, deep nesting, magic numbers
+    * AI WAJIB **proaktif refactor** jika menemukan code smell
+    * Jika file existing melanggar standar, laporkan di task report dan usulkan refactoring plan
 14. **DILARANG menulis credential aktual di file .md di dalam folder kode** (`apps/`, `backend/`, `frontend/`):
     * File di `{apps}/docs/operations/` berada DI DALAM git repo dan WILL di-push ke GitHub
     * **DILARANG** menulis: password, token, API key, SSH key, secret, database username, connection string aktual, server IP aktual
