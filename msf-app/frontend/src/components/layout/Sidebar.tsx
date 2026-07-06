@@ -29,37 +29,26 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: "Dashboard",
       href: "/dashboard",
       icon: LayoutDashboard,
-      description: "Overview & statistik",
     },
     {
-      label: "AI Generator",
+      label: "Generator",
       href: "/generate",
       icon: Sparkles,
-      description: "Generate dokumentasi DB",
     },
     {
-      label: "MSF Diagram",
+      label: "Diagram",
       href: "/diagram",
       icon: Layers,
-      description: "Visualisasi skema & relasi",
     },
     {
-      label: "SQL Shortcuts",
+      label: "Shortcuts",
       href: "/shortcuts",
       icon: Terminal,
-      description: "Skrip DBA & optimasi",
     },
     {
-      label: "Settings",
+      label: "Pengaturan",
       href: "/settings",
       icon: Settings,
-      description: "Konfigurasi AI & koneksi",
-    },
-    {
-      label: "Admin Portal",
-      href: "/admin",
-      icon: ShieldAlert,
-      description: "Log & kontrol sistem",
     },
   ];
 
@@ -88,7 +77,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </div>
               <span className="font-bold text-base text-foreground tracking-tight">MSF DB</span>
             </div>
-            <span className="text-[10px] text-muted-foreground mt-0.5 block pl-9">v2.0 — AI Docs Platform</span>
+            <span className="text-[10px] text-muted-foreground mt-0.5 block pl-9">v2.1 — AI Docs Platform</span>
           </div>
           <button
             onClick={onClose}
@@ -123,51 +112,30 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     isActive ? "text-accent" : "text-muted-foreground group-hover:text-foreground"
                   )}
                 />
-                <div className="flex flex-col">
-                  <span className={cn("text-sm font-medium leading-tight", isActive ? "text-accent" : "")}>
-                    {item.label}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground leading-none mt-0.5 font-normal">
-                    {item.description}
-                  </span>
-                </div>
+                <span className={cn("text-sm font-medium leading-tight", isActive ? "text-accent" : "")}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
         </nav>
 
         {/* Status Footer */}
-        <div className="p-4 border-t border-border space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground flex items-center gap-1.5">
-              <Activity className="h-3 w-3" />
-              API Server
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span className={cn("w-1.5 h-1.5 rounded-full pulse-dot", isApiUp ? "bg-accent" : "bg-red-400")} />
-              <span className={cn("text-[11px] font-semibold", isApiUp ? "text-accent" : "text-red-500")}>
-                {isApiUp ? "Online" : "Offline"}
-              </span>
+        <div className="p-3 border-t border-border space-y-2 bg-gray-50/50">
+          <div className="flex items-center justify-around text-[10px] font-mono font-bold text-gray-500">
+            <div className="flex items-center gap-1">
+              <span className={cn("w-1.5 h-1.5 rounded-full", isApiUp ? "bg-accent pulse-dot" : "bg-red-400")} />
+              <span>API: {isApiUp ? "UP" : "DOWN"}</span>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground flex items-center gap-1.5">
-              <Circle className="h-3 w-3" />
-              Ollama
-            </span>
-            <div className="flex items-center gap-1.5">
+            <div className="h-3 w-[1px] bg-border" />
+            <div className="flex items-center gap-1">
               <span className={cn("w-1.5 h-1.5 rounded-full", isOllamaUp ? "bg-accent pulse-dot" : "bg-amber-400")} />
-              <span className={cn("text-[11px] font-semibold", isOllamaUp ? "text-accent" : "text-amber-500")}>
-                {isOllamaUp ? (ollamaModel ? ollamaModel.split(":")[0] : "Active") : "Offline"}
-              </span>
+              <span>OLLAMA: {isOllamaUp ? (ollamaModel ? ollamaModel.split(":")[0].toUpperCase() : "UP") : "DOWN"}</span>
             </div>
           </div>
-
-          <div className="pt-2 border-t border-border">
-            <p className="text-[10px] text-muted-foreground text-center">
-              Powered by{" "}
-              <span className="text-accent font-semibold">MSF Team</span>
+          <div className="pt-1.5 border-t border-border/60 text-center">
+            <p className="text-[9px] text-muted-foreground font-mono">
+              v2.1 — 100% LOCAL &amp; SECURE
             </p>
           </div>
         </div>

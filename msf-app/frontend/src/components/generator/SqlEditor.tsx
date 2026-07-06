@@ -101,7 +101,7 @@ export default function SqlEditor({ value, onChange }: SqlEditorProps) {
   };
 
   return (
-    <div className="flex flex-col h-[500px] border border-border rounded-2xl overflow-hidden bg-white focus-within:border-accent/50 hover:border-accent/30 transition-colors duration-150 shadow-sm">
+    <div className="flex flex-col h-full border border-border rounded-2xl overflow-hidden bg-white focus-within:border-accent/50 hover:border-accent/30 transition-colors duration-150 shadow-sm">
       {/* Editor Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-gray-50 shrink-0">
         <div className="flex items-center gap-2">

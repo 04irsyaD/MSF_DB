@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { GeneratorSettings, AIProvider, OutputLanguage, DetailLevel, ExportFormat } from "@/lib/types";
 import { useAIModels } from "@/hooks/useOllamaModels";
-import { Sparkles, Globe, FileText, BarChart, Settings, Loader2 } from "lucide-react";
+import { Sparkles, FileText, Loader2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GeneratePanelProps {
@@ -12,6 +12,9 @@ interface GeneratePanelProps {
   onSubmit: () => void;
   disabled: boolean;
   loading: boolean;
+  trackJob?: (code: string) => Promise<void>;
+  inputCode?: string;
+  onInputCodeChange?: (code: string) => void;
 }
 
 export default function GeneratePanel({
@@ -20,6 +23,9 @@ export default function GeneratePanel({
   onSubmit,
   disabled,
   loading,
+  trackJob,
+  inputCode = "",
+  onInputCodeChange,
 }: GeneratePanelProps) {
   const [provider, setProvider] = useState<AIProvider>(settings.ai_provider);
 
@@ -95,10 +101,11 @@ export default function GeneratePanel({
   ];
 
   return (
-    <div className="space-y-6 bg-white border border-border p-6 rounded-2xl flex flex-col h-full justify-between shadow-sm">
-      <div className="space-y-5">
+    <div className="flex flex-col h-full bg-white border border-border rounded-2xl shadow-sm overflow-hidden">
+      {/* Scrollable config area */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-4">
         <div>
-          <h3 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest mb-1">
+          <h3 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest mb-0.5">
             AI & DOCUMENTATION CONFIG
           </h3>
           <p className="text-xs text-muted-foreground leading-normal">
@@ -288,13 +295,41 @@ export default function GeneratePanel({
         {/* Warning if Ollama is selected but offline */}
         {provider === "ollama" && !modelsLoading && models.length === 0 && (
           <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-[10.5px] leading-relaxed font-mono font-semibold">
-            ⚠️ OLLAMA LOKAL TIDAK TERDETEKSI ATAU TIDAK MEMILIKI MODEL YANG SIAP. SILAKAN JALANKAN OLLAMA DI SERVER LOKAL ANDA ATAU BERALIH KE PROVIDER API DEEPSEEK/OPENAI.
+            OLLAMA TIDAK TERDETEKSI. JALANKAN OLLAMA DI LOKAL ATAU GUNAKAN DEEPSEEK/OPENAI.
           </div>
         )}
       </div>
 
-      {/* Submit Generate Button */}
-      <div className="pt-4 border-t border-border mt-4">
+      {/* Sticky bottom: Job Tracker + Generate button */}
+      <div className="shrink-0 border-t border-border p-4 space-y-3 bg-white">
+        {/* Job Tracker */}
+        {trackJob && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-widest">Lacak Job Aktif</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="MSF-A1B2C3D4..."
+                value={inputCode}
+                onChange={(e) => onInputCodeChange?.(e.target.value)}
+                className="flex-1 bg-gray-50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-1.5 px-3 text-xs text-gray-900 placeholder-muted-foreground/40 focus:outline-none transition-colors duration-150 font-mono tracking-wider uppercase"
+              />
+              <button
+                type="button"
+                onClick={() => trackJob(inputCode).then(() => onInputCodeChange?.(""))}
+                className="px-3 py-1.5 bg-gray-100 hover:bg-accent hover:text-white text-gray-600 text-xs font-bold rounded-xl transition-all shadow-sm uppercase shrink-0 font-mono flex items-center gap-1"
+              >
+                <Search className="h-3 w-3" />
+                <span>Lacak</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Generate Button */}
         <button
           type="button"
           disabled={disabled || loading || (provider === "ollama" && models.length === 0)}

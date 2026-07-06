@@ -36,20 +36,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
           {isBackendDown && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-center justify-between gap-4 animate-fade-in-up">
+            <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-center justify-between gap-4 animate-fade-in-up">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 shrink-0">
-                  <Hammer className="h-4 w-4 animate-pulse" />
+                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+                  <Hammer className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-red-900">Koneksi API Bermasalah / Under Construction</p>
-                  <p className="text-[10px] text-red-600 mt-0.5">
-                    Gagal terhubung ke backend API. Beberapa fitur pembuatan dokumen dan database tidak dapat digunakan saat ini.
+                  <p className="text-xs font-bold text-amber-900">Koneksi Server Sedang Disiapkan</p>
+                  <p className="text-[10px] text-amber-700 mt-0.5">
+                    Gagal terhubung ke backend API. Silakan periksa apakah server backend lokal Anda sudah aktif dijalankan.
                   </p>
                 </div>
               </div>
-              <div className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-red-100 text-red-700 border border-red-200 shrink-0 uppercase tracking-wider">
-                Maintenance
+              <div className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-700 border border-amber-200 shrink-0 uppercase tracking-wider">
+                Offline
               </div>
             </div>
           )}
