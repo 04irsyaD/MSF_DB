@@ -23,6 +23,7 @@ Tidak ada task aktif saat ini.
 | T-007 | Implementasi layout Pusat Relasi (Hub-Centric) | DONE | 2026-07-02 |
 | T-008 | Implementasi layout Grid + Pusat Relasi (Smart Grid) + fix card overlap bug | DONE | 2026-07-02 |
 | T-009 | Perbaiki AI rules compliance: fix AGENTS.md bug, lengkapi dev-docs/ai/ | DONE | 2026-07-03 |
+| T-010 | Perombakan UI/UX & Restrukturisasi IA terinspirasi dari Databricks & dbdiagram | DONE | 2026-07-06 |
 
 ---
 

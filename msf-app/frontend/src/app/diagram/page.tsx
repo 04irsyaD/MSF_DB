@@ -11,9 +11,7 @@ import { DDL_TEMPLATES } from "./templates";
 
 export default function DiagramPage() {
   const [mode, setMode] = useState<"ddl" | "database">("ddl");
-  const [sqlContent, setSqlContent] = useState<string>(
-    `-- Contoh SQL DDL. Klik 'Visualisasikan' di bawah untuk merender diagram!\n\nCREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  username VARCHAR(50) NOT NULL,\n  email VARCHAR(100) UNIQUE,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE posts (\n  id SERIAL PRIMARY KEY,\n  title VARCHAR(200) NOT NULL,\n  content TEXT,\n  user_id INT REFERENCES users(id) ON DELETE CASCADE,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE comments (\n  id SERIAL PRIMARY KEY,\n  post_id INT REFERENCES posts(id) ON DELETE CASCADE,\n  author_name VARCHAR(100) NOT NULL,\n  comment_text TEXT,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);`
-  );
+  const [sqlContent, setSqlContent] = useState<string>("");
   
   const [connection, setConnection] = useState<DBConnection>({
     engine: "postgresql",
@@ -32,9 +30,18 @@ export default function DiagramPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [dialect, setDialect] = useState<string>("postgresql");
 
-  // Auto visualize default DDL on mount
+  const useExampleSql = () => {
+    setSqlContent(
+      `-- Contoh SQL DDL untuk Visualisasi\nCREATE TABLE users (\n  id SERIAL PRIMARY KEY,\n  username VARCHAR(50) NOT NULL,\n  email VARCHAR(100) UNIQUE,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE posts (\n  id SERIAL PRIMARY KEY,\n  title VARCHAR(200) NOT NULL,\n  content TEXT,\n  user_id INT REFERENCES users(id) ON DELETE CASCADE\n);`
+    );
+    toast.success("Contoh skema berhasil dimuat ke editor.");
+  };
+
+  // Auto visualize default DDL on mount (only if content is loaded)
   useEffect(() => {
-    handleVisualizeDDL(true, "postgresql");
+    if (sqlContent) {
+      handleVisualizeDDL(true, "postgresql");
+    }
   }, []);
 
   const handleVisualizeDDL = async (
@@ -182,11 +189,20 @@ export default function DiagramPage() {
                   </div>
 
                   <div className="flex-1 flex flex-col min-h-0 space-y-1.5">
-                    <label className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-wider block">
-                      KODE SQL DDL:
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-wider block">
+                        KODE SQL DDL:
+                      </label>
+                      <button
+                        type="button"
+                        onClick={useExampleSql}
+                        className="text-[9px] font-mono font-bold text-accent hover:underline uppercase"
+                      >
+                        Gunakan Contoh
+                      </button>
+                    </div>
                     <textarea
-                      placeholder="Masukkan skrip SQL CREATE TABLE di sini..."
+                      placeholder="-- Tempel kode DDL SQL (CREATE TABLE) Anda di sini..."
                       value={sqlContent}
                       onChange={(e) => setSqlContent(e.target.value)}
                       className="flex-1 w-full bg-gray-50 border border-border focus:border-accent rounded-xl p-3.5 text-[10px] font-mono text-gray-900 focus:outline-none transition-colors duration-150 resize-none min-h-[250px]"

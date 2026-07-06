@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { GeneratorSettings, AIProvider, OutputLanguage, DetailLevel, ExportFormat } from "@/lib/types";
 import { useAIModels } from "@/hooks/useOllamaModels";
-import { Sparkles, FileText, Loader2, Search } from "lucide-react";
+import { Sparkles, FileText, Loader2, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GeneratePanelProps {
@@ -12,7 +12,7 @@ interface GeneratePanelProps {
   onSubmit: () => void;
   disabled: boolean;
   loading: boolean;
-  trackJob?: (code: string) => Promise<void>;
+  trackJob?: (code: string) => Promise<any>;
   inputCode?: string;
   onInputCodeChange?: (code: string) => void;
 }
@@ -28,6 +28,7 @@ export default function GeneratePanel({
   onInputCodeChange,
 }: GeneratePanelProps) {
   const [provider, setProvider] = useState<AIProvider>(settings.ai_provider);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // Load models for current provider
   const { models, isAvailable, isLoading: modelsLoading } = useAIModels(provider);
@@ -113,132 +114,8 @@ export default function GeneratePanel({
           </p>
         </div>
 
-        {/* Project Metadata */}
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              PROJECT NAME
-            </label>
-            <input
-              type="text"
-              value={settings.project_name}
-              onChange={(e) => handleFieldChange("project_name", e.target.value)}
-              placeholder="E-Commerce DB"
-              className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              AUTHOR
-            </label>
-            <input
-              type="text"
-              value={settings.author}
-              onChange={(e) => handleFieldChange("author", e.target.value)}
-              placeholder="Developer"
-              className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
-            />
-          </div>
-        </div>
-
-        {/* Business Context */}
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-            BUSINESS CONTEXT & DESCRIPTION
-          </label>
-          <textarea
-            value={settings.business_context}
-            onChange={(e) => handleFieldChange("business_context", e.target.value)}
-            rows={2}
-            placeholder="Sistem e-commerce B2B dengan fitur multi-vendor, payment gateway, dan inventory management..."
-            className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono resize-none leading-relaxed"
-          />
-        </div>
-
-        {/* Language & Detail */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              OUTPUT LANGUAGE
-            </label>
-            <div className="flex bg-gray-50 border border-border rounded-xl p-0.5">
-              {languages.map((l) => (
-                <button
-                  key={l.value}
-                  type="button"
-                  onClick={() => handleFieldChange("language", l.value)}
-                  className={cn(
-                    "flex-1 py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-colors duration-150",
-                    settings.language === l.value
-                      ? "bg-white text-accent shadow-sm border border-gray-200/55"
-                      : "text-muted-foreground hover:text-gray-900"
-                  )}
-                >
-                  {l.label.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              FILE FORMAT
-            </label>
-            <div className="flex bg-gray-50 border border-border rounded-xl p-0.5">
-              {(["docx", "pdf"] as ExportFormat[]).map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => handleFieldChange("output_format", f)}
-                  className={cn(
-                    "flex-1 py-1.5 rounded-lg text-[11px] font-mono font-semibold uppercase transition-colors duration-150",
-                    settings.output_format === f
-                      ? "bg-white text-accent shadow-sm border border-gray-200/55"
-                      : "text-muted-foreground hover:text-gray-900"
-                  )}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Detail Level */}
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-            DETAIL LEVEL
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {levels.map((l) => (
-              <button
-                key={l.value}
-                type="button"
-                onClick={() => handleFieldChange("detail_level", l.value)}
-                className={cn(
-                  "p-2.5 rounded-xl border text-left flex flex-col transition-colors duration-150",
-                  settings.detail_level === l.value
-                    ? "bg-emerald-50/50 border-accent text-accent"
-                    : "bg-gray-50 border-border hover:border-accent/40 text-muted-foreground"
-                )}
-              >
-                <span className={cn(
-                  "font-mono font-bold text-[10px] leading-none",
-                  settings.detail_level === l.value ? "text-accent" : "text-gray-900"
-                )}>
-                  {l.label.toUpperCase()}
-                </span>
-                <span className="text-[9px] text-muted-foreground mt-1 leading-normal font-medium">
-                  {l.desc}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Provider & Model */}
-        <div className="border-t border-border pt-4 grid grid-cols-2 gap-4">
+        {/* AI Provider & Model (Esenisal - Top) */}
+        <div className="grid grid-cols-2 gap-4 pb-2 border-b border-border/50">
           <div className="space-y-1.5">
             <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
               AI PROVIDER
@@ -290,6 +167,150 @@ export default function GeneratePanel({
               </div>
             )}
           </div>
+        </div>
+
+        {/* Language & Format */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+              OUTPUT LANGUAGE
+            </label>
+            <div className="flex bg-gray-50 border border-border rounded-xl p-0.5">
+              {languages.map((l) => (
+                <button
+                  key={l.value}
+                  type="button"
+                  onClick={() => handleFieldChange("language", l.value)}
+                  className={cn(
+                    "flex-1 py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-colors duration-150",
+                    settings.language === l.value
+                      ? "bg-white text-accent shadow-sm border border-gray-200/55"
+                      : "text-muted-foreground hover:text-gray-900"
+                  )}
+                >
+                  {l.label.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+              FILE FORMAT
+            </label>
+            <div className="flex bg-gray-50 border border-border rounded-xl p-0.5">
+              {(["docx", "pdf"] as ExportFormat[]).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => handleFieldChange("output_format", f)}
+                  className={cn(
+                    "flex-1 py-1.5 rounded-lg text-[11px] font-mono font-semibold uppercase transition-colors duration-150",
+                    settings.output_format === f
+                      ? "bg-white text-accent shadow-sm border border-gray-200/55"
+                      : "text-muted-foreground hover:text-gray-900"
+                  )}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Collapsible Advanced Options Section */}
+        <div className="border-t border-border/60 pt-3">
+          <button
+            type="button"
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="flex items-center justify-between w-full py-1.5 text-[10px] font-mono font-bold text-gray-500 hover:text-accent transition-colors uppercase tracking-wider"
+          >
+            <span>Opsi Lanjutan (Opsional)</span>
+            {isAdvancedOpen ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </button>
+
+          {isAdvancedOpen && (
+            <div className="space-y-4 pt-3 border-t border-dashed border-border/80 mt-2 animate-fade-in">
+              {/* Project Metadata */}
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    PROJECT NAME
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.project_name}
+                    onChange={(e) => handleFieldChange("project_name", e.target.value)}
+                    placeholder="E-Commerce DB"
+                    className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    AUTHOR
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.author}
+                    onChange={(e) => handleFieldChange("author", e.target.value)}
+                    placeholder="Developer"
+                    className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Business Context */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                  BUSINESS CONTEXT & DESCRIPTION
+                </label>
+                <textarea
+                  value={settings.business_context}
+                  onChange={(e) => handleFieldChange("business_context", e.target.value)}
+                  rows={2}
+                  placeholder="Sistem e-commerce B2B dengan fitur multi-vendor..."
+                  className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* Detail Level */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                  DETAIL LEVEL
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {levels.map((l) => (
+                    <button
+                      key={l.value}
+                      type="button"
+                      onClick={() => handleFieldChange("detail_level", l.value)}
+                      className={cn(
+                        "p-2.5 rounded-xl border text-left flex flex-col transition-colors duration-150",
+                        settings.detail_level === l.value
+                          ? "bg-emerald-50/50 border-accent text-accent"
+                          : "bg-gray-50 border-border hover:border-accent/40 text-muted-foreground"
+                      )}
+                    >
+                      <span className={cn(
+                        "font-mono font-bold text-[10px] leading-none",
+                        settings.detail_level === l.value ? "text-accent" : "text-gray-900"
+                      )}>
+                        {l.label.toUpperCase()}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground mt-1 leading-normal font-medium">
+                        {l.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Warning if Ollama is selected but offline */}

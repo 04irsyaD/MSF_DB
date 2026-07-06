@@ -56,6 +56,7 @@ export interface GenerateJobResponse {
   status: JobStatus;
   created_at: string;
   estimated_seconds?: number;
+  access_code?: string;
 }
 
 export interface JobStatusResponse {
@@ -72,6 +73,7 @@ export interface JobStatusResponse {
   preview_markdown?: string;
   download_url?: string;
   access_code?: string;
+  project_name?: string;
 }
 
 export interface AIModelsResponse {
