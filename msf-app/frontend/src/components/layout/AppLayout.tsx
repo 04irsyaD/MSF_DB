@@ -29,6 +29,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
     return <>{children}</>;
   }
 
+  // Admin page: standalone fullscreen console layout (bypass offline overlay)
+  if (pathname === "/admin") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col font-mono">
+        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
+          {children}
+        </main>
+      </div>
+    );
+  }
+
+  // Secure and generic maintenance overlay for end-users
   if (isBackendDown) {
     return (
       <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-6 font-mono">
@@ -38,10 +50,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </div>
           <div className="space-y-2">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">
-              Koneksi Server Sedang Disiapkan
+              SISTEM SEDANG PEMELIHARAAN
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto uppercase">
-              Gagal menghubungi backend API. Pastikan server backend lokal Anda sudah aktif dijalankan.
+              Kami sedang melakukan pemeliharaan rutin untuk meningkatkan kualitas layanan. Silakan coba hubungkan kembali beberapa saat lagi.
             </p>
           </div>
 

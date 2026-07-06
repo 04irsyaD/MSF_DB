@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
+import Link from "next/link";
 import { 
   ShieldAlert, 
   Terminal, 
@@ -60,7 +61,7 @@ export default function AdminPage() {
   const verifyPasscodeOnMount = async (code: string) => {
     setVerifying(true);
     try {
-      const res = await fetch("http://localhost:3001/api/admin/verify", {
+      const res = await fetch("/api/admin/verify", {
         method: "POST",
         headers: { "X-Admin-Passcode": code },
       });
@@ -81,7 +82,7 @@ export default function AdminPage() {
     if (!passcode.trim()) return;
     setVerifying(true);
     try {
-      const res = await fetch("http://localhost:3001/api/admin/verify", {
+      const res = await fetch("/api/admin/verify", {
         method: "POST",
         headers: { "X-Admin-Passcode": passcode },
       });
@@ -109,7 +110,7 @@ export default function AdminPage() {
 
   // Poll stats dan jobs jika diotorisasi
   const { data: stats, error: statsError, mutate: mutateStats } = useSWR(
-    isAuthorized ? ["http://localhost:3001/api/admin/stats", passcode] : null,
+    isAuthorized ? ["/api/admin/stats", passcode] : null,
     adminFetcher,
     { refreshInterval: 5000 }
   );
@@ -121,13 +122,13 @@ export default function AdminPage() {
   );
 
   const { data: jobsData, error: jobsError, mutate: mutateJobs } = useSWR(
-    isAuthorized ? ["http://localhost:3001/api/admin/jobs", passcode] : null,
+    isAuthorized ? ["/api/admin/jobs", passcode] : null,
     adminFetcher,
     { refreshInterval: 4000 }
   );
 
   const { data: logsData, error: logsError, mutate: mutateLogs } = useSWR(
-    isAuthorized ? [`http://localhost:3001/api/admin/logs?limit=${logLimit}`, passcode] : null,
+    isAuthorized ? [`/api/admin/logs?limit=${logLimit}`, passcode] : null,
     adminFetcher,
     { refreshInterval: 3000 }
   );
@@ -144,7 +145,7 @@ export default function AdminPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:3001/api/admin/cleanup", {
+      const res = await fetch("/api/admin/cleanup", {
         method: "POST",
         headers: { "X-Admin-Passcode": passcode },
       });
@@ -184,7 +185,7 @@ export default function AdminPage() {
   if (verifying && !isAuthorized) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 font-mono">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
         <span className="text-xs text-muted-foreground uppercase tracking-widest">Memverifikasi Akses Admin...</span>
       </div>
     );
@@ -214,7 +215,7 @@ export default function AdminPage() {
               value={passcode}
               onChange={(e) => setPasscode(e.target.value)}
               placeholder="MASUKKAN PASSCODE..."
-              className="w-full bg-gray-50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 placeholder-muted-foreground/50 focus:outline-none transition-colors duration-150 font-mono text-center tracking-widest"
+              className="w-full bg-gray-50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-indigo-600 focus:border-b-indigo-600 rounded-none py-2 px-3 text-xs text-gray-900 placeholder-muted-foreground/50 focus:outline-none transition-colors duration-150 font-mono text-center tracking-widest"
               autoFocus
             />
           </div>
@@ -222,7 +223,7 @@ export default function AdminPage() {
           <button
             type="submit"
             disabled={verifying}
-            className="w-full py-2 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase"
+            className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600/50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase"
           >
             {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unlock className="h-3.5 w-3.5" />}
             <span>Verifikasi Akses</span>
@@ -241,7 +242,7 @@ export default function AdminPage() {
       {/* Admin Header */}
       <div className="p-5 bg-white border border-border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <Server className="h-5 w-5 text-accent mt-0.5 shrink-0 animate-pulse" />
+          <Server className="h-5 w-5 text-indigo-600 mt-0.5 shrink-0 animate-pulse" />
           <div>
             <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">
               SYSTEM CONTROL & ANALYTICS
@@ -253,6 +254,12 @@ export default function AdminPage() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
+          <Link
+            href="/dashboard"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 hover:text-emerald-700 transition-colors duration-150 text-xs font-bold flex items-center gap-1.5 uppercase shadow-sm font-mono"
+          >
+            <span>← WORKSPACE</span>
+          </Link>
           <button
             onClick={handleCleanup}
             className="px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 hover:text-red-700 transition-colors duration-150 text-xs font-bold flex items-center gap-1.5 uppercase shadow-sm"
@@ -331,7 +338,7 @@ export default function AdminPage() {
         {/* Backend API Server Info */}
         <div className="bg-white border border-border rounded-2xl p-5 space-y-3 shadow-sm">
           <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest flex items-center gap-1.5">
-            <Server className="h-4.5 w-4.5 text-accent" />
+            <Server className="h-4.5 w-4.5 text-indigo-600" />
             FastAPI Backend Diagnostics
           </h4>
           <div className="space-y-2 text-xs font-mono">
@@ -360,7 +367,7 @@ export default function AdminPage() {
                 href="/api/docs"
                 target="_blank"
                 rel="noreferrer"
-                className="text-accent hover:underline font-bold uppercase text-[10px] flex items-center gap-0.5"
+                className="text-indigo-600 hover:underline font-bold uppercase text-[10px] flex items-center gap-0.5"
               >
                 <span>Swagger Docs</span>
                 <span className="text-[8px]">↗</span>
@@ -373,7 +380,7 @@ export default function AdminPage() {
         <div className="bg-white border border-border rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between">
           <div>
             <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest flex items-center gap-1.5">
-              <Cpu className="h-4.5 w-4.5 text-accent" />
+              <Cpu className="h-4.5 w-4.5 text-indigo-600" />
               Local Ollama Instance
             </h4>
             <div className="space-y-2 text-xs font-mono mt-3">
@@ -409,12 +416,12 @@ export default function AdminPage() {
             <button
               onClick={handleTestOllama}
               disabled={testingOllama}
-              className="ml-auto px-3 py-1.5 rounded-xl border border-border hover:border-accent/40 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 transition-colors text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider shrink-0"
+              className="ml-auto px-3 py-1.5 rounded-xl border border-border hover:border-indigo-500/40 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 transition-colors text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider shrink-0"
             >
               {testingOllama ? (
-                <Loader2 className="h-3 w-3 animate-spin text-accent" />
+                <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
               ) : (
-                <Play className="h-3 w-3 text-accent" />
+                <Play className="h-3 w-3 text-indigo-600" />
               )}
               <span>Test AI Connection</span>
             </button>
@@ -427,7 +434,7 @@ export default function AdminPage() {
         <div className="lg:col-span-2 bg-white border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col h-[500px]">
           <div className="bg-gray-50 border-b border-border px-4 py-3 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-accent" />
+              <Terminal className="h-4 w-4 text-indigo-600" />
               <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Live Log Terminal</span>
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
@@ -438,7 +445,7 @@ export default function AdminPage() {
                   type="checkbox"
                   checked={autoScroll}
                   onChange={(e) => setAutoScroll(e.target.checked)}
-                  className="rounded border-gray-300 text-accent focus:ring-accent accent-accent"
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
                 />
                 <span>AUTO SCROLL</span>
               </label>
@@ -500,7 +507,7 @@ export default function AdminPage() {
             {/* AI Provider Bar Charts */}
             <div className="space-y-3.5">
               <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                <Cpu className="h-3.5 w-3.5 text-accent" />
+                <Cpu className="h-3.5 w-3.5 text-indigo-600" />
                 AI Providers
               </h5>
               <div className="space-y-2.5 text-[10px]">
@@ -515,7 +522,7 @@ export default function AdminPage() {
                         </div>
                         <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-accent rounded-full" 
+                            className="h-full bg-indigo-600 rounded-full" 
                             style={{ width: `${pct}%` }} 
                           />
                         </div>
@@ -531,7 +538,7 @@ export default function AdminPage() {
             {/* DB Engine Bar Charts */}
             <div className="space-y-3.5 pt-2">
               <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                <Database className="h-3.5 w-3.5 text-accent" />
+                <Database className="h-3.5 w-3.5 text-indigo-600" />
                 Database Engines
               </h5>
               <div className="space-y-2.5 text-[10px]">
@@ -546,7 +553,7 @@ export default function AdminPage() {
                         </div>
                         <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-accent rounded-full" 
+                            className="h-full bg-indigo-600 rounded-full" 
                             style={{ width: `${pct}%` }} 
                           />
                         </div>
