@@ -46,18 +46,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        {health?.services && (
-          <div className={cn(
-            "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium border",
-            health.services.ollama === "up"
-              ? "bg-accent/10 text-accent border-accent/20"
-              : "bg-amber-50 text-amber-600 border-amber-200"
-          )}>
-            <span className={cn("w-1.5 h-1.5 rounded-full", health.services.ollama === "up" ? "bg-accent pulse-dot" : "bg-amber-400")} />
-            <Cpu className="h-3 w-3" />
-            <span>{health.services.ollama_model ? health.services.ollama_model.split(":")[0] : "Ollama Offline"}</span>
-          </div>
-        )}
+        {/* Status detail sistem disembunyikan untuk end-user */}
       </div>
     </header>
   );

@@ -16,10 +16,13 @@ import {
   Lock,
   Unlock,
   Loader2,
-  Server
+  Server,
+  Settings as SettingsIcon,
+  Play
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { api, swrFetcher } from "@/lib/api";
 
 // Custom fetcher dengan auth header
 const adminFetcher = async ([url, passcode]: [string, string]) => {
@@ -41,6 +44,8 @@ export default function AdminPage() {
   const [verifying, setVerifying] = useState(false);
   const [logLimit, setLogLimit] = useState(100);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [testingOllama, setTestingOllama] = useState(false);
+  const [ollamaResult, setOllamaResult] = useState<{ success: boolean; message: string } | null>(null);
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
   // Load passcode dari localStorage saat mount
@@ -109,6 +114,12 @@ export default function AdminPage() {
     { refreshInterval: 5000 }
   );
 
+  const { data: health, mutate: mutateHealth } = useSWR(
+    isAuthorized ? "/api/health" : null,
+    swrFetcher,
+    { refreshInterval: 10000 }
+  );
+
   const { data: jobsData, error: jobsError, mutate: mutateJobs } = useSWR(
     isAuthorized ? ["http://localhost:3001/api/admin/jobs", passcode] : null,
     adminFetcher,
@@ -146,6 +157,27 @@ export default function AdminPage() {
       }
     } catch (e: any) {
       toast.error(`Gagal menghubungi server: ${e.message}`);
+    }
+  };
+
+  const handleTestOllama = async () => {
+    setTestingOllama(true);
+    setOllamaResult(null);
+    try {
+      const isUp = await api.testAIConnection("ollama", health?.services?.ollama_model || "");
+      if (isUp.success) {
+        setOllamaResult({ success: true, message: "Koneksi ke Ollama berhasil terhubung!" });
+        toast.success("Ollama siap digunakan!");
+      } else {
+        setOllamaResult({ success: false, message: isUp.message || "Ollama tidak merespon." });
+        toast.error("Gagal terhubung ke Ollama.");
+      }
+    } catch (err: any) {
+      setOllamaResult({ success: false, message: err.message || "Gagal menghubungi API backend." });
+      toast.error(`Koneksi gagal: ${err.message}`);
+    } finally {
+      setTestingOllama(false);
+      mutateHealth();
     }
   };
 
@@ -290,6 +322,102 @@ export default function AdminPage() {
               : "bg-gray-50 border-gray-100 text-gray-400"
           )}>
             <RefreshCw className={cn("h-5 w-5", ((summary.queued || 0) + (summary.processing || 0)) > 0 && "animate-spin")} />
+          </div>
+        </div>
+      </div>
+
+      {/* System Diagnostics (Moved from settings to admin-only area) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Backend API Server Info */}
+        <div className="bg-white border border-border rounded-2xl p-5 space-y-3 shadow-sm">
+          <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest flex items-center gap-1.5">
+            <Server className="h-4.5 w-4.5 text-accent" />
+            FastAPI Backend Diagnostics
+          </h4>
+          <div className="space-y-2 text-xs font-mono">
+            <div className="flex justify-between items-center py-1 border-b border-border/40">
+              <span className="text-muted-foreground uppercase text-[10px]">API Status:</span>
+              <span className={cn(
+                "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border flex items-center gap-1.5",
+                health
+                  ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                  : "bg-red-50 text-red-600 border-red-200"
+              )}>
+                <span className={cn(
+                  "h-1.5 w-1.5 rounded-full",
+                  health ? "bg-emerald-500 animate-pulse" : "bg-red-500"
+                )} />
+                {health ? "ONLINE" : "OFFLINE"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-1 border-b border-border/40">
+              <span className="text-muted-foreground uppercase text-[10px]">Version:</span>
+              <span className="text-gray-900">{health?.version || "2.1.0"}</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-muted-foreground uppercase text-[10px]">Swagger Docs:</span>
+              <a
+                href="/api/docs"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent hover:underline font-bold uppercase text-[10px] flex items-center gap-0.5"
+              >
+                <span>Swagger Docs</span>
+                <span className="text-[8px]">↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Local Ollama Info */}
+        <div className="bg-white border border-border rounded-2xl p-5 space-y-3 shadow-sm flex flex-col justify-between">
+          <div>
+            <h4 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest flex items-center gap-1.5">
+              <Cpu className="h-4.5 w-4.5 text-accent" />
+              Local Ollama Instance
+            </h4>
+            <div className="space-y-2 text-xs font-mono mt-3">
+              <div className="flex justify-between items-center py-1 border-b border-border/40">
+                <span className="text-muted-foreground uppercase text-[10px]">Status:</span>
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border",
+                  health?.services?.ollama === "up"
+                    ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                    : "bg-amber-50 text-amber-600 border-amber-200"
+                )}>
+                  {health?.services?.ollama === "up" ? "ACTIVE / RUNNING" : "OFFLINE / INACTIVE"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-border/40">
+                <span className="text-muted-foreground uppercase text-[10px]">Active Model:</span>
+                <span className="text-gray-900 truncate max-w-[150px]" title={health?.services?.ollama_model}>
+                  {health?.services?.ollama_model ? health.services.ollama_model.split(":")[0].toUpperCase() : "NONE"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-border/40 mt-3 flex items-center justify-between gap-3">
+            {ollamaResult && (
+              <span className={cn(
+                "text-[10px] font-mono leading-none font-bold",
+                ollamaResult.success ? "text-emerald-600" : "text-amber-600"
+              )}>
+                {ollamaResult.message}
+              </span>
+            )}
+            <button
+              onClick={handleTestOllama}
+              disabled={testingOllama}
+              className="ml-auto px-3 py-1.5 rounded-xl border border-border hover:border-accent/40 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 transition-colors text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider shrink-0"
+            >
+              {testingOllama ? (
+                <Loader2 className="h-3 w-3 animate-spin text-accent" />
+              ) : (
+                <Play className="h-3 w-3 text-accent" />
+              )}
+              <span>Test AI Connection</span>
+            </button>
           </div>
         </div>
       </div>

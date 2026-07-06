@@ -114,61 +114,6 @@ export default function GeneratePanel({
           </p>
         </div>
 
-        {/* AI Provider & Model (Esenisal - Top) */}
-        <div className="grid grid-cols-2 gap-4 pb-2 border-b border-border/50">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              AI PROVIDER
-            </label>
-            <select
-              value={provider}
-              onChange={(e) => {
-                const newProvider = e.target.value as AIProvider;
-                setProvider(newProvider);
-                onChange({
-                  ...settings,
-                  ai_provider: newProvider,
-                });
-              }}
-              className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
-            >
-              {providers.map((p) => (
-                <option key={p.value} value={p.value} className="bg-white text-gray-900">
-                  {p.label.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              AI MODEL
-            </label>
-            {modelsLoading ? (
-              <div className="w-full bg-gray-50 border border-border rounded-xl py-2 px-3 text-xs text-muted-foreground flex items-center gap-2">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" />
-                <span className="font-mono">LOADING...</span>
-              </div>
-            ) : models.length > 0 ? (
-              <select
-                value={settings.model}
-                onChange={(e) => handleFieldChange("model", e.target.value)}
-                className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
-              >
-                {models.map((m) => (
-                  <option key={m.name} value={m.name} className="bg-white text-gray-900">
-                    {m.name.toUpperCase()} {m.size ? `(${m.size})` : ""}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="w-full bg-red-50 border border-red-200 rounded-xl py-2 px-3 text-xs text-red-600 font-mono font-bold">
-                NO MODEL FOUND
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Language & Format */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
@@ -307,6 +252,61 @@ export default function GeneratePanel({
                       </span>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* AI Provider & Model (Collapsible) */}
+              <div className="border-t border-border/50 pt-4 grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    AI PROVIDER
+                  </label>
+                  <select
+                    value={provider}
+                    onChange={(e) => {
+                      const newProvider = e.target.value as AIProvider;
+                      setProvider(newProvider);
+                      onChange({
+                        ...settings,
+                        ai_provider: newProvider,
+                      });
+                    }}
+                    className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+                  >
+                    {providers.map((p) => (
+                      <option key={p.value} value={p.value} className="bg-white text-gray-900">
+                        {p.label.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    AI MODEL
+                  </label>
+                  {modelsLoading ? (
+                    <div className="w-full bg-gray-50 border border-border rounded-xl py-2 px-3 text-xs text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" />
+                      <span className="font-mono">LOADING...</span>
+                    </div>
+                  ) : models.length > 0 ? (
+                    <select
+                      value={settings.model}
+                      onChange={(e) => handleFieldChange("model", e.target.value)}
+                      className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+                    >
+                      {models.map((m) => (
+                        <option key={m.name} value={m.name} className="bg-white text-gray-900">
+                          {m.name.toUpperCase()} {m.size ? `(${m.size})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="w-full bg-red-50 border border-red-200 rounded-xl py-2 px-3 text-xs text-red-600 font-mono font-bold">
+                      NO MODEL FOUND
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

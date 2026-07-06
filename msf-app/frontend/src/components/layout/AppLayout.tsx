@@ -17,7 +17,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
   // Monitor backend health
-  const { data: health, error } = useSWR("/api/health", swrFetcher, {
+  const { data: health, error, mutate } = useSWR("/api/health", swrFetcher, {
     refreshInterval: 10000,
     shouldRetryOnError: true,
   });
@@ -29,30 +29,41 @@ export default function AppLayout({ children }: AppLayoutProps) {
     return <>{children}</>;
   }
 
+  if (isBackendDown) {
+    return (
+      <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-6 font-mono">
+        <div className="max-w-md w-full bg-white border border-border rounded-3xl p-8 text-center space-y-6 shadow-xl animate-fade-in">
+          <div className="mx-auto h-16 w-16 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500">
+            <Hammer className="h-7 w-7 animate-bounce" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">
+              Koneksi Server Sedang Disiapkan
+            </h3>
+            <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto uppercase">
+              Gagal menghubungi backend API. Pastikan server backend lokal Anda sudah aktif dijalankan.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => mutate()}
+              className="px-5 py-2.5 bg-accent hover:bg-accent/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm uppercase mx-auto"
+            >
+              Coba Hubungkan Kembali
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full min-h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
-          {isBackendDown && (
-            <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-center justify-between gap-4 animate-fade-in-up">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
-                  <Hammer className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-amber-900">Koneksi Server Sedang Disiapkan</p>
-                  <p className="text-[10px] text-amber-700 mt-0.5">
-                    Gagal terhubung ke backend API. Silakan periksa apakah server backend lokal Anda sudah aktif dijalankan.
-                  </p>
-                </div>
-              </div>
-              <div className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-700 border border-amber-200 shrink-0 uppercase tracking-wider">
-                Offline
-              </div>
-            </div>
-          )}
           {children}
         </main>
       </div>

@@ -45,11 +45,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/shortcuts",
       icon: Terminal,
     },
-    {
-      label: "Pengaturan",
-      href: "/settings",
-      icon: Settings,
-    },
   ];
 
   return (
@@ -121,23 +116,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Status Footer */}
-        <div className="p-3 border-t border-border space-y-2 bg-gray-50/50">
-          <div className="flex items-center justify-around text-[10px] font-mono font-bold text-gray-500">
-            <div className="flex items-center gap-1">
-              <span className={cn("w-1.5 h-1.5 rounded-full", isApiUp ? "bg-accent pulse-dot" : "bg-red-400")} />
-              <span>API: {isApiUp ? "UP" : "DOWN"}</span>
-            </div>
-            <div className="h-3 w-[1px] bg-border" />
-            <div className="flex items-center gap-1">
-              <span className={cn("w-1.5 h-1.5 rounded-full", isOllamaUp ? "bg-accent pulse-dot" : "bg-amber-400")} />
-              <span>OLLAMA: {isOllamaUp ? (ollamaModel ? ollamaModel.split(":")[0].toUpperCase() : "UP") : "DOWN"}</span>
-            </div>
-          </div>
-          <div className="pt-1.5 border-t border-border/60 text-center">
-            <p className="text-[9px] text-muted-foreground font-mono">
-              v2.1 — 100% LOCAL &amp; SECURE
-            </p>
-          </div>
+        <div className="p-3.5 border-t border-border text-center bg-gray-50/30">
+          <p className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider">
+            v2.1 — 100% LOCAL &amp; SECURE
+          </p>
         </div>
       </div>
     </>
