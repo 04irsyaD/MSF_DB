@@ -45,6 +45,7 @@
     "sonner": "^1.7.1",
 
     "swr": "^2.2.5",
+    "html-to-image": "^1.11.11",
 
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.5.5",

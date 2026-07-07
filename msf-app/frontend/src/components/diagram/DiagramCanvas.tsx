@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { TableMetadata, ForeignKeyMetadata } from "@/lib/types";
-import { Key, Link as LinkIcon, ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { Key, Link as LinkIcon, ZoomIn, ZoomOut, Maximize, Download, Loader2 } from "lucide-react";
+import { toPng } from "html-to-image";
+import { toast } from "sonner";
 
 interface DiagramCanvasProps {
   tables: TableMetadata[];
@@ -16,8 +18,10 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
   const [activeDragTable, setActiveDragTable] = useState<string | null>(null);
   const [layoutStyle, setLayoutStyle] = useState<string>("horizontal");
   const [hoveredTable, setHoveredTable] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<boolean>(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -429,15 +433,141 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     setActiveDragTable(null);
   };
 
-  // Auto zoom fit layout
-  const handleResetZoom = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-  };
-
   const getTableHeight = (table: TableMetadata) => {
     return HEADER_HEIGHT + table.columns.length * COLUMN_HEIGHT + 10;
   };
+
+  // Auto zoom fit layout (Dynamic Bounding Box calculation)
+  const handleResetZoom = () => {
+    if (tables.length === 0 || !containerRef.current) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    tables.forEach((table) => {
+      const pos = positions[table.name];
+      if (pos) {
+        const tableHeight = getTableHeight(table);
+        if (pos.x < minX) minX = pos.x;
+        if (pos.y < minY) minY = pos.y;
+        if (pos.x + CARD_WIDTH > maxX) maxX = pos.x + CARD_WIDTH;
+        if (pos.y + tableHeight > maxY) maxY = pos.y + tableHeight;
+      }
+    });
+
+    if (minX === Infinity || minY === Infinity) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    const padding = 50;
+    const boxWidth = maxX - minX + padding * 2;
+    const boxHeight = maxY - minY + padding * 2;
+
+    const scaleX = containerWidth / boxWidth;
+    const scaleY = containerHeight / boxHeight;
+    let nextZoom = Math.min(scaleX, scaleY);
+    // Bound zoom between 0.45 and 1.3 to keep text readable
+    nextZoom = Math.max(0.45, Math.min(1.3, nextZoom));
+
+    const boxCenterX = minX + (maxX - minX) / 2;
+    const boxCenterY = minY + (maxY - minY) / 2;
+    const containerCenterX = containerWidth / 2;
+    const containerCenterY = containerHeight / 2;
+
+    const nextPanX = containerCenterX - boxCenterX * nextZoom;
+    const nextPanY = containerCenterY - boxCenterY * nextZoom;
+
+    setZoom(nextZoom);
+    setPan({ x: nextPanX, y: nextPanY });
+  };
+
+  // Auto-fit to screen once positions are computed
+  const lastLayoutRef = useRef<string>("");
+  const lastTablesLenRef = useRef<number>(0);
+  useEffect(() => {
+    const posKeys = Object.keys(positions);
+    if (tables.length > 0 && posKeys.length === tables.length) {
+      const hasLayoutChanged = lastLayoutRef.current !== layoutStyle;
+      const hasTablesChanged = lastTablesLenRef.current !== tables.length;
+      if (hasLayoutChanged || hasTablesChanged) {
+        lastLayoutRef.current = layoutStyle;
+        lastTablesLenRef.current = tables.length;
+        
+        const timer = setTimeout(() => {
+          handleResetZoom();
+        }, 150);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [positions, tables, layoutStyle]);
+
+  // Export diagram to PNG
+  const handleDownloadDiagram = async () => {
+    if (!canvasRef.current || tables.length === 0) return;
+    setDownloading(true);
+
+    try {
+      // Find bounding box to fit the output image size perfectly
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      tables.forEach((table) => {
+        const pos = positions[table.name];
+        if (pos) {
+          const tableHeight = getTableHeight(table);
+          if (pos.x < minX) minX = pos.x;
+          if (pos.y < minY) minY = pos.y;
+          if (pos.x + CARD_WIDTH > maxX) maxX = pos.x + CARD_WIDTH;
+          if (pos.y + tableHeight > maxY) maxY = pos.y + tableHeight;
+        }
+      });
+
+      const padding = 40;
+      const width = maxX - minX + padding * 2;
+      const height = maxY - minY + padding * 2;
+
+      // Capture canvas
+      const dataUrl = await toPng(canvasRef.current, {
+        width: width,
+        height: height,
+        style: {
+          transform: `translate(${-minX + padding}px, ${-minY + padding}px) scale(1)`,
+          transformOrigin: "top left",
+          width: `${width}px`,
+          height: `${height}px`,
+        },
+        backgroundColor: "#f9fafb", // clean background color matching user theme
+        quality: 0.95,
+      });
+
+      // Trigger download link
+      const link = document.createElement("a");
+      link.download = `msf-database-diagram-${new Date().toISOString().slice(0,10)}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success("Diagram database berhasil diunduh!");
+    } catch (error: any) {
+      console.error("Gagal mendownload diagram:", error);
+      toast.error("Gagal mendownload diagram database.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+
 
   // Step/Elbow connector routing — horizontal → vertical → horizontal
   const renderRelations = () => {
@@ -582,7 +712,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
   return (
     <div className="relative w-full h-[600px] border border-border bg-gray-50 rounded-2xl overflow-hidden shadow-inner select-none">
       {/* Layout Controls */}
-      <div className="absolute top-4 right-36 z-20 flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded-xl shadow-sm">
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded-xl shadow-sm">
         <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider font-mono">Layout:</span>
         <select
           value={layoutStyle}
@@ -603,8 +733,22 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         </select>
       </div>
 
-      {/* Zoom / Pan Controls */}
+      {/* Zoom / Pan / Download Controls */}
       <div className="absolute top-4 right-4 z-20 flex gap-1.5 bg-white border border-border p-1.5 rounded-xl shadow-sm">
+        <button
+          type="button"
+          disabled={downloading}
+          onClick={handleDownloadDiagram}
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors flex items-center justify-center disabled:opacity-50"
+          title="Unduh Diagram (PNG)"
+        >
+          {downloading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-accent" />
+          ) : (
+            <Download className="h-4 w-4 text-accent" />
+          )}
+        </button>
+        <div className="w-[1px] bg-border my-0.5" />
         <button
           type="button"
           onClick={() => setZoom((z) => Math.min(2, z + 0.1))}
@@ -625,7 +769,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
           type="button"
           onClick={handleResetZoom}
           className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
-          title="Reset Fit"
+          title="Pusatkan Layar (Fit)"
         >
           <Maximize className="h-4 w-4" />
         </button>
@@ -641,6 +785,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         className="w-full h-full cursor-grab active:cursor-grabbing"
       >
         <div
+          ref={canvasRef}
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: "0 0",
