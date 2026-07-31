@@ -1,0 +1,56 @@
+# ==============================================================
+# MSF-APP — .gitignore
+# ==============================================================
+
+# ---- Node / Next.js ----
+frontend/node_modules/
+frontend/.next/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/out/
+frontend/.turbo/
+
+# ---- Python ----
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/venv/
+backend/.venv/
+backend/.pytest_cache/
+backend/.ruff_cache/
+backend/*.egg-info/
+backend/dist/
+backend/.coverage
+backend/htmlcov/
+
+# ---- Output files (hasil generate) ----
+backend/outputs/
+*.docx
+*.pdf
+
+# ---- Environment ----
+.env
+.env.local
+
+# ---- Docker ----
+# (docker-compose.yml tetap di-track)
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Editor ----
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ---- Logs ----
+*.log
+logs/
+npm-debug.log*

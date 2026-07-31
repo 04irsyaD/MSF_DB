@@ -1,0 +1,136 @@
+version: "3.9"
+
+# ==============================================================
+# MSF-APP — Docker Compose
+# Jalankan semua service dengan: docker-compose up -d
+# Stop semua: docker-compose down
+# Reset total: docker-compose down -v
+# ==============================================================
+
+services:
+
+  # ------------------------------------------------------------
+  # OLLAMA — AI Service (Lokal LLM) - NONAKTIF KARENA PORT BENTROK DENGAN HOST OLLAMA NATIVE
+  # ------------------------------------------------------------
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: msf-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 60s
+
+  # ------------------------------------------------------------
+  # BACKEND — FastAPI
+  # ------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: msf-backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_DEFAULT_MODEL=${OLLAMA_DEFAULT_MODEL:-llama3.2}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-300}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-Indonesian}
+      - DEFAULT_DETAIL_LEVEL=${DEFAULT_DETAIL_LEVEL:-detailed}
+      - MAX_TABLES_PER_REQUEST=${MAX_TABLES_PER_REQUEST:-50}
+      - ADMIN_PASSCODE=${ADMIN_PASSCODE:-admin123}
+      - MAX_JOB_RETENTION_MINUTES=${MAX_JOB_RETENTION_MINUTES:-60}
+      - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-3}
+      - OUTPUT_DIR=/app/outputs
+      - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-1800}
+      - TZ=Asia/Jakarta
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CORS_ORIGINS=http://localhost:3001,http://localhost:3000,http://frontend:3000,http://127.0.0.1:3001,https://msf-db.my.id
+    volumes:
+      - backend_outputs:/app/outputs    # Hasil file DOCX/PDF
+      - ./backend/templates:/app/templates  # Template Word
+      - ./backend/shortcuts_data:/app/shortcuts_data  # Data shortcut SQL
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ------------------------------------------------------------
+  # FRONTEND — Next.js
+  # ------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: msf-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-8000}
+      - NODE_ENV=production
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ------------------------------------------------------------
+  # POSTGRESQL — Database untuk testing live DB connection
+  # ------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: msf-postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-msf_test}
+      - POSTGRES_USER=${POSTGRES_USER:-msf_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-msf_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-scripts:/docker-entrypoint-initdb.d  # SQL init scripts (opsional)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-msf_user} -d ${POSTGRES_DB:-msf_test}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ------------------------------------------------------------
+  # CLOUDFLARE TUNNEL
+  # ------------------------------------------------------------
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: msf-cloudflared
+    command: tunnel --no-autoupdate run --token $CLOUDFLARE_TUNNEL_TOKEN
+    restart: unless-stopped
+    depends_on:
+      - frontend
+
+# ==============================================================
+
+# VOLUMES
+# ==============================================================
+volumes:
+  ollama_data:
+    name: msf_ollama_data
+  postgres_data:
+    name: msf_postgres_data
+  backend_outputs:
+    name: msf_backend_outputs
