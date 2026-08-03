@@ -31,7 +31,7 @@ sqlalchemy==2.0.36              # ORM & multi-DB connector
 psycopg2-binary==2.9.10         # PostgreSQL driver
 pymysql==1.1.1                  # MySQL / MariaDB driver
 cryptography==44.0.0            # Required by pymysql untuk SSL
-# pyodbc==5.2.0                 # SQL Server (aktifkan di v2.1 — butuh ODBC driver)
+pyodbc==5.2.0                   # SQL Server (butuh msodbcsql18 di image)
 # pymongo==4.10.1               # MongoDB (aktifkan di v2.1)
 
 # --------------------------------------------------------------

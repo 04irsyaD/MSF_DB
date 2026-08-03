@@ -4,6 +4,7 @@ Support: PostgreSQL, MySQL, SQLite (MVP). SQL Server & MongoDB di v2.1.
 """
 
 from typing import List, Optional
+import os
 import re
 from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text, inspect
@@ -18,6 +19,12 @@ from app.models.schemas import (
 )
 
 logger = structlog.get_logger()
+
+# Schema bawaan per engine, dipakai saat pengguna tidak memilih schema
+_DEFAULT_SCHEMA = {
+    "sqlite": "main",
+    "sqlserver": "dbo",
+}
 
 # Default ports per engine
 DEFAULT_PORTS = {
@@ -60,10 +67,16 @@ class DBConnector:
             # Untuk SQLite, database adalah path file
             return f"sqlite:///{conn.database}"
         elif engine == DBEngine.SQLSERVER or engine == "sqlserver":
+            # Driver 18 mewajibkan enkripsi secara bawaan dan menolak server tanpa
+            # sertifikat tepercaya, karena itu TrustServerCertificate dibuat eksplisit.
+            driver = quote_plus(
+                os.getenv("MSSQL_ODBC_DRIVER", "ODBC Driver 18 for SQL Server")
+            )
+            trust = os.getenv("MSSQL_TRUST_SERVER_CERTIFICATE", "yes")
             return (
                 f"mssql+pyodbc://{username_enc}:{password_enc}"
                 f"@{conn.host}:{port}/{conn.database}"
-                f"?driver=ODBC+Driver+17+for+SQL+Server"
+                f"?driver={driver}&TrustServerCertificate={trust}"
             )
         else:
             raise ValueError(f"Engine tidak didukung: {engine}")
@@ -113,7 +126,7 @@ class DBConnector:
                         except Exception:
                             tables_by_schema[s] = []
 
-                active_schema = conn.schema_name or ("main" if conn.engine == "sqlite" else "public")
+                active_schema = conn.schema_name or _DEFAULT_SCHEMA.get(str(conn.engine), "public")
                 if active_schema not in tables_by_schema and filtered_schemas:
                     active_schema = filtered_schemas[0]
                 
@@ -155,6 +168,12 @@ class DBConnector:
             "postgresql": ["information_schema", "pg_catalog", "pg_toast", "pg_temp_1", "pg_toast_temp_1"],
             "mysql": ["information_schema", "performance_schema", "sys", "mysql"],
             "sqlite": ["main"],
+            "sqlserver": [
+                "sys", "information_schema", "guest", "db_owner", "db_accessadmin",
+                "db_securityadmin", "db_ddladmin", "db_backupoperator",
+                "db_datareader", "db_datawriter", "db_denydatareader",
+                "db_denydatawriter",
+            ],
         }
         filtered = []
         for s in schemas:
@@ -163,11 +182,13 @@ class DBConnector:
                 continue
             if engine == "mysql" and s_lower in system_schemas["mysql"]:
                 continue
+            if engine == "sqlserver" and s_lower in system_schemas["sqlserver"]:
+                continue
             filtered.append(s)
-        
-        # Jika SQLite atau kosong, kembalikan schema default
+
+        # Jika kosong, kembalikan schema default per engine
         if not filtered:
-            filtered = ["main"] if engine == "sqlite" else ["public"]
+            filtered = [_DEFAULT_SCHEMA.get(engine, "public")]
         return filtered
 
     @classmethod
@@ -453,6 +474,8 @@ class DBConnector:
             return "SELECT VERSION()"
         elif engine_type == DBEngine.SQLITE:
             return "SELECT sqlite_version()"
+        elif engine_type == DBEngine.SQLSERVER or engine_type == "sqlserver":
+            return "SELECT @@VERSION"
         else:
             return "SELECT @@VERSION"
 
