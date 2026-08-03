@@ -12,6 +12,37 @@ MSF-APP (MSF Database Documentation Tool) adalah platform web fullstack untuk me
 
 ---
 
+## 1a. Yang Berubah di v2.2.0 (2026-08-03)
+
+Empat hal yang wajib diketahui engineer atau AI agent baru sebelum menyentuh kode ini.
+
+**1. Sistem kini punya penyimpanan persisten.** `jobs.db` (SQLite, di dalam volume
+`msf2_backend_outputs`) menyimpan riwayat job. Ini aset persisten pertama proyek ini, dan
+kehilangannya membuat seluruh kode akses yang beredar tidak berguna. Prosedur backup wajib dibaca:
+`backend/docs/operations/job-database-backup.md`.
+
+**2. Job aktif hidup di dua tempat.** Memori adalah lapisan cepat, SQLite adalah kebenaran yang
+bertahan. Setiap `Job.update()` menulis balik ke basis data lewat callback. Job yang dihidrasi dari
+basis data adalah snapshot **baca-saja**; jangan memutasinya. Rinciannya di
+`dev-docs/decisions/005-persistent-job-queue-sqlite.md`.
+
+**3. `list_jobs()` sengaja hanya membaca memori.** Terlihat seperti bug, tetapi bukan: gerbang
+`MAX_CONCURRENT_JOBS` dihitung dari sana, dan menghitungnya dari riwayat penuh akan membuat job yatim
+menolak setiap generate baru secara permanen. Admin Portal memakai `JobStore.query()` untuk riwayat
+penuh.
+
+**4. Ada dua jenis 429 yang artinya berlawanan.** Bedakan lewat `error_code`, jangan lewat status:
+`JOB_QUEUE_FULL` berarti tunggu pekerjaan lain selesai, `RATE_LIMIT_EXCEEDED` berarti terlalu sering
+mengirim permintaan. Lihat `backend/docs/operations/rate-limiting.md`.
+
+Port v2: backend 8001, frontend 3002, PostgreSQL 5434, Ollama host 11435. Container berawalan
+`msf2-` agar dapat berjalan bersamaan dengan msf-app.
+
+Status pengujian dan utang teknis terkini: `dev-docs/ai/CURRENT_STATE.md`,
+`TECHNICAL_DEBT.md`, dan `KNOWN_ISSUES.md`.
+
+---
+
 ## 2. Cara Menjalankan Secara Lokal
 
 ### Prasyarat

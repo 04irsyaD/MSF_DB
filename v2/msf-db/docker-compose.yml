@@ -57,7 +57,7 @@ services:
       - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-1800}
       - TZ=Asia/Jakarta
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3001,http://127.0.0.1:3001}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3002,http://127.0.0.1:3002}
       # Persistensi job (v2.2.0)
       - JOBS_DB_PATH=${JOBS_DB_PATH:-/app/outputs/jobs.db}
       - JOB_RECORD_RETENTION_DAYS=${JOB_RECORD_RETENTION_DAYS:-30}
@@ -92,7 +92,7 @@ services:
       dockerfile: Dockerfile
     container_name: msf2-frontend
     ports:
-      - "${FRONTEND_PORT:-3001}:3000"
+      - "${FRONTEND_PORT:-3002}:3000"
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8001}
       - NODE_ENV=production
@@ -108,7 +108,7 @@ services:
     image: postgres:16-alpine
     container_name: msf2-postgres
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "${POSTGRES_PORT:-5434}:5432"
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-msf_test}
       - POSTGRES_USER=${POSTGRES_USER:-msf_user}

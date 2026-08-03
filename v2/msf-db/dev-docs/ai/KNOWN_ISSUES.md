@@ -6,7 +6,14 @@
 
 ## Open Issues
 
-Tidak ada issue open saat ini.
+| ID | Issue | Dampak | Ditemukan | Catatan |
+|----|-------|--------|-----------|---------|
+| I-005 | Backend tidak memasang satu pun HTTP security header (CSP, HSTS, X-Frame-Options) | Melanggar `ai-rules/security/` Part B yang bersifat wajib, pada aplikasi yang terbuka ke internet | 2026-08-03 | Di luar cakupan v2.2.0 dan tidak bersinggungan dengan berkas yang disentuh. Diusulkan menjadi batch tersendiri |
+| I-006 | Tidak ada satu pun batas memori atau prosesor di seluruh container | Satu container bermasalah dapat menghabiskan RAM host dan mematikan layanan lain. Menjalankan v2 berdampingan dengan msf-app menggandakan konsumsi tanpa pagar | 2026-08-03 | Pengukuran sudah tersedia (lihat task report 2026-08-03). Batas dapat disetel setelah ada data lebih panjang |
+| I-007 | Batas 50 tabel ditegakkan di dua titik yang sangat berbeda rasanya bagi pengguna | Jalur DDL menolak seketika dengan 400. Jalur koneksi DB terlanjur membuat job dan memberi kode akses, lalu berakhir `error`, sekaligus memakai satu slot konkurensi | 2026-08-03 | Perbaikan berada di `routers/generate.py` yang sudah melebihi batas ukuran; paling tepat dikerjakan bersama TD-008 |
+| I-008 | `estimated_seconds` pada jalur koneksi DB selalu 60 detik | Database 40 tabel yang butuh sekitar 10 menit tetap dijanjikan selesai dalam 60 detik | 2026-08-03 | Jumlah tabel belum diketahui saat respons dikirim. Perbaikan jujur menuntut perubahan `JobStatusResponse` |
+| I-009 | Antarmuka menawarkan engine MongoDB yang belum berfungsi | Pengguna mengisi seluruh form koneksi, lalu menerima "Engine tidak didukung: mongodb" | 2026-08-03 | Perbaikan termurah: tandai pilihan MongoDB sebagai belum tersedia dan nonaktifkan di `DbConnector.tsx`. Satu berkas frontend, tanpa perubahan backend |
+| I-010 | Kegagalan AI per tabel tidak terlihat sama sekali di antarmuka | Job berakhir `done` dengan isi jauh lebih miskin dari harapan; dokumen hanya memuat catatan "AI description tidak tersedia" | 2026-08-03 | Baru terlihat setelah alur dipetakan utuh. Usulan: hitung tabel yang gagal dan tampilkan peringatan di panel hasil |
 
 ---
 

@@ -32,14 +32,14 @@
 ## 🟡 SHOULD DO (Prioritas Menengah - Penting)
 
 ### Database Engines (v2.1)
-- [ ] Implementasi driver koneksi dan parser metadata untuk **SQL Server** (menggunakan `pyodbc`)
+- [x] Implementasi driver koneksi dan parser metadata untuk **SQL Server** (menggunakan `pyodbc`)
 - [ ] Implementasi driver koneksi dan parser metadata untuk **MongoDB** (menggunakan `pymongo`)
 
 ### User Experience & UI (v2.2)
 - [ ] Tambahkan toggle Dark/Light Mode di Sidebar menggunakan `next-themes`
 - [ ] Hasilkan diagram ERD (Entity Relationship Diagram) visual secara otomatis dari skema DDL menggunakan `mermaid.js`
 - [ ] Simpan riwayat dokumentasi terakhir di `localStorage` browser pengguna agar tidak hilang saat refresh
-- [ ] Buat agar riwayat status pekerjaan tersimpan secara persistent di database lokal (SQLite) alih-alih hanya di memori server
+- [x] Buat agar riwayat status pekerjaan tersimpan secara persistent di database lokal (SQLite) alih-alih hanya di memori server
 
 ---
 
@@ -48,5 +48,5 @@
 - [ ] Buat fitur "Share Link" dengan URL unik untuk membagikan hasil dokumentasi ke anggota tim
 - [ ] Tambahkan dukungan bahasa tambahan untuk dokumentasi selain Indonesia dan Inggris
 - [ ] Buat integrasi webhook untuk mengirimkan notifikasi (misal ke Discord atau Slack) saat dokumentasi selesai dibuat
-- [ ] Terapkan rate limiting per alamat IP menggunakan `slowapi` di backend FastAPI
+- [x] Terapkan rate limiting per alamat IP menggunakan `slowapi` di backend FastAPI
 - [ ] Buat Docker image khusus Ollama dengan dukungan akselerasi GPU Nvidia secara out-of-the-box

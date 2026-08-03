@@ -9,6 +9,9 @@
 | Modul Fungsional | Folder/Berkas Backend | Folder/Berkas Frontend |
 |------------------|-----------------------|------------------------|
 | **Job Queue & Core** | `backend/app/background/job_queue.py` | `frontend/src/hooks/useGenerate.ts` |
+| **Job Persistence (SQLite)** | `backend/app/background/job_store.py` | — |
+| **Rate Limiting** | `backend/app/utils/rate_limit.py` + registrasi di `backend/app/main.py` | `frontend/src/lib/api.ts` (penanganan 429) |
+| **Operations Docs** | `backend/docs/operations/` | — |
 | **DDL Parsing** | `backend/app/services/sql_parser.py` | `frontend/src/components/generator/SqlEditor.tsx` |
 | **DB Metadata extraction** | `backend/app/services/db_connector.py` | `frontend/src/components/generator/DbConnector.tsx` |
 | **Docx/PDF Exporter** | `backend/app/services/exporters/` | `frontend/src/components/generator/DocPreview.tsx` |

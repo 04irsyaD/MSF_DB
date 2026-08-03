@@ -5,7 +5,17 @@
 ---
 
 ## 1. Penyimpanan Data Pekerjaan (Job Queue Store)
-Saat ini, antrean pengerjaan dokumentasi berjalan secara **in-memory** di dalam memori proses backend. Kelas `Job` menyimpan status pekerjaan yang sedang berjalan dengan struktur objek sebagai berikut:
+
+> **Diperbarui 2026-08-03 (v2.2.0).** Antrean job kini **persisten**, tidak lagi murni in-memory.
+> Job aktif tetap hidup di memori sebagai lapisan cepat, tetapi setiap perubahan status ikut ditulis
+> ke SQLite (`jobs.db`) sehingga riwayat dan kode akses selamat dari restart backend. Skema tabel dan
+> alasan tiap keputusannya ada di `dev-docs/architecture/database.md`; keputusan arsitekturnya di
+> `dev-docs/decisions/005-persistent-job-queue-sqlite.md`.
+>
+> Seluruh atribut kelas `Job` di bawah dipetakan satu-lawan-satu menjadi kolom tabel, ditambah satu
+> kolom turunan `file_purged`. Tidak ada atribut yang dihilangkan.
+
+Kelas `Job` menyimpan status pekerjaan dengan struktur objek sebagai berikut:
 
 ```python
 class Job:

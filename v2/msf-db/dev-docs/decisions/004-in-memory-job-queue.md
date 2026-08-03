@@ -1,7 +1,13 @@
 # ADR-004 — In-Memory Job Queue
 
-> **Status:** Accepted
+> **Status:** Superseded by [ADR-005](005-persistent-job-queue-sqlite.md)
 > **Tanggal:** 2026-06-27
+> **Di-supersede:** 2026-08-03
+
+> **Catatan.** Isi di bawah sengaja TIDAK diubah agar jejak keputusan tetap utuh.
+> Trade-off "job hilang saat backend restart" ternyata bertentangan dengan
+> Persyaratan Non-Fungsional Keandalan di `planning/prd.md`, dan konflik itu
+> diselesaikan oleh ADR-005 dengan memenangkan PRD.
 
 ---
 

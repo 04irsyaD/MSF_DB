@@ -4,6 +4,41 @@
 
 ---
 
+## [v2.2.0] — 2026-08-03
+
+### Added
+
+- **Antrean job persisten dengan SQLite.** Komponen baru `backend/app/background/job_store.py` menyimpan metadata job ke `jobs.db`. Riwayat pekerjaan dan kode akses `MSF-XXXXXXXXXX` kini selamat dari restart, deploy ulang, dan crash backend.
+- **Rekonsiliasi job yatim saat startup.** Job yang tertinggal `queued` atau `processing` ditandai `error` dengan pesan "Pekerjaan terhenti karena server dimulai ulang.", bukan menggantung selamanya.
+- **Retensi dua tingkat.** Berkas hasil dibatasi `MAX_JOB_RETENTION_MINUTES` (bawaan 60 menit), sedangkan baris riwayat dibatasi `JOB_RECORD_RETENTION_DAYS` (bawaan 30 hari).
+- **Rate limiting per alamat IP** pada `POST /api/generate/from-ddl`, `POST /api/generate/from-db`, dan `POST /api/admin/verify`, memakai slowapi. Dapat dimatikan lewat `RATE_LIMIT_ENABLED=false`.
+- **Dukungan SQL Server.** `pyodbc` diaktifkan, `msodbcsql18` dipasang di image backend, dan `ODBC Driver 18` beserta `TrustServerCertificate` dapat diatur lewat env.
+- Dokumentasi operations baru: `backend/docs/operations/job-database-backup.md`, `scheduler-cleanup.md`, dan `rate-limiting.md`.
+- [ADR-005](decisions/005-persistent-job-queue-sqlite.md) yang men-supersede ADR-004 dan menyelesaikan konflik antara PRD dan ADR.
+
+### Changed
+
+- **PERUBAHAN MAKNA: statistik Admin Portal kini melintasi 30 hari, bukan 60 menit terakhir.** Sumbernya berpindah dari memori ke `JobStore.query()`. Angka yang tampil akan terlihat jauh lebih besar dari sebelumnya; ini disengaja, bukan anomali.
+- Unduh pada job yang berkasnya sudah kedaluwarsa menjawab **410 `RESULT_EXPIRED`**, sebelumnya 500 "File hasil tidak tersedia" yang menyesatkan.
+- Respons 429 antrean penuh kini membawa `error_code: JOB_QUEUE_FULL`, sedangkan 429 rate limit membawa `error_code: RATE_LIMIT_EXCEEDED` beserta header `Retry-After`. Frontend menampilkan dua pesan berbeda untuk keduanya.
+- `MAX_JOB_RETENTION_MINUTES` kini benar-benar dibaca kode; sebelumnya dideklarasikan tetapi diabaikan (hardcoded 60).
+- Isolasi sumber daya v2: nama container menjadi `msf2-*`, nama volume menjadi `msf2_*`, port backend 8001, frontend 3002, PostgreSQL 5434, Ollama host 11435.
+- `OLLAMA_BASE_URL` dan `CORS_ORIGINS` kini benar-benar dapat diubah lewat `.env`; sebelumnya di-hardcode di `docker-compose.yml` sehingga perubahan `.env` gagal secara diam-diam.
+- `.env.example` mendokumentasikan tujuh variabel yang sebelumnya tidak tercatat, termasuk rahasia `CLOUDFLARE_TUNNEL_TOKEN`, dan menandai variabel yang tidak dibaca kode mana pun.
+
+### Security
+
+- **Passcode admin `admin123` dihapus.** `docker-compose.yml` sebelumnya menyuntikkan nilai bawaan itu sehingga perlindungan di `admin.py` tidak pernah tercapai, pada aplikasi yang terbuka ke internet. Kini `ADMIN_PASSCODE` kosong secara bawaan dan Admin Portal mati total selama belum diisi.
+- Perbandingan passcode memakai `secrets.compare_digest` untuk menutup kebocoran waktu.
+- `SECRET_KEY` dihapus dari `docker-compose.yml` dan `.env.example` karena tidak ada kode yang membacanya.
+
+### Fixed
+
+- Berkas hasil tidak lagi menjadi yatim setelah restart. Berkas yatim yang menumpuk **sebelum** v2.2.0 tetap perlu dibersihkan manual; caranya ada di `backend/docs/operations/job-database-backup.md`.
+- Fixture test `setup_admin_passcode` tidak lagi bergantung pada urutan import yang kebetulan.
+
+---
+
 ## [Unreleased]
 
 ### Added

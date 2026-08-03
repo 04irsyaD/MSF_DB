@@ -11,11 +11,37 @@
 | `backend/app/main.py` | Entry point FastAPI, middleware setup (CORS, X-API-Key), router registration |
 | `backend/app/routers/` | FastAPI APIRouter per domain: `generate.py`, `shortcuts.py`, `admin.py`, `db_connect.py` |
 | `backend/app/services/` | Business logic: `sql_parser.py`, `ai_provider.py`, `db_connector.py`, `exporters/` |
-| `backend/app/background/` | In-memory job queue: `job_queue.py` |
+| `backend/app/background/` | Antrean job: `job_queue.py` (eksekusi dan siklus hidup) + `job_store.py` (persistensi SQLite, sejak v2.2.0) |
+| `backend/app/utils/` | `logger.py`, `errors.py`, dan `rate_limit.py` (sejak v2.2.0) |
 | `backend/app/models/` | Pydantic schemas untuk request/response validation |
-| `backend/tests/` | Pytest test suite (32 test cases) |
+| `backend/docs/operations/` | Dokumentasi operations yang ikut ter-deploy bersama kode (pengecualian resmi AGENTS.md aturan 11) |
+| `backend/tests/` | Pytest test suite (79 test cases) |
 | `backend/requirements.txt` | Dependency Python |
-| `backend/Dockerfile` | Docker build config |
+| `backend/Dockerfile` | Docker build config, termasuk pemasangan `msodbcsql18` untuk SQL Server |
+
+---
+
+## Batas Tanggung Jawab Komponen Antrean (v2.2.0)
+
+Lapisan yang berlaku tetap `router -> service -> model`. `JobStore` adalah komponen persistensi
+pertama proyek ini dan ditempatkan di `background/`, bukan `services/`, karena ia melayani antrean
+job dan bukan logika domain.
+
+| Komponen | Bertanggung jawab atas | Bergantung pada | TIDAK bertanggung jawab atas |
+|---|---|---|---|
+| `JobStore` | Membaca dan menulis baris job ke SQLite, rekonsiliasi, dua jenis pembersihan | `sqlite3` (stdlib) | Menjalankan job, menghapus berkas hasil, mengetahui HTTP |
+| `Job` | State satu pekerjaan dan pemberitahuan perubahan lewat callback `on_change` | Tidak ada | Mengetahui SQLite |
+| `JobQueue` | Menjalankan job, menegakkan siklus hidup, menjembatani `Job` dan `JobStore`, menghapus berkas | `Job`, `JobStore` | Mengetahui HTTP |
+| `utils/rate_limit.py` | Menentukan kunci pembatas dan membentuk respons 429 | `slowapi` | Menentukan endpoint mana yang dibatasi |
+
+Setiap komponen dapat diuji sendiri: `JobStore` diuji tanpa FastAPI, `Job` diuji tanpa SQLite.
+
+**Invarian penting:** hanya job yang berada di memori yang boleh dimutasi. Job yang dihidrasi dari
+`JobStore` adalah snapshot baca-saja dengan `on_change` bernilai None. Aman karena hanya job
+`queued`/`processing` yang dimutasi, dan job seperti itu selalu ada di memori setelah rehidrasi.
+
+`list_jobs()` sengaja tetap murni dari memori. Gerbang `MAX_CONCURRENT_JOBS` dihitung dari sana, dan
+menghitungnya dari riwayat penuh akan membuat job yatim mematikan fitur generate secara permanen.
 
 ---
 
