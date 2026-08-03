@@ -2,24 +2,24 @@
 Test suite untuk Admin Portal endpoints.
 """
 import pytest
-import os
 from fastapi.testclient import TestClient
 
 
 @pytest.fixture(autouse=True)
-def setup_admin_passcode():
-    """Fixture untuk memaksa ADMIN_PASSCODE terkonfigurasi selama test."""
-    old_passcode = os.environ.get("ADMIN_PASSCODE")
-    os.environ["ADMIN_PASSCODE"] = "test-admin-secret-123"
-    # ADMIN_PASSCODE dibaca SEKALI saat modul admin.py di-import, bukan per request.
-    # Fixture ini hanya bekerja karena kebetulan berjalan sebelum client mengimpor
-    # app.main. Test baru menambal atribut modul (monkeypatch.setattr) agar tidak
-    # bergantung pada urutan import.
+def setup_admin_passcode(monkeypatch):
+    """
+    Fixture untuk memaksa ADMIN_PASSCODE terkonfigurasi selama test.
+
+    ADMIN_PASSCODE dibaca SEKALI saat modul admin.py di-import, bukan per request.
+    Karena itu yang ditambal adalah ATRIBUT MODUL, bukan variabel environment —
+    menyetel env saja hanya bekerja bila fixture ini kebetulan berjalan sebelum
+    modul admin.py pernah di-import (spec 9.8).
+    """
+    import app.routers.admin as admin_module
+
+    monkeypatch.setenv("ADMIN_PASSCODE", "test-admin-secret-123")
+    monkeypatch.setattr(admin_module, "ADMIN_PASSCODE", "test-admin-secret-123")
     yield
-    if old_passcode is not None:
-        os.environ["ADMIN_PASSCODE"] = old_passcode
-    else:
-        del os.environ["ADMIN_PASSCODE"]
 
 
 def test_admin_endpoints_without_header_returns_401(client):
