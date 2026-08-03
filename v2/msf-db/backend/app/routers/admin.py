@@ -48,7 +48,9 @@ async def verify_passcode():
 @router.get("/stats", dependencies=[Depends(verify_admin_passcode)])
 async def get_admin_stats():
     """Mengembalikan statistik penggunaan dan performa sistem."""
-    jobs = job_queue.list_jobs()
+    # Sumbernya riwayat penuh di basis data, bukan memori. Sejak v2.2.0 angka ini
+    # melintasi JOB_RECORD_RETENTION_DAYS, bukan lagi 60 menit terakhir.
+    jobs = job_queue.store.query()
     
     total = len(jobs)
     done = sum(1 for j in jobs if j["status"] == JobStatus.DONE)
@@ -104,8 +106,8 @@ async def get_admin_stats():
 
 @router.get("/jobs", dependencies=[Depends(verify_admin_passcode)])
 async def get_all_jobs():
-    """Mengembalikan daftar seluruh pekerjaan di memori."""
-    jobs = job_queue.list_jobs()
+    """Mengembalikan daftar seluruh pekerjaan dari riwayat penuh."""
+    jobs = job_queue.store.query()
     # Urutkan berdasarkan waktu dibuat (terbaru dahulu)
     jobs.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return {"jobs": jobs}
@@ -140,13 +142,18 @@ async def get_server_logs(limit: int = 200):
 async def force_cleanup_system():
     """Membersihkan seluruh riwayat pekerjaan secara paksa."""
     try:
-        # Batalkan semua job aktif terlebih dahulu
-        jobs = job_queue.list_jobs()
-        active_ids = [j["job_id"] for j in jobs if j["status"] in (JobStatus.QUEUED, JobStatus.PROCESSING)]
+        # Pembatalan hanya berlaku untuk job yang benar-benar berjalan (memori),
+        # sedangkan penghapusan mencakup seluruh riwayat di basis data.
+        aktif = job_queue.list_jobs()
+        active_ids = [
+            j["job_id"] for j in aktif
+            if j["status"] in (JobStatus.QUEUED, JobStatus.PROCESSING)
+        ]
         for job_id in active_ids:
             await job_queue.cancel_job(job_id)
-            
-        # Hapus semua job dari memory
+
+        # Hapus seluruh riwayat, termasuk baris yang sudah tidak ada di memori
+        jobs = job_queue.store.query()
         all_ids = [j["job_id"] for j in jobs]
         for job_id in all_ids:
             job_queue.delete_job(job_id)

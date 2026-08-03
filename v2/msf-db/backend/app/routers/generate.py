@@ -15,6 +15,7 @@ from app.services.sql_parser import SQLParser
 from app.services.db_connector import DBConnector
 from app.services.doc_generator import DocGenerator, get_provider
 from app.services.exporters.docx_exporter import DocxExporter
+from app.utils.errors import AppDetailedException
 import structlog
 
 logger = structlog.get_logger()
@@ -301,6 +302,18 @@ async def download_job_result(job_id: str):
         raise HTTPException(
             status_code=400,
             detail=f"Job belum selesai. Status: {job.status}"
+        )
+
+    # Berkas sengaja dihapus penyapu retensi. Ini bukan kerusakan, sehingga
+    # 500 menyesatkan; 410 menyatakan sumber daya pernah ada lalu hilang.
+    if job.file_purged:
+        raise AppDetailedException(
+            detail=(
+                "Berkas hasil sudah kedaluwarsa dan dihapus dari server. "
+                "Silakan jalankan ulang proses generate."
+            ),
+            status_code=410,
+            error_code="RESULT_EXPIRED",
         )
 
     if not job.result_filepath or not os.path.exists(job.result_filepath):

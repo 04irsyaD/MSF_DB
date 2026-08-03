@@ -105,6 +105,60 @@ def test_verify_memakai_compare_digest():
     assert "compare_digest" in source
 
 
+def _job_hanya_di_basis_data(antrean, project_name: str):
+    """
+    Buat job selesai yang berkasnya sudah dihapus penyapu.
+
+    Job seperti ini TIDAK ikut direhidrasi ke memori oleh recover(), sehingga
+    hanya terlihat bila endpoint benar-benar membaca JobStore. Tanpa syarat
+    ini, test akan lulus semu karena rehidrasi mengembalikannya ke memori.
+    """
+    from datetime import datetime, timezone
+
+    job = antrean.create_job(project_name=project_name)
+    job.update(
+        status="done",
+        progress=100,
+        completed_at=datetime.now(timezone.utc).isoformat(),
+    )
+    antrean.store.mark_file_purged(job.job_id)
+    antrean._jobs.clear()
+    return job
+
+
+def test_stats_bersumber_dari_riwayat_penuh(isolated_job_queue):
+    """Statistik admin harus melintasi riwayat basis data, bukan hanya memori."""
+    from app.main import app
+
+    _job_hanya_di_basis_data(isolated_job_queue, "Riwayat Lama")
+
+    with TestClient(app) as c:
+        assert isolated_job_queue.list_jobs() == []
+        response = c.get(
+            "/api/admin/stats", headers={"X-Admin-Passcode": "test-admin-secret-123"}
+        )
+
+    assert response.status_code == 200
+    assert response.json()["summary"]["total_jobs"] == 1
+    assert response.json()["summary"]["done"] == 1
+
+
+def test_daftar_jobs_admin_bersumber_dari_riwayat_penuh(isolated_job_queue):
+    from app.main import app
+
+    _job_hanya_di_basis_data(isolated_job_queue, "Riwayat Lama")
+
+    with TestClient(app) as c:
+        response = c.get(
+            "/api/admin/jobs", headers={"X-Admin-Passcode": "test-admin-secret-123"}
+        )
+
+    assert response.status_code == 200
+    jobs = response.json()["jobs"]
+    assert len(jobs) == 1
+    assert jobs[0]["project_name"] == "Riwayat Lama"
+
+
 def test_admin_logs_invalid_limit(client):
     """Mengirim limit log di luar batas (10-1000) wajib mengembalikan 400."""
     headers = {"X-Admin-Passcode": "test-admin-secret-123"}

@@ -86,14 +86,20 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error("Gagal memulihkan antrean job dari basis data", error=str(e))
 
-    # Background task: cleanup job lama setiap 15 menit
+    # Background task: dua pembersihan terpisah setiap 15 menit.
+    # Berkas hasil dibatasi menit, baris riwayat dibatasi hari.
     async def cleanup_loop():
         while True:
             try:
                 await asyncio.sleep(15 * 60)
-                cleaned = await job_queue.cleanup_old_jobs()
-                if cleaned > 0:
-                    logger.info(f"Cleaned up {cleaned} old jobs")
+                berkas = await job_queue.purge_expired_files()
+                baris = await job_queue.purge_expired_records()
+                if berkas > 0 or baris > 0:
+                    logger.info(
+                        "Pembersihan terjadwal selesai",
+                        berkas_dihapus=berkas,
+                        baris_dihapus=baris,
+                    )
             except Exception as e:
                 logger.error("Error in job cleanup loop", error=str(e))
 

@@ -303,25 +303,38 @@ class JobQueue:
                     completed_at=datetime.now(timezone.utc).isoformat()
                 )
 
-    async def cleanup_old_jobs(self):
-        """Hapus job lama yang sudah melebihi retention time"""
-        now = datetime.now(timezone.utc)
-        to_delete = []
+    async def purge_expired_files(self) -> int:
+        """
+        Hapus berkas hasil yang sudah melewati MAX_JOB_RETENTION_MINUTES.
 
-        for job_id, job in self._jobs.items():
-            if job.status in (JobStatus.DONE, JobStatus.ERROR, JobStatus.CANCELLED):
-                if job.completed_at:
-                    completed = datetime.fromisoformat(job.completed_at)
-                    age_minutes = (now - completed).total_seconds() / 60
-                    if age_minutes > self._max_retention_minutes:
-                        to_delete.append(job_id)
+        Baris riwayatnya sengaja DIPERTAHANKAN dan ditandai file_purged agar
+        kode akses tetap dapat dilacak sampai retensi riwayat habis. Inilah
+        yang memisahkan umur berkas (dibatasi ruang disk) dari umur riwayat
+        (sekitar 1 KB per baris).
+        """
+        jumlah = 0
+        for job_id, filepath in self._store.list_purgeable_files(
+            self._max_retention_minutes
+        ):
+            if filepath and os.path.exists(filepath):
+                try:
+                    os.remove(filepath)
+                except OSError as e:
+                    import structlog
+                    structlog.get_logger().warning(
+                        "Gagal menghapus berkas hasil kedaluwarsa",
+                        job_id=job_id,
+                        error=str(e),
+                    )
+                    continue
+            self._store.mark_file_purged(job_id)
+            self._jobs.pop(job_id, None)
+            jumlah += 1
+        return jumlah
 
-        for job_id in to_delete:
-            job = self._jobs[job_id]
-            job.cleanup_file()
-            del self._jobs[job_id]
-
-        return len(to_delete)
+    async def purge_expired_records(self) -> int:
+        """Hapus baris riwayat yang lebih tua dari JOB_RECORD_RETENTION_DAYS."""
+        return self._store.purge_expired_records(self._record_retention_days)
 
 
 # Singleton instance — dipakai di seluruh app.
