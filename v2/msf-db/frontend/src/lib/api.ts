@@ -222,6 +222,22 @@ export function getFriendlyErrorMessage(err: any): string {
     if (err.status === 403) return "Akses ditolak. Anda tidak memiliki izin untuk mengakses fitur ini.";
     if (err.status === 404) return "Layanan tidak ditemukan (404). Silakan periksa kembali konfigurasi API URL.";
     if (err.status === 422) return err.message || "Data input tidak valid. Mohon periksa kembali form pengisian Anda.";
+    if (err.status === 410) {
+      return (
+        err.message ||
+        "Berkas hasil sudah kedaluwarsa dan dihapus dari server. Silakan jalankan ulang proses generate."
+      );
+    }
+    if (err.status === 429) {
+      // Dua kondisi berbeda memakai status yang sama; error_code yang membedakan.
+      if (err.errorCode === "JOB_QUEUE_FULL") {
+        return (
+          err.message ||
+          "Antrean pekerjaan sedang penuh. Tunggu pekerjaan lain selesai lalu coba lagi."
+        );
+      }
+      return "Terlalu sering mengirim permintaan. Mohon tunggu sebentar sebelum mencoba lagi.";
+    }
     if (err.status === 500) return "Terjadi kesalahan internal pada server (500). Mohon coba beberapa saat lagi.";
     if (err.status >= 502 && err.status <= 504) return "Server backend sedang sibuk atau mati (Gateway Timeout/Bad Gateway). Silakan coba lagi nanti.";
   }
