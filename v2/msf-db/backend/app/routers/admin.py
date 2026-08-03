@@ -4,6 +4,7 @@ Menyediakan statistik, pemantauan log, manajemen antrean, dan aksi sistem.
 """
 
 import os
+import secrets
 from fastapi import APIRouter, HTTPException, Header, Depends
 from datetime import datetime
 from collections import deque
@@ -29,7 +30,9 @@ async def verify_admin_passcode(x_admin_passcode: str = Header(None)):
             detail="Header X-Admin-Passcode wajib disertakan."
         )
         
-    if x_admin_passcode != ADMIN_PASSCODE:
+    # compare_digest menutup kebocoran waktu. Relevan karena /api/admin/verify
+    # adalah endpoint publik yang kini juga dibatasi rate limit.
+    if not secrets.compare_digest(x_admin_passcode, ADMIN_PASSCODE):
         raise HTTPException(
             status_code=401,
             detail="Admin passcode tidak valid."

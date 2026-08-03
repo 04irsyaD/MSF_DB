@@ -11,7 +11,10 @@ def setup_admin_passcode():
     """Fixture untuk memaksa ADMIN_PASSCODE terkonfigurasi selama test."""
     old_passcode = os.environ.get("ADMIN_PASSCODE")
     os.environ["ADMIN_PASSCODE"] = "test-admin-secret-123"
-    # Re-import atau re-initialize module jika diperlukan, tetapi FastAPI membaca env secara dinamis via os.getenv
+    # ADMIN_PASSCODE dibaca SEKALI saat modul admin.py di-import, bukan per request.
+    # Fixture ini hanya bekerja karena kebetulan berjalan sebelum client mengimpor
+    # app.main. Test baru menambal atribut modul (monkeypatch.setattr) agar tidak
+    # bergantung pada urutan import.
     yield
     if old_passcode is not None:
         os.environ["ADMIN_PASSCODE"] = old_passcode
@@ -76,6 +79,30 @@ def test_admin_logs_success(client):
     assert response.status_code == 200
     assert "logs" in response.json()
     assert isinstance(response.json()["logs"], list)
+
+
+def test_passcode_salah_ditolak_dengan_401(monkeypatch):
+    """Passcode yang salah harus ditolak lewat perbandingan waktu-konstan."""
+    import app.routers.admin as admin_module
+
+    monkeypatch.setattr(admin_module, "ADMIN_PASSCODE", "passcode-benar")
+
+    from app.main import app
+
+    with TestClient(app) as c:
+        response = c.post("/api/admin/verify", headers={"X-Admin-Passcode": "passcode-salah"})
+
+    assert response.status_code == 401
+
+
+def test_verify_memakai_compare_digest():
+    """Perbandingan passcode tidak boleh memakai operator != yang bocor waktu."""
+    import inspect
+
+    import app.routers.admin as admin_module
+
+    source = inspect.getsource(admin_module.verify_admin_passcode)
+    assert "compare_digest" in source
 
 
 def test_admin_logs_invalid_limit(client):
