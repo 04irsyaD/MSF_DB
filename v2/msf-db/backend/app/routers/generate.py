@@ -2,7 +2,7 @@
 
 import asyncio
 import os
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from fastapi.responses import Response
 
 from app.models.schemas import (
@@ -16,6 +16,7 @@ from app.services.db_connector import DBConnector
 from app.services.doc_generator import DocGenerator, get_provider
 from app.services.exporters.docx_exporter import DocxExporter
 from app.utils.errors import AppDetailedException
+from app.utils.rate_limit import generate_limit, limiter
 import structlog
 
 logger = structlog.get_logger()
@@ -103,31 +104,40 @@ async def parse_ddl_endpoint(request: ParseDDLRequest):
 
 
 @router.post("/generate/from-ddl", response_model=GenerateJobResponse)
+@limiter.limit(generate_limit)
 async def generate_from_ddl(
-    request: GenerateFromDDLRequest,
+    request: Request,
+    payload: GenerateFromDDLRequest,
     background_tasks: BackgroundTasks,
 ):
     """
     Generate dokumentasi dari SQL DDL yang di-paste.
     Return job_id — gunakan GET /api/jobs/{job_id} untuk cek status.
+
+    Parameter request wajib bernama persis itu dan bertipe Request karena
+    dekorator slowapi mencarinya berdasarkan nama; body pindah ke payload.
     """
-    logger.info("Menerima request generate_from_ddl", payload=request.model_dump() if hasattr(request, 'model_dump') else request.dict())
-    # Rate limiting: cek jumlah job aktif
+    logger.info("Menerima request generate_from_ddl", payload=payload.model_dump() if hasattr(payload, 'model_dump') else payload.dict())
+    # Gerbang antrean: cek jumlah job aktif di memori
     max_concurrent = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
     active_jobs = [j for j in job_queue.list_jobs() if j["status"] in ("queued", "processing")]
     if len(active_jobs) >= max_concurrent:
-        raise HTTPException(
+        raise AppDetailedException(
+            detail=(
+                f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). "
+                "Tunggu job sebelumnya selesai."
+            ),
             status_code=429,
-            detail=f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). Tunggu job sebelumnya selesai."
+            error_code="JOB_QUEUE_FULL",
         )
     # Validasi SQL
-    validation = SQLParser.validate_sql(request.sql_content)
+    validation = SQLParser.validate_sql(payload.sql_content)
     if not validation["valid"]:
         raise HTTPException(status_code=400, detail=validation["message"])
 
     # Parse tables
-    tables = SQLParser.parse(request.sql_content)
-    
+    tables = SQLParser.parse(payload.sql_content)
+
     max_tables = int(os.getenv("MAX_TABLES_PER_REQUEST", "50"))
     if len(tables) > max_tables:
         raise HTTPException(
@@ -136,18 +146,18 @@ async def generate_from_ddl(
         )
 
     # Buat job
-    job = job_queue.create_job(project_name=request.project_name)
-    job.update(ai_provider=request.ai_provider, db_engine="ddl")
+    job = job_queue.create_job(project_name=payload.project_name)
+    job.update(ai_provider=payload.ai_provider, db_engine="ddl")
 
     settings = {
-        "ai_provider": request.ai_provider,
-        "model": request.model,
-        "language": request.language,
-        "detail_level": request.detail_level,
-        "business_context": request.business_context,
-        "project_name": request.project_name,
-        "author": request.author,
-        "output_format": request.output_format,
+        "ai_provider": payload.ai_provider,
+        "model": payload.model,
+        "language": payload.language,
+        "detail_level": payload.detail_level,
+        "business_context": payload.business_context,
+        "project_name": payload.project_name,
+        "author": payload.author,
+        "output_format": payload.output_format,
     }
 
     # Jalankan di background
@@ -172,29 +182,38 @@ async def generate_from_ddl(
 
 
 @router.post("/generate/from-db", response_model=GenerateJobResponse)
+@limiter.limit(generate_limit)
 async def generate_from_db(
-    request: GenerateFromDBRequest,
+    request: Request,
+    payload: GenerateFromDBRequest,
     background_tasks: BackgroundTasks,
 ):
     """
     Generate dokumentasi dari koneksi database langsung.
+
+    Parameter request wajib bernama persis itu dan bertipe Request karena
+    dekorator slowapi mencarinya berdasarkan nama; body pindah ke payload.
     """
-    payload_dict = request.model_dump() if hasattr(request, 'model_dump') else request.dict()
+    payload_dict = payload.model_dump() if hasattr(payload, 'model_dump') else payload.dict()
     if "connection" in payload_dict and isinstance(payload_dict["connection"], dict):
         if "password" in payload_dict["connection"] and payload_dict["connection"]["password"]:
             payload_dict["connection"] = payload_dict["connection"].copy()
             payload_dict["connection"]["password"] = "***"
     logger.info("Menerima request generate_from_db", payload=payload_dict)
-    # Rate limiting: cek jumlah job aktif
+    # Gerbang antrean: cek jumlah job aktif di memori
     max_concurrent = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
     active_jobs = [j for j in job_queue.list_jobs() if j["status"] in ("queued", "processing")]
     if len(active_jobs) >= max_concurrent:
-        raise HTTPException(
+        raise AppDetailedException(
+            detail=(
+                f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). "
+                "Tunggu job sebelumnya selesai."
+            ),
             status_code=429,
-            detail=f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). Tunggu job sebelumnya selesai."
+            error_code="JOB_QUEUE_FULL",
         )
     # Test koneksi dulu
-    test_result = await DBConnector.test_connection(request.connection)
+    test_result = await DBConnector.test_connection(payload.connection)
     if not test_result.success:
         raise HTTPException(
             status_code=400,
@@ -202,18 +221,18 @@ async def generate_from_db(
         )
 
     # Buat job
-    job = job_queue.create_job(project_name=request.project_name)
-    job.update(ai_provider=request.ai_provider, db_engine=request.connection.engine)
+    job = job_queue.create_job(project_name=payload.project_name)
+    job.update(ai_provider=payload.ai_provider, db_engine=payload.connection.engine)
 
     settings = {
-        "ai_provider": request.ai_provider,
-        "model": request.model,
-        "language": request.language,
-        "detail_level": request.detail_level,
-        "business_context": request.business_context,
-        "project_name": request.project_name,
-        "author": request.author,
-        "output_format": request.output_format,
+        "ai_provider": payload.ai_provider,
+        "model": payload.model,
+        "language": payload.language,
+        "detail_level": payload.detail_level,
+        "business_context": payload.business_context,
+        "project_name": payload.project_name,
+        "author": payload.author,
+        "output_format": payload.output_format,
     }
 
     async def _run_from_db(job, conn_request, gen_settings):
@@ -243,7 +262,7 @@ async def generate_from_db(
         job_queue.run_job,
         job,
         _run_from_db,
-        request,
+        payload,
         settings,
     )
 

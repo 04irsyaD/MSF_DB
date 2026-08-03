@@ -49,6 +49,7 @@ structlog==24.4.0               # Structured logging
 anyio==4.7.0                    # Async utilities
 aiofiles==24.1.0                # Async file I/O
 uuid7==0.1.0                    # Generate job ID dengan UUID v7
+slowapi==0.1.9                  # Rate limiting per alamat IP
 
 # --------------------------------------------------------------
 # DATA PROCESSING (untuk metadata processing)

@@ -5,11 +5,12 @@ Menyediakan statistik, pemantauan log, manajemen antrean, dan aksi sistem.
 
 import os
 import secrets
-from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi import APIRouter, HTTPException, Header, Depends, Request
 from datetime import datetime
 from collections import deque
 
 from app.background.job_queue import job_queue, JobStatus
+from app.utils.rate_limit import admin_verify_limit, limiter
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
@@ -40,7 +41,8 @@ async def verify_admin_passcode(x_admin_passcode: str = Header(None)):
 
 
 @router.post("/verify", dependencies=[Depends(verify_admin_passcode)])
-async def verify_passcode():
+@limiter.limit(admin_verify_limit)
+async def verify_passcode(request: Request):
     """Endpoint sederhana untuk memvalidasi passcode dari frontend."""
     return {"success": True, "message": "Otentikasi admin berhasil."}
 

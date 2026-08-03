@@ -17,8 +17,11 @@ from datetime import datetime, timezone
 from app.routers import generate, database, ai, shortcuts, export, stats, admin
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
+from slowapi.errors import RateLimitExceeded
+
 from app.utils.errors import AppDetailedException
 from app.utils.logger import setup_logger
+from app.utils.rate_limit import limiter, rate_limit_exceeded_handler
 
 setup_logger()
 logger = structlog.get_logger()
@@ -170,6 +173,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key", "X-Admin-Passcode"],
 )
 app.add_middleware(APIKeyMiddleware)
+
+# Rate limiting per IP. Endpoint yang dibatasi ditandai dekorator di routernya.
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # ================================================================
 # EXCEPTION HANDLERS
