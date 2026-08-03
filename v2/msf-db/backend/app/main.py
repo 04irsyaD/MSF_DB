@@ -74,6 +74,18 @@ async def lifespan(app: FastAPI):
     """Setup saat startup, cleanup saat shutdown"""
     logger.info("MSF-APP Backend starting up...")
 
+    # Rekonsiliasi job yatim WAJIB selesai sebelum yield: tanpa ini job yang mati
+    # saat restart tetap terhitung queued/processing dan mengunci gerbang
+    # MAX_CONCURRENT_JOBS secara permanen.
+    try:
+        orphans = job_queue.recover()
+        if orphans > 0:
+            logger.warning(
+                "Job yatim ditandai error setelah restart", jumlah=orphans
+            )
+    except Exception as e:
+        logger.error("Gagal memulihkan antrean job dari basis data", error=str(e))
+
     # Background task: cleanup job lama setiap 15 menit
     async def cleanup_loop():
         while True:
@@ -102,7 +114,13 @@ async def lifespan(app: FastAPI):
 
     # Cleanup
     cleanup_task.cancel()
-    
+
+    try:
+        job_queue.close()
+    except Exception as e:
+        logger.error("Gagal menutup basis data job", error=str(e))
+
+
     # Close singleton clients
     try:
         from app.services.cloud_provider import deepseek_provider, openai_provider

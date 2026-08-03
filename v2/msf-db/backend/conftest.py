@@ -1,10 +1,21 @@
 """
 Pytest configuration dan shared fixtures untuk MSF-APP backend tests.
 """
-import pytest
 import asyncio
+import os
+import tempfile
+
+import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
+
+# Dijalankan saat conftest di-import, sebelum modul test mana pun dikumpulkan.
+# Singleton job_queue dibangun saat modul di-import, yaitu sebelum fixture mana
+# pun berjalan, dan path bawaan /app/outputs/jobs.db tidak valid di luar container.
+os.environ.setdefault(
+    "JOBS_DB_PATH", os.path.join(tempfile.gettempdir(), "msf_test_jobs.db")
+)
+os.environ.setdefault("OUTPUT_DIR", tempfile.gettempdir())
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -28,11 +39,12 @@ def isolated_job_queue(tmp_path, monkeypatch):
     output_dir = tmp_path / "outputs"
     output_dir.mkdir()
     monkeypatch.setenv("OUTPUT_DIR", str(output_dir))
+    monkeypatch.setenv("JOBS_DB_PATH", str(tmp_path / "jobs.db"))
 
     import app.background.job_queue as jq_module
     monkeypatch.setattr(jq_module, "OUTPUT_DIR", str(output_dir))
 
-    fresh = jq_module.JobQueue(max_retention_minutes=60)
+    fresh = jq_module.JobQueue()
     monkeypatch.setattr(jq_module, "job_queue", fresh)
 
     import app.main as main_module
@@ -44,6 +56,8 @@ def isolated_job_queue(tmp_path, monkeypatch):
     monkeypatch.setattr(main_module, "job_queue", fresh)
 
     yield fresh
+
+    fresh.close()
 
 
 @pytest.fixture
