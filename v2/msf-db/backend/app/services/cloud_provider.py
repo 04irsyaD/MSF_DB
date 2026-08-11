@@ -8,7 +8,7 @@ import os
 from typing import List
 import structlog
 
-from app.services.ai_provider import AIProvider
+from app.services.ai_provider import AIProvider, ai_seed, ai_temperature
 from app.models.schemas import AIModelInfo
 
 logger = structlog.get_logger()
@@ -64,9 +64,12 @@ class DeepSeekProvider(AIProvider):
                 },
                 {"role": "user", "content": prompt},
             ],
-            "temperature": 0.3,
+            "temperature": ai_temperature(),
             "max_tokens": 2048,
         }
+        seed = ai_seed()
+        if seed is not None:
+            payload["seed"] = seed
 
         async def _call():
             try:
@@ -173,9 +176,12 @@ class OpenAIProvider(AIProvider):
                 },
                 {"role": "user", "content": prompt},
             ],
-            "temperature": 0.3,
+            "temperature": ai_temperature(),
             "max_tokens": 2048,
         }
+        seed = ai_seed()
+        if seed is not None:
+            payload["seed"] = seed
 
         async def _call():
             try:

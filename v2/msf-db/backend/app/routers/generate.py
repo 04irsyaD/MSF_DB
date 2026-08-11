@@ -16,7 +16,7 @@ from app.services.db_connector import DBConnector
 from app.services.doc_generator import DocGenerator, get_provider
 from app.services.exporters.docx_exporter import DocxExporter
 from app.utils.errors import AppDetailedException
-from app.utils.rate_limit import generate_limit, limiter
+from app.utils.rate_limit import generate_limit, job_lookup_limit, limiter
 import structlog
 
 logger = structlog.get_logger()
@@ -34,6 +34,7 @@ async def _run_generate_job(job, tables, settings: dict):
             language=settings["language"],
             detail_level=settings["detail_level"],
             business_context=settings.get("business_context"),
+            project_description=settings.get("project_description"),
         )
 
         # Generate Markdown
@@ -154,7 +155,9 @@ async def generate_from_ddl(
         "model": payload.model,
         "language": payload.language,
         "detail_level": payload.detail_level,
+        "structure_template": payload.structure_template,
         "business_context": payload.business_context,
+        "project_description": payload.project_description,
         "project_name": payload.project_name,
         "author": payload.author,
         "output_format": payload.output_format,
@@ -229,7 +232,9 @@ async def generate_from_db(
         "model": payload.model,
         "language": payload.language,
         "detail_level": payload.detail_level,
+        "structure_template": payload.structure_template,
         "business_context": payload.business_context,
+        "project_description": payload.project_description,
         "project_name": payload.project_name,
         "author": payload.author,
         "output_format": payload.output_format,
@@ -287,8 +292,14 @@ async def get_job_status(job_id: str):
 
 
 @router.get("/jobs/by-code/{access_code}", response_model=JobStatusResponse)
-async def get_job_by_code(access_code: str):
-    """Cek status job berdasarkan kode akses pelacakan"""
+@limiter.limit(job_lookup_limit)
+async def get_job_by_code(request: Request, access_code: str):
+    """
+    Cek status job berdasarkan kode akses pelacakan.
+
+    Parameter request wajib bernama persis itu dan bertipe Request karena
+    dekorator slowapi mencarinya berdasarkan nama.
+    """
     job = job_queue.get_job_by_access_code(access_code)
     if not job:
         raise HTTPException(

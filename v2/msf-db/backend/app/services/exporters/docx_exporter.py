@@ -170,7 +170,7 @@ class DocxExporter:
                 i += 1
                 continue
 
-            # Blockquote (⚠️ warning)
+            # Blockquote (catatan atau peringatan)
             if line.strip().startswith(">"):
                 text = line.strip()[1:].strip()
                 p = doc.add_paragraph()

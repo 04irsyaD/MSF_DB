@@ -4,12 +4,38 @@ Semua provider harus implementasi interface AIProvider.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, TypeVar, Callable, Awaitable
+from typing import List, Optional, TypeVar, Callable, Awaitable
 import asyncio
+import os
 import random
 from app.models.schemas import AIModelInfo
 
 T = TypeVar("T")
+
+
+def ai_seed() -> Optional[int]:
+    """
+    Seed sampling AI. None berarti tidak dikirim sama sekali.
+
+    Ditempatkan di sini, bukan di salah satu provider, karena dipakai
+    provider lokal maupun cloud. Menaruhnya di ollama_provider akan
+    memaksa cloud_provider bergantung pada provider lokal.
+    """
+    nilai = os.getenv("AI_SEED", "").strip()
+    if not nilai:
+        return None
+    try:
+        return int(nilai)
+    except ValueError:
+        return None
+
+
+def ai_temperature() -> float:
+    """Rendah secara bawaan: tugasnya ekstraksi fakta, bukan menulis kreatif."""
+    try:
+        return float(os.getenv("AI_TEMPERATURE", "0.1"))
+    except ValueError:
+        return 0.1
 
 async def retry_with_backoff(
     func: Callable[[], Awaitable[T]],

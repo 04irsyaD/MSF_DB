@@ -302,6 +302,7 @@ class DBConnector:
                 default_value=str(col["default"]) if col.get("default") is not None else None,
                 is_primary_key=False,
                 is_foreign_key=False,
+                column_comment=col.get("comment"),
             ))
 
         # Primary Key
@@ -405,6 +406,14 @@ class DBConnector:
         except Exception:
             pass
 
+        # Komentar tabel tidak didukung setiap engine; SQLite melempar
+        # NotImplementedError. Ketiadaannya bukan kegagalan.
+        try:
+            info_komentar = inspector.get_table_comment(table_name, schema=schema)
+            table_comment = (info_komentar or {}).get("text")
+        except Exception:
+            table_comment = None
+
         return TableMetadata(
             name=table_name,
             schema=schema,
@@ -413,6 +422,7 @@ class DBConnector:
             foreign_keys=foreign_keys,
             indexes=indexes,
             row_count=row_count,
+            table_comment=table_comment,
         )
 
     @classmethod

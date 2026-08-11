@@ -52,7 +52,28 @@ def admin_verify_limit() -> str:
     return os.getenv("RATE_LIMIT_ADMIN_VERIFY", "5/minute")
 
 
-limiter = Limiter(key_func=client_key, enabled=rate_limit_enabled())
+def job_lookup_limit() -> str:
+    """
+    Pelacakan job memakai kode akses 40 bit dari secrets. Kuat terhadap
+    tebakan tunggal, tetapi tanpa limit enumerasinya tidak dibatasi apa pun.
+    Endpoint ini mengembalikan preview dokumen, yang dapat memuat komentar
+    dari database milik pengguna.
+    """
+    return os.getenv("RATE_LIMIT_JOB_LOOKUP", "30/minute")
+
+
+# key_style="endpoint" wajib, bukan bawaan slowapi "url".
+#
+# Dengan gaya "url", nama bucket limit diambil dari path permintaan, sehingga
+# setiap path unik mendapat penghitung sendiri. Endpoint pelacakan job memuat
+# kode akses di dalam path-nya, jadi penyerang yang menebak kode berbeda-beda
+# akan menempati bucket berbeda pula dan tidak pernah terkena limit. Persis
+# serangan yang hendak dicegah yang justru lolos.
+#
+# Endpoint lain memakai path tetap, sehingga bagi mereka kedua gaya setara.
+limiter = Limiter(
+    key_func=client_key, key_style="endpoint", enabled=rate_limit_enabled()
+)
 
 
 def _retry_after_seconds(exc: RateLimitExceeded, default: int = 60) -> int:

@@ -3,16 +3,28 @@ Documentation Generator — generate Markdown dari metadata tabel menggunakan AI
 """
 
 import os
+from datetime import datetime, timezone
 from typing import List, Optional
 import structlog
 
-from app.models.schemas import (
-    TableMetadata, DBMetadataResponse,
-    OutputLanguage, DetailLevel, AIProviderType,
-)
+from app.models.schemas import AIProviderType, TableMetadata
 from app.services.ai_provider import AIProvider
+from app.services.ai_column_parser import (
+    BATAS_RINGKASAN,
+    parse_keluaran_kolom,
+    sanitasi_teks,
+)
+from app.services.doc_model import (
+    SUMBER_AI,
+    SUMBER_FALLBACK,
+    SUMBER_KOMENTAR_DB,
+    ColumnDoc,
+    DocumentModel,
+    TableDoc,
+)
 from app.services.ollama_provider import ollama_provider
 from app.services.cloud_provider import deepseek_provider, openai_provider
+from app.services.renderers.markdown_renderer import render_markdown
 from app.background.job_queue import Job, JobStatus
 
 logger = structlog.get_logger()
@@ -49,12 +61,14 @@ class DocGenerator:
         language: str = DEFAULT_LANGUAGE,
         detail_level: str = DEFAULT_DETAIL_LEVEL,
         business_context: Optional[str] = None,
+        project_description: Optional[str] = None,
     ):
         self.provider = provider
         self.model = model
         self.language = language
         self.detail_level = detail_level
         self.business_context = business_context
+        self.project_description = project_description
 
     async def generate_from_tables(
         self,
@@ -63,313 +77,172 @@ class DocGenerator:
         job: Optional[Job] = None,
     ) -> str:
         """
-        Generate dokumentasi lengkap untuk semua tabel.
-        Update job progress jika job diberikan.
+        Bangun model dokumen lalu render menjadi Markdown.
+
+        Penyusunan isi dan penyusunan tampilan sengaja dipisah: model yang
+        sama kelak dapat dirender ke bentuk keluaran lain tanpa menduplikasi
+        logika pengisian deskripsi.
         """
-        if not tables:
-            return "# Dokumentasi Database\n\n*Tidak ada tabel yang ditemukan.*"
+        model = await self.build_document_model(tables, project_name, job=job)
+        markdown = render_markdown(model, self.language, self.detail_level)
+
+        if job:
+            preview = markdown[:2000] + "\n\n..." if len(markdown) > 2000 else markdown
+            job.update(preview_markdown=preview)
+
+        logger.info(
+            "Dokumen selesai dibangun",
+            tabel=len(model.tables),
+            sumber=model.ringkasan_sumber(),
+        )
+        return markdown
+
+    def _deskripsi_fallback(self, kolom, tabel) -> str:
+        """Dipakai saat komentar database kosong dan AI tidak memberi hasil."""
+        if kolom.is_primary_key:
+            return "Primary key"
+        for fk in tabel.foreign_keys:
+            if fk.column == kolom.name:
+                return f"Referensi ke {fk.references_table}.{fk.references_column}"
+        return "-"
+
+    def _prompt_kolom(self, tabel, nama_kolom_diminta) -> str:
+        """
+        Minta satu baris per kolom, bukan prosa bebas.
+
+        Instruksi ditulis positif, bukan berupa larangan. Model kecil
+        mengabaikan larangan seperti "jangan pakai heading", tetapi menurut
+        permintaan berbentuk contoh format.
+        """
+        baris_kolom = []
+        for kolom in tabel.columns:
+            penanda = []
+            if kolom.is_primary_key:
+                penanda.append("PRIMARY KEY")
+            if kolom.is_foreign_key:
+                penanda.append("FOREIGN KEY")
+            keterangan = f" [{', '.join(penanda)}]" if penanda else ""
+            sudah = " (sudah ada keterangan)" if kolom.column_comment else ""
+            baris_kolom.append(f"- {kolom.name} ({kolom.data_type}){keterangan}{sudah}")
+
+        konteks = ""
+        if tabel.table_comment:
+            konteks += f"\nKeterangan tabel: {tabel.table_comment.strip()}"
+        if self.business_context:
+            konteks += f"\nKonteks bisnis: {self.business_context}"
+        if self.project_description:
+            konteks += f"\nDeskripsi proyek: {self.project_description}"
+
+        diminta = ", ".join(nama_kolom_diminta)
+
+        return f"""Kamu ahli dokumentasi database. Tabel: {tabel.name}
+
+Kolom:
+{chr(10).join(baris_kolom)}{konteks}
+
+Tulis jawaban dalam format berikut, tanpa tambahan apa pun:
+RINGKASAN: <satu kalimat tentang kegunaan tabel ini>
+<nama_kolom> | <deskripsi singkat satu kalimat>
+
+Tulis satu baris untuk setiap kolom berikut saja: {diminta}
+Pakai nama kolom persis seperti tertulis di atas.
+Jangan menambah kolom yang tidak ada dalam daftar."""
+
+    async def build_document_model(
+        self, tables, project_name: str, job=None
+    ) -> DocumentModel:
+        """Satukan metadata dan keluaran AI menjadi model dokumen."""
+        model = DocumentModel(
+            project_name=project_name,
+            generated_at=datetime.now(timezone.utc).strftime("%d %B %Y"),
+            project_description=self.project_description,
+        )
 
         total = len(tables)
         if job:
             job.update(tables_total=total, tables_processed=0)
 
-        sections = [self._build_header(project_name, tables)]
-
-        for i, table in enumerate(tables):
+        for indeks, tabel in enumerate(tables):
             if job:
                 if job.status == JobStatus.CANCELLED:
                     logger.info("Job dibatalkan oleh user", job_id=job.job_id)
                     raise RuntimeError("Job dibatalkan oleh pengguna.")
                 job.update(
-                    current_table=table.name,
-                    tables_processed=i,
-                    progress=int((i / total) * 90),  # 0-90% untuk AI, 90-100% untuk export
+                    current_table=tabel.name,
+                    tables_processed=indeks,
+                    progress=int((indeks / total) * 90) if total else 0,
                     status=JobStatus.PROCESSING,
                 )
 
-            logger.info(f"Generating docs for table: {table.name}")
-
-            try:
-                table_doc = await self._generate_table_doc(table)
-                sections.append(table_doc)
-            except Exception as e:
-                logger.error(f"Gagal generate docs untuk {table.name}", error=str(e))
-                sections.append(self._fallback_table_doc(table, str(e)))
-
-        # Summary relasi antar tabel
-        if self.detail_level in ("detailed", "comprehensive") and len(tables) > 1:
-            relations_section = self._build_relations_summary(tables)
-            sections.append(relations_section)
+            model.tables.append(await self._bangun_tabel(tabel))
 
         if job:
             job.update(tables_processed=total, progress=90)
 
-        full_doc = "\n\n---\n\n".join(sections)
+        return model
 
-        # Simpan preview (500 karakter pertama)
-        if job:
-            preview = full_doc[:2000] + "\n\n..." if len(full_doc) > 2000 else full_doc
-            job.update(preview_markdown=preview)
+    async def _bangun_tabel(self, tabel) -> TableDoc:
+        """
+        Rantai pengisian per kolom: komentar database, lalu AI, lalu metadata.
 
-        return full_doc
+        Kolom yang sudah punya komentar tidak pernah ditanyakan ke AI,
+        sehingga tidak mungkin dikarang.
+        """
+        tanpa_komentar = [k.name for k in tabel.columns if not k.column_comment]
 
-    def _build_header(self, project_name: str, tables: List[TableMetadata]) -> str:
-        """Buat header dokumentasi"""
-        from datetime import datetime, timezone
-        now = datetime.now(timezone.utc).strftime("%d %B %Y")
+        ringkasan = ""
+        deskripsi_ai = {}
+        if tanpa_komentar:
+            try:
+                keluaran = await self.provider.generate(
+                    self._prompt_kolom(tabel, tanpa_komentar), self.model
+                )
+                ringkasan, deskripsi_ai, ditolak = parse_keluaran_kolom(
+                    keluaran, [k.name for k in tabel.columns]
+                )
+                if ditolak:
+                    logger.warning(
+                        "Kolom karangan dibuang parser",
+                        tabel=tabel.name,
+                        jumlah=ditolak,
+                    )
+            except Exception as e:
+                logger.error(
+                    "Gagal ambil deskripsi kolom", tabel=tabel.name, error=str(e)
+                )
 
-        table_list = "\n".join(
-            f"- [{t.name}](#{t.name.lower().replace(' ', '-')})"
-            for t in tables
+        kolom_doc = []
+        for nomor, kolom in enumerate(tabel.columns, start=1):
+            if kolom.column_comment:
+                deskripsi = sanitasi_teks(kolom.column_comment, BATAS_RINGKASAN)
+                sumber = SUMBER_KOMENTAR_DB
+            elif kolom.name in deskripsi_ai:
+                deskripsi = deskripsi_ai[kolom.name]
+                sumber = SUMBER_AI
+            else:
+                deskripsi = self._deskripsi_fallback(kolom, tabel)
+                sumber = SUMBER_FALLBACK
+
+            kolom_doc.append(
+                ColumnDoc(
+                    no=nomor,
+                    name=kolom.name,
+                    data_type_label=kolom.data_type,
+                    description=deskripsi,
+                    source=sumber,
+                    nullable=kolom.is_nullable,
+                    is_primary_key=kolom.is_primary_key,
+                    is_foreign_key=kolom.is_foreign_key,
+                )
+            )
+
+        return TableDoc(
+            name=tabel.name,
+            schema=tabel.schema,
+            comment=tabel.table_comment,
+            summary=ringkasan,
+            columns=kolom_doc,
+            foreign_keys=list(tabel.foreign_keys),
+            indexes=list(tabel.indexes),
         )
 
-        if self.language == OutputLanguage.INDONESIAN:
-            return f"""# {project_name}
-
-**Tanggal Generate:** {now}
-**Total Tabel:** {len(tables)}
-**Dibuat dengan:** MSF-APP v2.0
-
-## Daftar Tabel
-
-{table_list}"""
-        else:
-            return f"""# {project_name}
-
-**Generated:** {now}
-**Total Tables:** {len(tables)}
-**Created with:** MSF-APP v2.0
-
-## Table of Contents
-
-{table_list}"""
-
-    async def _generate_table_doc(self, table: TableMetadata) -> str:
-        """Generate dokumentasi satu tabel menggunakan AI"""
-        prompt = self._build_prompt(table)
-        ai_description = await self.provider.generate(prompt, self.model)
-
-        # Bangun markdown tabel kolom
-        columns_md = self._build_columns_table(table)
-
-        # FK section
-        fk_section = self._build_fk_section(table) if table.foreign_keys else ""
-
-        # Index section
-        idx_section = self._build_index_section(table) if (
-            table.indexes and self.detail_level == "comprehensive"
-        ) else ""
-
-        if self.language == OutputLanguage.INDONESIAN:
-            return f"""## Tabel: `{table.name}`
-
-{ai_description}
-
-### Kolom
-
-{columns_md}
-{fk_section}{idx_section}"""
-        else:
-            return f"""## Table: `{table.name}`
-
-{ai_description}
-
-### Columns
-
-{columns_md}
-{fk_section}{idx_section}"""
-
-    def _build_prompt(self, table: TableMetadata) -> str:
-        """Bangun prompt untuk AI berdasarkan metadata tabel"""
-        # Buat representasi teks dari kolom
-        cols_text = []
-        for col in table.columns:
-            flags = []
-            if col.is_primary_key:
-                flags.append("PRIMARY KEY")
-            if col.is_foreign_key:
-                flags.append("FOREIGN KEY")
-            if not col.is_nullable:
-                flags.append("NOT NULL")
-            if col.default_value:
-                flags.append(f"DEFAULT {col.default_value}")
-
-            col_desc = f"  - {col.name} ({col.data_type})"
-            if flags:
-                col_desc += f" [{', '.join(flags)}]"
-            cols_text.append(col_desc)
-
-        cols_repr = "\n".join(cols_text)
-
-        # FK info
-        fk_text = ""
-        if table.foreign_keys:
-            fk_lines = [
-                f"  - {fk.column} → {fk.references_table}.{fk.references_column}"
-                for fk in table.foreign_keys
-            ]
-            fk_text = f"\nForeign Keys:\n" + "\n".join(fk_lines)
-
-        # Context tambahan
-        context_text = ""
-        if self.business_context:
-            if self.language == OutputLanguage.INDONESIAN:
-                context_text = f"\nKonteks Bisnis: {self.business_context}"
-            else:
-                context_text = f"\nBusiness Context: {self.business_context}"
-
-        # Row count hint
-        row_hint = ""
-        if table.row_count is not None:
-            row_hint = f"\nJumlah data saat ini: {table.row_count:,} baris"
-
-        if self.language == OutputLanguage.INDONESIAN:
-            detail_instruction = {
-                "simple": "Berikan deskripsi singkat (2-3 kalimat) tentang tujuan tabel ini.",
-                "detailed": "Berikan deskripsi mendetail tentang tujuan tabel, deskripsi singkat tiap kolom penting, dan hubungannya dengan tabel lain.",
-                "comprehensive": "Berikan dokumentasi komprehensif: tujuan tabel, penjelasan setiap kolom, relasi, use case bisnis, dan catatan teknis penting.",
-            }.get(self.detail_level, "Berikan deskripsi mendetail.")
-
-            return f"""Kamu adalah ahli dokumentasi database. Buat dokumentasi dalam Bahasa Indonesia untuk tabel database berikut:
-
-Nama Tabel: {table.name}
-Schema: {table.schema}
-{row_hint}
-
-Kolom:
-{cols_repr}
-{fk_text}{context_text}
-
-Instruksi: {detail_instruction}
-Tulis dalam format prosa yang jelas. Jangan ulangi informasi yang sudah ada di tabel kolom.
-Fokus pada: APA tujuan tabel ini, MENGAPA kolom-kolom ini ada, dan BAGAIMANA tabel ini digunakan.
-Jawaban hanya berisi deskripsi, tanpa heading atau markdown tambahan."""
-
-        else:
-            detail_instruction = {
-                "simple": "Provide a brief description (2-3 sentences) about this table's purpose.",
-                "detailed": "Provide a detailed description about the table purpose, brief explanation of important columns, and its relationship with other tables.",
-                "comprehensive": "Provide comprehensive documentation: table purpose, column explanations, relationships, business use cases, and important technical notes.",
-            }.get(self.detail_level, "Provide a detailed description.")
-
-            return f"""You are a database documentation expert. Create documentation in English for the following database table:
-
-Table Name: {table.name}
-Schema: {table.schema}
-{row_hint}
-
-Columns:
-{cols_repr}
-{fk_text}{context_text}
-
-Instruction: {detail_instruction}
-Write in clear prose format. Do not repeat information already shown in the column table.
-Focus on: WHAT is the purpose of this table, WHY these columns exist, and HOW this table is used.
-Response should contain only the description, without additional headings or markdown."""
-
-    def _build_columns_table(self, table: TableMetadata) -> str:
-        """Buat tabel Markdown untuk kolom"""
-        if self.language == OutputLanguage.INDONESIAN:
-            header = "| Kolom | Tipe Data | Nullable | Keterangan |"
-            separator = "|-------|-----------|----------|------------|"
-        else:
-            header = "| Column | Data Type | Nullable | Notes |"
-            separator = "|--------|-----------|----------|-------|"
-
-        rows = []
-        for col in table.columns:
-            flags = []
-            if col.is_primary_key:
-                flags.append("🔑 PK")
-            if col.is_foreign_key:
-                flags.append("🔗 FK")
-            if col.default_value:
-                flags.append(f"default: `{col.default_value}`")
-
-            nullable = "Ya" if col.is_nullable else "Tidak" if self.language == OutputLanguage.INDONESIAN else ("Yes" if col.is_nullable else "No")
-            notes = " · ".join(flags) if flags else "-"
-            rows.append(f"| `{col.name}` | `{col.data_type}` | {nullable} | {notes} |")
-
-        return "\n".join([header, separator] + rows)
-
-    def _build_fk_section(self, table: TableMetadata) -> str:
-        """Buat seksi foreign key"""
-        if not table.foreign_keys:
-            return ""
-
-        if self.language == OutputLanguage.INDONESIAN:
-            title = "\n### Relasi (Foreign Key)\n"
-        else:
-            title = "\n### Relationships (Foreign Keys)\n"
-
-        lines = []
-        for fk in table.foreign_keys:
-            line = f"- `{fk.column}` → `{fk.references_table}.{fk.references_column}`"
-            if fk.on_delete:
-                line += f" _(ON DELETE {fk.on_delete})_"
-            lines.append(line)
-
-        return title + "\n".join(lines) + "\n"
-
-    def _build_index_section(self, table: TableMetadata) -> str:
-        """Buat seksi index (untuk comprehensive mode)"""
-        if not table.indexes:
-            return ""
-
-        if self.language == OutputLanguage.INDONESIAN:
-            title = "\n### Index\n"
-        else:
-            title = "\n### Indexes\n"
-
-        lines = []
-        for idx in table.indexes:
-            cols = ", ".join(f"`{c}`" for c in idx.columns)
-            idx_type = " _(UNIQUE)_" if idx.is_unique else ""
-            lines.append(f"- **{idx.name}**: {cols}{idx_type}")
-
-        return title + "\n".join(lines) + "\n"
-
-    def _build_relations_summary(self, tables: List[TableMetadata]) -> str:
-        """Buat ringkasan relasi antar tabel"""
-        all_fks = []
-        for table in tables:
-            for fk in table.foreign_keys:
-                all_fks.append(f"- `{table.name}.{fk.column}` → `{fk.references_table}.{fk.references_column}`")
-
-        if not all_fks:
-            return ""
-
-        if self.language == OutputLanguage.INDONESIAN:
-            return f"""## Ringkasan Relasi Antar Tabel
-
-{chr(10).join(all_fks)}"""
-        else:
-            return f"""## Table Relationships Summary
-
-{chr(10).join(all_fks)}"""
-
-    def _fallback_table_doc(self, table: TableMetadata, error: str) -> str:
-        """Fallback jika AI gagal — generate dokumentasi dasar tanpa AI"""
-        columns_md = self._build_columns_table(table)
-        fk_section = self._build_fk_section(table) if table.foreign_keys else ""
-
-        note = f"\n> ⚠️ AI description tidak tersedia: {error[:100]}\n"
-
-        if self.language == OutputLanguage.INDONESIAN:
-            return f"""## Tabel: `{table.name}`
-
-{note}
-
-### Kolom
-
-{columns_md}
-{fk_section}"""
-        else:
-            return f"""## Table: `{table.name}`
-
-{note}
-
-### Columns
-
-{columns_md}
-{fk_section}"""

@@ -9,7 +9,7 @@ from typing import List
 from datetime import datetime, timezone
 import structlog
 
-from app.services.ai_provider import AIProvider
+from app.services.ai_provider import AIProvider, ai_seed, ai_temperature
 from app.models.schemas import AIModelInfo
 
 logger = structlog.get_logger()
@@ -50,6 +50,23 @@ class OllamaProvider(AIProvider):
     def label(self) -> str:
         return "Ollama (Lokal)"
 
+    def bangun_payload(self, prompt: str, model: str) -> dict:
+        """Payload dipisah dari pemanggilan agar dapat diuji tanpa jaringan."""
+        options = {
+            "temperature": ai_temperature(),
+            "num_predict": 2048,      # Max token output
+            "top_p": 0.9,
+        }
+        seed = ai_seed()
+        if seed is not None:
+            options["seed"] = seed
+        return {
+            "model": model,
+            "prompt": prompt,
+            "stream": False,
+            "options": options,
+        }
+
     async def generate(self, prompt: str, model: str) -> str:
         """
         Generate teks menggunakan Ollama /api/generate endpoint.
@@ -58,16 +75,7 @@ class OllamaProvider(AIProvider):
         from app.services.ai_provider import retry_with_backoff
 
         url = f"{self.base_url}/api/generate"
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.3,       # Lebih deterministik untuk dokumentasi
-                "num_predict": 2048,      # Max token output
-                "top_p": 0.9,
-            },
-        }
+        payload = self.bangun_payload(prompt, model)
 
         async def _call():
             try:

@@ -22,6 +22,18 @@ class DetailLevel(str, Enum):
     COMPREHENSIVE = "comprehensive"
 
 
+class StructureTemplate(str, Enum):
+    """
+    Bentuk struktur dokumen.
+
+    Enum tertutup, bukan string bebas: endpoint generate dapat diakses
+    anonim, dan nilai ini kelak memilih berkas template. Nilai dari request
+    tidak boleh pernah menyentuh path berkas.
+    """
+
+    STANDARD = "standard"
+
+
 class AIProviderType(str, Enum):
     OLLAMA = "ollama"
     DEEPSEEK = "deepseek"
@@ -193,6 +205,7 @@ class DBMetadataResponse(BaseModel):
 class GenerateSettings(BaseModel):
     language: OutputLanguage = OutputLanguage.INDONESIAN
     detail_level: DetailLevel = DetailLevel.DETAILED
+    structure_template: StructureTemplate = StructureTemplate.STANDARD
     ai_provider: AIProviderType = AIProviderType.OLLAMA
     model: str = "llama3.2"
     output_format: ExportFormat = ExportFormat.DOCX

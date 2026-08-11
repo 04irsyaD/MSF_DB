@@ -116,6 +116,37 @@ def test_rate_limit_dapat_dimatikan(monkeypatch, ddl_payload):
         rl.limiter.enabled = True
 
 
+def test_job_lookup_limit_punya_bawaan(monkeypatch):
+    from app.utils.rate_limit import job_lookup_limit
+
+    monkeypatch.delenv("RATE_LIMIT_JOB_LOOKUP", raising=False)
+
+    assert job_lookup_limit() == "30/minute"
+
+
+def test_endpoint_by_code_dibatasi(monkeypatch):
+    """
+    Kode akses 40 bit kuat terhadap tebakan tunggal, tetapi tanpa limit
+    enumerasinya tidak dibatasi apa pun. Endpoint ini mengembalikan
+    preview_markdown yang kini memuat komentar database.
+    """
+    from app.main import app
+    from app.utils import rate_limit as rl
+
+    monkeypatch.setenv("RATE_LIMIT_JOB_LOOKUP", "3/minute")
+    rl.limiter.enabled = True
+    _reset_limiter(rl)
+
+    with TestClient(app) as c:
+        status = [
+            c.get(f"/api/jobs/by-code/MSF-{i:010X}").status_code for i in range(5)
+        ]
+
+    assert status[:3] == [404, 404, 404]
+    assert status[3] == 429
+    assert status[4] == 429
+
+
 def test_antrean_penuh_menjawab_429_job_queue_full(
     monkeypatch, isolated_job_queue, ddl_payload
 ):

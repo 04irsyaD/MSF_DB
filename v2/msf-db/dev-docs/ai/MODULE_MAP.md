@@ -14,7 +14,10 @@
 | **Security Headers** | `backend/app/utils/security_headers.py` + registrasi di `backend/app/main.py` | Belum ada; direncanakan di `frontend/next.config.js` |
 | **Operations Docs** | `backend/docs/operations/` | — |
 | **DDL Parsing** | `backend/app/services/sql_parser.py` | `frontend/src/components/generator/SqlEditor.tsx` |
-| **DB Metadata extraction** | `backend/app/services/db_connector.py` | `frontend/src/components/generator/DbConnector.tsx` |
+| **DB Metadata extraction** | `backend/app/services/db_connector.py` — termasuk komentar tabel dan kolom lewat inspector SQLAlchemy | `frontend/src/components/generator/DbConnector.tsx` |
+| **Model dokumen** | `backend/app/services/doc_model.py` — `DocumentModel`, `TableDoc`, `ColumnDoc`, pelacakan asal deskripsi | — |
+| **Parser keluaran AI** | `backend/app/services/ai_column_parser.py` — sanitasi dan penyaring halusinasi terhadap metadata | — |
+| **Renderer** | `backend/app/services/renderers/markdown_renderer.py` — `DocumentModel` menjadi Markdown | — |
 | **Docx/PDF Exporter** | `backend/app/services/exporters/` | `frontend/src/components/generator/DocPreview.tsx` |
 | **AI Integration** | `backend/app/services/ai_provider.py` | `frontend/src/components/generator/GeneratePanel.tsx` |
 | **Shortcuts Manager** | `backend/app/routers/shortcuts.py` | `frontend/src/app/shortcuts/` |
