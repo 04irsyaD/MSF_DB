@@ -6,7 +6,7 @@
 
 ## 1. Status Pengujian (Test Coverage & Health)
 
-*   **Kasus Uji Backend (Pytest)**: **79 passed** (100% passing) per 2026-08-03, naik dari 32 pada v2.1.0. Tambahan berasal dari `test_job_store.py`, `test_job_queue.py` yang diperluas, `test_job_retention.py`, `test_rate_limit.py`, `test_db_connector_sqlserver.py`, `test_download_expired.py`, dan `test_conftest_isolation.py`.
+*   **Kasus Uji Backend (Pytest)**: **90 passed** (100% passing) per 2026-08-04, naik dari 32 pada v2.1.0. Tambahan berasal dari `test_job_store.py`, `test_job_queue.py` yang diperluas, `test_job_retention.py`, `test_rate_limit.py`, `test_db_connector_sqlserver.py`, `test_download_expired.py`, `test_conftest_isolation.py`, dan `test_security_headers.py`.
 *   **Kasus Uji Frontend**: **tidak ada sama sekali.** Tidak ada jest, vitest, maupun playwright di `package.json` (TD-012). Verifikasi frontend hanya lewat `npm run build`.
 *   **Linter Backend (ruff)**: 18 pelanggaran terbawa dari baseline msf-app, tidak satu pun berasal dari v2.2.0 (TD-010). Seluruh berkas yang disentuh v2.2.0 lulus ruff.
 *   **Linter Frontend (ESLint)**: **tidak dapat dijalankan** — tidak ada `.eslintrc.json` sehingga `next lint` berhenti menunggu jawaban interaktif (TD-011).
@@ -23,7 +23,8 @@ Tinjauan keamanan dijalankan pada branch `dev` tanggal 2026-08-04.
 *   **Temuan tinjauan**: 1 severity Medium (certificate validation bypass pada koneksi SQL Server) — **sudah ditutup** dengan mengubah bawaan `MSSQL_TRUST_SERVER_CERTIFICATE` menjadi `no`.
 *   **Terbukti aman**: tidak ada SQL injection di `job_store.py` (seluruh query memakai binding), tidak ada path traversal di endpoint download, tidak ada header injection di `Content-Disposition` (nama proyek disaring), dan `jobs.db` tidak memuat satu pun kredensial.
 *   **Insiden pemindai rahasia**: GitGuardian menandai commit `6638912`. Terverifikasi **false positive** — nilai karangan di dalam test. `.env` tidak pernah ter-track dan token Cloudflare tidak pernah masuk history.
-*   **Yang masih terbuka**: HTTP security headers belum dipasang (I-005), batas sumber daya container belum ada (I-006), dan `MSF_API_KEY` masih kosong sehingga seluruh endpoint dapat diakses anonim. Rincian di `TECHNICAL_DEBT.md` bagian Catatan Keamanan.
+*   **HTTP security headers**: **terpasang di backend per 2026-08-04** (tujuh header, plus HSTS opsional lewat `HSTS_ENABLED` yang mati secara bawaan). Yang masih terbuka: header di lapisan frontend dan Content-Security-Policy.
+*   **Yang masih terbuka**: CSP dan header frontend (sisa I-005), batas sumber daya container belum ada (I-006), dan `MSF_API_KEY` masih kosong sehingga seluruh endpoint dapat diakses anonim. Rincian di `TECHNICAL_DEBT.md` bagian Catatan Keamanan.
 
 Konteks yang membingkai semuanya: aplikasi ini **terbuka ke internet lewat Cloudflare Tunnel dan tidak memiliki sistem login sama sekali.**
 

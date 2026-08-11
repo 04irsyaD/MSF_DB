@@ -68,6 +68,8 @@ services:
       - RATE_LIMIT_GENERATE=${RATE_LIMIT_GENERATE:-10/minute}
       - RATE_LIMIT_ADMIN_VERIFY=${RATE_LIMIT_ADMIN_VERIFY:-5/minute}
       - RATE_LIMIT_TRUST_FORWARDED_FOR=${RATE_LIMIT_TRUST_FORWARDED_FOR:-false}
+      # Security headers. HSTS mati secara bawaan; lihat backend/docs/operations/
+      - HSTS_ENABLED=${HSTS_ENABLED:-false}
       # SQL Server (v2.2.0)
       - MSSQL_ODBC_DRIVER=${MSSQL_ODBC_DRIVER:-ODBC Driver 18 for SQL Server}
       - MSSQL_TRUST_SERVER_CERTIFICATE=${MSSQL_TRUST_SERVER_CERTIFICATE:-no}

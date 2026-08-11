@@ -22,6 +22,7 @@ from slowapi.errors import RateLimitExceeded
 from app.utils.errors import AppDetailedException
 from app.utils.logger import setup_logger
 from app.utils.rate_limit import limiter, rate_limit_exceeded_handler
+from app.utils.security_headers import SecurityHeadersMiddleware
 
 setup_logger()
 logger = structlog.get_logger()
@@ -173,6 +174,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key", "X-Admin-Passcode"],
 )
 app.add_middleware(APIKeyMiddleware)
+
+# Security headers dipasang paling luar agar ikut menempel pada respons yang
+# dihasilkan middleware lain, termasuk penolakan API key dan respons error.
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Rate limiting per IP. Endpoint yang dibatasi ditandai dekorator di routernya.
 app.state.limiter = limiter
