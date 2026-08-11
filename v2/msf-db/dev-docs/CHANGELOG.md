@@ -41,6 +41,12 @@
 
 ## [Unreleased]
 
+### Security
+
+- **`MSSQL_TRUST_SERVER_CERTIFICATE` bawaan diubah dari `yes` menjadi `no`.** Nilai `yes` membuat ODBC Driver 18 menerima sertifikat apa pun tanpa memvalidasi rantai kepercayaan maupun nama host, sehingga kredensial database yang dimasukkan pengguna dapat disadap lewat serangan orang di tengah. Temuan tinjauan keamanan 2026-08-04, severity Medium. Operator yang memakai sertifikat self-signed dapat menaikkannya kembali secara sadar lewat `.env`.
+- **Port PostgreSQL uji diikat ke `127.0.0.1`.** Sebelumnya dipetakan ke seluruh antarmuka, sehingga database uji berkredensial bawaan terbuka ke jaringan. Akses dari klien DB di mesin yang sama tetap berfungsi.
+- **`_get_table_count_query` dihapus.** Fungsi itu tidak pernah dipanggil tetapi menyisipkan nama schema milik pengguna ke SQL lewat f-string. Tidak terjangkau berarti tidak dapat dieksploitasi, tetapi meninggalkannya berarti menunggu seseorang memanggilnya.
+
 ### Added
 - Integrasi folder panduan `ai-rules/` dari repository `docs-ai` untuk standardisasi AI Coding.
 - Penambahan file `.agents/AGENTS.md` untuk konfigurasi asisten Gemini (Antigravity).

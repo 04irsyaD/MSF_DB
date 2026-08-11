@@ -67,12 +67,14 @@ class DBConnector:
             # Untuk SQLite, database adalah path file
             return f"sqlite:///{conn.database}"
         elif engine == DBEngine.SQLSERVER or engine == "sqlserver":
-            # Driver 18 mewajibkan enkripsi secara bawaan dan menolak server tanpa
-            # sertifikat tepercaya, karena itu TrustServerCertificate dibuat eksplisit.
+            # Driver 18 mewajibkan enkripsi secara bawaan. TrustServerCertificate
+            # dibuat eksplisit dan bernilai "no" agar sertifikat server benar-benar
+            # divalidasi; dengan "yes" driver menerima sertifikat apa pun sehingga
+            # kredensial database pengguna dapat disadap lewat orang di tengah.
             driver = quote_plus(
                 os.getenv("MSSQL_ODBC_DRIVER", "ODBC Driver 18 for SQL Server")
             )
-            trust = os.getenv("MSSQL_TRUST_SERVER_CERTIFICATE", "yes")
+            trust = os.getenv("MSSQL_TRUST_SERVER_CERTIFICATE", "no")
             return (
                 f"mssql+pyodbc://{username_enc}:{password_enc}"
                 f"@{conn.host}:{port}/{conn.database}"
@@ -479,16 +481,11 @@ class DBConnector:
         else:
             return "SELECT @@VERSION"
 
-    @staticmethod
-    def _get_table_count_query(engine_type: str, schema: str) -> str:
-        if engine_type == DBEngine.POSTGRESQL:
-            return f"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '{schema}' AND table_type = 'BASE TABLE'"
-        elif engine_type == DBEngine.MYSQL:
-            return "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()"
-        elif engine_type == DBEngine.SQLITE:
-            return "SELECT COUNT(*) FROM sqlite_master WHERE type='table'"
-        else:
-            return "SELECT COUNT(*) FROM information_schema.tables"
+    # _get_table_count_query DIHAPUS pada 2026-08-04.
+    # Fungsi itu tidak pernah dipanggil dari mana pun (jumlah tabel dihitung dari
+    # hasil inspector, lihat test_connection_sync), tetapi menyisipkan nama schema
+    # milik pengguna ke SQL lewat f-string. Tidak terjangkau berarti tidak dapat
+    # dieksploitasi, tetapi meninggalkannya berarti menunggu seseorang memanggilnya.
 
     @staticmethod
     def _clean_error(error_msg: str) -> str:

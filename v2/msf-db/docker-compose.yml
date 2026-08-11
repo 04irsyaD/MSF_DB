@@ -70,7 +70,7 @@ services:
       - RATE_LIMIT_TRUST_FORWARDED_FOR=${RATE_LIMIT_TRUST_FORWARDED_FOR:-false}
       # SQL Server (v2.2.0)
       - MSSQL_ODBC_DRIVER=${MSSQL_ODBC_DRIVER:-ODBC Driver 18 for SQL Server}
-      - MSSQL_TRUST_SERVER_CERTIFICATE=${MSSQL_TRUST_SERVER_CERTIFICATE:-yes}
+      - MSSQL_TRUST_SERVER_CERTIFICATE=${MSSQL_TRUST_SERVER_CERTIFICATE:-no}
     volumes:
       - backend_outputs:/app/outputs    # Hasil file DOCX/PDF
       - ./backend/templates:/app/templates  # Template Word
@@ -110,7 +110,10 @@ services:
     image: postgres:16-alpine
     container_name: msf2-postgres
     ports:
-      - "${POSTGRES_PORT:-5434}:5432"
+      # Diikat ke 127.0.0.1 saja: backend mengaksesnya lewat jaringan internal
+      # Docker, sedangkan pemetaan ini hanya untuk klien DB di mesin ini.
+      # Tanpa awalan itu, database uji berkredensial bawaan terbuka ke jaringan.
+      - "127.0.0.1:${POSTGRES_PORT:-5434}:5432"
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-msf_test}
       - POSTGRES_USER=${POSTGRES_USER:-msf_user}

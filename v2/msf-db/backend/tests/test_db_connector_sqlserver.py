@@ -42,12 +42,19 @@ def test_build_connection_url_memakai_driver_18(monkeypatch):
     assert "driver=ODBC+Driver+18+for+SQL+Server" in url
 
 
-def test_build_connection_url_menyertakan_trust_server_certificate(monkeypatch):
+def test_sertifikat_server_divalidasi_secara_bawaan(monkeypatch):
+    """
+    Bawaan harus 'no' agar sertifikat server benar-benar divalidasi.
+
+    Dengan 'yes', driver menerima sertifikat apa pun tanpa memeriksa rantai
+    kepercayaan maupun nama host, sehingga kredensial database pengguna dapat
+    disadap lewat serangan orang di tengah.
+    """
     monkeypatch.delenv("MSSQL_TRUST_SERVER_CERTIFICATE", raising=False)
 
     url = DBConnector.build_connection_url(_conn())
 
-    assert "TrustServerCertificate=yes" in url
+    assert "TrustServerCertificate=no" in url
 
 
 def test_driver_dan_trust_dapat_diubah_lewat_env(monkeypatch):
