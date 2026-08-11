@@ -16,6 +16,27 @@
 
 ---
 
+## 1a. Status Keamanan (diperbarui 2026-08-04)
+
+Tinjauan keamanan dijalankan pada branch `dev` tanggal 2026-08-04.
+
+*   **Temuan tinjauan**: 1 severity Medium (certificate validation bypass pada koneksi SQL Server) — **sudah ditutup** dengan mengubah bawaan `MSSQL_TRUST_SERVER_CERTIFICATE` menjadi `no`.
+*   **Terbukti aman**: tidak ada SQL injection di `job_store.py` (seluruh query memakai binding), tidak ada path traversal di endpoint download, tidak ada header injection di `Content-Disposition` (nama proyek disaring), dan `jobs.db` tidak memuat satu pun kredensial.
+*   **Insiden pemindai rahasia**: GitGuardian menandai commit `6638912`. Terverifikasi **false positive** — nilai karangan di dalam test. `.env` tidak pernah ter-track dan token Cloudflare tidak pernah masuk history.
+*   **Yang masih terbuka**: HTTP security headers belum dipasang (I-005), batas sumber daya container belum ada (I-006), dan `MSF_API_KEY` masih kosong sehingga seluruh endpoint dapat diakses anonim. Rincian di `TECHNICAL_DEBT.md` bagian Catatan Keamanan.
+
+Konteks yang membingkai semuanya: aplikasi ini **terbuka ke internet lewat Cloudflare Tunnel dan tidak memiliki sistem login sama sekali.**
+
+---
+
+## 1b. Status Branch (per 2026-08-04)
+
+*   **`main`**: identik dengan `origin/main`. Merge v2 sempat dilakukan lokal lalu dibatalkan secara sadar — keputusan pengguna untuk menahan `main` sampai v2 benar-benar stabil.
+*   **`dev`**: branch kerja aktif. Seluruh pengembangan fitur dan keamanan berlangsung di sini sampai dinyatakan stabil, baru kemudian di-merge ke `main` sekali.
+*   **Kebijakan commit**: sejak 2026-08-04, commit dilakukan oleh human developer. AI menyiapkan perubahan dan pesan commit, tidak mengeksekusinya.
+
+---
+
 ## 2. Technical Debt (Hutang Teknis yang Belum Selesai)
 
 Berikut adalah beberapa pekerjaan yang perlu dikerjakan pada milestone berikutnya:

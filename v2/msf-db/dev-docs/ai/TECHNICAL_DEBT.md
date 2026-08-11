@@ -25,4 +25,21 @@
 
 ## Resolved Technical Debt
 
-Tidak ada yang telah diselesaikan saat ini.
+| ID | Debt | Area | Diselesaikan | Cara |
+|----|------|------|--------------|------|
+| TD-013 | `_get_table_count_query` adalah dead code yang menyisipkan nama schema milik pengguna ke SQL lewat f-string | Backend / Database | 2026-08-04 | Fungsi dihapus seluruhnya. Tidak pernah dipanggil dari mana pun; jumlah tabel dihitung dari hasil inspector di `test_connection_sync` |
+
+---
+
+## Catatan Keamanan yang Belum Selesai
+
+Berasal dari tinjauan keamanan 2026-08-04. Bukan technical debt murni, tetapi
+dicatat di sini agar tidak hilang.
+
+| Item | Status | Rujukan |
+|------|--------|---------|
+| HTTP security headers (CSP, HSTS, X-Frame-Options) belum dipasang | **Terbuka.** Pelanggaran standar wajib `ai-rules/security/part-b` | I-005 |
+| Batas memori dan CPU container belum dipasang | **Terbuka.** Angka pengukuran sudah tersedia sebagai dasar | I-006 |
+| `MSF_API_KEY` kosong sehingga seluruh endpoint dapat diakses anonim | **Menunggu keputusan pengguna.** Middleware sudah ada dan berfungsi, tinggal diisi. Konsekuensi: frontend harus mengirimnya lewat `NEXT_PUBLIC_MSF_API_KEY` yang ikut ter-bundle ke browser, sehingga melindungi dari bot tetapi bukan dari pembaca DevTools | — |
+| Tidak ada pemindai rahasia lokal sebelum commit | **Terbuka.** Insiden 2026-08-04 tertangkap setelah push. Usulan: pre-commit hook `gitleaks` | — |
+| `SQLAlchemyError` diimpor tetapi tidak dipakai di `db_connector.py` | Terbuka, bagian dari TD-010 | TD-010 |
