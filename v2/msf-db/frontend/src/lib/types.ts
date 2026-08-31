@@ -2,6 +2,10 @@ export type JobStatus = "queued" | "processing" | "done" | "error" | "cancelled"
 
 export type DetailLevel = "simple" | "detailed" | "comprehensive";
 
+// Nilai wajib sama persis dengan enum StructureTemplate di backend
+// (app/models/schemas.py). Backend menolak nilai di luar daftar ini.
+export type StructureTemplate = "standard" | "msf_tsd";
+
 export type OutputLanguage = "Indonesian" | "English";
 
 export type InputMode = "ddl" | "database";
@@ -19,6 +23,7 @@ export interface GenerateFromDDLRequest {
   author?: string;
   language: OutputLanguage;
   detail_level: DetailLevel;
+  structure_template: StructureTemplate;
   business_context?: string;
   ai_provider: AIProvider;
   model: string;
@@ -30,6 +35,7 @@ export interface GenerateFromDBRequest {
   project_name?: string;
   language: OutputLanguage;
   detail_level: DetailLevel;
+  structure_template: StructureTemplate;
   business_context?: string;
   ai_provider: AIProvider;
   model: string;
@@ -178,6 +184,7 @@ export interface FunctionMetadata {
 export interface GeneratorSettings {
   language: OutputLanguage;
   detail_level: DetailLevel;
+  structure_template: StructureTemplate;
   ai_provider: AIProvider;
   model: string;
   output_format: ExportFormat;

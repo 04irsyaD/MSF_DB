@@ -8,13 +8,15 @@ from fastapi.responses import Response
 from app.models.schemas import (
     GenerateFromDDLRequest, GenerateFromDBRequest,
     GenerateJobResponse, JobStatusResponse, JobStatus,
-    ParseDDLRequest, TableMetadata,
+    ParseDDLRequest, StructureTemplate, TableMetadata,
 )
 from app.background.job_queue import job_queue
 from app.services.sql_parser import SQLParser
 from app.services.db_connector import DBConnector
 from app.services.doc_generator import DocGenerator, get_provider
 from app.services.exporters.docx_exporter import DocxExporter
+from app.services.renderers.docx_template_renderer import render_docx
+from app.services.renderers.markdown_renderer import render_markdown
 from app.utils.errors import AppDetailedException
 from app.utils.rate_limit import generate_limit, job_lookup_limit, limiter
 import structlog
@@ -22,6 +24,40 @@ import structlog
 logger = structlog.get_logger()
 
 router = APIRouter(prefix="/api", tags=["Generate"])
+
+
+def pilih_keluaran_docx(
+    template, model, markdown: str, project_name: str, author, exporter
+) -> bytes:
+    """
+    Pilih renderer DOCX sesuai template struktur.
+
+    Dipisah dari _run_generate_job agar dapat diuji tanpa menjalankan job.
+    Nilai template dapat berupa string biasa, bukan anggota enum, karena
+    GenerateSettings memakai use_enum_values dan job tersimpan di SQLite
+    menyimpannya sebagai string.
+    """
+    if template == StructureTemplate.MSF_TSD:
+        return render_docx(model, StructureTemplate.MSF_TSD, author)
+    return exporter(
+        markdown_content=markdown, project_name=project_name, author=author
+    )
+
+
+def batasi_ukuran_keluaran(data: bytes) -> None:
+    """
+    Tolak berkas hasil yang melampaui batas.
+
+    Template TSD memperbesar keluaran secara berarti, sedangkan berkas hasil
+    disimpan di volume dan dikirim utuh lewat satu respons.
+    """
+    batas_mb = int(os.getenv("MAX_OUTPUT_SIZE_MB", "25"))
+    if len(data) > batas_mb * 1024 * 1024:
+        raise ValueError(
+            f"Berkas hasil {len(data) / 1024 / 1024:.1f} MB melebihi batas "
+            f"{batas_mb} MB. Kurangi jumlah tabel, atau naikkan "
+            "MAX_OUTPUT_SIZE_MB bila memang dikehendaki."
+        )
 
 
 async def _run_generate_job(job, tables, settings: dict):
@@ -37,11 +73,21 @@ async def _run_generate_job(job, tables, settings: dict):
             project_description=settings.get("project_description"),
         )
 
-        # Generate Markdown
-        markdown = await generator.generate_from_tables(
+        # Model dibangun eksplisit di sini, bukan lewat generate_from_tables,
+        # karena renderer DOCX berbasis template memerlukan modelnya, bukan
+        # Markdown hasil render.
+        model = await generator.build_document_model(
             tables=tables,
             project_name=settings["project_name"],
             job=job,
+        )
+        markdown = render_markdown(
+            model, settings["language"], settings["detail_level"]
+        )
+        job.update(
+            preview_markdown=(
+                markdown[:2000] + "\n\n..." if len(markdown) > 2000 else markdown
+            )
         )
 
         if job.status == JobStatus.CANCELLED:
@@ -67,13 +113,21 @@ async def _run_generate_job(job, tables, settings: dict):
             )
             
         else:
-            logger.info("Export Engine", engine="docx_exporter")
+            template = settings.get(
+                "structure_template", StructureTemplate.STANDARD
+            )
+            logger.info("Export Engine", engine="docx", template=str(template))
             exporter = DocxExporter()
-            result_bytes = exporter.export(
-                markdown_content=markdown,
+            result_bytes = pilih_keluaran_docx(
+                template=template,
+                model=model,
+                markdown=markdown,
                 project_name=settings["project_name"],
                 author=settings.get("author"),
+                exporter=exporter.export,
             )
+
+        batasi_ukuran_keluaran(result_bytes)
 
         job.update(
             result_bytes=result_bytes,

@@ -18,6 +18,8 @@
 | **Model dokumen** | `backend/app/services/doc_model.py` — `DocumentModel`, `TableDoc`, `ColumnDoc`, pelacakan asal deskripsi | — |
 | **Parser keluaran AI** | `backend/app/services/ai_column_parser.py` — sanitasi dan penyaring halusinasi terhadap metadata | — |
 | **Renderer** | `backend/app/services/renderers/markdown_renderer.py` — `DocumentModel` menjadi Markdown | — |
+| **Renderer template DOCX** | `backend/app/services/renderers/docx_template_renderer.py` + template di `backend/templates/` | `frontend/src/components/generator/GeneratePanel.tsx` selector Struktur Dokumen |
+| **Penyiapan template** | `backend/scripts/siapkan_template_tsd.py` — dokumen TSD terisi menjadi kerangka docxtpl | — |
 | **Docx/PDF Exporter** | `backend/app/services/exporters/` | `frontend/src/components/generator/DocPreview.tsx` |
 | **AI Integration** | `backend/app/services/ai_provider.py` | `frontend/src/components/generator/GeneratePanel.tsx` |
 | **Shortcuts Manager** | `backend/app/routers/shortcuts.py` | `frontend/src/app/shortcuts/` |

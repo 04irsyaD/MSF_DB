@@ -31,6 +31,7 @@ export default function GeneratePage() {
   const [settings, setSettings] = useState<GeneratorSettings>({
     language: "Indonesian",
     detail_level: "detailed",
+    structure_template: "standard",
     ai_provider: "ollama",
     model: "",
     output_format: "docx",
@@ -78,6 +79,7 @@ export default function GeneratePage() {
         author: settings.author,
         language: settings.language,
         detail_level: settings.detail_level,
+        structure_template: settings.structure_template,
         business_context: settings.business_context,
         ai_provider: settings.ai_provider,
         model: settings.model,
@@ -95,6 +97,7 @@ export default function GeneratePage() {
         project_name: settings.project_name,
         language: settings.language,
         detail_level: settings.detail_level,
+        structure_template: settings.structure_template,
         business_context: settings.business_context,
         ai_provider: settings.ai_provider,
         model: settings.model,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { GeneratorSettings, AIProvider, OutputLanguage, DetailLevel, ExportFormat } from "@/lib/types";
+import { GeneratorSettings, AIProvider, OutputLanguage, DetailLevel, ExportFormat, StructureTemplate } from "@/lib/types";
 import { useAIModels } from "@/hooks/useOllamaModels";
 import { Sparkles, FileText, Loader2, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -99,6 +99,11 @@ export default function GeneratePanel({
     { label: "Simple", value: "simple", desc: "Metadata & deskripsi" },
     { label: "Detailed", value: "detailed", desc: "Penjelasan relasi" },
     { label: "Comprehensive", value: "comprehensive", desc: "Analisis bisnis" },
+  ];
+
+  const templates: { label: string; value: StructureTemplate; desc: string }[] = [
+    { label: "Standard", value: "standard", desc: "Markdown, DOCX & PDF" },
+    { label: "MSF TSD", value: "msf_tsd", desc: "Template Word, DOCX saja" },
   ];
 
   return (
@@ -253,6 +258,43 @@ export default function GeneratePanel({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Struktur Dokumen */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                  STRUKTUR DOKUMEN
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {templates.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => handleFieldChange("structure_template", t.value)}
+                      className={cn(
+                        "p-2.5 rounded-xl border text-left flex flex-col transition-colors duration-150",
+                        settings.structure_template === t.value
+                          ? "bg-emerald-50/50 border-accent text-accent"
+                          : "bg-gray-50 border-border hover:border-accent/40 text-muted-foreground"
+                      )}
+                    >
+                      <span className={cn(
+                        "font-mono font-bold text-[10px] leading-none",
+                        settings.structure_template === t.value ? "text-accent" : "text-gray-900"
+                      )}>
+                        {t.label.toUpperCase()}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground mt-1 leading-normal font-medium">
+                        {t.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {settings.structure_template === "msf_tsd" && settings.output_format !== "docx" && (
+                  <p className="text-[9px] text-amber-700 leading-normal font-medium">
+                    Template MSF TSD hanya berlaku untuk DOCX. Format lain memakai struktur standar.
+                  </p>
+                )}
               </div>
 
               {/* AI Provider & Model (Collapsible) */}

@@ -6,7 +6,7 @@
 
 ## 1. Status Pengujian (Test Coverage & Health)
 
-*   **Kasus Uji Backend (Pytest)**: **195 passed** (100% passing) per 2026-08-11, naik dari 32 pada v2.1.0. Tambahan Batch 1-3 berasal dari `test_doc_generator.py`, `test_db_comments.py`, `test_ai_determinism.py`, `test_generate_settings.py`, `test_tanpa_emoji.py`, `test_doc_model.py`, `test_ai_column_parser.py`, `test_doc_model_builder.py`, `test_markdown_renderer.py`, `test_structure_template.py`, serta perluasan `test_rate_limit.py`.
+*   **Kasus Uji Backend (Pytest)**: **224 passed** (100% passing) per 2026-08-11, naik dari 32 pada v2.1.0. Tambahan Batch 1-3 berasal dari `test_doc_generator.py`, `test_db_comments.py`, `test_ai_determinism.py`, `test_generate_settings.py`, `test_tanpa_emoji.py`, `test_doc_model.py`, `test_ai_column_parser.py`, `test_doc_model_builder.py`, `test_markdown_renderer.py`, `test_structure_template.py`, serta perluasan `test_rate_limit.py`. Batch 4 menambah `test_template_tersedia.py`, `test_template_tsd.py`, `test_docx_template_renderer.py`, dan `test_generate_structure_routing.py`.
 *   **Ukuran berkas setelah pemecahan**: `doc_generator.py` 248 baris (sebelumnya 375), `markdown_renderer.py` 155, `ai_column_parser.py` 84, `doc_model.py` 63. Seluruhnya di bawah rekomendasi 400 baris untuk Service.
 *   **Lingkungan verifikasi**: jalankan pytest dari venv lokal `backend/.venv`. Container `msf2-backend` **tidak** mem-bind-mount kode aplikasi (`docker-compose.yml` hanya memasang `templates`, `shortcuts_data`, dan volume outputs), sehingga perubahan kode tidak terlihat di sana tanpa rebuild image.
 *   **Kasus Uji Frontend**: **tidak ada sama sekali.** Tidak ada jest, vitest, maupun playwright di `package.json` (TD-012). Verifikasi frontend hanya lewat `npm run build`.

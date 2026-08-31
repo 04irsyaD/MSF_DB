@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 import structlog
 
-from app.models.schemas import AIProviderType, TableMetadata
+from app.models.schemas import AIProviderType, OutputLanguage, TableMetadata
 from app.services.ai_provider import AIProvider
 from app.services.ai_column_parser import (
     BATAS_RINGKASAN,
@@ -135,7 +135,18 @@ class DocGenerator:
 
         diminta = ", ".join(nama_kolom_diminta)
 
+        # Bahasa WAJIB dinyatakan eksplisit. Prompt berbahasa Indonesia saja
+        # tidak cukup: model tetap menjawab dalam bahasa Inggris untuk baris
+        # per kolom, meskipun ringkasannya mengikuti bahasa prompt.
+        bahasa = (
+            "Bahasa Indonesia"
+            if self.language == OutputLanguage.INDONESIAN
+            else "English"
+        )
+
         return f"""Kamu ahli dokumentasi database. Tabel: {tabel.name}
+
+Tulis SELURUH jawaban dalam {bahasa}.
 
 Kolom:
 {chr(10).join(baris_kolom)}{konteks}

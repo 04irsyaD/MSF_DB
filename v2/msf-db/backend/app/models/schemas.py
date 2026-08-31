@@ -32,6 +32,7 @@ class StructureTemplate(str, Enum):
     """
 
     STANDARD = "standard"
+    MSF_TSD = "msf_tsd"
 
 
 class AIProviderType(str, Enum):

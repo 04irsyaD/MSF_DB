@@ -31,3 +31,21 @@
 *   `ADMIN_PASSCODE`: Kata sandi untuk masuk ke halaman portal Admin (default: `admin123`).
 *   `NEXT_PUBLIC_MSF_API_KEY`: Kunci API di sisi frontend (harus sama dengan `MSF_API_KEY` di backend).
 *   `OLLAMA_BASE_URL`: URL untuk menghubungi Ollama (diatur ke `http://host.docker.internal:11434` untuk koneksi dari dalam kontainer Docker ke host).
+
+---
+
+## 4. UI/UX Template & Framework
+
+Bagian ini dirujuk AGENTS.md poin 10 tetapi sebelumnya belum pernah ada, sehingga aturan UI/UX tidak
+dapat ditelusuri ke fakta proyek. Diisi pada 2026-08-14.
+
+*   **Tidak ada HTML template pihak ketiga** yang disediakan pengguna. Tidak memakai Metronic,
+    AdminLTE, maupun Stisla.
+*   **Framework UI: Tailwind CSS 3.4** di atas Next.js 14.2 dan React 18.3. Inilah framework
+    established yang dimaksud AGENTS.md poin 10 cabang kedua.
+*   **Dilarang membuat CSS framework sendiri.** Komponen baru wajib meniru pola komponen yang sudah
+    ada. Contoh acuan: selector Detail Level dan Struktur Dokumen di
+    `frontend/src/components/generator/GeneratePanel.tsx`, keduanya memakai kelas Tailwind yang sama
+    persis.
+*   **Verifikasi frontend hanya lewat `npm run build`.** Tidak ada framework test (TD-012), dan
+    ESLint tidak dapat dijalankan karena `.eslintrc.json` tidak ada (TD-011).

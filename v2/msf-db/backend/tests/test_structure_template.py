@@ -35,10 +35,16 @@ def test_kedua_router_meneruskan_structure_template():
     assert sumber.count('"structure_template": payload.structure_template') == 2
 
 
-def test_enum_hanya_memuat_nilai_yang_sudah_didukung():
+def test_enum_memuat_dua_nilai_yang_didukung():
     """
     Nilai template hanya boleh bertambah bersamaan dengan renderer yang
     benar-benar ada. Enum yang mendahului implementasi berarti request
     yang valid tetapi tidak dapat dilayani.
     """
-    assert [t.value for t in StructureTemplate] == ["standard"]
+    assert [t.value for t in StructureTemplate] == ["standard", "msf_tsd"]
+
+
+def test_nilai_msf_tsd_diterima_generate_settings():
+    setting = GenerateSettings(structure_template="msf_tsd")
+
+    assert setting.structure_template == StructureTemplate.MSF_TSD

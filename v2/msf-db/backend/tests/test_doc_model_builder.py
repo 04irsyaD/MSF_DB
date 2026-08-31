@@ -168,3 +168,28 @@ async def test_ringkasan_sumber_mencerminkan_isi_dokumen():
         SUMBER_AI: 1,
         SUMBER_FALLBACK: 1,
     }
+
+
+@pytest.mark.asyncio
+async def test_prompt_menyebut_bahasa_keluaran_secara_eksplisit():
+    """
+    Prompt berbahasa Indonesia saja tidak cukup. Pada uji nyata dengan
+    llama3, ringkasan tabel keluar Bahasa Indonesia sementara seluruh baris
+    per kolom keluar Bahasa Inggris.
+    """
+    provider = ProviderPalsu("")
+    gen = DocGenerator(provider=provider, model="model-uji", language="Indonesian")
+
+    await gen.build_document_model([tabel_campuran()], "Proyek Uji")
+
+    assert "Bahasa Indonesia" in provider.prompt_terakhir
+
+
+@pytest.mark.asyncio
+async def test_prompt_inggris_meminta_keluaran_inggris():
+    provider = ProviderPalsu("")
+    gen = DocGenerator(provider=provider, model="model-uji", language="English")
+
+    await gen.build_document_model([tabel_campuran()], "Proyek Uji")
+
+    assert "English" in provider.prompt_terakhir

@@ -32,6 +32,13 @@ backend/outputs/
 *.docx
 *.pdf
 
+# Template dokumen WAJIB masuk repo, jadi dikecualikan dari aturan *.docx di
+# atas. Prinsip keamanan pada planning/spec-template-dokumentasi-tsd.md
+# section 9.1 mensyaratkan template hanya berasal dari repositori, tidak
+# pernah dari unggahan pengguna. Tanpa negasi ini aturan tersebut menelannya
+# tanpa pesan error apa pun, dan template tidak akan pernah sampai ke server.
+!backend/templates/*.docx
+
 # ---- Environment ----
 .env
 .env.local
