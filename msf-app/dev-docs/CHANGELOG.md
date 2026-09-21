@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- Kurasi dan integrasi **16 skrip DBA baru** dari folder `Postgresql/` dan `Mysql/` ke dataset SQL Helper (termasuk Kill Session, Audit Primary Key, Data Dictionary, Scan Kolom NULL, Search Functions, FLUSH HOSTS, dan Max Connections Tuning) sehingga total kueri bertambah dari 11 menjadi 27 kueri.
 - Fitur **Pagination 5 Baris Default** pada tabel SQL Helper (`/sql-helper`) dengan pemilih baris (5/10/20), navigasi halaman (Prev, Number, Next), teks ringkasan, dan auto-reset saat pencarian/filter aktif.
 - Berkas spesifikasi modul SQL Helper di `dev-docs/modules/sql-helper/` (`README.md` dan `views.md`) sesuai standar `ai-rules/modules-template/`.
 - Penambahan modul dan halaman baru **SQL Helper** (`/sql-helper`) berbasis tampilan Table/Data Grid View mandiri di sisi frontend (client-side standalone), lengkap dengan filter pencarian, filter engine/kategori/risiko, drawer intip kueri SQL, dan ringkasan metrik statistik.

@@ -10,6 +10,46 @@
     "tags": ["active", "connections", "process", "monitoring"]
   },
   {
+    "id": "mysql-flush-hosts",
+    "title": "Fix Blocked Hosts & Connection Errors",
+    "description": "Mengatasi error klasik 'Host is blocked because of many connection errors' dengan me-reset cache host dan menaikkan batas max_connect_errors.",
+    "engine": "mysql",
+    "category": "maintenance",
+    "risk_level": "caution",
+    "sql": "-- 1. Reset tabel cache host yang terblokir\nFLUSH HOSTS;\n\n-- 2. Tingkatkan toleransi error koneksi agar tidak mudah terblokir (default: 100)\nSET GLOBAL max_connect_errors = 10000;\n\n-- 3. Verifikasi nilai saat ini\nSHOW GLOBAL VARIABLES LIKE 'max_connect_errors';",
+    "tags": ["flush-hosts", "connection-error", "blocked-host", "maintenance", "mysqladmin"]
+  },
+  {
+    "id": "mysql-max-connections",
+    "title": "Inspect & Adjust Max Connections",
+    "description": "Memeriksa batas jumlah koneksi simultan MySQL dan menaikkan kuotanya secara dinamis tanpa perlu me-restart server.",
+    "engine": "mysql",
+    "category": "performance",
+    "risk_level": "caution",
+    "sql": "-- Cek batas koneksi saat ini\nSHOW VARIABLES LIKE 'max_connections';\n\n-- Cek jumlah koneksi tertinggi yang pernah terjadi (peak)\nSHOW STATUS LIKE 'Max_used_connections';\n\n-- Naikkan batas koneksi (misal ke 500 koneksi)\nSET GLOBAL max_connections = 500;",
+    "tags": ["connections", "max-connections", "performance", "tuning", "threads"]
+  },
+  {
+    "id": "mysql-search-column",
+    "title": "Find Tables by Column Name",
+    "description": "Mencari nama tabel dan skema mana saja yang memiliki kolom tertentu di seluruh database MySQL.",
+    "engine": "mysql",
+    "category": "diagnostic",
+    "risk_level": "read-only",
+    "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name = 'nama_kolom'\n  AND table_schema = DATABASE() -- Atau ganti dengan 'nama_database' spesifik\nORDER BY table_name;",
+    "tags": ["search", "columns", "table", "schema", "diagnostic"]
+  },
+  {
+    "id": "mysql-server-info",
+    "title": "Server Version & SQL Mode Info",
+    "description": "Memeriksa versi detail server MySQL serta mode SQL (strict mode, only_full_group_by) pada level global dan sesi.",
+    "engine": "mysql",
+    "category": "monitoring",
+    "risk_level": "read-only",
+    "sql": "SELECT VERSION() AS mysql_version;\n\nSELECT @@global.sql_mode AS global_sql_mode,\n       @@session.sql_mode AS session_sql_mode;",
+    "tags": ["version", "sql-mode", "configuration", "server-info", "monitoring"]
+  },
+  {
     "id": "mysql-db-size",
     "title": "Database Sizes",
     "description": "Calculate total size of all databases on the server, detailing data size, index size, and total size in MB.",
