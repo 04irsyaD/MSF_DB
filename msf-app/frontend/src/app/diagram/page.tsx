@@ -104,7 +104,7 @@ export default function DiagramPage() {
       <MaintenanceModal
         title="Layanan MSF Diagram Sedang Maintenance"
         description="Halo pengguna MSF DB, kami sedang melakukan pemeliharaan rutin pada modul parser & visualisasi diagram database. Harap sabar, kami akan segera kembali online!"
-        estimateTime="15 MENIT LAGI"
+        estimateTime="Segera Hadir"
         storageKey="msf_maintenance_diagram"
       />
 
