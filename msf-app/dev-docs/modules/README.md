@@ -14,6 +14,7 @@
 | [AI Provider](./ai-provider/README.md) | `dev-docs/modules/ai-provider/` | Production |
 | [DB Connector](./db-connector/README.md) | `dev-docs/modules/db-connector/` | Production |
 | [Shortcuts Manager](./shortcuts/README.md) | `dev-docs/modules/shortcuts/` | Production |
+| [SQL Helper](./sql-helper/README.md) | `dev-docs/modules/sql-helper/` | Production |
 | [Admin Portal](./admin/README.md) | `dev-docs/modules/admin/` | Production |
 
 ---

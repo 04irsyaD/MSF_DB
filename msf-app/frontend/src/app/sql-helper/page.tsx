@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Database } from "lucide-react";
 import { ShortcutItem } from "@/lib/types";
 import {
   filterShortcuts,
@@ -41,30 +40,11 @@ export default function SqlHelperPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-fade-in-up max-w-7xl mx-auto">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border pb-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#00bfa5]/10 text-[#00bfa5]">
-              <Database className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">
-                SQL Helper
-              </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Skrip database siap pakai untuk DBA dan optimasi (Client Standalone)
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Info Box Banner */}
+    <div className="space-y-5 pb-12 animate-fade-in-up max-w-7xl mx-auto">
+      {/* Info Box Guide Banner */}
       <SqlHelperInfoBox />
 
-      {/* Search & Filters */}
+      {/* Search & Filters Bar */}
       <SqlHelperFilter
         search={search}
         onSearchChange={setSearch}
@@ -79,20 +59,20 @@ export default function SqlHelperPage() {
         categories={categories}
       />
 
-      {/* Scripts Table */}
+      {/* Scripts Data Grid Table with Pagination */}
       <SqlHelperTable
         shortcuts={filteredShortcuts}
         onSelect={(shortcut) => setSelectedShortcut(shortcut)}
       />
 
-      {/* Footer Stats */}
+      {/* Footer Metrics Stats */}
       <SqlHelperStats
         total={filteredShortcuts.length}
         engine={engine}
         lastUpdated="100% Client Ready"
       />
 
-      {/* Slide-Over Drawer for Script Details */}
+      {/* Slide-Over Drawer for Script Details (Rendered via React Portal) */}
       <SqlHelperDrawer
         shortcut={selectedShortcut}
         onClose={() => setSelectedShortcut(null)}

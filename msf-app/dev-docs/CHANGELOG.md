@@ -7,12 +7,18 @@
 ## [Unreleased]
 
 ### Added
+- Fitur **Pagination 5 Baris Default** pada tabel SQL Helper (`/sql-helper`) dengan pemilih baris (5/10/20), navigasi halaman (Prev, Number, Next), teks ringkasan, dan auto-reset saat pencarian/filter aktif.
+- Berkas spesifikasi modul SQL Helper di `dev-docs/modules/sql-helper/` (`README.md` dan `views.md`) sesuai standar `ai-rules/modules-template/`.
 - Penambahan modul dan halaman baru **SQL Helper** (`/sql-helper`) berbasis tampilan Table/Data Grid View mandiri di sisi frontend (client-side standalone), lengkap dengan filter pencarian, filter engine/kategori/risiko, drawer intip kueri SQL, dan ringkasan metrik statistik.
 - Penambahan folder data kueri lokal `src/data/shortcuts/` (`postgresql.json`, `mysql.json`, dan helper `shortcutsData.ts`) agar kueri DBA dapat diakses langsung tanpa ketergantungan server backend.
 - Penambahan komponen `MaintenanceModal` pada halaman **AI Generator** (`/generate`) dan **MSF Diagram** (`/diagram`) dengan ilustrasi teknisi ramah, estimasi waktu, backdrop blur transparan, dan floating trigger saat ditutup.
 - Peningkatan konfigurasi `next.config.js` untuk mendukung variabel lingkungan `BACKEND_URL` / `NEXT_PUBLIC_API_URL` secara dinamis saat deploy ke Vercel atau cloud hosting lain.
 
 ### Changed
+- Perbaikan bug **Drawer Melayang & Terpotong** pada SQL Helper dengan refactor ke **React Portal (`createPortal`)** sehingga backdrop dan panel menempel penuh di viewport (`fixed inset-y-0 right-0 z-[100]`) tanpa terkurung CSS `transform` parent.
+- Peningkatan responsivitas filter, perataan tombol reset, dan responsivitas tabel pada layar laptop resolusi standar maupun jendela browser yang dikecilkan (resize/split).
+- Sinkronisasi navbar global (`Header.tsx`) untuk rute `/sql-helper` dan `/diagram` serta eliminasi header ganda di dalam halaman.
+- Pengecualian banner error backend di `AppLayout.tsx` pada rute `/sql-helper` karena bersifat *client standalone*.
 - Pembersihan modal konstruksi global (`UnderConstructionModal`) dari RootLayout agar modal hanya tampil terisolasi pada modul yang membutuhkan.
 - Integrasi folder panduan `ai-rules/` dari repository `docs-ai` untuk standardisasi AI Coding.
 - Penambahan file `.agents/AGENTS.md` untuk konfigurasi asisten Gemini (Antigravity).

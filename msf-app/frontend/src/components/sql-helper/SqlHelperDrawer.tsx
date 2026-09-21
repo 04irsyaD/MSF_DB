@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ShortcutItem } from "@/lib/types";
-import { X, Copy, Check, Terminal, Database, Tag, ShieldCheck, AlertTriangle } from "lucide-react";
+import { X, Copy, Check, Terminal, Tag, ShieldCheck, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 interface SqlHelperDrawerProps {
@@ -15,8 +16,30 @@ export default function SqlHelperDrawer({
   onClose,
 }: SqlHelperDrawerProps) {
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!shortcut) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Handle ESC key to close drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    if (shortcut) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [shortcut, onClose]);
+
+  if (!mounted || !shortcut) return null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shortcut.sql);
@@ -39,27 +62,29 @@ export default function SqlHelperDrawer({
   const risk = getRiskColor(shortcut.risk_level);
   const RiskIcon = risk.icon;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
+  const drawerContent = (
+    <div className="fixed inset-0 z-[100] overflow-hidden">
+      {/* Backdrop spanning 100% viewport */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in cursor-pointer"
+        aria-hidden="true"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-xl bg-white border-l border-border shadow-2xl flex flex-col h-full animate-in slide-in-from-right duration-200">
-          {/* Header Drawer */}
-          <div className="p-5 border-b border-border flex items-center justify-between bg-gray-50/70 shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#00bfa5]/10 text-[#00bfa5]">
+      {/* Drawer Container anchored directly to right viewport edge */}
+      <div className="fixed inset-y-0 right-0 max-w-full flex">
+        <div className="w-screen max-w-full sm:max-w-xl bg-white border-l border-border shadow-2xl flex flex-col h-full animate-in slide-in-from-right duration-200 z-[101]">
+          {/* Header Drawer (Sticky) */}
+          <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-gray-50/80 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0 pr-2">
+              <div className="p-1.5 rounded-lg bg-[#00bfa5]/10 text-[#00bfa5] shrink-0">
                 <Terminal className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 leading-tight">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-gray-900 leading-snug truncate">
                   {shortcut.title}
                 </h3>
-                <span className="text-[10px] font-mono text-muted-foreground uppercase">
+                <span className="text-[10px] font-mono text-muted-foreground uppercase block truncate">
                   Engine: {shortcut.engine} • Category: {shortcut.category}
                 </span>
               </div>
@@ -68,14 +93,15 @@ export default function SqlHelperDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+              title="Tutup (Esc)"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
           {/* Drawer Body (Scrollable) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
             {/* Description */}
             <div className="space-y-1.5">
               <h4 className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">
@@ -105,7 +131,7 @@ export default function SqlHelperDrawer({
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#00bfa5] hover:text-teal-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#00bfa5] hover:text-teal-700 transition-colors cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -149,12 +175,12 @@ export default function SqlHelperDrawer({
             )}
           </div>
 
-          {/* Footer Drawer */}
+          {/* Footer Drawer (Sticky at Bottom) */}
           <div className="p-4 border-t border-border bg-gray-50 flex items-center justify-between gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="py-2 px-4 rounded-lg border border-border text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+              className="py-2 px-4 rounded-lg border border-border text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Tutup
             </button>
@@ -162,7 +188,7 @@ export default function SqlHelperDrawer({
             <button
               type="button"
               onClick={handleCopy}
-              className="flex-1 py-2 px-4 bg-[#00bfa5] hover:bg-teal-600 text-white text-xs font-bold font-mono uppercase tracking-wider rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
+              className="flex-1 py-2 px-4 bg-[#00bfa5] hover:bg-teal-600 text-white text-xs font-bold font-mono uppercase tracking-wider rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               <span>{copied ? "Kueri Telah Disalin!" : "Salin Kueri SQL"}</span>
@@ -172,4 +198,6 @@ export default function SqlHelperDrawer({
       </div>
     </div>
   );
+
+  return createPortal(drawerContent, document.body);
 }

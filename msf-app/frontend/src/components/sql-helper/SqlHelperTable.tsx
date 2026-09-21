@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ShortcutItem } from "@/lib/types";
-import { Play, Code, SearchX } from "lucide-react";
+import { Play, Code, SearchX, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface SqlHelperTableProps {
   shortcuts: ShortcutItem[];
@@ -12,6 +13,26 @@ export default function SqlHelperTable({
   shortcuts,
   onSelect,
 }: SqlHelperTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  // Otomatis reset ke halaman 1 saat data hasil filter berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [shortcuts]);
+
+  const totalPages = Math.ceil(shortcuts.length / pageSize) || 1;
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const paginatedShortcuts = shortcuts.slice(
+    startIndex,
+    startIndex + pageSize
+  );
+
+  const displayFrom = shortcuts.length === 0 ? 0 : startIndex + 1;
+  const displayTo = Math.min(startIndex + pageSize, shortcuts.length);
+
   const getCategoryBadge = (category: string) => {
     switch (category.toLowerCase()) {
       case "diagnostic":
@@ -63,7 +84,7 @@ export default function SqlHelperTable({
 
   if (shortcuts.length === 0) {
     return (
-      <div className="bg-white border border-border rounded-xl p-12 text-center space-y-3">
+      <div className="bg-white border border-border rounded-xl p-10 sm:p-12 text-center space-y-3 shadow-xs">
         <div className="w-12 h-12 rounded-full bg-gray-100 text-muted-foreground flex items-center justify-center mx-auto">
           <SearchX className="h-6 w-6" />
         </div>
@@ -78,9 +99,10 @@ export default function SqlHelperTable({
   }
 
   return (
-    <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
+    <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs flex flex-col">
+      {/* Table Content */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="bg-gray-50/80 border-b border-border text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">
               <th className="py-3 px-4">Script Name</th>
@@ -91,7 +113,7 @@ export default function SqlHelperTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border text-xs">
-            {shortcuts.map((shortcut) => {
+            {paginatedShortcuts.map((shortcut) => {
               const risk = getRiskBadge(shortcut.risk_level);
               return (
                 <tr
@@ -101,10 +123,10 @@ export default function SqlHelperTable({
                 >
                   {/* Script Name & Description */}
                   <td className="py-3.5 px-4">
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 max-w-md">
                       <div className="font-bold text-gray-900 group-hover:text-[#00695c] transition-colors flex items-center gap-2">
                         <Code className="h-3.5 w-3.5 text-[#00bfa5] shrink-0" />
-                        <span>{shortcut.title}</span>
+                        <span className="truncate">{shortcut.title}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground line-clamp-1">
                         {shortcut.description}
@@ -162,6 +184,93 @@ export default function SqlHelperTable({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Bar (Fixed Footer) */}
+      <div className="border-t border-border px-4 py-3 bg-gray-50/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        {/* Left Side: Page Size & Summary */}
+        <div className="flex items-center gap-3 text-muted-foreground font-mono">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px]">Tampilkan:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="py-1 px-2 bg-white border border-border rounded-md text-[11px] font-bold text-foreground focus:outline-none focus:border-[#00bfa5] cursor-pointer"
+            >
+              <option value={5}>5 baris</option>
+              <option value={10}>10 baris</option>
+              <option value={20}>20 baris</option>
+            </select>
+          </div>
+          <span className="hidden sm:inline text-border">|</span>
+          <span className="text-[11px]">
+            Menampilkan <span className="font-bold text-foreground">{displayFrom}–{displayTo}</span> dari <span className="font-bold text-foreground">{shortcuts.length}</span> skrip
+          </span>
+        </div>
+
+        {/* Right Side: Page Controls */}
+        <div className="flex items-center gap-1 font-mono">
+          <button
+            type="button"
+            disabled={safeCurrentPage <= 1}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            className="p-1.5 rounded-md border border-border bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            title="Halaman Sebelumnya"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          {/* Page Number Badges */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+              // Hanya tampilkan halaman terdekat jika total halaman banyak
+              if (
+                totalPages > 6 &&
+                pageNum !== 1 &&
+                pageNum !== totalPages &&
+                Math.abs(pageNum - safeCurrentPage) > 1
+              ) {
+                if (pageNum === 2 || pageNum === totalPages - 1) {
+                  return (
+                    <span key={pageNum} className="px-1 text-muted-foreground">
+                      ...
+                    </span>
+                  );
+                }
+                return null;
+              }
+
+              const isActive = pageNum === safeCurrentPage;
+              return (
+                <button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`min-w-[28px] h-7 px-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-[#00bfa5] text-white shadow-xs"
+                      : "bg-white border border-border text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            disabled={safeCurrentPage >= totalPages}
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            className="p-1.5 rounded-md border border-border bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            title="Halaman Selanjutnya"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
