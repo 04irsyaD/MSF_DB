@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Clock, Info, X } from "lucide-react";
 
@@ -14,7 +15,7 @@ interface MaintenanceModalProps {
 export default function MaintenanceModal({
   title = "Layanan AI Generator Sedang Maintenance",
   description = "Halo pengguna MSF DB, kami sedang melakukan pemeliharaan rutin pada modul ini untuk meningkatkan performa dan fitur. Harap sabar, kami akan segera kembali online!",
-  estimateTime = "15 MENIT LAGI",
+  estimateTime = "Coming Soon",
   storageKey = "msf_maintenance_notice",
 }: MaintenanceModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +30,17 @@ export default function MaintenanceModal({
     }
   }, [storageKey]);
 
+  // Listener tombol Escape untuk menutup modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const handleClose = () => {
     sessionStorage.setItem(storageKey, "true");
     setIsOpen(false);
@@ -40,11 +52,11 @@ export default function MaintenanceModal({
 
   if (!mounted) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Modal Overlay & Card (hanya di area konten, tidak menutupi sidebar) */}
       {isOpen && (
-        <div className="fixed inset-0 lg:left-64 z-30 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 lg:left-64 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="relative bg-white border border-border/80 w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
             {/* Close Icon Button */}
             <button
@@ -115,6 +127,7 @@ export default function MaintenanceModal({
           </button>
         </div>
       )}
-    </>
+    </>,
+    document.body
   );
 }

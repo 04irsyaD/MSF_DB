@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Database, Layers } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Database, Layers, ShieldAlert } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
     if (pathname.startsWith("/shortcuts")) return { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi", icon: Terminal };
     if (pathname.startsWith("/diagram")) return { title: "MSF Diagram", desc: "Visualisasi skema & relasi database interaktif", icon: Layers };
     if (pathname.startsWith("/settings")) return { title: "Settings", desc: "Konfigurasi AI provider, model, dan preferensi", icon: Settings };
+    if (pathname.startsWith("/admin")) return { title: "Admin Portal", desc: "Log & kontrol sistem", icon: ShieldAlert };
     return { title: "AI Generator", desc: "Generate dokumentasi dari DDL atau koneksi database langsung", icon: Sparkles };
   };
 

@@ -116,7 +116,7 @@ export default function GeneratePage() {
       <MaintenanceModal
         title="Layanan AI Generator Sedang Maintenance"
         description="Halo pengguna MSF DB, kami sedang melakukan pemeliharaan rutin pada modul AI Generator untuk meningkatkan performa dan fitur. Harap sabar, kami akan segera kembali online!"
-        estimateTime="15 MENIT LAGI"
+        estimateTime="Coming Soon"
         storageKey="msf_maintenance_generator"
       />
 

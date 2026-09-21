@@ -15,7 +15,15 @@
 - Penambahan komponen `MaintenanceModal` pada halaman **AI Generator** (`/generate`) dan **MSF Diagram** (`/diagram`) dengan ilustrasi teknisi ramah, estimasi waktu, backdrop blur transparan, dan floating trigger saat ditutup.
 - Peningkatan konfigurasi `next.config.js` untuk mendukung variabel lingkungan `BACKEND_URL` / `NEXT_PUBLIC_API_URL` secara dinamis saat deploy ke Vercel atau cloud hosting lain.
 
+### Fixed
+- Perbaikan bug **Backdrop MaintenanceModal Melayang & Terpotong**: migrasi rendering `MaintenanceModal` ke **React Portal (`createPortal(..., document.body)`)** dengan pengecekan `mounted` client-side dan listener tombol `Escape`, sehingga backdrop menutupi penuh viewport browser tanpa terpengaruh batasan CSS `transform` dari class animasi parent (`.animate-fade-in-up`).
+- Sinkronisasi navbar global (`Header.tsx`) untuk rute `/admin` sehingga menampilkan judul **"Admin Portal"** dan ikon `ShieldAlert` yang presisi alih-alih fallback "AI Generator".
+- Optimasi baris kode `frontend/src/app/admin/page.tsx` dengan mapping array kartu analitik sehingga kembali mematuhi **Anti-Monster Rule** (< 500 baris, tepat 494 baris).
+
 ### Changed
+- Standardisasi badge estimasi selesai pemeliharaan menjadi **`Coming Soon`** secara seragam di seluruh modul (`MaintenanceModal.tsx`, `/diagram`, `/generate`, `/admin`, dan `/shortcuts`).
+- Ekspansi `MaintenanceModal` ke halaman **Admin Portal** (`/admin`) dan **SQL Shortcuts** (`/shortcuts`).
+- Standardisasi Bahasa Indonesia (100% lokalisasi) untuk seluruh judul, deskripsi, dan tag pada 27 kueri PostgreSQL dan MySQL di SQL Helper agar seragam, baku, dan ramah dibaca developer.
 - Perbaikan bug **Drawer Melayang & Terpotong** pada SQL Helper dengan refactor ke **React Portal (`createPortal`)** sehingga backdrop dan panel menempel penuh di viewport (`fixed inset-y-0 right-0 z-[100]`) tanpa terkurung CSS `transform` parent.
 - Peningkatan responsivitas filter, perataan tombol reset, dan responsivitas tabel pada layar laptop resolusi standar maupun jendela browser yang dikecilkan (resize/split).
 - Sinkronisasi navbar global (`Header.tsx`) untuk rute `/sql-helper` dan `/diagram` serta eliminasi header ganda di dalam halaman.
