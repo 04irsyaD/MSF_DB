@@ -17,16 +17,27 @@ export default function SqlHelperDrawer({
 }: SqlHelperDrawerProps) {
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Handle ESC key to close drawer
+  // Smooth close with slide-out animation
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 220);
+  };
+
+  // Handle ESC key to close drawer with smooth animation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        handleClose();
       }
     };
     if (shortcut) {
@@ -37,7 +48,7 @@ export default function SqlHelperDrawer({
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "unset";
     };
-  }, [shortcut, onClose]);
+  }, [shortcut, isClosing]);
 
   if (!mounted || !shortcut) return null;
 
@@ -64,16 +75,22 @@ export default function SqlHelperDrawer({
 
   const drawerContent = (
     <div className="fixed inset-0 z-[100] overflow-hidden">
-      {/* Backdrop spanning 100% viewport */}
+      {/* Backdrop spanning 100% viewport with smooth fade */}
       <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in cursor-pointer"
+        onClick={handleClose}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-xs cursor-pointer ${
+          isClosing ? "animate-backdrop-out" : "animate-backdrop-in"
+        }`}
         aria-hidden="true"
       />
 
       {/* Drawer Container anchored directly to right viewport edge */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex">
-        <div className="w-screen max-w-full sm:max-w-xl bg-white border-l border-border shadow-2xl flex flex-col h-full animate-in slide-in-from-right duration-200 z-[101]">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pointer-events-none">
+        <div
+          className={`w-screen max-w-full sm:max-w-xl bg-white border-l border-border shadow-2xl flex flex-col h-full z-[101] pointer-events-auto ${
+            isClosing ? "animate-drawer-out" : "animate-drawer-in"
+          }`}
+        >
           {/* Header Drawer (Sticky) */}
           <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-gray-50/80 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0 pr-2">
@@ -92,8 +109,8 @@ export default function SqlHelperDrawer({
 
             <button
               type="button"
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+              onClick={handleClose}
+              className="p-2 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors shrink-0 cursor-pointer"
               title="Tutup (Esc)"
             >
               <X className="h-4 w-4" />
@@ -179,7 +196,7 @@ export default function SqlHelperDrawer({
           <div className="p-4 border-t border-border bg-gray-50 flex items-center justify-between gap-3 shrink-0">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="py-2 px-4 rounded-lg border border-border text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Tutup
