@@ -32,14 +32,15 @@ Selain itu, modal konstruksi global lama (`UnderConstructionModal`) dilepas dari
 ## 3) Daftar File yang Diubah
 
 - `msf-app/frontend/public/images/technician-avatar.png` [NEW]
-- `msf-app/frontend/src/components/common/MaintenanceModal.tsx` [NEW]
+- `msf-app/frontend/src/components/common/MaintenanceModal.tsx` [NEW/MODIFY]
+- `msf-app/frontend/src/components/layout/Sidebar.tsx` [MODIFY]
 - `msf-app/frontend/src/app/generate/page.tsx` [MODIFY]
 - `msf-app/frontend/src/app/diagram/page.tsx` [MODIFY]
 - `msf-app/frontend/src/app/layout.tsx` [MODIFY]
 - `msf-app/frontend/next.config.js` [MODIFY]
 - `msf-app/dev-docs/CHANGELOG.md` [MODIFY]
 - `msf-app/dev-docs/COMMIT_LOG.md` [MODIFY]
-- `msf-app/dev-docs/commit-logs/2026-09-21.md` [NEW]
+- `msf-app/dev-docs/commit-logs/2026-09-21.md` [MODIFY]
 
 ---
 
