@@ -1,88 +1,88 @@
 [
   {
     "id": "pg-active-queries",
-    "title": "Active Queries and Connections",
-    "description": "Show all active database connections and their current queries, including execution duration.",
+    "title": "Koneksi dan Kueri Aktif (Active Queries)",
+    "description": "Menampilkan semua koneksi database yang sedang aktif beserta kueri yang sedang dijalankan dan durasi eksekusinya.",
     "engine": "postgresql",
     "category": "monitoring",
     "risk_level": "read-only",
     "sql": "SELECT pid, age(clock_timestamp(), query_start) AS duration, usename, query, state\nFROM pg_stat_activity\nWHERE state != 'idle'\n  AND query NOT LIKE '%pg_stat_activity%'\nORDER BY duration DESC;",
-    "tags": ["active", "connections", "monitoring", "slow-query"]
+    "tags": ["active", "connections", "monitoring", "slow-query", "kueri-aktif"]
   },
   {
     "id": "pg-terminate-blocking",
-    "title": "Kill Idle & Blocking Sessions",
-    "description": "Hentikan koneksi atau transaksi yang menggantung (idle in transaction) menggunakan pg_terminate_backend agar tidak mengunci tabel.",
+    "title": "Hentikan Sesi Menggantung (Kill Idle/Blocking Sessions)",
+    "description": "Menghentikan koneksi atau transaksi yang menggantung (idle in transaction) menggunakan pg_terminate_backend agar tidak mengunci tabel.",
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "caution",
     "sql": "SELECT pg_terminate_backend(pid),\n       pid,\n       usename,\n       state,\n       age(clock_timestamp(), query_start) AS duration,\n       query\nFROM pg_stat_activity\nWHERE pid <> pg_backend_pid()\n  AND state = 'idle in transaction'\nORDER BY duration DESC;",
-    "tags": ["terminate", "kill", "blocking", "locks", "maintenance"]
+    "tags": ["terminate", "kill", "blocking", "locks", "maintenance", "sesi-terkunci"]
   },
   {
     "id": "pg-check-pk-coverage",
-    "title": "Check Primary Key Coverage per Schema",
-    "description": "Menampilkan seluruh tabel dalam skema tertentu beserta status kepemilikan Primary Key (YES/NO) dan daftar kolom kunci primernya.",
+    "title": "Pemeriksaan Primary Key per Skema",
+    "description": "Menampilkan seluruh tabel dalam skema target beserta status kepemilikan Primary Key (YA/TIDAK) dan daftar kolom kunci primernya.",
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "read-only",
     "sql": "SELECT \n    n.nspname AS schema_name,\n    t.relname AS table_name,\n    CASE WHEN pk.conname IS NOT NULL THEN 'YES' ELSE 'NO' END AS has_primary_key,\n    array_agg(a.attname ORDER BY a.attnum) FILTER (WHERE a.attname IS NOT NULL) AS primary_key_columns\nFROM pg_class t\nJOIN pg_namespace n ON n.oid = t.relnamespace\nLEFT JOIN pg_constraint pk ON pk.conrelid = t.oid AND pk.contype = 'p'\nLEFT JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(pk.conkey)\nWHERE t.relkind = 'r'\n  AND n.nspname = 'public' -- Ganti dengan skema target jika perlu\nGROUP BY n.nspname, t.relname, pk.conname\nORDER BY has_primary_key ASC, t.relname;",
-    "tags": ["primary-key", "schema", "table", "integrity", "audit"]
+    "tags": ["primary-key", "schema", "table", "integrity", "audit", "kunci-primer"]
   },
   {
     "id": "pg-search-column-name",
-    "title": "Find Tables by Column Name",
-    "description": "Mencari tabel dan skema mana saja yang memiliki kolom dengan nama tertentu di database.",
+    "title": "Cari Tabel Berdasarkan Nama Kolom",
+    "description": "Mencari tabel dan skema mana saja yang memuat nama kolom tertentu di seluruh database.",
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name ILIKE '%nama_kolom%'\n  AND table_schema NOT IN ('pg_catalog', 'information_schema')\nORDER BY table_schema, table_name;",
-    "tags": ["search", "columns", "schema", "table", "diagnostic"]
+    "tags": ["search", "columns", "schema", "table", "diagnostic", "cari-kolom"]
   },
   {
     "id": "pg-scan-null-columns",
-    "title": "Scan Tables with NULL Values",
-    "description": "Blok prosedur dinamis PL/pgSQL untuk memindai seluruh tabel dan kolom di skema publik yang memiliki baris bernilai NULL.",
+    "title": "Pindai Kolom Bernilai NULL di Semua Tabel",
+    "description": "Blok skrip dinamis PL/pgSQL untuk memeriksa dan mendeteksi seluruh tabel dan kolom yang memiliki data bernilai NULL.",
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "DO $$\nDECLARE\n    r RECORD;\n    c RECORD;\n    v_sql TEXT;\n    has_null BOOLEAN;\nBEGIN\n    FOR r IN\n        SELECT table_schema, table_name\n        FROM information_schema.tables\n        WHERE table_type = 'BASE TABLE'\n          AND table_schema = 'public'\n    LOOP\n        has_null := FALSE;\n        FOR c IN\n            SELECT column_name\n            FROM information_schema.columns\n            WHERE table_schema = r.table_schema\n              AND table_name = r.table_name\n        LOOP\n            v_sql := FORMAT(\n                'SELECT 1 FROM %I.%I WHERE %I IS NULL LIMIT 1',\n                r.table_schema, r.table_name, c.column_name\n            );\n            BEGIN\n                EXECUTE v_sql;\n                IF FOUND THEN\n                    has_null := TRUE;\n                    RAISE NOTICE 'TABEL DENGAN NILAI NULL: %.% (Kolom: %)', r.table_schema, r.table_name, c.column_name;\n                END IF;\n            EXCEPTION\n                WHEN OTHERS THEN CONTINUE;\n            END;\n        END LOOP;\n    END LOOP;\nEND $$;",
-    "tags": ["null", "data-quality", "audit", "diagnostic", "cleaning"]
+    "tags": ["null", "data-quality", "audit", "diagnostic", "cleaning", "nilai-null"]
   },
   {
     "id": "pg-data-dictionary",
-    "title": "Data Dictionary & Column Comments",
-    "description": "Menampilkan kamus data lengkap setiap tabel beserta tipe data, ukuran, nullable, dan komentar/deskripsi kolom dari pg_description.",
+    "title": "Kamus Data & Komentar Kolom",
+    "description": "Menampilkan kamus data lengkap setiap tabel beserta tipe data, ukuran, batas null, dan deskripsi/komentar kolom dari pg_description.",
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "SELECT \n    c.table_name,\n    c.column_name,\n    c.data_type,\n    c.character_maximum_length,\n    c.is_nullable,\n    pgd.description AS column_description\nFROM information_schema.columns c\nLEFT JOIN pg_catalog.pg_statio_all_tables st\n       ON c.table_schema = st.schemaname \n      AND c.table_name = st.relname\nLEFT JOIN pg_catalog.pg_description pgd \n       ON pgd.objoid = st.relid \n      AND pgd.objsubid = c.ordinal_position\nWHERE c.table_schema = 'public'\nORDER BY c.table_name, c.ordinal_position;",
-    "tags": ["dictionary", "comments", "metadata", "documentation", "columns"]
+    "tags": ["dictionary", "comments", "metadata", "documentation", "columns", "kamus-data"]
   },
   {
     "id": "pg-list-all-indexes",
-    "title": "List All Indexes & Definitions",
-    "description": "Menampilkan seluruh indeks dalam skema target beserta perintah DDL pembuatannya dari pg_indexes.",
+    "title": "Daftar Seluruh Indeks & Definisi DDL",
+    "description": "Menampilkan seluruh indeks yang terdaftar pada skema database beserta perintah DDL pembuatannya.",
     "engine": "postgresql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT \n    schemaname,\n    tablename,\n    indexname,\n    indexdef\nFROM pg_indexes\nWHERE schemaname NOT IN ('pg_catalog', 'information_schema')\nORDER BY tablename, indexname;",
-    "tags": ["index", "indexes", "ddl", "performance", "indexing"]
+    "tags": ["index", "indexes", "ddl", "performance", "indexing", "daftar-indeks"]
   },
   {
     "id": "pg-search-functions",
-    "title": "Search Functions by Code Definition",
-    "description": "Mencari nama stored function/procedure di pg_proc berdasarkan potongan isi kode atau logika di dalamnya.",
+    "title": "Cari Fungsi/Prosedur dari Definisi Kode",
+    "description": "Mencari nama fungsi atau stored procedure di pg_proc berdasarkan potongan kata kunci kode yang ada di dalamnya.",
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "SELECT \n    n.nspname AS schema_name,\n    p.proname AS function_name,\n    pg_get_function_identity_arguments(p.oid) AS arguments,\n    pg_get_functiondef(p.oid) AS definition\nFROM pg_proc p\nJOIN pg_namespace n ON p.pronamespace = n.oid\nWHERE p.prokind = 'f'\n  AND pg_get_functiondef(p.oid) ILIKE '%KEYWORD%'\nORDER BY schema_name, function_name;",
-    "tags": ["function", "procedure", "search", "plpgsql", "code"]
+    "tags": ["function", "procedure", "search", "plpgsql", "code", "cari-fungsi"]
   },
   {
     "id": "pg-disable-triggers",
-    "title": "Disable or Enable All Triggers",
-    "description": "Menonaktifkan seluruh trigger pada skema untuk keperluan migrasi atau bulk loading data, serta perintah untuk mengaktifkannya kembali.",
+    "title": "Nonaktifkan atau Aktifkan Semua Trigger",
+    "description": "Menonaktifkan seluruh trigger pada skema untuk keperluan migrasi atau pengisian data massal, serta cara mengaktifkannya kembali.",
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "dangerous",
@@ -91,92 +91,92 @@
   },
   {
     "id": "pg-search-all-tables",
-    "title": "Global Text Search Across All Tables",
-    "description": "Fungsi dinamis PL/pgSQL untuk mencari string atau nomor ID ke seluruh tabel dan kolom teks di database secara otomatis.",
+    "title": "Pencarian Teks Global di Seluruh Tabel",
+    "description": "Fungsi dinamis PL/pgSQL untuk mencari kata kunci teks atau nomor ID ke seluruh kolom teks pada semua tabel secara otomatis.",
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "CREATE OR REPLACE FUNCTION search_all(keyword TEXT)\nRETURNS TABLE (\n    location TEXT,\n    row_data JSONB\n) AS $$\nDECLARE\n    r RECORD;\n    v_sql TEXT;\nBEGIN\n    FOR r IN\n        SELECT table_schema, table_name, column_name\n        FROM information_schema.columns\n        WHERE table_schema = 'public'\n          AND table_name NOT LIKE 'pg_%'\n          AND data_type IN ('text', 'character varying', 'character', 'citext')\n    LOOP\n        v_sql := format(\n            'SELECT %L AS location, to_jsonb(t) AS row_data\n             FROM %I.%I t\n             WHERE %I ILIKE %L',\n            r.table_schema || '.' || r.table_name || '.' || r.column_name,\n            r.table_schema, r.table_name,\n            r.column_name,\n            '%' || keyword || '%'\n        );\n        RETURN QUERY EXECUTE v_sql;\n    END LOOP;\nEND;\n$$ LANGUAGE plpgsql;\n\n-- Cara Pemanggilan:\nSELECT * FROM search_all('TR-1-LSM-1');",
-    "tags": ["search", "global-search", "plpgsql", "function", "data"]
+    "tags": ["search", "global-search", "plpgsql", "function", "data", "cari-global"]
   },
   {
     "id": "pg-create-user-security",
-    "title": "Database User Security & Privileges Template",
-    "description": "Panduan standar pembuatan user database dengan isolasi hak akses, pembatasan koneksi, dan konfigurasi ALTER DEFAULT PRIVILEGES.",
+    "title": "Template Keamanan & Hak Akses Pengguna DB",
+    "description": "Panduan standar pembuatan user database dengan isolasi hak akses skema, pembatasan koneksi, dan konfigurasi ALTER DEFAULT PRIVILEGES.",
     "engine": "postgresql",
     "category": "security",
     "risk_level": "caution",
     "sql": "-- 1. Buat user database baru dengan password kuat\nCREATE USER user_app WITH PASSWORD 'GantiPasswordKuat123!';\n\n-- 2. Beri hak koneksi ke database target\nGRANT ALL PRIVILEGES ON DATABASE db_utama TO user_app;\n\n-- 3. Batasi akses koneksi ke database sensitif/lainnya\nREVOKE CONNECT ON DATABASE db_prod_audit FROM user_app;\n\n-- 4. Beri hak akses operasional pada skema public\nGRANT USAGE ON SCHEMA public TO user_app;\nGRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO user_app;\nGRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO user_app;\nGRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO user_app;\n\n-- 5. Kunci default privileges agar objek baru otomatis dapat diakses user ini\nALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO user_app;\nALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO user_app;\nALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO user_app;",
-    "tags": ["security", "user", "grant", "privileges", "permissions"]
+    "tags": ["security", "user", "grant", "privileges", "permissions", "keamanan-user"]
   },
   {
     "id": "pg-change-object-owner",
-    "title": "Transfer Ownership of All Tables & Objects",
-    "description": "Skrip massal untuk mengganti pemilik (owner) seluruh tabel, sequence, dan view ke role/user baru.",
+    "title": "Ubah Kepemilikan (Owner) Semua Objek Database",
+    "description": "Skrip massal untuk mengganti pemilik (owner) seluruh tabel, sequence, dan view ke role atau pengguna baru.",
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "caution",
     "sql": "DO $$\nDECLARE\n    r RECORD;\n    target_user TEXT := 'user_baru'; -- Ganti dengan nama user baru\nBEGIN\n    -- Ganti owner semua tabel\n    FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP\n        EXECUTE format('ALTER TABLE public.%I OWNER TO %I', r.tablename, target_user);\n    END LOOP;\n\n    -- Ganti owner semua sequence\n    FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' LOOP\n        EXECUTE format('ALTER SEQUENCE public.%I OWNER TO %I', r.sequence_name, target_user);\n    END LOOP;\n\n    -- Ganti owner semua view\n    FOR r IN SELECT table_name FROM information_schema.views WHERE table_schema = 'public' LOOP\n        EXECUTE format('ALTER VIEW public.%I OWNER TO %I', r.table_name, target_user);\n    END LOOP;\nEND $$;",
-    "tags": ["owner", "alter-table", "permissions", "maintenance", "role"]
+    "tags": ["owner", "alter-table", "permissions", "maintenance", "role", "ganti-owner"]
   },
   {
     "id": "pg-check-duplicate-data",
-    "title": "Find Duplicate Rows in Table",
-    "description": "Mendeteksi data baris yang terduplikasi berdasarkan kombinasi kolom tertentu menggunakan agregasi GROUP BY dan HAVING count(*) > 1.",
+    "title": "Temukan Baris Data Duplikat pada Tabel",
+    "description": "Mendeteksi data baris yang terduplikasi berdasarkan kombinasi kolom kunci tertentu menggunakan agregasi GROUP BY dan HAVING COUNT(*) > 1.",
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "SELECT kolom_kunci_1, kolom_kunci_2, COUNT(*) AS jumlah_duplikat\nFROM nama_tabel\nGROUP BY kolom_kunci_1, kolom_kunci_2\nHAVING COUNT(*) > 1\nORDER BY jumlah_duplikat DESC;",
-    "tags": ["duplicate", "data-quality", "group-by", "cleaning", "diagnostic"]
+    "tags": ["duplicate", "data-quality", "group-by", "cleaning", "diagnostic", "data-duplikat"]
   },
   {
     "id": "pg-db-size",
-    "title": "Database Sizes",
-    "description": "List all databases in the server along with their size on disk, formatted nicely.",
+    "title": "Ukuran Seluruh Database",
+    "description": "Menampilkan daftar seluruh database yang ada di server beserta ukuran total penyimpanannya di disk dalam format yang mudah dibaca.",
     "engine": "postgresql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT pg_database.datname,\n       pg_size_pretty(pg_database_size(pg_database.datname)) AS size\nFROM pg_database\nORDER BY pg_database_size(pg_database.datname) DESC;",
-    "tags": ["size", "disk", "database"]
+    "tags": ["size", "disk", "database", "kapasitas-db"]
   },
   {
     "id": "pg-table-size",
-    "title": "Table Size Breakdown",
-    "description": "Show size breakdown of tables in the current database, including table size, index size, and total size.",
+    "title": "Rincian Ukuran Tabel & Indeks",
+    "description": "Menampilkan rincian ukuran tabel pada database aktif, mencakup ukuran data tabel mentah, ukuran indeks, dan ukuran total untuk 20 tabel teratas.",
     "engine": "postgresql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT relname AS table_name,\n       pg_size_pretty(pg_total_relation_size(c.oid)) AS total_size,\n       pg_size_pretty(pg_relation_size(c.oid)) AS table_size,\n       pg_size_pretty(pg_total_relation_size(c.oid) - pg_relation_size(c.oid)) AS index_size\nFROM pg_class c\nLEFT JOIN pg_namespace n ON n.oid = c.relnamespace\nWHERE n.nspname = 'public'\n  AND c.relkind = 'r'\nORDER BY pg_total_relation_size(c.oid) DESC\nLIMIT 20;",
-    "tags": ["size", "table", "index", "disk"]
+    "tags": ["size", "table", "index", "disk", "ukuran-tabel"]
   },
   {
     "id": "pg-unused-indexes",
-    "title": "Unused Indexes",
-    "description": "Identify indexes that are rarely or never scanned, which consume disk space and slow down writes.",
+    "title": "Indeks yang Tidak Pernah Digunakan",
+    "description": "Mengidentifikasi indeks yang jarang atau tidak pernah dipindai (scanned), yang hanya memboroskan ruang disk dan memperlambat proses penulisan data.",
     "engine": "postgresql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT schemaname, relname AS table_name, indexrelname AS index_name,\n       idx_scan AS number_of_scans, idx_tup_read, idx_tup_fetch\nFROM pg_stat_user_indexes\nWHERE idx_scan = 0\n  AND indexrelname NOT LIKE 'pg_%'\nORDER BY relname, indexrelname;",
-    "tags": ["index", "performance", "unused-index"]
+    "tags": ["index", "performance", "unused-index", "indeks-tidak-terpakai"]
   },
   {
     "id": "pg-index-bloat",
-    "title": "Cache Hit Rate (Tables & Indexes)",
-    "description": "Calculate how often data is read from the cache vs. disk. Ideally, it should be > 99%.",
+    "title": "Tingkat Efektivitas Cache (Cache Hit Rate)",
+    "description": "Menghitung persentase data yang dibaca dari memori cache RAM dibandingkan dengan pembacaan disk fisik. Idealnya nilai rasio di atas 99%.",
     "engine": "postgresql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT \n  'table' AS type,\n  sum(heap_blks_hit) * 100.0 / nullif(sum(heap_blks_read) + sum(heap_blks_hit), 0) AS ratio\nFROM pg_statio_user_tables\nUNION ALL\nSELECT \n  'index' AS type,\n  sum(idx_blks_hit) * 100.0 / nullif(sum(idx_blks_read) + sum(idx_blks_hit), 0) AS ratio\nFROM pg_statio_user_indexes;",
-    "tags": ["cache", "performance", "buffer-pool"]
+    "tags": ["cache", "performance", "buffer-pool", "efisiensi-cache"]
   },
   {
     "id": "pg-find-duplicates",
-    "title": "Duplicate Indexes",
-    "description": "Find redundant indexes (indexes on the same column set in the same order) that consume storage.",
+    "title": "Deteksi Indeks Ganda (Redundant Indexes)",
+    "description": "Menemukan indeks dengan kombinasi kolom ganda atau berlebih yang memakan kapasitas penyimpanan tanpa memberikan manfaat performa tambahan.",
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "read-only",
     "sql": "SELECT pg_size_pretty(pg_relation_size(i.indexrelid)) AS size,\n       i.indrelid::regclass AS table_name,\n       i.indexrelid::regclass AS index_name,\n       array_to_string(array_agg(a.attname), ', ') AS columns\nFROM pg_index i\nJOIN pg_attribute a ON a.attrelid = i.indexrelid\nGROUP BY i.indrelid, i.indexrelid, i.indisunique\nHAVING count(*) > 1\nORDER BY pg_relation_size(i.indexrelid) DESC;",
-    "tags": ["index", "duplicate-index", "maintenance"]
+    "tags": ["index", "duplicate-index", "maintenance", "indeks-duplikat"]
   }
 ]

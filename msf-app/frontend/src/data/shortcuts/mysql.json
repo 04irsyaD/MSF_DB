@@ -1,92 +1,92 @@
 [
   {
     "id": "mysql-active-process",
-    "title": "Active Processlist",
-    "description": "Show all active running connections and queries. Helps spot blocking or slow queries currently running.",
+    "title": "Daftar Proses & Kueri Aktif (Active Processlist)",
+    "description": "Menampilkan seluruh koneksi dan kueri yang sedang aktif berjalan. Membantu mendeteksi transaksi macet atau kueri lambat secara langsung.",
     "engine": "mysql",
     "category": "monitoring",
     "risk_level": "read-only",
     "sql": "SELECT ID, USER, HOST, DB, COMMAND, TIME, STATE, INFO\nFROM information_schema.processlist\nWHERE COMMAND != 'Sleep'\n  AND INFO IS NOT NULL\nORDER BY TIME DESC;",
-    "tags": ["active", "connections", "process", "monitoring"]
+    "tags": ["active", "connections", "process", "monitoring", "proses-aktif"]
   },
   {
     "id": "mysql-flush-hosts",
-    "title": "Fix Blocked Hosts & Connection Errors",
-    "description": "Mengatasi error klasik 'Host is blocked because of many connection errors' dengan me-reset cache host dan menaikkan batas max_connect_errors.",
+    "title": "Atasi Host Terblokir & Error Koneksi (Flush Hosts)",
+    "description": "Mengatasi kendala klasik 'Host is blocked because of many connection errors' dengan mereset cache host dan menaikkan batas toleransi max_connect_errors.",
     "engine": "mysql",
     "category": "maintenance",
     "risk_level": "caution",
     "sql": "-- 1. Reset tabel cache host yang terblokir\nFLUSH HOSTS;\n\n-- 2. Tingkatkan toleransi error koneksi agar tidak mudah terblokir (default: 100)\nSET GLOBAL max_connect_errors = 10000;\n\n-- 3. Verifikasi nilai saat ini\nSHOW GLOBAL VARIABLES LIKE 'max_connect_errors';",
-    "tags": ["flush-hosts", "connection-error", "blocked-host", "maintenance", "mysqladmin"]
+    "tags": ["flush-hosts", "connection-error", "blocked-host", "maintenance", "mysqladmin", "host-terblokir"]
   },
   {
     "id": "mysql-max-connections",
-    "title": "Inspect & Adjust Max Connections",
-    "description": "Memeriksa batas jumlah koneksi simultan MySQL dan menaikkan kuotanya secara dinamis tanpa perlu me-restart server.",
+    "title": "Periksa & Naikkan Batas Koneksi Maksimal",
+    "description": "Memeriksa batas kuota koneksi simultan MySQL dan meningkatkan kapasitasnya secara dinamis tanpa perlu merestart server.",
     "engine": "mysql",
     "category": "performance",
     "risk_level": "caution",
     "sql": "-- Cek batas koneksi saat ini\nSHOW VARIABLES LIKE 'max_connections';\n\n-- Cek jumlah koneksi tertinggi yang pernah terjadi (peak)\nSHOW STATUS LIKE 'Max_used_connections';\n\n-- Naikkan batas koneksi (misal ke 500 koneksi)\nSET GLOBAL max_connections = 500;",
-    "tags": ["connections", "max-connections", "performance", "tuning", "threads"]
+    "tags": ["connections", "max-connections", "performance", "tuning", "threads", "koneksi-maksimal"]
   },
   {
     "id": "mysql-search-column",
-    "title": "Find Tables by Column Name",
+    "title": "Cari Tabel Berdasarkan Nama Kolom",
     "description": "Mencari nama tabel dan skema mana saja yang memiliki kolom tertentu di seluruh database MySQL.",
     "engine": "mysql",
     "category": "diagnostic",
     "risk_level": "read-only",
     "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name = 'nama_kolom'\n  AND table_schema = DATABASE() -- Atau ganti dengan 'nama_database' spesifik\nORDER BY table_name;",
-    "tags": ["search", "columns", "table", "schema", "diagnostic"]
+    "tags": ["search", "columns", "table", "schema", "diagnostic", "cari-kolom"]
   },
   {
     "id": "mysql-server-info",
-    "title": "Server Version & SQL Mode Info",
-    "description": "Memeriksa versi detail server MySQL serta mode SQL (strict mode, only_full_group_by) pada level global dan sesi.",
+    "title": "Informasi Versi Server & Mode SQL",
+    "description": "Memeriksa versi detail server MySQL serta konfigurasi mode SQL aktif (seperti strict mode atau only_full_group_by) pada level global dan sesi.",
     "engine": "mysql",
     "category": "monitoring",
     "risk_level": "read-only",
     "sql": "SELECT VERSION() AS mysql_version;\n\nSELECT @@global.sql_mode AS global_sql_mode,\n       @@session.sql_mode AS session_sql_mode;",
-    "tags": ["version", "sql-mode", "configuration", "server-info", "monitoring"]
+    "tags": ["version", "sql-mode", "configuration", "server-info", "monitoring", "info-server"]
   },
   {
     "id": "mysql-db-size",
-    "title": "Database Sizes",
-    "description": "Calculate total size of all databases on the server, detailing data size, index size, and total size in MB.",
+    "title": "Ukuran Seluruh Database MySQL",
+    "description": "Menghitung kapasitas total seluruh database di server, merinci ukuran data mentah, ukuran indeks, dan total kapasitas dalam satuan Megabyte (MB).",
     "engine": "mysql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT table_schema AS database_name,\n       ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS total_size_mb,\n       ROUND(SUM(data_length) / 1024 / 1024, 2) AS data_size_mb,\n       ROUND(SUM(index_length) / 1024 / 1024, 2) AS index_size_mb\nFROM information_schema.tables\nGROUP BY table_schema\nORDER BY total_size_mb DESC;",
-    "tags": ["size", "database", "disk"]
+    "tags": ["size", "database", "disk", "kapasitas-db"]
   },
   {
     "id": "mysql-table-size",
-    "title": "Table Size Breakdown",
-    "description": "Show total size, row count, and average row length for all tables in a specific database.",
+    "title": "Rincian Ukuran Tabel Terbesar",
+    "description": "Menampilkan ukuran total, estimasi jumlah baris data, serta ukuran indeks untuk 20 tabel terbesar pada database yang sedang aktif.",
     "engine": "mysql",
     "category": "performance",
     "risk_level": "read-only",
     "sql": "SELECT table_name,\n       table_rows AS row_count,\n       ROUND((data_length + index_length) / 1024 / 1024, 2) AS total_size_mb,\n       ROUND(data_length / 1024 / 1024, 2) AS data_size_mb,\n       ROUND(index_length / 1024 / 1024, 2) AS index_size_mb\nFROM information_schema.tables\nWHERE table_schema = DATABASE()\nORDER BY total_size_mb DESC\nLIMIT 20;",
-    "tags": ["size", "table", "rows"]
+    "tags": ["size", "table", "rows", "ukuran-tabel"]
   },
   {
     "id": "mysql-find-no-pk",
-    "title": "Tables Without Primary Key",
-    "description": "List all tables in the current database that lack a primary key, which can cause performance issues (especially in replication).",
+    "title": "Tabel Tanpa Primary Key",
+    "description": "Mendata semua tabel yang belum memiliki Primary Key, yang berisiko memperburuk performa replikasi database dan mesin penyimpanan InnoDB.",
     "engine": "mysql",
     "category": "maintenance",
     "risk_level": "read-only",
     "sql": "SELECT tab.table_schema, tab.table_name\nFROM information_schema.tables tab\nLEFT JOIN information_schema.table_constraints con\n  ON tab.table_schema = con.table_schema\n  AND tab.table_name = con.table_name\n  AND con.constraint_type = 'PRIMARY KEY'\nWHERE con.constraint_name IS NULL\n  AND tab.table_schema = DATABASE()\n  AND tab.table_type = 'BASE TABLE';",
-    "tags": ["maintenance", "primary-key", "best-practice"]
+    "tags": ["maintenance", "primary-key", "best-practice", "tanpa-pk"]
   },
   {
     "id": "mysql-innodb-locks",
-    "title": "InnoDB Lock Waits",
-    "description": "Show which transactions are blocking which, along with the query details. Useful for debugging lock timeouts.",
+    "title": "Transaksi Kunci Menggantung (InnoDB Lock Waits)",
+    "description": "Menampilkan transaksi mana yang sedang memblokir transaksi lain beserta detail kuerinya. Sangat berguna untuk mendiagnosis kendala lock timeout.",
     "engine": "mysql",
     "category": "monitoring",
     "risk_level": "read-only",
     "sql": "SELECT \n  r.trx_id waiting_trx_id,\n  r.trx_mysql_thread_id waiting_thread,\n  r.trx_query waiting_query,\n  b.trx_id blocking_trx_id,\n  b.trx_mysql_thread_id blocking_thread,\n  b.trx_query blocking_query\nFROM sys.innodb_lock_waits w\nINNER JOIN information_schema.innodb_trx b\n  ON b.trx_id = w.blocking_trx_id\nINNER JOIN information_schema.innodb_trx r\n  ON r.trx_id = w.requesting_trx_id;",
-    "tags": ["lock", "blocking", "innodb", "monitoring"]
+    "tags": ["lock", "blocking", "innodb", "monitoring", "kunci-transaksi"]
   }
 ]
