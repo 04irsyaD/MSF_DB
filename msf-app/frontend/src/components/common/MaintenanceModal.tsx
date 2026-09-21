@@ -42,9 +42,9 @@ export default function MaintenanceModal({
 
   return (
     <>
-      {/* Modal Overlay & Card */}
+      {/* Modal Overlay & Card (hanya di area konten, tidak menutupi sidebar) */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 lg:left-64 z-30 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative bg-white border border-border/80 w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
             {/* Close Icon Button */}
             <button
