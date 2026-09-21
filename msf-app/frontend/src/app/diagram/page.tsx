@@ -8,6 +8,7 @@ import DiagramCanvas from "@/components/diagram/DiagramCanvas";
 import { Play, Sparkles, RefreshCw, Layers, Terminal, ArrowRight, Info } from "lucide-react";
 import { toast } from "sonner";
 import { DDL_TEMPLATES } from "./templates";
+import MaintenanceModal from "@/components/common/MaintenanceModal";
 
 export default function DiagramPage() {
   const [mode, setMode] = useState<"ddl" | "database">("ddl");
@@ -99,6 +100,14 @@ export default function DiagramPage() {
 
   return (
     <div className="space-y-5 animate-fade-in-up h-[calc(100vh-120px)] flex flex-col">
+      {/* Maintenance Notice Modal */}
+      <MaintenanceModal
+        title="Layanan MSF Diagram Sedang Maintenance"
+        description="Halo pengguna MSF DB, kami sedang melakukan pemeliharaan rutin pada modul parser & visualisasi diagram database. Harap sabar, kami akan segera kembali online!"
+        estimateTime="15 MENIT LAGI"
+        storageKey="msf_maintenance_diagram"
+      />
+
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border pb-3 shrink-0">
         <div>

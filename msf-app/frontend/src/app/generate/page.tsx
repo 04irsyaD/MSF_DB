@@ -12,6 +12,7 @@ import { FileText, Database, Sparkles, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { defaultSQL } from "@/components/generator/SqlEditor";
 import { toast } from "sonner";
+import MaintenanceModal from "@/components/common/MaintenanceModal";
 
 export default function GeneratePage() {
   const [mode, setMode] = useState<InputMode>("ddl");
@@ -111,6 +112,14 @@ export default function GeneratePage() {
 
   return (
     <div className="space-y-6">
+      {/* Maintenance Notice Modal */}
+      <MaintenanceModal
+        title="Layanan AI Generator Sedang Maintenance"
+        description="Halo pengguna MSF DB, kami sedang melakukan pemeliharaan rutin pada modul AI Generator untuk meningkatkan performa dan fitur. Harap sabar, kami akan segera kembali online!"
+        estimateTime="15 MENIT LAGI"
+        storageKey="msf_maintenance_generator"
+      />
+
       {/* Jika sedang memproses pembuatan dokumentasi */}
       {isGenerating ? (
         <div className="py-12">

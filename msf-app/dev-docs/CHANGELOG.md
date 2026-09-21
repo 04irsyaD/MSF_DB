@@ -7,6 +7,11 @@
 ## [Unreleased]
 
 ### Added
+- Penambahan komponen `MaintenanceModal` pada halaman **AI Generator** (`/generate`) dan **MSF Diagram** (`/diagram`) dengan ilustrasi teknisi ramah, estimasi waktu, backdrop blur transparan, dan floating trigger saat ditutup.
+- Peningkatan konfigurasi `next.config.js` untuk mendukung variabel lingkungan `BACKEND_URL` / `NEXT_PUBLIC_API_URL` secara dinamis saat deploy ke Vercel atau cloud hosting lain.
+
+### Changed
+- Pembersihan modal konstruksi global (`UnderConstructionModal`) dari RootLayout agar modal hanya tampil terisolasi pada modul yang membutuhkan.
 - Integrasi folder panduan `ai-rules/` dari repository `docs-ai` untuk standardisasi AI Coding.
 - Penambahan file `.agents/AGENTS.md` untuk konfigurasi asisten Gemini (Antigravity).
 - Konfigurasi linter `.markdownlint.json` untuk menyeleksi validasi format berkas `.md` secara lokal dan di CI/CD GitHub Actions.
