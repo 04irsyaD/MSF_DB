@@ -7,6 +7,8 @@
 ## [Unreleased]
 
 ### Added
+- Penambahan modul dan halaman baru **SQL Helper** (`/sql-helper`) berbasis tampilan Table/Data Grid View mandiri di sisi frontend (client-side standalone), lengkap dengan filter pencarian, filter engine/kategori/risiko, drawer intip kueri SQL, dan ringkasan metrik statistik.
+- Penambahan folder data kueri lokal `src/data/shortcuts/` (`postgresql.json`, `mysql.json`, dan helper `shortcutsData.ts`) agar kueri DBA dapat diakses langsung tanpa ketergantungan server backend.
 - Penambahan komponen `MaintenanceModal` pada halaman **AI Generator** (`/generate`) dan **MSF Diagram** (`/diagram`) dengan ilustrasi teknisi ramah, estimasi waktu, backdrop blur transparan, dan floating trigger saat ditutup.
 - Peningkatan konfigurasi `next.config.js` untuk mendukung variabel lingkungan `BACKEND_URL` / `NEXT_PUBLIC_API_URL` secara dinamis saat deploy ke Vercel atau cloud hosting lain.
 
