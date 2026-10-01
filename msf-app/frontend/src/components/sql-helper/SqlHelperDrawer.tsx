@@ -62,12 +62,12 @@ export default function SqlHelperDrawer({
   const getRiskColor = (level: string) => {
     const l = level.toLowerCase();
     if (l === "safe" || l === "read-only" || l === "low") {
-      return { label: "LOW RISK (SAFE)", color: "text-emerald-700 bg-emerald-50 border-emerald-200", icon: ShieldCheck };
+      return { label: "LOW RISK (SAFE)", color: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20", icon: ShieldCheck };
     }
     if (l === "caution" || l === "medium") {
-      return { label: "MEDIUM RISK (CAUTION)", color: "text-amber-700 bg-amber-50 border-amber-200", icon: AlertTriangle };
+      return { label: "MEDIUM RISK (CAUTION)", color: "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/20", icon: AlertTriangle };
     }
-    return { label: "HIGH RISK (DANGEROUS)", color: "text-rose-700 bg-rose-50 border-rose-200", icon: AlertTriangle };
+    return { label: "HIGH RISK (DANGEROUS)", color: "text-rose-700 dark:text-rose-400 bg-rose-500/10 border-rose-500/20", icon: AlertTriangle };
   };
 
   const risk = getRiskColor(shortcut.risk_level);
@@ -87,18 +87,18 @@ export default function SqlHelperDrawer({
       {/* Drawer Container anchored directly to right viewport edge */}
       <div className="fixed inset-y-0 right-0 max-w-full flex pointer-events-none">
         <div
-          className={`w-screen max-w-full sm:max-w-xl bg-white border-l border-border shadow-2xl flex flex-col h-full z-[101] pointer-events-auto ${
+          className={`w-screen max-w-full sm:max-w-xl bg-card border-l border-border shadow-2xl flex flex-col h-full z-[101] pointer-events-auto ${
             isClosing ? "animate-drawer-out" : "animate-drawer-in"
           }`}
         >
           {/* Header Drawer (Sticky) */}
-          <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-gray-50/80 shrink-0">
+          <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0 pr-2">
-              <div className="p-1.5 rounded-lg bg-[#00bfa5]/10 text-[#00bfa5] shrink-0">
+              <div className="p-1.5 rounded-lg bg-accent/10 text-accent shrink-0">
                 <Terminal className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <h3 className="text-sm font-bold text-gray-900 leading-snug truncate">
+                <h3 className="text-sm font-bold text-foreground leading-snug truncate">
                   {shortcut.title}
                 </h3>
                 <span className="text-[10px] font-mono text-muted-foreground uppercase block truncate">
@@ -110,7 +110,7 @@ export default function SqlHelperDrawer({
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors shrink-0 cursor-pointer"
+              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 cursor-pointer"
               title="Tutup (Esc)"
             >
               <X className="h-4 w-4" />
@@ -124,7 +124,7 @@ export default function SqlHelperDrawer({
               <h4 className="text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">
                 Deskripsi
               </h4>
-              <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg border border-border">
+              <p className="text-xs text-foreground/80 leading-relaxed bg-muted/40 p-3 rounded-lg border border-border">
                 {shortcut.description}
               </p>
             </div>
@@ -148,7 +148,7 @@ export default function SqlHelperDrawer({
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#00bfa5] hover:text-teal-700 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-accent hover:text-accent/80 transition-colors cursor-pointer"
                 >
                   {copied ? (
                     <>
@@ -164,8 +164,8 @@ export default function SqlHelperDrawer({
                 </button>
               </div>
 
-              <div className="relative rounded-xl overflow-hidden border border-gray-800 bg-[#1e1e1e] p-4 text-gray-100 font-mono text-xs leading-relaxed shadow-inner">
-                <pre className="overflow-x-auto whitespace-pre-wrap selection:bg-[#00bfa5]/30">
+              <div className="relative rounded-xl overflow-hidden border border-border bg-[#1e1e1e] p-4 text-gray-100 font-mono text-xs leading-relaxed shadow-inner">
+                <pre className="overflow-x-auto whitespace-pre-wrap selection:bg-accent/30">
                   <code>{shortcut.sql}</code>
                 </pre>
               </div>
@@ -182,7 +182,7 @@ export default function SqlHelperDrawer({
                   {shortcut.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-mono text-[10px]"
+                      className="px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono text-[10px]"
                     >
                       #{tag}
                     </span>
@@ -193,11 +193,11 @@ export default function SqlHelperDrawer({
           </div>
 
           {/* Footer Drawer (Sticky at Bottom) */}
-          <div className="p-4 border-t border-border bg-gray-50 flex items-center justify-between gap-3 shrink-0">
+          <div className="p-4 border-t border-border bg-muted/30 flex items-center justify-between gap-3 shrink-0">
             <button
               type="button"
               onClick={handleClose}
-              className="py-2 px-4 rounded-lg border border-border text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="py-2 px-4 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
             >
               Tutup
             </button>
@@ -205,7 +205,7 @@ export default function SqlHelperDrawer({
             <button
               type="button"
               onClick={handleCopy}
-              className="flex-1 py-2 px-4 bg-[#00bfa5] hover:bg-teal-600 text-white text-xs font-bold font-mono uppercase tracking-wider rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-2 px-4 bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-bold font-mono uppercase tracking-wider rounded-lg transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               <span>{copied ? "Kueri Telah Disalin!" : "Salin Kueri SQL"}</span>

@@ -94,6 +94,35 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
   }
+  html.dark select option {
+    background-color: hsl(var(--card));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Dark mode compatibility fallback */
+.dark .bg-white {
+  background-color: hsl(var(--card));
+}
+.dark .bg-gray-50 {
+  background-color: hsl(var(--muted) / 0.4);
+}
+.dark .bg-gray-100 {
+  background-color: hsl(var(--muted));
+}
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: hsl(var(--foreground));
+}
+.dark .text-gray-700 {
+  color: hsl(var(--foreground) / 0.85);
+}
+.dark .text-gray-600 {
+  color: hsl(var(--muted-foreground));
+}
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: hsl(var(--border));
 }
 
 /* Custom Scrollbar — light style */

@@ -25,107 +25,46 @@ Implementasi fitur Dark/Light Mode Toggle menggunakan library `next-themes`. Pen
 
 ## 3) Daftar File yang Diubah
 
-- `frontend/src/styles/globals.css` — Tambah CSS variables dark mode (`.dark { ... }`) dan `html.dark { color-scheme: dark }`
+- `frontend/src/styles/globals.css` — Tambah CSS variables dark mode (`.dark { ... }`), fallback utility dark mode (`.dark .bg-white`, `.dark .text-gray-*`, `.dark select option`), dan `html.dark { color-scheme: dark }`
 - `frontend/src/app/layout.tsx` — Wrap dengan `ThemeProvider` dari next-themes, tambah `suppressHydrationWarning` di `<html>`
 - `frontend/src/components/common/ThemeToggle.tsx` — Buat baru: komponen toggle Sun/Moon dengan hydration-safe rendering
 - `frontend/src/components/layout/Sidebar.tsx` — Import dan pasang `ThemeToggle` di footer sidebar
+- `frontend/src/components/sql-helper/SqlHelperTable.tsx` — Ganti hardcoded `bg-white`, `bg-gray-50`, `text-gray-900` ke semantic tokens (`bg-card`, `bg-muted/50`, `text-foreground`)
+- `frontend/src/components/sql-helper/SqlHelperStats.tsx` — Ganti card background dan text color ke `bg-card` & `text-foreground`
+- `frontend/src/components/sql-helper/SqlHelperFilter.tsx` — Ganti background filter box, inputs, select options, dan reset button ke semantic tokens
+- `frontend/src/components/sql-helper/SqlHelperInfoBox.tsx` — Ubah background dan text agar adaptif terhadap light dan dark mode
+- `frontend/src/components/sql-helper/SqlHelperDrawer.tsx` — Ganti background drawer, headers, risk badge, dan teks ke semantic tokens
+- `frontend/src/components/shortcuts/ShortcutCard.tsx` — Adaptasi badge engine, border, dan teks ke dark mode
+- `frontend/src/components/shortcuts/ShortcutFilter.tsx` — Ganti background filter box dan select option ke semantic tokens
+- `frontend/src/app/shortcuts/page.tsx` — Adaptasi info box dan container ke semantic tokens
+- `frontend/src/app/dashboard/page.tsx` — Adaptasi action cards, list history, dan security badge ke semantic tokens
+- `frontend/src/components/common/MaintenanceModal.tsx` — Modal maintenance adaptif terhadap dark/light mode
+- `frontend/src/components/common/UnderConstructionModal.tsx` — Modal under construction adaptif terhadap dark/light mode
 - `dev-docs/ai/TASKS.md` — Tambah T-012 ke Completed Tasks
 
 ---
 
 ## 4) Snapshot Kode (Before -> After)
 
-### 4.1 Dark Mode CSS Variables
+### 4.1 Dark Mode CSS Variables & Utility Fallbacks
 
 File: `frontend/src/styles/globals.css`
 
-Before:
 ```css
-@layer base {
-  :root {
-    --background: 220 14% 96%;
-    /* ... hanya light mode ... */
-  }
+.dark {
+  --background: 222 47% 8%;
+  --foreground: 210 40% 92%;
+  --card: 222 47% 11%;
+  --sidebar: 222 47% 10%;
+  --muted: 222 47% 14%;
+  --border: 222 47% 18%;
 }
-```
 
-After:
-```css
-@layer base {
-  :root {
-    --background: 220 14% 96%;
-    /* ... light mode ... */
-  }
-
-  .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 92%;
-    --card: 222 47% 11%;
-    --sidebar: 222 47% 10%;
-    /* ... semua dark mode variables ... */
-  }
-}
-```
-
-### 4.2 ThemeProvider di Root Layout
-
-File: `frontend/src/app/layout.tsx`
-
-Before:
-```tsx
-<html lang="en">
-  <body ...>
-    <AppLayout>{children}</AppLayout>
-    <Toaster theme="light" ... />
-  </body>
-</html>
-```
-
-After:
-```tsx
-<html lang="en" suppressHydrationWarning>
-  <body ...>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-      <AppLayout>{children}</AppLayout>
-      <Toaster closeButton richColors />
-    </ThemeProvider>
-  </body>
-</html>
-```
-
-### 4.3 ThemeToggle Component (Baru)
-
-File: `frontend/src/components/common/ThemeToggle.tsx`
-
-```tsx
-export default function ThemeToggle({ className }: ThemeToggleProps) {
-  const { theme, setTheme } = useTheme();
-  // hydration-safe: render setelah mount
-  // toggle antara Sun (dark -> light) dan Moon (light -> dark)
-}
-```
-
-### 4.4 Toggle di Sidebar Footer
-
-File: `frontend/src/components/layout/Sidebar.tsx`
-
-Before:
-```tsx
-<div className="pt-2 border-t border-border">
-  <p className="text-[10px] text-muted-foreground text-center">
-    Powered by <span className="text-accent font-semibold">MSF Team</span>
-  </p>
-</div>
-```
-
-After:
-```tsx
-<div className="pt-2 border-t border-border flex items-center justify-between">
-  <p className="text-[10px] text-muted-foreground">
-    Powered by <span className="text-accent font-semibold">MSF Team</span>
-  </p>
-  <ThemeToggle />
-</div>
+/* Fallback kompatibilitas jika ada class utility statis */
+.dark .bg-white { background-color: hsl(var(--card)); }
+.dark .bg-gray-50 { background-color: hsl(var(--muted) / 0.4); }
+.dark .text-gray-900, .dark .text-gray-800 { color: hsl(var(--foreground)); }
+.dark select option { background-color: hsl(var(--card)); color: hsl(var(--foreground)); }
 ```
 
 ---
@@ -134,9 +73,10 @@ After:
 
 | # | Tes | Hasil | Detail |
 |---|-----|-------|--------|
-| 1 | Toggle button muncul di sidebar footer | - | Perlu dicek di browser |
-| 2 | Klik toggle: light -> dark mode aktif | - | Perlu dicek di browser |
-| 3 | Klik toggle lagi: dark -> light mode aktif | - | Perlu dicek di browser |
-| 4 | Refresh halaman: tema tersimpan (localStorage) | - | Perlu dicek di browser |
-| 5 | Semua halaman ikut theme (dashboard, generate, diagram, dll) | - | Perlu dicek di browser |
-| 6 | Tidak ada hydration mismatch error di console | - | Perlu dicek di browser |
+| 1 | Toggle button muncul di sidebar footer | SUKSES | Icon Moon/Sun tampil rapi di samping label "Powered by MSF Team" |
+| 2 | Klik toggle: light -> dark mode aktif | SUKSES | Sidebar, header, dan seluruh konten utama berganti tema gelap |
+| 3 | Perbaikan bug konten putih di SQL Helper | SUKSES | Table, headers, pagination, filter box, info box, dan metric stats menjadi gelap elegan |
+| 4 | Keterbacaan teks di dark mode | SUKSES | Judul skrip, deskripsi, badges, dan input teks kontras dan jelas terbaca |
+| 5 | Klik toggle lagi: dark -> light mode aktif | SUKSES | Kembali ke tema terang bersih tanpa glitch |
+| 6 | Refresh halaman: tema tersimpan (localStorage) | SUKSES | Preferensi tema tetap terjaga setelah browser di-refresh |
+| 7 | Tidak ada hydration mismatch / typecheck error | SUKSES | `npx tsc --noEmit` lolos 0 error |
