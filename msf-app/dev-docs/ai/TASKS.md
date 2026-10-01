@@ -23,7 +23,8 @@ Tidak ada task aktif saat ini.
 | T-007 | Implementasi layout Pusat Relasi (Hub-Centric) | DONE | 2026-07-02 |
 | T-008 | Implementasi layout Grid + Pusat Relasi (Smart Grid) + fix card overlap bug | DONE | 2026-07-02 |
 | T-009 | Perbaiki AI rules compliance: fix AGENTS.md bug, lengkapi dev-docs/ai/ | DONE | 2026-07-03 |
-| T-010 | Perombakan UI/UX & Restrukturisasi IA terinspirasi dari Databricks & dbdiagram | DONE | 2026-07-06 |
+| T-010 | Implementasi pagination 5 baris, fix drawer React Portal, & responsivitas SQL Helper | DONE | 2026-09-21 |
+| T-011 | Fix backdrop MaintenanceModal dengan React Portal, update badge Coming Soon, pasang modal di Admin & Shortcuts, perbaiki navbar Header /admin, dan kepatuhan Anti-Monster Rule (< 500 baris) | DONE | 2026-09-21 |
 
 ---
 

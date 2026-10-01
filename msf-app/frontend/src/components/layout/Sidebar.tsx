@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, ShieldAlert, Layers } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, ShieldAlert, Layers, Database } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -29,21 +29,43 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: "Dashboard",
       href: "/dashboard",
       icon: LayoutDashboard,
+      description: "Overview & statistik",
     },
     {
-      label: "Generator",
+      label: "AI Generator",
       href: "/generate",
       icon: Sparkles,
+      description: "Generate dokumentasi DB",
     },
     {
-      label: "Diagram",
+      label: "MSF Diagram",
       href: "/diagram",
       icon: Layers,
+      description: "Visualisasi skema & relasi",
     },
     {
-      label: "Shortcuts",
+      label: "SQL Helper",
+      href: "/sql-helper",
+      icon: Database,
+      description: "Tabel skrip DBA & optimasi",
+    },
+    {
+      label: "SQL Shortcuts",
       href: "/shortcuts",
       icon: Terminal,
+      description: "Skrip DBA & optimasi",
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: Settings,
+      description: "Konfigurasi AI & koneksi",
+    },
+    {
+      label: "Admin Portal",
+      href: "/admin",
+      icon: ShieldAlert,
+      description: "Log & kontrol sistem",
     },
   ];
 
@@ -59,7 +81,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       <div
         className={cn(
-          "fixed inset-y-0 left-0 w-64 bg-sidebar border-r border-border flex flex-col h-screen shrink-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:z-20",
+          "fixed inset-y-0 left-0 w-64 bg-sidebar border-r border-border flex flex-col h-screen shrink-0 z-50 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:z-40",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
@@ -72,7 +94,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </div>
               <span className="font-bold text-base text-foreground tracking-tight">MSF DB</span>
             </div>
-            <span className="text-[10px] text-muted-foreground mt-0.5 block pl-9">v2.1 — AI Docs Platform</span>
+            <span className="text-[10px] text-muted-foreground mt-0.5 block pl-9">v2.0 — AI Docs Platform</span>
           </div>
           <button
             onClick={onClose}
@@ -107,19 +129,53 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     isActive ? "text-accent" : "text-muted-foreground group-hover:text-foreground"
                   )}
                 />
-                <span className={cn("text-sm font-medium leading-tight", isActive ? "text-accent" : "")}>
-                  {item.label}
-                </span>
+                <div className="flex flex-col">
+                  <span className={cn("text-sm font-medium leading-tight", isActive ? "text-accent" : "")}>
+                    {item.label}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground leading-none mt-0.5 font-normal">
+                    {item.description}
+                  </span>
+                </div>
               </Link>
             );
           })}
         </nav>
 
         {/* Status Footer */}
-        <div className="p-3.5 border-t border-border text-center bg-gray-50/30">
-          <p className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider">
-            v2.1 — 100% LOCAL &amp; SECURE
-          </p>
+        <div className="p-4 border-t border-border space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground flex items-center gap-1.5">
+              <Activity className="h-3 w-3" />
+              API Server
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={cn("w-1.5 h-1.5 rounded-full pulse-dot", isApiUp ? "bg-accent" : "bg-red-400")} />
+              <span className={cn("text-[11px] font-semibold", isApiUp ? "text-accent" : "text-red-500")}>
+                {isApiUp ? "Online" : "Offline"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground flex items-center gap-1.5">
+              <Circle className="h-3 w-3" />
+              Ollama
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={cn("w-1.5 h-1.5 rounded-full", isOllamaUp ? "bg-accent pulse-dot" : "bg-amber-400")} />
+              <span className={cn("text-[11px] font-semibold", isOllamaUp ? "text-accent" : "text-amber-500")}>
+                {isOllamaUp ? (ollamaModel ? ollamaModel.split(":")[0] : "Active") : "Offline"}
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-border">
+            <p className="text-[10px] text-muted-foreground text-center">
+              Powered by{" "}
+              <span className="text-accent font-semibold">MSF Team</span>
+            </p>
+          </div>
         </div>
       </div>
     </>

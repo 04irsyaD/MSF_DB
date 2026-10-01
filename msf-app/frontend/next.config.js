@@ -5,7 +5,11 @@ const nextConfig = {
   // Kita bisa setup rewrite ke backend API lokal agar tidak terkendala CORS saat development
   async rewrites() {
     const isProd = process.env.NODE_ENV === "production";
-    const dest = isProd ? "http://backend:8000/api/:path*" : "http://localhost:8080/api/:path*";
+    const defaultHost = isProd ? "http://backend:8000" : "http://localhost:8080";
+    const backendBase = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || defaultHost;
+    const dest = backendBase.endsWith("/api")
+      ? `${backendBase}/:path*`
+      : `${backendBase.replace(/\/$/, "")}/api/:path*`;
     return [
       {
         source: "/api/:path*",

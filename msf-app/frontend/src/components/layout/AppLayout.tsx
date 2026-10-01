@@ -17,57 +17,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
   // Monitor backend health
-  const { data: health, error, mutate } = useSWR("/api/health", swrFetcher, {
+  const { data: health, error } = useSWR("/api/health", swrFetcher, {
     refreshInterval: 10000,
     shouldRetryOnError: true,
   });
 
   const isBackendDown = !health && !!error;
+  const showBackendAlert = isBackendDown && !pathname.startsWith("/sql-helper");
 
   // Landing page: render tanpa sidebar/header
   if (pathname === "/") {
     return <>{children}</>;
-  }
-
-  // Admin page: standalone fullscreen console layout (bypass offline overlay)
-  if (pathname === "/admin") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col font-mono">
-        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
-      </div>
-    );
-  }
-
-  // Secure and generic maintenance overlay for end-users
-  if (isBackendDown) {
-    return (
-      <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-6 font-mono">
-        <div className="max-w-md w-full bg-white border border-border rounded-3xl p-8 text-center space-y-6 shadow-xl animate-fade-in">
-          <div className="mx-auto h-16 w-16 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500">
-            <Hammer className="h-7 w-7 animate-bounce" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">
-              SISTEM SEDANG PEMELIHARAAN
-            </h3>
-            <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto uppercase">
-              Kami sedang melakukan pemeliharaan rutin untuk meningkatkan kualitas layanan. Silakan coba hubungkan kembali beberapa saat lagi.
-            </p>
-          </div>
-
-          <div className="pt-2">
-            <button
-              onClick={() => mutate()}
-              className="px-5 py-2.5 bg-accent hover:bg-accent/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm uppercase mx-auto"
-            >
-              Coba Hubungkan Kembali
-            </button>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -75,7 +35,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          {showBackendAlert && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-center justify-between gap-4 animate-fade-in-up">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+                  <Hammer className="h-4 w-4 animate-pulse" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-red-900">Koneksi API Bermasalah / Under Construction</p>
+                  <p className="text-[10px] text-red-600 mt-0.5">
+                    Gagal terhubung ke backend API. Beberapa fitur pembuatan dokumen dan database tidak dapat digunakan saat ini.
+                  </p>
+                </div>
+              </div>
+              <div className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-red-100 text-red-700 border border-red-200 shrink-0 uppercase tracking-wider">
+                Maintenance
+              </div>
+            </div>
+          )}
           {children}
         </main>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Layers } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Database, Layers, ShieldAlert } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -14,11 +14,13 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   const pathname = usePathname();
 
   const getPageInfo = () => {
-    if (pathname.startsWith("/dashboard")) return { title: "Dashboard", desc: "Ringkasan aktivitas dan riwayat dokumentasi", icon: LayoutDashboard };
-    if (pathname.startsWith("/shortcuts")) return { title: "Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi", icon: Terminal };
-    if (pathname.startsWith("/settings")) return { title: "Pengaturan", desc: "Konfigurasi AI provider, model, dan koneksi", icon: Settings };
-    if (pathname.startsWith("/diagram")) return { title: "Diagram", desc: "Visualisasi skema dan relasi antartabel database", icon: Layers };
-    return { title: "Generator", desc: "Buat dokumentasi dari DDL SQL atau koneksi database langsung", icon: Sparkles };
+    if (pathname.startsWith("/dashboard")) return { title: "Dashboard", desc: "Ringkasan aktivitas dan statistik aplikasi", icon: LayoutDashboard };
+    if (pathname.startsWith("/sql-helper")) return { title: "SQL Helper", desc: "Tabel skrip DBA & optimasi (Client Standalone)", icon: Database };
+    if (pathname.startsWith("/shortcuts")) return { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi", icon: Terminal };
+    if (pathname.startsWith("/diagram")) return { title: "MSF Diagram", desc: "Visualisasi skema & relasi database interaktif", icon: Layers };
+    if (pathname.startsWith("/settings")) return { title: "Settings", desc: "Konfigurasi AI provider, model, dan preferensi", icon: Settings };
+    if (pathname.startsWith("/admin")) return { title: "Admin Portal", desc: "Log & kontrol sistem", icon: ShieldAlert };
+    return { title: "AI Generator", desc: "Generate dokumentasi dari DDL atau koneksi database langsung", icon: Sparkles };
   };
 
   const { title, desc, icon: Icon } = getPageInfo();
@@ -46,7 +48,18 @@ export default function Header({ onMenuToggle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Status detail sistem disembunyikan untuk end-user */}
+        {health?.services && (
+          <div className={cn(
+            "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium border",
+            health.services.ollama === "up"
+              ? "bg-accent/10 text-accent border-accent/20"
+              : "bg-amber-50 text-amber-600 border-amber-200"
+          )}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", health.services.ollama === "up" ? "bg-accent pulse-dot" : "bg-amber-400")} />
+            <Cpu className="h-3 w-3" />
+            <span>{health.services.ollama_model ? health.services.ollama_model.split(":")[0] : "Ollama Offline"}</span>
+          </div>
+        )}
       </div>
     </header>
   );
