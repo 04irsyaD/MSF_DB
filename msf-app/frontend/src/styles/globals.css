@@ -39,6 +39,42 @@
     --sidebar: 0 0% 100%;            /* #ffffff sidebar */
     --radius: 8px;
   }
+
+  .dark {
+    /* Dark Mode */
+    --background: 222 47% 8%;        /* #0d1117 — dark page bg */
+    --foreground: 210 40% 92%;       /* #e2e8f0 — text utama */
+
+    --card: 222 47% 11%;             /* #161b22 — card surface */
+    --card-foreground: 210 40% 92%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 92%;
+
+    --primary: 160 84% 39%;          /* #10b981 — emerald tetap */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 47% 14%;        /* #1f2937 */
+    --secondary-foreground: 210 40% 92%;
+
+    --muted: 222 47% 14%;            /* #1f2937 */
+    --muted-foreground: 215 20% 55%; /* #8b9ab1 */
+
+    --accent: 160 84% 39%;           /* #10b981 emerald */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;        /* #dc2626 */
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;           /* #f59e0b */
+    --warning-foreground: 0 0% 100%;
+
+    --border: 222 47% 18%;           /* #2d3748 */
+    --input: 222 47% 18%;
+    --ring: 160 84% 39%;
+
+    --sidebar: 222 47% 10%;          /* #13181f — sidebar dark */
+  }
 }
 
 @layer base {
@@ -47,6 +83,9 @@
   }
   html {
     color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground antialiased;

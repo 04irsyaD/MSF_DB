@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "../styles/globals.css";
 import AppLayout from "@/components/layout/AppLayout";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,14 +27,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
       >
-        <AppLayout>{children}</AppLayout>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <AppLayout>{children}</AppLayout>
 
-        {/* Sonner Toast Notifications */}
-        <Toaster position="bottom-right" theme="light" closeButton richColors />
+          {/* Sonner Toast Notifications */}
+          <Toaster position="bottom-right" closeButton richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

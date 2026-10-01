@@ -6,6 +6,7 @@ import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, Shi
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -170,11 +171,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-border">
-            <p className="text-[10px] text-muted-foreground text-center">
+          <div className="pt-2 border-t border-border flex items-center justify-between">
+            <p className="text-[10px] text-muted-foreground">
               Powered by{" "}
               <span className="text-accent font-semibold">MSF Team</span>
             </p>
+            <ThemeToggle />
           </div>
         </div>
       </div>
