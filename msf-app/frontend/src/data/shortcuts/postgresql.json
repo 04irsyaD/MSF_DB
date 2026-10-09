@@ -26,7 +26,17 @@
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "read-only",
-    "sql": "SELECT \n    n.nspname AS schema_name,\n    t.relname AS table_name,\n    CASE WHEN pk.conname IS NOT NULL THEN 'YES' ELSE 'NO' END AS has_primary_key,\n    array_agg(a.attname ORDER BY a.attnum) FILTER (WHERE a.attname IS NOT NULL) AS primary_key_columns\nFROM pg_class t\nJOIN pg_namespace n ON n.oid = t.relnamespace\nLEFT JOIN pg_constraint pk ON pk.conrelid = t.oid AND pk.contype = 'p'\nLEFT JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(pk.conkey)\nWHERE t.relkind = 'r'\n  AND n.nspname = 'public' -- Ganti dengan skema target jika perlu\nGROUP BY n.nspname, t.relname, pk.conname\nORDER BY has_primary_key ASC, t.relname;",
+    "params": [
+      {
+        "key": "schema_name",
+        "label": "Schema Name",
+        "type": "string",
+        "default": "public",
+        "required": true,
+        "hint": "Target PostgreSQL schema name (e.g. public, auth, core)"
+      }
+    ],
+    "sql": "SELECT \n    n.nspname AS schema_name,\n    t.relname AS table_name,\n    CASE WHEN pk.conname IS NOT NULL THEN 'YES' ELSE 'NO' END AS has_primary_key,\n    array_agg(a.attname ORDER BY a.attnum) FILTER (WHERE a.attname IS NOT NULL) AS primary_key_columns\nFROM pg_class t\nJOIN pg_namespace n ON n.oid = t.relnamespace\nLEFT JOIN pg_constraint pk ON pk.conrelid = t.oid AND pk.contype = 'p'\nLEFT JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(pk.conkey)\nWHERE t.relkind = 'r'\n  AND n.nspname = '{{schema_name}}'\nGROUP BY n.nspname, t.relname, pk.conname\nORDER BY has_primary_key ASC, t.relname;",
     "tags": ["primary-key", "schema", "table", "integrity", "audit", "kunci-primer"]
   },
   {
@@ -36,7 +46,17 @@
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
-    "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name ILIKE '%nama_kolom%'\n  AND table_schema NOT IN ('pg_catalog', 'information_schema')\nORDER BY table_schema, table_name;",
+    "params": [
+      {
+        "key": "column_pattern",
+        "label": "Column Name Pattern",
+        "type": "string",
+        "default": "user_id",
+        "required": true,
+        "hint": "Column name substring to search for (e.g. user_id, email, created_at)"
+      }
+    ],
+    "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name ILIKE '%{{column_pattern}}%'\n  AND table_schema NOT IN ('pg_catalog', 'information_schema')\nORDER BY table_schema, table_name;",
     "tags": ["search", "columns", "schema", "table", "diagnostic", "cari-kolom"]
   },
   {
@@ -76,7 +96,17 @@
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
-    "sql": "SELECT \n    n.nspname AS schema_name,\n    p.proname AS function_name,\n    pg_get_function_identity_arguments(p.oid) AS arguments,\n    pg_get_functiondef(p.oid) AS definition\nFROM pg_proc p\nJOIN pg_namespace n ON p.pronamespace = n.oid\nWHERE p.prokind = 'f'\n  AND pg_get_functiondef(p.oid) ILIKE '%KEYWORD%'\nORDER BY schema_name, function_name;",
+    "params": [
+      {
+        "key": "keyword",
+        "label": "Keyword",
+        "type": "string",
+        "default": "insert",
+        "required": true,
+        "hint": "Potongan kata kunci atau nama tabel di dalam kode fungsi"
+      }
+    ],
+    "sql": "SELECT \n    n.nspname AS schema_name,\n    p.proname AS function_name,\n    pg_get_function_identity_arguments(p.oid) AS arguments,\n    pg_get_functiondef(p.oid) AS definition\nFROM pg_proc p\nJOIN pg_namespace n ON p.pronamespace = n.oid\nWHERE p.prokind = 'f'\n  AND pg_get_functiondef(p.oid) ILIKE '%{{keyword}}%'\nORDER BY schema_name, function_name;",
     "tags": ["function", "procedure", "search", "plpgsql", "code", "cari-fungsi"]
   },
   {
@@ -116,7 +146,17 @@
     "engine": "postgresql",
     "category": "maintenance",
     "risk_level": "caution",
-    "sql": "DO $$\nDECLARE\n    r RECORD;\n    target_user TEXT := 'user_baru'; -- Ganti dengan nama user baru\nBEGIN\n    -- Ganti owner semua tabel\n    FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP\n        EXECUTE format('ALTER TABLE public.%I OWNER TO %I', r.tablename, target_user);\n    END LOOP;\n\n    -- Ganti owner semua sequence\n    FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' LOOP\n        EXECUTE format('ALTER SEQUENCE public.%I OWNER TO %I', r.sequence_name, target_user);\n    END LOOP;\n\n    -- Ganti owner semua view\n    FOR r IN SELECT table_name FROM information_schema.views WHERE table_schema = 'public' LOOP\n        EXECUTE format('ALTER VIEW public.%I OWNER TO %I', r.table_name, target_user);\n    END LOOP;\nEND $$;",
+    "params": [
+      {
+        "key": "new_owner",
+        "label": "New Owner Role/User",
+        "type": "identifier",
+        "default": "app_user",
+        "required": true,
+        "hint": "Nama role atau pengguna database yang akan menjadi pemilik baru"
+      }
+    ],
+    "sql": "DO $$\nDECLARE\n    r RECORD;\n    target_user TEXT := '{{new_owner}}';\nBEGIN\n    -- Ganti owner semua tabel\n    FOR r IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP\n        EXECUTE format('ALTER TABLE public.%I OWNER TO %I', r.tablename, target_user);\n    END LOOP;\n\n    -- Ganti owner semua sequence\n    FOR r IN SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' LOOP\n        EXECUTE format('ALTER SEQUENCE public.%I OWNER TO %I', r.sequence_name, target_user);\n    END LOOP;\n\n    -- Ganti owner semua view\n    FOR r IN SELECT table_name FROM information_schema.views WHERE table_schema = 'public' LOOP\n        EXECUTE format('ALTER VIEW public.%I OWNER TO %I', r.table_name, target_user);\n    END LOOP;\nEND $$;",
     "tags": ["owner", "alter-table", "permissions", "maintenance", "role", "ganti-owner"]
   },
   {
@@ -126,7 +166,25 @@
     "engine": "postgresql",
     "category": "diagnostic",
     "risk_level": "read-only",
-    "sql": "SELECT kolom_kunci_1, kolom_kunci_2, COUNT(*) AS jumlah_duplikat\nFROM nama_tabel\nGROUP BY kolom_kunci_1, kolom_kunci_2\nHAVING COUNT(*) > 1\nORDER BY jumlah_duplikat DESC;",
+    "params": [
+      {
+        "key": "table_name",
+        "label": "Table Name",
+        "type": "identifier",
+        "default": "users",
+        "required": true,
+        "hint": "Nama tabel yang ingin diperiksa duplikatnya"
+      },
+      {
+        "key": "key_column",
+        "label": "Key Column",
+        "type": "identifier",
+        "default": "email",
+        "required": true,
+        "hint": "Nama kolom kunci (mis. email, username, nik)"
+      }
+    ],
+    "sql": "SELECT {{key_column}}, COUNT(*) AS jumlah_duplikat\nFROM {{table_name}}\nGROUP BY {{key_column}}\nHAVING COUNT(*) > 1\nORDER BY jumlah_duplikat DESC;",
     "tags": ["duplicate", "data-quality", "group-by", "cleaning", "diagnostic", "data-duplikat"]
   },
   {
@@ -146,7 +204,25 @@
     "engine": "postgresql",
     "category": "performance",
     "risk_level": "read-only",
-    "sql": "SELECT relname AS table_name,\n       pg_size_pretty(pg_total_relation_size(c.oid)) AS total_size,\n       pg_size_pretty(pg_relation_size(c.oid)) AS table_size,\n       pg_size_pretty(pg_total_relation_size(c.oid) - pg_relation_size(c.oid)) AS index_size\nFROM pg_class c\nLEFT JOIN pg_namespace n ON n.oid = c.relnamespace\nWHERE n.nspname = 'public'\n  AND c.relkind = 'r'\nORDER BY pg_total_relation_size(c.oid) DESC\nLIMIT 20;",
+    "params": [
+      {
+        "key": "schema_name",
+        "label": "Schema Name",
+        "type": "string",
+        "default": "public",
+        "required": true,
+        "hint": "Nama skema database (default: public)"
+      },
+      {
+        "key": "limit_rows",
+        "label": "Result Limit",
+        "type": "number",
+        "default": "20",
+        "required": true,
+        "hint": "Jumlah tabel terbesar yang ingin ditampilkan"
+      }
+    ],
+    "sql": "SELECT relname AS table_name,\n       pg_size_pretty(pg_total_relation_size(c.oid)) AS total_size,\n       pg_size_pretty(pg_relation_size(c.oid)) AS table_size,\n       pg_size_pretty(pg_total_relation_size(c.oid) - pg_relation_size(c.oid)) AS index_size\nFROM pg_class c\nLEFT JOIN pg_namespace n ON n.oid = c.relnamespace\nWHERE n.nspname = '{{schema_name}}'\n  AND c.relkind = 'r'\nORDER BY pg_total_relation_size(c.oid) DESC\nLIMIT {{limit_rows}};",
     "tags": ["size", "table", "index", "disk", "ukuran-tabel"]
   },
   {

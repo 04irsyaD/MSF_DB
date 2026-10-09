@@ -109,9 +109,28 @@ export const SQL_HELPER_LABELS = {
     suggestionRisk: "Try clearing risk filters to include safe read-only queries.",
     resetButton: "Reset All Filters",
   },
+  params: {
+    heading: "Template Parameters",
+    subheading: "Customize query placeholders before copying or executing",
+    disclaimer: "Text generator: Always inspect the interpolated SQL before running in production.",
+    resetParams: "Reset Defaults",
+    requiredBadge: "Required",
+    optionalBadge: "Optional",
+    fillRequiredWarning: "Please fill all required parameters to enable script copying.",
+    invalidFormatWarning: "One or more parameters have invalid format.",
+  },
+  quickAccess: {
+    all: "All Scripts",
+    favorites: "Favorites",
+    recent: "Recently Used",
+    clearRecent: "Clear Recent",
+    noFavorites: "No favorited scripts yet. Click ⭐ on any card to bookmark.",
+    noRecent: "No recently viewed scripts yet.",
+  },
   toast: {
     copySuccess: "SQL script copied to clipboard!",
     copyFailed: "Failed to copy to clipboard. Please copy manually.",
     shareSuccess: "Script link copied to clipboard!",
+    paramsReset: "Parameters reset to default values.",
   },
 };

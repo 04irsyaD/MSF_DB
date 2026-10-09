@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
   X,
@@ -12,11 +12,18 @@ import {
   Check,
   Tag,
   Info,
+  AlertTriangle,
 } from "lucide-react";
 import { ScriptItem } from "../lib/schema";
 import { RiskBadge, EngineBadge, CategoryBadge } from "./Badges";
 import { RiskBanner } from "./RiskBanner";
 import { SqlViewer } from "./SqlViewer";
+import { ParamForm } from "./ParamForm";
+import {
+  interpolateSql,
+  getDefaultParamValues,
+  getParamStorageKey,
+} from "../lib/interpolate";
 import { copyScriptWithToast } from "../lib/clipboard";
 import { copyToClipboard } from "@/lib/clipboard";
 import { toast } from "sonner";
@@ -29,6 +36,7 @@ interface ScriptDrawerProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onSelectTag?: (tag: string) => void;
+  onAccessScript?: (scriptId: string) => void;
   hasPrev?: boolean;
   hasNext?: boolean;
   onPrev?: () => void;
@@ -42,6 +50,7 @@ export function ScriptDrawer({
   isFavorite,
   onToggleFavorite,
   onSelectTag,
+  onAccessScript,
   hasPrev = false,
   hasNext = false,
   onPrev,
@@ -49,21 +58,138 @@ export function ScriptDrawer({
 }: ScriptDrawerProps) {
   const [highRiskConfirmed, setHighRiskConfirmed] = useState(false);
   const [copiedPrimary, setCopiedPrimary] = useState(false);
+  const [paramValues, setParamValues] = useState<Record<string, string>>({});
 
-  // Reset confirmation state whenever script changes or drawer closes
+  // Reset confirmation state & load/initialize parameters whenever script changes or drawer opens
   useEffect(() => {
     setHighRiskConfirmed(false);
     setCopiedPrimary(false);
-  }, [script?.id, isOpen]);
+
+    if (script && isOpen) {
+      onAccessScript?.(script.id);
+
+      // Initialize parameters from localStorage or defaults
+      if (script.params && script.params.length > 0) {
+        const defaults = getDefaultParamValues(script.params);
+        try {
+          const stored = window.localStorage.getItem(getParamStorageKey(script.id));
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            setParamValues({ ...defaults, ...parsed });
+          } else {
+            setParamValues(defaults);
+          }
+        } catch {
+          setParamValues(defaults);
+        }
+      } else {
+        setParamValues({});
+      }
+    }
+  }, [script, isOpen, onAccessScript]);
+
+  // Keyboard navigation: ArrowLeft (prev), ArrowRight (next)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isEditing =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable);
+
+      if (isEditing) return;
+
+      if (e.key === "ArrowLeft") {
+        if (hasPrev && onPrev) {
+          e.preventDefault();
+          onPrev();
+        }
+      } else if (e.key === "ArrowRight") {
+        if (hasNext && onNext) {
+          e.preventDefault();
+          onNext();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, hasPrev, hasNext, onPrev, onNext]);
+
+  // Handle parameter value updates and persist to localStorage
+  const handleParamChange = useCallback(
+    (key: string, value: string) => {
+      if (!script) return;
+      setParamValues((prev) => {
+        const updated = { ...prev, [key]: value };
+        try {
+          window.localStorage.setItem(
+            getParamStorageKey(script.id),
+            JSON.stringify(updated)
+          );
+        } catch {
+          // Ignore localStorage errors
+        }
+        return updated;
+      });
+    },
+    [script]
+  );
+
+  const handleResetParams = useCallback(() => {
+    if (!script || !script.params) return;
+    const defaults = getDefaultParamValues(script.params);
+    setParamValues(defaults);
+    try {
+      window.localStorage.removeItem(getParamStorageKey(script.id));
+    } catch {
+      // Ignore
+    }
+    toast.info(SQL_HELPER_LABELS.toast.paramsReset);
+  }, [script]);
+
+  // Real-time SQL interpolation
+  const interpolation = useMemo(() => {
+    if (!script) {
+      return {
+        interpolatedSql: "",
+        isValid: true,
+        errors: {},
+        missingRequired: [],
+      };
+    }
+    return interpolateSql(script.sql, script.params || [], paramValues);
+  }, [script, paramValues]);
 
   if (!script) return null;
 
-  const isCopyDisabled = script.risk === "high" && !highRiskConfirmed;
+  const hasParams = script.params && script.params.length > 0;
+  const isHighRiskLocked = script.risk === "high" && !highRiskConfirmed;
+  const isParamInvalid = !interpolation.isValid;
+  const isCopyDisabled = isHighRiskLocked || isParamInvalid;
+
+  const copyDisabledReason = isParamInvalid
+    ? interpolation.missingRequired.length > 0
+      ? SQL_HELPER_LABELS.params.fillRequiredWarning
+      : SQL_HELPER_LABELS.params.invalidFormatWarning
+    : isHighRiskLocked
+    ? SQL_HELPER_LABELS.risk.highConfirmRequired
+    : undefined;
 
   const handleCopyPrimary = async () => {
-    if (isCopyDisabled) return;
-    const success = await copyScriptWithToast(script.sql);
+    if (isCopyDisabled) {
+      if (copyDisabledReason) {
+        toast.warning(copyDisabledReason);
+      }
+      return;
+    }
+    const success = await copyScriptWithToast(interpolation.interpolatedSql);
     if (success) {
+      onAccessScript?.(script.id);
       setCopiedPrimary(true);
       setTimeout(() => setCopiedPrimary(false), 2000);
     }
@@ -179,12 +305,28 @@ export function ScriptDrawer({
               </div>
             )}
 
-            {/* SQL Viewer */}
+            {/* Template Parameters Form (if script has params) */}
+            {hasParams && (
+              <ParamForm
+                params={script.params}
+                values={paramValues}
+                errors={interpolation.errors}
+                onChange={handleParamChange}
+                onReset={handleResetParams}
+              />
+            )}
+
+            {/* SQL Viewer with real-time interpolated SQL */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider font-mono">
                 {SQL_HELPER_LABELS.viewer.heading}
               </h4>
-              <SqlViewer sql={script.sql} scriptId={script.id} />
+              <SqlViewer
+                sql={interpolation.interpolatedSql}
+                scriptId={script.id}
+                isCopyDisabled={isCopyDisabled}
+                copyDisabledReason={copyDisabledReason}
+              />
             </div>
 
             {/* Notes */}
@@ -222,6 +364,14 @@ export function ScriptDrawer({
 
           {/* Sticky Footer */}
           <div className="p-4 border-t border-border/80 bg-background/95 backdrop-blur-xs space-y-3">
+            {/* Warning banner if parameters are invalid/incomplete */}
+            {isParamInvalid && (
+              <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-300 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 font-medium">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{copyDisabledReason}</span>
+              </div>
+            )}
+
             {/* High-risk confirmation checkbox in footer */}
             {script.risk === "high" && (
               <label className="flex items-center gap-2.5 text-xs text-rose-700 dark:text-rose-300 font-medium cursor-pointer p-2 rounded-lg bg-rose-500/10 border border-rose-500/20">
@@ -243,6 +393,7 @@ export function ScriptDrawer({
                   disabled={!hasPrev}
                   onClick={onPrev}
                   aria-label={SQL_HELPER_LABELS.drawer.prevScript}
+                  title="Previous script (Press ←)"
                   className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium border border-border/70 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -256,6 +407,7 @@ export function ScriptDrawer({
                   disabled={!hasNext}
                   onClick={onNext}
                   aria-label={SQL_HELPER_LABELS.drawer.nextScript}
+                  title="Next script (Press →)"
                   className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium border border-border/70 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors"
                 >
                   <span className="hidden sm:inline">
@@ -270,6 +422,7 @@ export function ScriptDrawer({
                 type="button"
                 disabled={isCopyDisabled}
                 onClick={handleCopyPrimary}
+                title={copyDisabledReason || SQL_HELPER_LABELS.drawer.copyPrimary}
                 className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold font-mono tracking-wide transition-all shadow-xs ${
                   isCopyDisabled
                     ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"

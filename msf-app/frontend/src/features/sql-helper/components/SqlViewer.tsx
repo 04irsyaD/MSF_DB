@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Copy, Check, Download, WrapText, FileCode } from "lucide-react";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 import { getSqlHighlighter } from "../lib/shiki";
 import { copyScriptWithToast } from "../lib/clipboard";
 import { SQL_HELPER_LABELS } from "../lib/labels";
@@ -11,9 +12,17 @@ interface SqlViewerProps {
   sql: string;
   scriptId?: string;
   className?: string;
+  isCopyDisabled?: boolean;
+  copyDisabledReason?: string;
 }
 
-export function SqlViewer({ sql, scriptId = "query", className = "" }: SqlViewerProps) {
+export function SqlViewer({
+  sql,
+  scriptId = "query",
+  className = "",
+  isCopyDisabled = false,
+  copyDisabledReason,
+}: SqlViewerProps) {
   const { resolvedTheme } = useTheme();
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
   const [wrapLines, setWrapLines] = useState(false);
@@ -49,6 +58,12 @@ export function SqlViewer({ sql, scriptId = "query", className = "" }: SqlViewer
   }, [sql, themeName]);
 
   const handleCopy = async () => {
+    if (isCopyDisabled) {
+      if (copyDisabledReason) {
+        toast.warning(copyDisabledReason);
+      }
+      return;
+    }
     const success = await copyScriptWithToast(sql);
     if (success) {
       setCopied(true);
@@ -113,8 +128,12 @@ export function SqlViewer({ sql, scriptId = "query", className = "" }: SqlViewer
           <button
             type="button"
             onClick={handleCopy}
+            disabled={isCopyDisabled}
+            title={isCopyDisabled ? copyDisabledReason : SQL_HELPER_LABELS.viewer.copy}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-medium transition-all ${
-              copied
+              isCopyDisabled
+                ? "opacity-50 cursor-not-allowed bg-zinc-800/60 text-zinc-500"
+                : copied
                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                 : "bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
             }`}

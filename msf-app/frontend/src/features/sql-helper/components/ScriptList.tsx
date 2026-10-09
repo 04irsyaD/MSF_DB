@@ -15,6 +15,7 @@ interface ScriptListProps {
   onSelectScript: (script: ScriptItem) => void;
   isFavorite: (id: string) => boolean;
   onToggleFavorite: (id: string) => void;
+  onAccessScript?: (id: string) => void;
 
   page: number;
   onPageChange: (p: number) => void;
@@ -35,6 +36,7 @@ export function ScriptList({
   onSelectScript,
   isFavorite,
   onToggleFavorite,
+  onAccessScript,
   page,
   onPageChange,
   pageSize,
@@ -102,6 +104,7 @@ export function ScriptList({
                     onSelect={() => onSelectScript(script)}
                     isFavorite={isFavorite(script.id)}
                     onToggleFavorite={() => onToggleFavorite(script.id)}
+                    onAccessScript={onAccessScript}
                   />
                 ))}
               </tbody>
@@ -116,6 +119,7 @@ export function ScriptList({
                 onSelect={() => onSelectScript(script)}
                 isFavorite={isFavorite(script.id)}
                 onToggleFavorite={() => onToggleFavorite(script.id)}
+                onAccessScript={onAccessScript}
               />
             ))}
           </div>
@@ -132,6 +136,7 @@ export function ScriptList({
               onSelect={() => onSelectScript(script)}
               isFavorite={isFavorite(script.id)}
               onToggleFavorite={() => onToggleFavorite(script.id)}
+              onAccessScript={onAccessScript}
             />
           ))}
         </div>

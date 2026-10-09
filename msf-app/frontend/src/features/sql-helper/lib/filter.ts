@@ -2,6 +2,7 @@ import { ScriptItem, RiskLevelType } from "./schema";
 import { searchScriptsWithFuse } from "./search";
 
 export type SortKey = "relevance" | "title" | "risk" | "category";
+export type AccessScope = "all" | "favorites" | "recent";
 
 export interface ScriptFilterOptions {
   q?: string;
@@ -9,6 +10,9 @@ export interface ScriptFilterOptions {
   categories?: string[];
   risks?: RiskLevelType[];
   sort?: SortKey;
+  scope?: AccessScope;
+  favoriteIds?: string[];
+  recentIds?: string[];
 }
 
 const RISK_WEIGHTS: Record<RiskLevelType, number> = {
@@ -25,6 +29,15 @@ export function filterScripts(
   options: ScriptFilterOptions = {}
 ): ScriptItem[] {
   let result = scripts;
+
+  // 0. Filter by scope (Favorites or Recent)
+  if (options.scope === "favorites" && options.favoriteIds) {
+    const favSet = new Set(options.favoriteIds);
+    result = result.filter((item) => favSet.has(item.id));
+  } else if (options.scope === "recent" && options.recentIds) {
+    const recentSet = new Set(options.recentIds);
+    result = result.filter((item) => recentSet.has(item.id));
+  }
 
   // 1. Search Query (via Fuse.js for fuzzy scoring)
   if (options.q && options.q.trim()) {
@@ -65,6 +78,10 @@ export function filterScripts(
       }
       case "relevance":
       default:
+        // When filtering recent in default view, maintain recent recency order
+        if (options.scope === "recent" && options.recentIds && (!options.q || !options.q.trim())) {
+          return options.recentIds.indexOf(a.id) - options.recentIds.indexOf(b.id);
+        }
         // When there is no search query, sort by category then title
         if (!options.q || !options.q.trim()) {
           const catDiff = a.category.localeCompare(b.category);

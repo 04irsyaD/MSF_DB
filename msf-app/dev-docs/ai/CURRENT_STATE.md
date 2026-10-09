@@ -1,7 +1,7 @@
 # Current State — Status Kesehatan Sistem saat Ini
 
 > **Status:** PROJECT STATUS — Kondisi berkas, cakupan testing, dan technical debt.
-> **Terakhir diupdate:** 2026-10-02
+> **Terakhir diupdate:** 2026-10-09
 
 ---
 
@@ -10,7 +10,10 @@
 *   **Kasus Uji Backend (Pytest)**: **32 passed** (100% passing).
 *   **Keamanan Linter**: **Markdownlint lulus 100% (0 errors)** berkat konfigurasi berkas `.markdownlint.json` di root repositori.
 *   **Status Dependensi**: Stabil (semua image docker-compose berhasil dibuat dan berjalan normal).
-*   **TypeScript Check (Frontend)**: `npx tsc --noEmit` → **0 error** (terverifikasi pasca T-012 dark mode).
+*   **TypeScript Check (Frontend)**: `npm run type-check` (`tsc --noEmit`) → **0 error** (terverifikasi pasca SQL Helper v2 Fase 4).
+*   **Validasi Data SQL Helper**: `npm run validate:data` → **27 skrip valid 100%** across 2 datasets.
+*   **Unit Tests Frontend**: `npm run test:sql-helper` → **7 passed** (100% passing parameter validation & interpolation).
+*   **Production Build**: `npm run build` → **11/11 halaman statis sukses** (bundle `/sql-helper` 71.1 kB).
 
 ---
 
@@ -18,6 +21,10 @@
 
 | Task ID | Fitur | Tanggal |
 |---------|-------|---------|
+| T-020 | SQL Helper v2 Fase 4 (Template params `{{x}}`, Favorites & Recent localStorage, Deep link `?script=`, Drawer Prev/Next) | 2026-10-09 |
+| T-019 | SQL Helper v2 Fase 3 (UI Baru: Cards preview 3 baris SQL, Table ringkas, Radix drawer, FilterChips, Shiki SqlViewer) | 2026-10-09 |
+| T-018 | SQL Helper v2 Fase 2 (Refactor Fondasi: Zod schema, riskMeta, labels, validate:data, useScriptFilters URL sync) | 2026-10-09 |
+| T-017 | SQL Helper v2 Fase 1 (Quick Wins: Salin langsung, default 10 baris, dismissible info, a11y, clipboard utility) | 2026-10-09 |
 | T-012 | Dark/Light Mode Toggle (`next-themes`, ThemeProvider, semantic tokens) | 2026-10-01 |
 | T-011 | Fix MaintenanceModal React Portal, ekspansi ke Admin & Shortcuts | 2026-09-21 |
 | T-010 | SQL Helper pagination, Drawer React Portal, responsivitas | 2026-09-21 |

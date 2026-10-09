@@ -1,10 +1,16 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Star, Copy, Check, ArrowRight } from "lucide-react";
+import { Star, Copy, Check, ArrowRight, SlidersHorizontal } from "lucide-react";
 import { ScriptItem } from "../lib/schema";
 import { RiskBadge, EngineBadge, CategoryBadge } from "./Badges";
 import { copyScriptWithToast } from "../lib/clipboard";
+import {
+  interpolateSql,
+  getDefaultParamValues,
+  getParamStorageKey,
+} from "../lib/interpolate";
+import { toast } from "sonner";
 import { SQL_HELPER_LABELS } from "../lib/labels";
 
 interface ScriptCardProps {
@@ -12,6 +18,7 @@ interface ScriptCardProps {
   onSelect: () => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
+  onAccessScript?: (id: string) => void;
   className?: string;
 }
 
@@ -20,9 +27,12 @@ export function ScriptCard({
   onSelect,
   isFavorite,
   onToggleFavorite,
+  onAccessScript,
   className = "",
 }: ScriptCardProps) {
   const [copied, setCopied] = useState(false);
+
+  const hasParams = Boolean(script.params && script.params.length > 0);
 
   // Take first 3 lines of SQL for the preview
   const sqlPreview = useMemo(() => {
@@ -32,8 +42,36 @@ export function ScriptCard({
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (hasParams && script.params) {
+      const defaults = getDefaultParamValues(script.params);
+      let values = defaults;
+      try {
+        const stored = window.localStorage.getItem(getParamStorageKey(script.id));
+        if (stored) values = { ...defaults, ...JSON.parse(stored) };
+      } catch {
+        // Fallback to defaults
+      }
+
+      const res = interpolateSql(script.sql, script.params, values);
+      if (!res.isValid) {
+        toast.info(SQL_HELPER_LABELS.params.fillRequiredWarning);
+        onSelect();
+        return;
+      }
+
+      const success = await copyScriptWithToast(res.interpolatedSql);
+      if (success) {
+        onAccessScript?.(script.id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+      return;
+    }
+
     const success = await copyScriptWithToast(script.sql);
     if (success) {
+      onAccessScript?.(script.id);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -56,6 +94,12 @@ export function ScriptCard({
             <EngineBadge engine={script.engine} minVersion={script.minVersion} />
             <CategoryBadge category={script.category} />
             <RiskBadge risk={script.risk} />
+            {hasParams && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
+                <SlidersHorizontal className="w-2.5 h-2.5" />
+                <span>Param</span>
+              </span>
+            )}
           </div>
 
           <button

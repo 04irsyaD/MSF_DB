@@ -82,10 +82,10 @@ Perubahan kecil, risiko rendah, dampak langsung terasa.
 
 ### Fase 4 — Fitur Pembeda (2–3 hari)
 
-- [ ] **Parameter template** `{{placeholder}}` + form + preview real-time
-- [ ] Favorit & Terakhir dipakai (localStorage)
-- [ ] Deep link `?script=<id>` + tombol bagikan link
-- [ ] Navigasi prev/next skrip di drawer
+- [x] **Parameter template** `{{placeholder}}` + form + preview real-time
+- [x] Favorit & Terakhir dipakai (localStorage)
+- [x] Deep link `?script=<id>` + tombol bagikan link
+- [x] Navigasi prev/next skrip di drawer
 
 ### Fase 5 — Konten, QA, Integrasi (3–5 hari)
 

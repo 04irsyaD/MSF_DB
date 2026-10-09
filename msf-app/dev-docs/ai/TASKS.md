@@ -33,6 +33,7 @@ Tidak ada task aktif saat ini.
 | T-017 | SQL Helper v2 Fase 1 (Quick Wins): Salin kueri langsung di tabel, default 10 baris, dismissible info box, hapus metrik redundan, a11y, dan utility clipboard | DONE | 2026-10-09 |
 | T-018 | SQL Helper v2 Fase 2 (Refactor Fondasi): Zod schema, riskMeta, labels, validate:data, useScriptFilters URL sync, dan modularisasi features/sql-helper/ | DONE | 2026-10-09 |
 | T-019 | SQL Helper v2 Fase 3 (UI Baru): Cards preview 3 baris SQL, Table ringkas, Radix drawer, FilterChips faceted count, RiskToggle, SqlViewer (Shiki), dan RiskBanner confirmation | DONE | 2026-10-09 |
+| T-020 | SQL Helper v2 Fase 4 (Fitur Pembeda): Parameter template {{placeholder}} + ParamForm + real-time preview, Favorit & Terakhir dipakai (localStorage), Deep link ?script=<id> + Share link + browser history sync, dan navigasi prev/next di drawer | DONE | 2026-10-09 |
 
 
 

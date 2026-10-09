@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useScriptFilters } from "../hooks/useScriptFilters";
 import { useFavorites } from "../hooks/useFavorites";
+import { useRecent } from "../hooks/useRecent";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import {
   allScripts,
@@ -13,6 +14,7 @@ import {
   filterScripts,
   calculateFacetedCounts,
   SortKey,
+  AccessScope,
 } from "../lib/filter";
 import { SQL_HELPER_LABELS } from "../lib/labels";
 import { InfoBanner } from "./InfoBanner";
@@ -21,6 +23,7 @@ import { FilterChips } from "./FilterChips";
 import { RiskToggle } from "./RiskToggle";
 import { ViewToggle, ViewMode } from "./ViewToggle";
 import { ActiveFilters } from "./ActiveFilters";
+import { QuickAccessBar } from "./QuickAccessBar";
 import { ScriptList } from "./ScriptList";
 import { ScriptDrawer } from "./ScriptDrawer";
 import { ScriptItem } from "../lib/schema";
@@ -53,7 +56,10 @@ export default function SqlHelperPage() {
     hasActiveFilters,
   } = useScriptFilters();
 
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const { recentIds, addToRecent, clearRecent } = useRecent();
+  const [scope, setScope] = useState<AccessScope>("all");
+
   const [viewMode, setViewMode] = useLocalStorage<ViewMode>(
     VIEW_STORAGE_KEY,
     "card"
@@ -62,7 +68,7 @@ export default function SqlHelperPage() {
   const availableEngines = useMemo(() => getAvailableEngines(), []);
   const availableCategories = useMemo(() => getAvailableCategories(), []);
 
-  // Filter scripts based on active criteria and sorting
+  // Filter scripts based on active criteria, scope, and sorting
   const filteredScripts = useMemo(() => {
     return filterScripts(allScripts, {
       q: debouncedSearch,
@@ -70,8 +76,20 @@ export default function SqlHelperPage() {
       categories: selectedCategories,
       risks: selectedRisks,
       sort,
+      scope,
+      favoriteIds: favorites,
+      recentIds,
     });
-  }, [debouncedSearch, selectedEngines, selectedCategories, selectedRisks, sort]);
+  }, [
+    debouncedSearch,
+    selectedEngines,
+    selectedCategories,
+    selectedRisks,
+    sort,
+    scope,
+    favorites,
+    recentIds,
+  ]);
 
   // Compute dynamic faceted counts for filter chips
   const facetedCounts = useMemo(() => {
@@ -88,6 +106,17 @@ export default function SqlHelperPage() {
     if (!selectedScriptId) return null;
     return allScripts.find((s) => s.id === selectedScriptId) || null;
   }, [selectedScriptId]);
+
+  // Derived lists for QuickAccessBar
+  const favoriteScripts = useMemo(() => {
+    return allScripts.filter((s) => favorites.includes(s.id));
+  }, [favorites]);
+
+  const recentScripts = useMemo(() => {
+    return recentIds
+      .map((id) => allScripts.find((s) => s.id === id))
+      .filter(Boolean) as ScriptItem[];
+  }, [recentIds]);
 
   // Drawer Prev/Next navigation based on filtered results
   const currentIndex = useMemo(() => {
@@ -116,6 +145,14 @@ export default function SqlHelperPage() {
       setSelectedScriptId(null);
     },
     [setSearch, setSelectedScriptId]
+  );
+
+  const handleScopeChange = useCallback(
+    (newScope: AccessScope) => {
+      setScope(newScope);
+      setPage(1);
+    },
+    [setPage]
   );
 
   return (
@@ -174,6 +211,18 @@ export default function SqlHelperPage() {
         </div>
       </div>
 
+      {/* Quick Access Bar: All / Favorites / Recent Tabs & Mini Carousel */}
+      <QuickAccessBar
+        activeScope={scope}
+        onScopeChange={handleScopeChange}
+        favoriteCount={favorites.length}
+        recentCount={recentIds.length}
+        favoriteScripts={favoriteScripts}
+        recentScripts={recentScripts}
+        onSelectScript={(script) => setSelectedScriptId(script.id)}
+        onClearRecent={clearRecent}
+      />
+
       {/* Active Filters Tag Bar & Result Counter */}
       <ActiveFilters
         totalResults={filteredScripts.length}
@@ -196,6 +245,7 @@ export default function SqlHelperPage() {
         onSelectScript={(script: ScriptItem) => setSelectedScriptId(script.id)}
         isFavorite={isFavorite}
         onToggleFavorite={toggleFavorite}
+        onAccessScript={addToRecent}
         page={page}
         onPageChange={setPage}
         pageSize={pageSize}
@@ -217,6 +267,7 @@ export default function SqlHelperPage() {
           selectedScript && toggleFavorite(selectedScript.id)
         }
         onSelectTag={handleSelectTag}
+        onAccessScript={addToRecent}
         hasPrev={hasPrev}
         hasNext={hasNext}
         onPrev={handlePrev}

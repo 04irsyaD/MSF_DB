@@ -7,6 +7,28 @@
 ## [Unreleased]
 
 ### Added
+- **SQL Helper v2 Differentiating Features (Fase 4)**:
+  - **Parameter Template (`{{placeholder}}`)**:
+    - Form dinamis `ParamForm.tsx` untuk kueri dengan placeholder, mendukung validasi tipe data (`identifier`, `number`, `string`) dan proteksi string escaping (`'` -> `''`).
+    - Interpolasi real-time di `SqlViewer` dan penguncian tombol salin jika parameter wajib belum diisi atau format tidak valid.
+    - Persistensi nilai parameter terakhir per skrip di `localStorage` (`msfdb:sqlhelper:v1:params:<id>`).
+    - Integrasi salin cerdas pada mode Kartu dan Baris Tabel: otomatis menggunakan nilai kustom/default atau mengarahkan ke form drawer jika parameter wajib belum lengkap.
+  - **Favorit & Terakhir Dipakai (QuickAccessBar)**:
+    - Tab bar tersegmentasi (`All Scripts`, `Favorites`, `Recently Used`) dengan badge hitungan numerik.
+    - Carousel mini-cards untuk akses cepat skrip favorit dan riwayat skrip terakhir yang diakses.
+    - Persistensi status bookmark favorit (`msfdb:sqlhelper:v1:favorites`) dan riwayat akses (`msfdb:sqlhelper:v1:recent`, max 10 item) di `localStorage`.
+    - Tombol *Clear Recent* untuk membersihkan riwayat akses.
+  - **Deep Link & Browser History Sync**:
+    - Sinkronisasi URL dua arah untuk parameter `?script=<id>`.
+    - Tombol *Share Link* di drawer untuk menyalin tautan langsung ke clipboard dengan toast konfirmasi.
+    - Penggunaan `router.push` saat membuka drawer dan `router.replace` saat filter berganti, sehingga tombol *Back* pada peramban secara alami menutup drawer tanpa meninggalkan halaman.
+    - Otomatis membuka drawer skrip jika pengguna mengakses URL dengan parameter `?script=<id>`.
+  - **Navigasi Prev / Next Skrip di Drawer**:
+    - Tombol *Previous* dan *Next* di sticky footer drawer.
+    - Navigasi keyboard interaktif menggunakan tombol panah kiri (`←`) dan panah kanan (`→`) di dalam drawer.
+    - Otomatis mereset status konfirmasi risiko dan memuat parameter spesifik skrip saat berpindah skrip.
+  - **Unit Testing**:
+    - Skrip tes unit otomatis `npm run test:sql-helper` (`scripts/test-sql-helper.mjs`) untuk validasi parameter, interpolasi teks, dan escaping SQL.
 - **SQL Helper v2 New UI (Fase 3)**:
   - Multi-select chip filters untuk database engine dan kategori dengan faceted count real-time.
   - Toggles tingkat risiko (`Low`, `Medium`, `High`) dengan faceted count dan ikon representatif.

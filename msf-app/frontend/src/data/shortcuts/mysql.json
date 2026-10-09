@@ -16,7 +16,17 @@
     "engine": "mysql",
     "category": "maintenance",
     "risk_level": "caution",
-    "sql": "-- 1. Reset tabel cache host yang terblokir\nFLUSH HOSTS;\n\n-- 2. Tingkatkan toleransi error koneksi agar tidak mudah terblokir (default: 100)\nSET GLOBAL max_connect_errors = 10000;\n\n-- 3. Verifikasi nilai saat ini\nSHOW GLOBAL VARIABLES LIKE 'max_connect_errors';",
+    "params": [
+      {
+        "key": "max_errors_tolerance",
+        "label": "Max Connect Errors Tolerance",
+        "type": "number",
+        "default": "10000",
+        "required": true,
+        "hint": "Batas toleransi kesalahan koneksi sebelum host diblokir (default: 10000)"
+      }
+    ],
+    "sql": "-- 1. Reset tabel cache host yang terblokir\nFLUSH HOSTS;\n\n-- 2. Tingkatkan toleransi error koneksi agar tidak mudah terblokir\nSET GLOBAL max_connect_errors = {{max_errors_tolerance}};\n\n-- 3. Verifikasi nilai saat ini\nSHOW GLOBAL VARIABLES LIKE 'max_connect_errors';",
     "tags": ["flush-hosts", "connection-error", "blocked-host", "maintenance", "mysqladmin", "host-terblokir"]
   },
   {
@@ -26,7 +36,17 @@
     "engine": "mysql",
     "category": "performance",
     "risk_level": "caution",
-    "sql": "-- Cek batas koneksi saat ini\nSHOW VARIABLES LIKE 'max_connections';\n\n-- Cek jumlah koneksi tertinggi yang pernah terjadi (peak)\nSHOW STATUS LIKE 'Max_used_connections';\n\n-- Naikkan batas koneksi (misal ke 500 koneksi)\nSET GLOBAL max_connections = 500;",
+    "params": [
+      {
+        "key": "max_connections_limit",
+        "label": "Max Connections Limit",
+        "type": "number",
+        "default": "500",
+        "required": true,
+        "hint": "Batas koneksi simultan maksimum yang diizinkan (default: 500)"
+      }
+    ],
+    "sql": "-- Cek batas koneksi saat ini\nSHOW VARIABLES LIKE 'max_connections';\n\n-- Cek jumlah koneksi tertinggi yang pernah terjadi (peak)\nSHOW STATUS LIKE 'Max_used_connections';\n\n-- Naikkan batas koneksi\nSET GLOBAL max_connections = {{max_connections_limit}};",
     "tags": ["connections", "max-connections", "performance", "tuning", "threads", "koneksi-maksimal"]
   },
   {
@@ -36,7 +56,17 @@
     "engine": "mysql",
     "category": "diagnostic",
     "risk_level": "read-only",
-    "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name = 'nama_kolom'\n  AND table_schema = DATABASE() -- Atau ganti dengan 'nama_database' spesifik\nORDER BY table_name;",
+    "params": [
+      {
+        "key": "column_name",
+        "label": "Column Name",
+        "type": "string",
+        "default": "user_id",
+        "required": true,
+        "hint": "Nama kolom yang ingin dicari di seluruh tabel"
+      }
+    ],
+    "sql": "SELECT table_schema, table_name, column_name, data_type, is_nullable\nFROM information_schema.columns\nWHERE column_name = '{{column_name}}'\n  AND table_schema = DATABASE() -- Atau ganti dengan 'nama_database' spesifik\nORDER BY table_name;",
     "tags": ["search", "columns", "table", "schema", "diagnostic", "cari-kolom"]
   },
   {
@@ -66,7 +96,17 @@
     "engine": "mysql",
     "category": "performance",
     "risk_level": "read-only",
-    "sql": "SELECT table_name,\n       table_rows AS row_count,\n       ROUND((data_length + index_length) / 1024 / 1024, 2) AS total_size_mb,\n       ROUND(data_length / 1024 / 1024, 2) AS data_size_mb,\n       ROUND(index_length / 1024 / 1024, 2) AS index_size_mb\nFROM information_schema.tables\nWHERE table_schema = DATABASE()\nORDER BY total_size_mb DESC\nLIMIT 20;",
+    "params": [
+      {
+        "key": "limit_rows",
+        "label": "Result Limit",
+        "type": "number",
+        "default": "20",
+        "required": true,
+        "hint": "Jumlah tabel terbesar yang ingin ditampilkan"
+      }
+    ],
+    "sql": "SELECT table_name,\n       table_rows AS row_count,\n       ROUND((data_length + index_length) / 1024 / 1024, 2) AS total_size_mb,\n       ROUND(data_length / 1024 / 1024, 2) AS data_size_mb,\n       ROUND(index_length / 1024 / 1024, 2) AS index_size_mb\nFROM information_schema.tables\nWHERE table_schema = DATABASE()\nORDER BY total_size_mb DESC\nLIMIT {{limit_rows}};",
     "tags": ["size", "table", "rows", "ukuran-tabel"]
   },
   {

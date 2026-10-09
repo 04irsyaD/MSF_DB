@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useDebouncedValue } from "./useDebouncedValue";
 import { useLocalStorage } from "./useLocalStorage";
 import { RiskLevelType } from "../lib/schema";
@@ -75,6 +75,8 @@ export function useScriptFilters(): ScriptFiltersState {
   const [pageSize, setPageSize] = useLocalStorage<10 | 20 | 50>(PAGE_SIZE_KEY, 10);
   const [selectedScriptId, setSelectedScriptId] = useState<string | null>(initialScript);
 
+  const prevScriptRef = useRef<string | null>(initialScript);
+
   // Sync state to URL search parameters
   const syncToUrl = useCallback(
     (params: {
@@ -98,7 +100,16 @@ export function useScriptFilters(): ScriptFiltersState {
 
       const qs = sp.toString();
       const target = qs ? `${pathname}?${qs}` : pathname;
-      router.replace(target, { scroll: false });
+
+      // SPEC §4.2: router.push for opening drawer; router.replace for filters
+      const isOpeningDrawer = !prevScriptRef.current && Boolean(params.script);
+      prevScriptRef.current = params.script;
+
+      if (isOpeningDrawer) {
+        router.push(target, { scroll: false });
+      } else {
+        router.replace(target, { scroll: false });
+      }
     },
     [pathname, router]
   );
@@ -123,6 +134,18 @@ export function useScriptFilters(): ScriptFiltersState {
     selectedScriptId,
     syncToUrl,
   ]);
+
+  // Sync state when browser Back / Forward updates query params
+  const scriptFromUrl = searchParams.get("script") || null;
+  useEffect(() => {
+    setSelectedScriptId((curr) => {
+      if (curr !== scriptFromUrl) {
+        prevScriptRef.current = scriptFromUrl;
+        return scriptFromUrl;
+      }
+      return curr;
+    });
+  }, [scriptFromUrl]);
 
   // Handler helpers that reset page to 1 on filter changes
   const setSearch = useCallback((val: string) => {
