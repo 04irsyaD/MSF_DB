@@ -1,0 +1,117 @@
+/**
+ * Centralized UI labels for SQL Helper (i18n-ready).
+ * Technical database terminology is in English.
+ */
+export const SQL_HELPER_LABELS = {
+  header: {
+    title: "SQL Helper",
+    subtitle: "DBA Script Library & Query Reference",
+    infoTitle: "DBA Diagnostic & Optimization Reference",
+    infoDescription:
+      "Ready-to-use SQL scripts to analyze table bloat, inspect active locks & connections, and audit database health without backend dependencies.",
+    dismissInfo: "Dismiss guide banner",
+  },
+  search: {
+    placeholder: "Search scripts by title, description, tags, or SQL keywords... (Press / to focus)",
+    label: "Search Database Scripts",
+    clear: "Clear search",
+    shortcutHint: "/",
+  },
+  filter: {
+    enginesLabel: "Database Engine",
+    categoriesLabel: "Category",
+    risksLabel: "Risk Level",
+    allEngines: "All Engines",
+    allCategories: "All Categories",
+    allRisks: "All Risks",
+    resetAll: "Reset All Filters",
+    clear: "Clear",
+    activeFiltersLabel: "Active Filters:",
+  },
+  sort: {
+    label: "Sort by",
+    relevance: "Relevance",
+    title: "Title (A–Z)",
+    risk: "Risk Level",
+    category: "Category",
+  },
+  view: {
+    cards: "Cards",
+    table: "Table",
+  },
+  risk: {
+    low: "Low Risk",
+    medium: "Medium Risk",
+    high: "High Risk",
+    bannerMedium:
+      "Caution: This script modifies database state or objects. Test in staging and take a backup before running.",
+    bannerHigh:
+      "Destructive Operation: This script can cause permanent data loss, exclusive locks, or downtime. Ensure verified backups exist and execute within a transaction if possible.",
+    highConfirmPrompt: "I understand the risks of executing this script",
+    highConfirmRequired: "You must confirm understanding before copying this high-risk script.",
+  },
+  card: {
+    copy: "Copy SQL",
+    copied: "Copied!",
+    details: "View Details",
+    favorite: "Toggle Favorite",
+    previewLines: 3,
+  },
+  table: {
+    colFavorite: "Fav",
+    colName: "Script Name & Purpose",
+    colCategory: "Category",
+    colEngine: "Engine",
+    colRisk: "Risk",
+    colActions: "Actions",
+    copy: "COPY",
+    copied: "COPIED",
+    details: "DETAILS",
+  },
+  pagination: {
+    showingSummary: (from: number, to: number, total: number) =>
+      `Showing ${from}–${to} of ${total} scripts`,
+    totalSummary: (total: number) => `${total} ${total === 1 ? "script" : "scripts"} found`,
+    rowsPerPage: "Per page:",
+    prevPage: "Previous",
+    nextPage: "Next",
+    pageIndicator: (current: number, total: number) => `Page ${current} of ${total}`,
+  },
+  viewer: {
+    heading: "SQL Query Script",
+    wrapLines: "Wrap lines",
+    unwrapLines: "No wrap",
+    copy: "Copy SQL",
+    copied: "Copied to clipboard!",
+    download: "Download .sql",
+    lineNumbers: "Line numbers",
+    loadingHighlighter: "Formatting SQL...",
+  },
+  drawer: {
+    close: "Close drawer",
+    share: "Share link",
+    shareCopied: "Link copied to clipboard!",
+    whenToUseHeading: "When to Use",
+    descriptionHeading: "Description",
+    notesHeading: "Important Notes",
+    tagsHeading: "Related Tags",
+    prevScript: "Previous script",
+    nextScript: "Next script",
+    copyPrimary: "Copy SQL Script",
+    copiedPrimary: "Script Copied!",
+  },
+  empty: {
+    title: "No Matching Scripts Found",
+    description: "We couldn't find any SQL scripts matching your current search and filter combination.",
+    suggestionQuery: "Try checking for typos or searching with broader keywords.",
+    suggestionEngine: "Try selecting 'All Engines' or clearing specific engine filters.",
+    suggestionCategory: "Try clearing category filters to view diagnostic, performance, and maintenance scripts.",
+    suggestionRisk: "Try clearing risk filters to include safe read-only queries.",
+    resetButton: "Reset All Filters",
+  },
+  toast: {
+    copySuccess: "SQL script copied to clipboard!",
+    copyFailed: "Failed to copy to clipboard. Please copy manually.",
+    shareSuccess: "Script link copied to clipboard!",
+  },
+};

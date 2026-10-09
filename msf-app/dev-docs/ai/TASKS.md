@@ -31,6 +31,9 @@ Tidak ada task aktif saat ini.
 | T-015 | Jalur B: Implementasi SQLite persistent job queue — buat job_store.py, integrasi ke job_queue.py (zero breaking change) | DONE | 2026-10-02 |
 | T-016 | Jalur B: Implementasi Mermaid.js ERD export — mermaidGenerator.ts, MermaidExportModal.tsx, integrasi tombol di DiagramCanvas | DONE | 2026-10-02 |
 | T-017 | SQL Helper v2 Fase 1 (Quick Wins): Salin kueri langsung di tabel, default 10 baris, dismissible info box, hapus metrik redundan, a11y, dan utility clipboard | DONE | 2026-10-09 |
+| T-018 | SQL Helper v2 Fase 2 (Refactor Fondasi): Zod schema, riskMeta, labels, validate:data, useScriptFilters URL sync, dan modularisasi features/sql-helper/ | DONE | 2026-10-09 |
+| T-019 | SQL Helper v2 Fase 3 (UI Baru): Cards preview 3 baris SQL, Table ringkas, Radix drawer, FilterChips faceted count, RiskToggle, SqlViewer (Shiki), dan RiskBanner confirmation | DONE | 2026-10-09 |
+
 
 
 ---

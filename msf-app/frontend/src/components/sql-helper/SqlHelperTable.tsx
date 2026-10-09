@@ -5,11 +5,16 @@ import { ShortcutItem } from "@/lib/types";
 import { Copy, Check, ChevronRight, SearchX, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/lib/clipboard";
+import { RiskBadge, CategoryBadge, EngineBadge } from "@/features/sql-helper/components/Badges";
+import { normalizeRiskLevel, ScriptItem } from "@/features/sql-helper/lib/schema";
+
+type TableShortcutItem = ShortcutItem | ScriptItem;
 
 interface SqlHelperTableProps {
-  shortcuts: ShortcutItem[];
-  onSelect: (shortcut: ShortcutItem) => void;
+  shortcuts: TableShortcutItem[];
+  onSelect: (shortcut: TableShortcutItem) => void;
 }
+
 
 export default function SqlHelperTable({
   shortcuts,
@@ -36,7 +41,7 @@ export default function SqlHelperTable({
   const displayFrom = shortcuts.length === 0 ? 0 : startIndex + 1;
   const displayTo = Math.min(startIndex + pageSize, shortcuts.length);
 
-  const handleCopy = async (e: React.MouseEvent, shortcut: ShortcutItem) => {
+  const handleCopy = async (e: React.MouseEvent, shortcut: TableShortcutItem) => {
     e.stopPropagation();
     const ok = await copyToClipboard(shortcut.sql);
     if (ok) {
@@ -48,55 +53,6 @@ export default function SqlHelperTable({
     } else {
       toast.error("Failed to copy query to clipboard");
     }
-  };
-
-  const getCategoryBadge = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "diagnostic":
-      case "monitoring":
-        return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
-      case "maintenance":
-        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
-      case "performance":
-        return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
-      case "security":
-        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
-      default:
-        return "bg-muted text-muted-foreground border-border";
-    }
-  };
-
-  const getEngineBadge = (engine: string) => {
-    switch (engine.toLowerCase()) {
-      case "postgresql":
-        return "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20";
-      case "mysql":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20";
-      case "oracle":
-        return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20";
-      default:
-        return "bg-muted text-muted-foreground border-border";
-    }
-  };
-
-  const getRiskBadge = (level: string) => {
-    const l = level.toLowerCase();
-    if (l === "safe" || l === "read-only" || l === "low") {
-      return {
-        label: "LOW",
-        classes: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-      };
-    }
-    if (l === "caution" || l === "medium") {
-      return {
-        label: "MEDIUM",
-        classes: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-      };
-    }
-    return {
-      label: "HIGH",
-      classes: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
-    };
   };
 
   if (shortcuts.length === 0) {
@@ -131,7 +87,6 @@ export default function SqlHelperTable({
           </thead>
           <tbody className="divide-y divide-border text-xs">
             {paginatedShortcuts.map((shortcut) => {
-              const risk = getRiskBadge(shortcut.risk_level);
               const isCopied = copiedId === shortcut.id;
 
               return (
@@ -163,33 +118,17 @@ export default function SqlHelperTable({
 
                   {/* Category */}
                   <td className="py-3.5 px-4 whitespace-nowrap">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-md border text-[10px] font-mono font-bold uppercase tracking-wider ${getCategoryBadge(
-                        shortcut.category
-                      )}`}
-                    >
-                      {shortcut.category}
-                    </span>
+                    <CategoryBadge category={shortcut.category} />
                   </td>
 
                   {/* Engine */}
                   <td className="py-3.5 px-4 whitespace-nowrap">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-md border text-[10px] font-mono font-bold uppercase tracking-wider ${getEngineBadge(
-                        shortcut.engine
-                      )}`}
-                    >
-                      {shortcut.engine}
-                    </span>
+                    <EngineBadge engine={shortcut.engine} />
                   </td>
 
                   {/* Risk */}
                   <td className="py-3.5 px-4 whitespace-nowrap">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-md border text-[10px] font-mono font-bold uppercase tracking-wider ${risk.classes}`}
-                    >
-                      {risk.label}
-                    </span>
+                    <RiskBadge risk={normalizeRiskLevel(shortcut.risk_level)} />
                   </td>
 
                   {/* Action Buttons */}

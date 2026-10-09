@@ -7,6 +7,25 @@
 ## [Unreleased]
 
 ### Added
+- **SQL Helper v2 New UI (Fase 3)**:
+  - Multi-select chip filters untuk database engine dan kategori dengan faceted count real-time.
+  - Toggles tingkat risiko (`Low`, `Medium`, `High`) dengan faceted count dan ikon representatif.
+  - Mode tampilan ganda: **Kartu (Cards)** dengan preview 3 baris SQL + fade overlay, dan **Tabel Ringkas (Table)** dengan fallback otomatis kartu di layar mobile (< md), tersimpan di `localStorage`.
+  - Drawer slide-over modern berbasis **Radix Dialog (`@radix-ui/react-dialog`)** dengan focus trap, navigasi keyboard (`Esc`), share link, dan aksesibilitas ARIA penuh.
+  - Komponen `SqlViewer` terpadu dengan syntax highlighting **Shiki** (`sql`, tema GitHub Dark/Light), nomor baris, tombol *Wrap/Unwrap*, *Copy*, dan unduh berkas `.sql`.
+  - Komponen peringatan risiko `RiskBanner` dan proteksi konfirmasi centang wajib untuk skrip destruktif berisiko tinggi (*High Risk*).
+  - Tampilan kosong informatif (`EmptyState`) dengan saran filter kontekstual dan tombol reset.
+  - Pencarian fuzzy berbobot menggunakan **Fuse.js** (`title`, `tags`, `description`, `sql`, `whenToUse`).
+  - Sentralisasi menyeluruh seluruh teks UI di `lib/labels.ts`.
+
+- **SQL Helper v2 Foundation Refactor (Fase 2)**:
+  - Pembentukan arsitektur fitur baru di `features/sql-helper/` (`components/`, `hooks/`, `lib/`, `data/`) dengan boundary `<Suspense>` Next.js 14.
+  - Skema data `Zod` (`schema.ts`) dengan normalisasi otomatis tingkat risiko (`low`, `medium`, `high`) dan type safety murni.
+  - Skrip validasi dataset `validate:data` (`scripts/validate-sql-helper.mjs`) untuk verifikasi integritas 27 skrip DBA.
+  - Hook sinkronisasi URL `useScriptFilters` (search `q`, `engine`, `category`, `risk`, `script`) dengan debounce 250ms tanpa page reload.
+  - Modul metadata terpadu `riskMeta.ts` dan label teknis `labels.ts` sebagai *single source of truth*.
+  - Komponen badge terpadu `<RiskBadge>`, `<CategoryBadge>`, dan `<EngineBadge>`.
+
 - **SQL Helper v2 Quick Wins (Fase 1)**:
   - Tombol aksi **Salin Kueri (COPY)** langsung di baris tabel dengan feedback indikator *COPIED* dan toast notification.
   - Tombol **Detail** terpisah untuk membuka panel drawer kueri.
@@ -14,6 +33,7 @@
   - Pilihan baris paginasi 10 (default), 20, dan 50.
   - Fitur tutup (dismiss) info box panduan dengan persistensi status di `localStorage`.
   - Dokumen rencana arsitektur dan spesifikasi teknis lengkap di `dev-docs/modules/sql-helper/PLAN.md` dan `SPEC.md`.
+
 
 ### Changed
 - Perbaikan tipografi SQL Helper: judul skrip menggunakan font sans-serif 13–14px semibold agar mudah dipindai, mono dikhususkan untuk kode SQL, badge, dan label teknis.

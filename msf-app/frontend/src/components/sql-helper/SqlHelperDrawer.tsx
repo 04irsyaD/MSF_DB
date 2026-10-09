@@ -3,14 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ShortcutItem } from "@/lib/types";
-import { X, Copy, Check, Terminal, Tag, ShieldCheck, AlertTriangle } from "lucide-react";
+import { X, Copy, Check, Terminal, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/lib/clipboard";
+import { RISK_META } from "@/features/sql-helper/lib/riskMeta";
+import { normalizeRiskLevel, ScriptItem } from "@/features/sql-helper/lib/schema";
 
 interface SqlHelperDrawerProps {
-  shortcut: ShortcutItem | null;
+  shortcut: ShortcutItem | ScriptItem | null;
   onClose: () => void;
 }
+
 
 export default function SqlHelperDrawer({
   shortcut,
@@ -67,31 +70,10 @@ export default function SqlHelperDrawer({
     }
   };
 
-  const getRiskColor = (level: string) => {
-    const l = level.toLowerCase();
-    if (l === "safe" || l === "read-only" || l === "low") {
-      return {
-        label: "LOW RISK (SAFE)",
-        color: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-        icon: ShieldCheck,
-      };
-    }
-    if (l === "caution" || l === "medium") {
-      return {
-        label: "MEDIUM RISK (CAUTION)",
-        color: "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
-        icon: AlertTriangle,
-      };
-    }
-    return {
-      label: "HIGH RISK (DANGEROUS)",
-      color: "text-rose-700 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
-      icon: AlertTriangle,
-    };
-  };
-
-  const risk = getRiskColor(shortcut.risk_level);
+  const normalizedRisk = normalizeRiskLevel(shortcut.risk_level);
+  const risk = RISK_META[normalizedRisk] || RISK_META.low;
   const RiskIcon = risk.icon;
+
 
   const drawerContent = (
     <div
@@ -158,12 +140,13 @@ export default function SqlHelperDrawer({
             {/* Risk Badge */}
             <div className="flex items-center gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border text-[11px] font-mono font-bold ${risk.color}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border text-[11px] font-mono font-bold ${risk.classes}`}
               >
                 <RiskIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>{risk.label}</span>
               </span>
             </div>
+
 
             {/* SQL Script Box */}
             <div className="space-y-2">

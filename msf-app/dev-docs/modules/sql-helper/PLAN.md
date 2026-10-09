@@ -60,24 +60,25 @@ Perubahan kecil, risiko rendah, dampak langsung terasa.
 
 ### Fase 2 — Refactor Fondasi (1–2 hari)
 
-- [ ] Zod schema `Script` + skrip `validate:data` + migrasi nilai risiko ke `low|medium|high`
-- [ ] `riskMeta`, `<RiskBadge>`, `<CategoryBadge>`, `<EngineBadge>` (hapus duplikasi)
-- [ ] Hapus sentinel `"ALL ENGINES"`/`"SEMUA TINGKATAN"` → filter bertipe
-- [ ] `useScriptFilters` (state ↔ URL) + debounce search
-- [ ] Pindah ke `features/sql-helper/` (lihat SPEC §2)
-- [ ] Unit test `filter`, `search`, validasi data
+- [x] Zod schema `Script` + skrip `validate:data` + migrasi nilai risiko ke `low|medium|high`
+- [x] `riskMeta`, `<RiskBadge>`, `<CategoryBadge>`, `<EngineBadge>` (hapus duplikasi)
+- [x] Hapus sentinel `"ALL ENGINES"`/`"SEMUA TINGKATAN"` → filter bertipe
+- [x] `useScriptFilters` (state ↔ URL) + debounce search
+- [x] Pindah ke `features/sql-helper/` (lihat SPEC §2)
+- [x] Unit test `filter`, `search`, validasi data
+
 
 ### Fase 3 — UI Baru (2–3 hari)
 
-- [ ] Chip filter engine/kategori (multi-select, faceted count)
-- [ ] Toggle risiko + sorting
-- [ ] Mode **Kartu** (preview 3 baris SQL) & **Tabel ringkas**, pilihan tersimpan
-- [ ] Drawer berbasis Radix Dialog (focus trap, ESC, aria) — keputusan final
-- [ ] Pusatkan semua teks UI di `lib/labels.ts` (siap i18n; UI tetap istilah teknis Inggris)
-- [ ] `SqlViewer`: syntax highlight, nomor baris, wrap toggle, download `.sql`
-- [ ] Banner & konfirmasi untuk risiko **High**
-- [ ] Empty/loading state yang informatif
-- [ ] Responsif: kartu otomatis di mobile
+- [x] Chip filter engine/kategori (multi-select, faceted count)
+- [x] Toggle risiko + sorting
+- [x] Mode **Kartu** (preview 3 baris SQL) & **Tabel ringkas**, pilihan tersimpan
+- [x] Drawer berbasis Radix Dialog (focus trap, ESC, aria) — keputusan final
+- [x] Pusatkan semua teks UI di `lib/labels.ts` (siap i18n; UI tetap istilah teknis Inggris)
+- [x] `SqlViewer`: syntax highlight, nomor baris, wrap toggle, download `.sql`
+- [x] Banner & konfirmasi untuk risiko **High**
+- [x] Empty/loading state yang informatif
+- [x] Responsif: kartu otomatis di mobile
 
 ### Fase 4 — Fitur Pembeda (2–3 hari)
 
