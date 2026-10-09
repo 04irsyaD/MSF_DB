@@ -43,8 +43,8 @@ SQLParser menggunakan regex kustom + algoritma Parentheses Depth Counting untuk 
 ### 2. Diagram Canvas Kustom (bukan React Flow)
 `DiagramCanvas.tsx` menggunakan HTML5 drag-drop native + SVG overlay. Pendekatan ini sangat ringan dan tidak membutuhkan library besar. Layout dihitung murni dengan JavaScript (tidak ada Dagre/ELK dependency).
 
-### 3. Background Job Queue In-Memory
-Generate dokumen berjalan di background via `job_queue.py` (in-memory Queue). Tidak ada Redis/Celery karena project ini adalah developer tool skala kecil/personal.
+### 3. Background Job Queue dengan SQLite Persistence (v2.2)
+Generate dokumen berjalan di background via `job_queue.py`. Status job kini disimpan ke SQLite (`job_store.py`) sehingga tidak hilang saat backend restart. Tidak ada Redis/Celery karena project ini adalah developer tool skala kecil/personal. File DB: `OUTPUT_DIR/msf_jobs.db`.
 
 ### 4. Multi-AI Provider Pattern
 Backend mendukung Ollama (lokal/offline) dan Cloud AI (DeepSeek, OpenAI). Provider dipilih berdasarkan availability check di startup.

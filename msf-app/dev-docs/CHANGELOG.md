@@ -7,6 +7,20 @@
 ## [Unreleased]
 
 ### Added
+- **SQL Helper v2 Quick Wins (Fase 1)**:
+  - Tombol aksi **Salin Kueri (COPY)** langsung di baris tabel dengan feedback indikator *COPIED* dan toast notification.
+  - Tombol **Detail** terpisah untuk membuka panel drawer kueri.
+  - Utilitas clipboard aman dengan fallback `execCommand` di `src/lib/clipboard.ts`.
+  - Pilihan baris paginasi 10 (default), 20, dan 50.
+  - Fitur tutup (dismiss) info box panduan dengan persistensi status di `localStorage`.
+  - Dokumen rencana arsitektur dan spesifikasi teknis lengkap di `dev-docs/modules/sql-helper/PLAN.md` dan `SPEC.md`.
+
+### Changed
+- Perbaikan tipografi SQL Helper: judul skrip menggunakan font sans-serif 13–14px semibold agar mudah dipindai, mono dikhususkan untuk kode SQL, badge, dan label teknis.
+- Pembersihan footer metrik `SqlHelperStats` untuk mengurangi visual clutter di halaman `/sql-helper`.
+- Peningkatan aksesibilitas filter dan drawer detail (`label htmlFor`, `role="dialog"`, `aria-modal`, keyboard navigasi).
+
+### Added
 - Kurasi dan integrasi **16 skrip DBA baru** dari folder `Postgresql/` dan `Mysql/` ke dataset SQL Helper (termasuk Kill Session, Audit Primary Key, Data Dictionary, Scan Kolom NULL, Search Functions, FLUSH HOSTS, dan Max Connections Tuning) sehingga total kueri bertambah dari 11 menjadi 27 kueri.
 - Fitur **Pagination 5 Baris Default** pada tabel SQL Helper (`/sql-helper`) dengan pemilih baris (5/10/20), navigasi halaman (Prev, Number, Next), teks ringkasan, dan auto-reset saat pencarian/filter aktif.
 - Berkas spesifikasi modul SQL Helper di `dev-docs/modules/sql-helper/` (`README.md` dan `views.md`) sesuai standar `ai-rules/modules-template/`.

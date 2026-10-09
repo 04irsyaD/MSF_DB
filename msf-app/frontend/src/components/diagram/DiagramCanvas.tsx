@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { TableMetadata, ForeignKeyMetadata } from "@/lib/types";
-import { Key, Link as LinkIcon, ZoomIn, ZoomOut, Maximize, Download, Loader2 } from "lucide-react";
+import { Key, Link as LinkIcon, ZoomIn, ZoomOut, Maximize, Download, Loader2, GitBranch } from "lucide-react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
+import MermaidExportModal from "@/components/diagram/MermaidExportModal";
 
 interface DiagramCanvasProps {
   tables: TableMetadata[];
@@ -19,6 +20,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
   const [layoutStyle, setLayoutStyle] = useState<string>("horizontal");
   const [hoveredTable, setHoveredTable] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<boolean>(false);
+  const [showMermaid, setShowMermaid] = useState<boolean>(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -737,6 +739,15 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       <div className="absolute top-4 right-4 z-20 flex gap-1.5 bg-white border border-border p-1.5 rounded-xl shadow-sm">
         <button
           type="button"
+          onClick={() => setShowMermaid(true)}
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-1"
+          title="Ekspor Kode Mermaid.js"
+        >
+          <GitBranch className="h-4 w-4 text-purple-500" />
+        </button>
+        <div className="w-[1px] bg-border my-0.5" />
+        <button
+          type="button"
           disabled={downloading}
           onClick={handleDownloadDiagram}
           className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors flex items-center justify-center disabled:opacity-50"
@@ -861,6 +872,14 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
           })}
         </div>
       </div>
+
+      {/* Mermaid ERD Export Modal */}
+      {showMermaid && (
+        <MermaidExportModal
+          tables={tables}
+          onClose={() => setShowMermaid(false)}
+        />
+      )}
     </div>
   );
 }

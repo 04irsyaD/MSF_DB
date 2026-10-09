@@ -14,6 +14,7 @@ import {
   Clock,
   ArrowRight,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,12 @@ export default function DashboardPage() {
       console.error("Failed to load jobs history", e);
     }
   }, []);
+
+  const handleClearHistory = () => {
+    if (!window.confirm("Hapus seluruh riwayat dokumentasi? Tindakan ini tidak dapat dibatalkan.")) return;
+    localStorage.removeItem("msf_jobs_history");
+    setJobsHistory([]);
+  };
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,9 +148,22 @@ export default function DashboardPage() {
               <Clock className="h-3.5 w-3.5 text-accent" />
               Riwayat Dokumentasi
             </h3>
-            <span className="text-[10px] text-muted-foreground font-mono bg-muted border border-border px-2 py-0.5 rounded-lg">
-              {jobsHistory.length} ITEM
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground font-mono bg-muted border border-border px-2 py-0.5 rounded-lg">
+                {jobsHistory.length} ITEM
+              </span>
+              {jobsHistory.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearHistory}
+                  title="Hapus semua riwayat"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-lg border border-border hover:border-red-300 text-muted-foreground hover:text-red-500 transition-colors text-[10px] font-mono"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Hapus Semua
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="divide-y divide-border/60">

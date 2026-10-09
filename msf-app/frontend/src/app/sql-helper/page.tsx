@@ -11,7 +11,6 @@ import SqlHelperInfoBox from "@/components/sql-helper/SqlHelperInfoBox";
 import SqlHelperFilter from "@/components/sql-helper/SqlHelperFilter";
 import SqlHelperTable from "@/components/sql-helper/SqlHelperTable";
 import SqlHelperDrawer from "@/components/sql-helper/SqlHelperDrawer";
-import SqlHelperStats from "@/components/sql-helper/SqlHelperStats";
 
 export default function SqlHelperPage() {
   const [search, setSearch] = useState("");
@@ -40,8 +39,8 @@ export default function SqlHelperPage() {
   };
 
   return (
-    <div className="space-y-5 pb-12 animate-fade-in-up max-w-7xl mx-auto">
-      {/* Info Box Guide Banner */}
+    <div className="space-y-4 pb-12 animate-fade-in-up max-w-7xl mx-auto">
+      {/* Dismissible Info Box Guide Banner */}
       <SqlHelperInfoBox />
 
       {/* Search & Filters Bar */}
@@ -65,13 +64,6 @@ export default function SqlHelperPage() {
         onSelect={(shortcut) => setSelectedShortcut(shortcut)}
       />
 
-      {/* Footer Metrics Stats */}
-      <SqlHelperStats
-        total={filteredShortcuts.length}
-        engine={engine}
-        lastUpdated="100% Client Ready"
-      />
-
       {/* Slide-Over Drawer for Script Details (Rendered via React Portal) */}
       <SqlHelperDrawer
         shortcut={selectedShortcut}
@@ -80,3 +72,4 @@ export default function SqlHelperPage() {
     </div>
   );
 }
+

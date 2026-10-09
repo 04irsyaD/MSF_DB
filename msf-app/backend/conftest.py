@@ -1,21 +1,14 @@
 """
 Pytest configuration dan shared fixtures untuk MSF-APP backend tests.
+
+Catatan: `asyncio_mode = auto` sudah dikonfigurasi di pytest.ini,
+sehingga fixture `event_loop` custom tidak lagi diperlukan dan telah
+dihapus untuk menghindari DeprecationWarning dari pytest-asyncio.
 """
-import pytest
-import asyncio
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
+import pytest
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop untuk async tests."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield loop
-    loop.close()
 
 @pytest.fixture
 def client():
@@ -23,6 +16,7 @@ def client():
     from app.main import app
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture
 async def async_client():

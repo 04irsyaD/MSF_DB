@@ -26,6 +26,12 @@ Tidak ada task aktif saat ini.
 | T-010 | Implementasi pagination 5 baris, fix drawer React Portal, & responsivitas SQL Helper | DONE | 2026-09-21 |
 | T-011 | Fix backdrop MaintenanceModal dengan React Portal, update badge Coming Soon, pasang modal di Admin & Shortcuts, perbaiki navbar Header /admin, dan kepatuhan Anti-Monster Rule (< 500 baris) | DONE | 2026-09-21 |
 | T-012 | Implementasi Dark/Light Mode Toggle menggunakan next-themes, ThemeProvider di root layout, ThemeToggle component, dan dark mode CSS variables | DONE | 2026-10-01 |
+| T-013 | Technical Debt Jalur A: Refactor Header.tsx getPageInfo() ke ROUTE_MAP pattern (TD-005) + fix deprecated event_loop fixture di conftest.py (TD-004) | DONE | 2026-10-02 |
+| T-014 | Jalur B: Konfirmasi localStorage riwayat dokumentasi sudah berfungsi, tambah tombol Hapus Semua di Dashboard | DONE | 2026-10-02 |
+| T-015 | Jalur B: Implementasi SQLite persistent job queue — buat job_store.py, integrasi ke job_queue.py (zero breaking change) | DONE | 2026-10-02 |
+| T-016 | Jalur B: Implementasi Mermaid.js ERD export — mermaidGenerator.ts, MermaidExportModal.tsx, integrasi tombol di DiagramCanvas | DONE | 2026-10-02 |
+| T-017 | SQL Helper v2 Fase 1 (Quick Wins): Salin kueri langsung di tabel, default 10 baris, dismissible info box, hapus metrik redundan, a11y, dan utility clipboard | DONE | 2026-10-09 |
+
 
 ---
 

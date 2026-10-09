@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { ShortcutItem } from "@/lib/types";
-import { Play, Code, SearchX, ChevronLeft, ChevronRight } from "lucide-react";
+import { Copy, Check, ChevronRight, SearchX, ChevronLeft } from "lucide-react";
+import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 
 interface SqlHelperTableProps {
   shortcuts: ShortcutItem[];
@@ -14,9 +16,10 @@ export default function SqlHelperTable({
   onSelect,
 }: SqlHelperTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Otomatis reset ke halaman 1 saat data hasil filter berubah
+  // Automatically reset to page 1 when filtered list changes
   useEffect(() => {
     setCurrentPage(1);
   }, [shortcuts]);
@@ -32,6 +35,20 @@ export default function SqlHelperTable({
 
   const displayFrom = shortcuts.length === 0 ? 0 : startIndex + 1;
   const displayTo = Math.min(startIndex + pageSize, shortcuts.length);
+
+  const handleCopy = async (e: React.MouseEvent, shortcut: ShortcutItem) => {
+    e.stopPropagation();
+    const ok = await copyToClipboard(shortcut.sql);
+    if (ok) {
+      setCopiedId(shortcut.id);
+      toast.success(`Query "${shortcut.title}" copied to clipboard!`);
+      setTimeout(() => {
+        setCopiedId((prev) => (prev === shortcut.id ? null : prev));
+      }, 2000);
+    } else {
+      toast.error("Failed to copy query to clipboard");
+    }
+  };
 
   const getCategoryBadge = (category: string) => {
     switch (category.toLowerCase()) {
@@ -86,13 +103,13 @@ export default function SqlHelperTable({
     return (
       <div className="bg-card border border-border rounded-xl p-10 sm:p-12 text-center space-y-3 shadow-xs">
         <div className="w-12 h-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mx-auto">
-          <SearchX className="h-6 w-6" />
+          <SearchX className="h-6 w-6" aria-hidden="true" />
         </div>
         <h4 className="text-sm font-bold text-foreground">
-          Tidak Ada Skrip Kueri yang Cocok
+          No Matching Scripts Found
         </h4>
         <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-          Coba ubah kata kunci pencarian atau reset filter database engine dan kategori di atas.
+          Try adjusting your search terms or resetting the DB engine, category, or risk level filters.
         </p>
       </div>
     );
@@ -102,33 +119,43 @@ export default function SqlHelperTable({
     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-xs flex flex-col">
       {/* Table Content */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[600px]">
+        <table className="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr className="bg-muted/50 border-b border-border text-[11px] font-mono font-bold text-muted-foreground uppercase tracking-wider">
-              <th className="py-3 px-4">Script Name</th>
+              <th className="py-3 px-4">Script Name & Purpose</th>
               <th className="py-3 px-4">Category</th>
               <th className="py-3 px-4">Engine</th>
-              <th className="py-3 px-4">Risk</th>
-              <th className="py-3 px-4 text-center">Action</th>
+              <th className="py-3 px-4">Risk Level</th>
+              <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border text-xs">
             {paginatedShortcuts.map((shortcut) => {
               const risk = getRiskBadge(shortcut.risk_level);
+              const isCopied = copiedId === shortcut.id;
+
               return (
                 <tr
                   key={shortcut.id}
                   onClick={() => onSelect(shortcut)}
-                  className="hover:bg-muted/50 transition-colors duration-100 cursor-pointer group"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onSelect(shortcut);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`View details for script: ${shortcut.title}`}
+                  className="hover:bg-muted/40 focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent transition-colors duration-100 cursor-pointer group"
                 >
                   {/* Script Name & Description */}
                   <td className="py-3.5 px-4">
-                    <div className="space-y-0.5 max-w-md">
-                      <div className="font-bold text-foreground group-hover:text-accent transition-colors flex items-center gap-2">
-                        <Code className="h-3.5 w-3.5 text-accent shrink-0" />
+                    <div className="space-y-1 max-w-md lg:max-w-xl">
+                      <div className="font-semibold text-sm text-foreground group-hover:text-accent transition-colors">
                         <span className="truncate">{shortcut.title}</span>
                       </div>
-                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                      <p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
                         {shortcut.description}
                       </p>
                     </div>
@@ -165,19 +192,46 @@ export default function SqlHelperTable({
                     </span>
                   </td>
 
-                  {/* Action Button */}
+                  {/* Action Buttons */}
                   <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelect(shortcut);
-                      }}
-                      title="Lihat & Salin Kueri"
-                      className="p-1.5 rounded-lg text-accent hover:bg-accent/10 transition-colors inline-flex items-center gap-1 cursor-pointer font-mono text-xs font-bold"
-                    >
-                      <Play className="h-4 w-4 fill-accent" />
-                    </button>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopy(e, shortcut)}
+                        title="Copy SQL Query"
+                        aria-label={`Copy query for ${shortcut.title}`}
+                        className={`py-1 px-2.5 rounded-lg border text-xs font-mono font-bold transition-all inline-flex items-center gap-1 cursor-pointer shadow-xs ${
+                          isCopied
+                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                            : "bg-card hover:bg-muted border-border text-foreground hover:border-accent/50"
+                        }`}
+                      >
+                        {isCopied ? (
+                          <>
+                            <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>COPIED</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
+                            <span>COPY</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect(shortcut);
+                        }}
+                        title="View Query Details"
+                        aria-label={`View details for ${shortcut.title}`}
+                        className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -187,11 +241,11 @@ export default function SqlHelperTable({
       </div>
 
       {/* Pagination Bar (Fixed Footer) */}
-      <div className="border-t border-border px-4 py-3 bg-muted/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="border-t border-border px-4 py-3 bg-muted/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         {/* Left Side: Page Size & Summary */}
         <div className="flex items-center gap-3 text-muted-foreground font-mono">
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px]">Tampilkan:</span>
+            <span className="text-[11px]">Rows:</span>
             <select
               value={pageSize}
               onChange={(e) => {
@@ -200,14 +254,14 @@ export default function SqlHelperTable({
               }}
               className="py-1 px-2 bg-card border border-border rounded-md text-[11px] font-bold text-foreground focus:outline-none focus:border-accent cursor-pointer"
             >
-              <option value={5} className="bg-card text-foreground">5 baris</option>
-              <option value={10} className="bg-card text-foreground">10 baris</option>
-              <option value={20} className="bg-card text-foreground">20 baris</option>
+              <option value={10} className="bg-card text-foreground">10</option>
+              <option value={20} className="bg-card text-foreground">20</option>
+              <option value={50} className="bg-card text-foreground">50</option>
             </select>
           </div>
           <span className="hidden sm:inline text-border">|</span>
           <span className="text-[11px]">
-            Menampilkan <span className="font-bold text-foreground">{displayFrom}–{displayTo}</span> dari <span className="font-bold text-foreground">{shortcuts.length}</span> skrip
+            Showing <span className="font-bold text-foreground">{displayFrom}–{displayTo}</span> of <span className="font-bold text-foreground">{shortcuts.length}</span> scripts
           </span>
         </div>
 
@@ -218,7 +272,8 @@ export default function SqlHelperTable({
             disabled={safeCurrentPage <= 1}
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             className="p-1.5 rounded-md border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            title="Halaman Sebelumnya"
+            title="Previous Page"
+            aria-label="Previous Page"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -226,7 +281,6 @@ export default function SqlHelperTable({
           {/* Page Number Badges */}
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-              // Hanya tampilkan halaman terdekat jika total halaman banyak
               if (
                 totalPages > 6 &&
                 pageNum !== 1 &&
@@ -266,7 +320,8 @@ export default function SqlHelperTable({
             disabled={safeCurrentPage >= totalPages}
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             className="p-1.5 rounded-md border border-border bg-card text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-            title="Halaman Selanjutnya"
+            title="Next Page"
+            aria-label="Next Page"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -275,3 +330,4 @@ export default function SqlHelperTable({
     </div>
   );
 }
+
