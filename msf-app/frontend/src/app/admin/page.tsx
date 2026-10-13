@@ -3,23 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import { 
-  ShieldAlert, 
-  Terminal, 
-  Activity, 
-  RefreshCw, 
-  Trash2, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Cpu, 
-  Database,
-  Lock,
-  Unlock,
-  Loader2,
-  Server
+  ShieldAlert, Terminal, Activity, RefreshCw, Trash2, CheckCircle2, 
+  XCircle, Clock, Cpu, Database, Lock, Unlock, Loader2, Server 
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import MaintenanceModal from "@/components/common/MaintenanceModal";
 
 // Custom fetcher dengan auth header
 const adminFetcher = async ([url, passcode]: [string, string]) => {
@@ -162,6 +151,12 @@ export default function AdminPage() {
   if (!isAuthorized) {
     return (
       <div className="max-w-md mx-auto mt-16 p-6 bg-white border border-border rounded-2xl shadow-sm space-y-6 font-mono">
+        <MaintenanceModal
+          title="Layanan Admin Portal Sedang Maintenance"
+          description="Halo Administrator, kami sedang melakukan pemeliharaan rutin pada modul kontrol sistem dan log aktivitas. Harap sabar, kami akan segera kembali online!"
+          estimateTime="Coming Soon"
+          storageKey="msf_maintenance_admin"
+        />
         <div className="flex flex-col items-center text-center gap-2">
           <div className="h-12 w-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
             <Lock className="h-5 w-5 animate-pulse" />
@@ -206,6 +201,12 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-8 animate-fade-in-up font-mono">
+      <MaintenanceModal
+        title="Layanan Admin Portal Sedang Maintenance"
+        description="Halo Administrator, kami sedang melakukan pemeliharaan rutin pada modul kontrol sistem dan log aktivitas. Harap sabar, kami akan segera kembali online!"
+        estimateTime="Coming Soon"
+        storageKey="msf_maintenance_admin"
+      />
       {/* Admin Header */}
       <div className="p-5 bg-white border border-border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-start gap-3">
@@ -240,38 +241,22 @@ export default function AdminPage() {
 
       {/* Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Generasi</span>
-            <div className="text-2xl font-extrabold text-gray-900">{summary.total_jobs ?? "-"}</div>
-            <span className="text-[9px] text-muted-foreground block">Semua pekerjaan terdaftar</span>
+        {[
+          { label: "Total Generasi", val: summary.total_jobs ?? "-", desc: "Semua pekerjaan terdaftar", icon: Activity, bg: "bg-blue-50 border-blue-100 text-blue-600" },
+          { label: "Success Rate", val: summary.success_rate !== undefined ? `${summary.success_rate}%` : "-", desc: "Rasio keberhasilan AI", icon: CheckCircle2, bg: "bg-emerald-50 border-emerald-100 text-emerald-600" },
+          { label: "Avg Duration", val: summary.avg_duration_seconds !== undefined ? `${summary.avg_duration_seconds}s` : "-", desc: "Waktu respon rata-rata", icon: Clock, bg: "bg-purple-50 border-purple-100 text-purple-600" },
+        ].map((card, idx) => (
+          <div key={idx} className="bg-white border border-border p-5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{card.label}</span>
+              <div className="text-2xl font-extrabold text-gray-900">{card.val}</div>
+              <span className="text-[9px] text-muted-foreground block">{card.desc}</span>
+            </div>
+            <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center", card.bg)}>
+              <card.icon className="h-5 w-5" />
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-xl border bg-blue-50 border-blue-100 text-blue-600 flex items-center justify-center">
-            <Activity className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Success Rate</span>
-            <div className="text-2xl font-extrabold text-gray-900">{summary.success_rate !== undefined ? `${summary.success_rate}%` : "-"}</div>
-            <span className="text-[9px] text-muted-foreground block">Rasio keberhasilan AI</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl border bg-emerald-50 border-emerald-100 text-emerald-600 flex items-center justify-center">
-            <CheckCircle2 className="h-5 w-5" />
-          </div>
-        </div>
-
-        <div className="bg-white border border-border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Avg Duration</span>
-            <div className="text-2xl font-extrabold text-gray-900">{summary.avg_duration_seconds !== undefined ? `${summary.avg_duration_seconds}s` : "-"}</div>
-            <span className="text-[9px] text-muted-foreground block">Waktu respon rata-rata</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl border bg-purple-50 border-purple-100 text-purple-600 flex items-center justify-center">
-            <Clock className="h-5 w-5" />
-          </div>
-        </div>
+        ))}
 
         <div className="bg-white border border-border p-5 rounded-2xl shadow-sm flex items-center justify-between">
           <div className="space-y-1">
@@ -482,9 +467,7 @@ export default function AdminPage() {
                         job.status === "queued" && "bg-gray-50 text-gray-500 border-gray-200",
                         job.status === "error" && "bg-red-50 text-red-600 border-red-200",
                         job.status === "cancelled" && "bg-amber-50 text-amber-600 border-amber-200"
-                      )}>
-                        {job.status}
-                      </span>
+                      )}>{job.status}</span>
                     </td>
                     <td className="py-3.5 px-4 font-bold text-gray-700">
                       {job.progress}%

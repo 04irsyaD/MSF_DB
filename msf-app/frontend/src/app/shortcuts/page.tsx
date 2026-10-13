@@ -7,6 +7,7 @@ import { ShortcutsResponse } from "@/lib/types";
 import ShortcutFilter from "@/components/shortcuts/ShortcutFilter";
 import ShortcutCard from "@/components/shortcuts/ShortcutCard";
 import { Terminal, AlertCircle, RefreshCw } from "lucide-react";
+import MaintenanceModal from "@/components/common/MaintenanceModal";
 
 export default function ShortcutsPage() {
   const [filters, setFilters] = useState({
@@ -47,6 +48,14 @@ export default function ShortcutsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Maintenance Notice Modal */}
+      <MaintenanceModal
+        title="Layanan SQL Shortcuts Sedang Maintenance"
+        description="Halo pengguna MSF DB, kami sedang melakukan pemeliharaan server backend untuk modul ini. Silakan gunakan menu SQL Helper di sidebar untuk alternatif skrip database siap pakai mandiri (Client Standalone)!"
+        estimateTime="Coming Soon"
+        storageKey="msf_maintenance_shortcuts"
+      />
+
       {/* Intro info bar */}
       <div className="p-5 bg-white border border-border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-start gap-3">
