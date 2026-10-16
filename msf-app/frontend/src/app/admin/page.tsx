@@ -158,7 +158,7 @@ export default function AdminPage() {
           storageKey="msf_maintenance_admin"
         />
         <div className="flex flex-col items-center text-center gap-2">
-          <div className="h-12 w-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+          <div className="h-12 w-12 rounded-full bg-amber-50 border border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
             <Lock className="h-5 w-5 animate-pulse" />
           </div>
           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">ADMIN PORTAL SECURED</h3>

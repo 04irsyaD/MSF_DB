@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MSF DB — AI Database Documentation",
   description:
-    "Generate dokumentasi database secara otomatis menggunakan AI lokal. Support PostgreSQL, MySQL, SQLite, dan SQL Server.",
+    "Turn a SQL schema or a live database connection into complete documentation with local AI. Supports PostgreSQL, MySQL, SQLite, and SQL Server.",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <AppLayout>{children}</AppLayout>
 
           {/* Sonner Toast Notifications */}
