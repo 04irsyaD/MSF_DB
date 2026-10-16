@@ -6,7 +6,23 @@
 
 ## Active Tasks
 
-Tidak ada task aktif saat ini.
+Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan backend 2026-10-16).
+
+| ID | Task | Severity | Status |
+|----|------|----------|--------|
+| T-021 | Batch 0: Housekeeping — untrack `data/msf_jobs.db`, `.env.example` + `ADMIN_PASSCODE`, hapus default `admin123` | Medium | DONE (belum commit) |
+| T-022 | Batch 1: Tutup SSRF di PDF exporter (matikan raw HTML + `link_callback`) | Critical | DONE (belum commit) |
+| T-023 | Batch 2: Tutup SSRF koneksi DB + nonaktifkan SQLite live di produksi | Critical | TODO |
+| T-024 | Batch 3: Redaksi `connection_string`/SQL dari log | Critical | TODO |
+| T-025 | Batch 4: Upgrade dependency rentan + pisah requirements-dev | High | TODO |
+| T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | TODO |
+| T-027 | Batch 6: API key server-side via Next.js middleware + fix URL admin `localhost:3001` | High | TODO |
+| T-028 | Batch 7: Rate limit per IP + whitelist model + kuota AI harian | High | TODO |
+| T-029 | Batch 8: Security headers + matikan `/docs` di produksi | Medium | TODO |
+| T-030 | Batch 9: Hardening admin — `compare_digest` + lockout | Medium | TODO |
+| T-031 | Batch 10: Sanitasi pesan error + `X-Request-ID` | Medium | TODO |
+| T-032 | Batch 11: Kode akses job 64-bit + cleanup baris SQLite | Medium | TODO |
+| T-033 | Batch 12: Coding standards — pecah `schemas.py`, hapus dead code, dedup | Low | TODO |
 
 ---
 

@@ -3,6 +3,25 @@ import markdown
 from xhtml2pdf import pisa
 import io
 
+# Pengganti untuk setiap resource eksternal (img, link, @import, font).
+# xhtml2pdf memakai URI asli jika callback mengembalikan nilai kosong,
+# jadi callback harus mengembalikan data URI kosong yang tidak butuh jaringan.
+_BLOCKED_RESOURCE_URI = "data:text/plain;base64,"
+
+
+def _block_external_resources(uri, rel) -> str:
+    """link_callback xhtml2pdf: tolak semua fetch resource (cegah SSRF / baca file lokal)."""
+    return _BLOCKED_RESOURCE_URI
+
+
+def _markdown_to_safe_html(markdown_content: str) -> str:
+    """Konversi Markdown ke HTML dengan raw HTML dimatikan (tag HTML di-escape sebagai teks)."""
+    md = markdown.Markdown(extensions=['tables', 'fenced_code'])
+    md.preprocessors.deregister('html_block')
+    md.inlinePatterns.deregister('html')
+    return md.convert(markdown_content)
+
+
 class PdfExporter:
     """Export markdown to PDF format"""
 
@@ -11,7 +30,7 @@ class PdfExporter:
         escaped_author = html.escape(author) if author else None
 
         # Convert Markdown to HTML
-        html_content = markdown.markdown(markdown_content, extensions=['tables', 'fenced_code'])
+        html_content = _markdown_to_safe_html(markdown_content)
         
         # Wrap with basic CSS styling
         full_html = f"""
@@ -53,7 +72,11 @@ class PdfExporter:
 
         # Generate PDF
         pdf_file = io.BytesIO()
-        pisa_status = pisa.CreatePDF(io.StringIO(full_html), dest=pdf_file)
+        pisa_status = pisa.CreatePDF(
+            io.StringIO(full_html),
+            dest=pdf_file,
+            link_callback=_block_external_resources,
+        )
         
         if pisa_status.err:
             raise Exception("Gagal melakukan render PDF")
