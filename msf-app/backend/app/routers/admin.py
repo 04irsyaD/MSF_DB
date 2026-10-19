@@ -4,36 +4,61 @@ Menyediakan statistik, pemantauan log, manajemen antrean, dan aksi sistem.
 """
 
 import os
-from fastapi import APIRouter, HTTPException, Header, Depends
+import secrets
+from fastapi import APIRouter, HTTPException, Header, Depends, Request
 from datetime import datetime
 from collections import deque
+import structlog
 
 from app.background.job_queue import job_queue, JobStatus
+from app.utils.client_ip import client_ip
+from app.utils.login_lockout import LoginLockout
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
+logger = structlog.get_logger()
 
-ADMIN_PASSCODE = os.getenv("ADMIN_PASSCODE", "")
+MIN_PASSCODE_LENGTH = 16
+admin_lockout = LoginLockout(max_failures=5, window_seconds=15 * 60, lockout_seconds=15 * 60)
 
 
-async def verify_admin_passcode(x_admin_passcode: str = Header(None)):
-    """Dependency untuk memvalidasi admin passcode."""
-    if not ADMIN_PASSCODE:
+def configured_admin_passcode() -> str:
+    """Passcode dari env; kosong (admin nonaktif) jika belum di-set atau terlalu pendek."""
+    passcode = os.getenv("ADMIN_PASSCODE", "")
+    if passcode and len(passcode) < MIN_PASSCODE_LENGTH:
+        logger.warning("ADMIN_PASSCODE terlalu pendek, fitur admin dinonaktifkan", min_length=MIN_PASSCODE_LENGTH)
+        return ""
+    return passcode
+
+
+def warn_if_admin_passcode_weak() -> None:
+    """Dipanggil saat startup supaya konfigurasi lemah terlihat di log sejak awal."""
+    configured_admin_passcode()
+
+
+async def verify_admin_passcode(request: Request, x_admin_passcode: str = Header(None)):
+    """Dependency untuk memvalidasi admin passcode (constant-time + lockout per IP)."""
+    expected = configured_admin_passcode()
+    if not expected:
+        raise HTTPException(status_code=403, detail="Fitur admin dinonaktifkan di server ini.")
+
+    ip = client_ip(request)
+    retry_after = admin_lockout.retry_after(ip)
+    if retry_after:
         raise HTTPException(
-            status_code=403,
-            detail="Fitur admin dinonaktifkan. ADMIN_PASSCODE belum dikonfigurasi di file .env server."
+            status_code=429,
+            detail="Terlalu banyak percobaan login admin. Coba lagi nanti.",
+            headers={"Retry-After": str(retry_after)},
         )
-    
+
     if not x_admin_passcode:
-        raise HTTPException(
-            status_code=401,
-            detail="Header X-Admin-Passcode wajib disertakan."
-        )
-        
-    if x_admin_passcode != ADMIN_PASSCODE:
-        raise HTTPException(
-            status_code=401,
-            detail="Admin passcode tidak valid."
-        )
+        raise HTTPException(status_code=401, detail="Header X-Admin-Passcode wajib disertakan.")
+
+    if not secrets.compare_digest(x_admin_passcode.encode(), expected.encode()):
+        failures = admin_lockout.register_failure(ip)
+        logger.warning("Login admin gagal", client_ip=ip, failures=failures)
+        raise HTTPException(status_code=401, detail="Admin passcode tidak valid.")
+
+    admin_lockout.register_success(ip)
 
 
 @router.post("/verify", dependencies=[Depends(verify_admin_passcode)])

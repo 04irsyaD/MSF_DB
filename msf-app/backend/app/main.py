@@ -15,6 +15,7 @@ import structlog
 from datetime import datetime, timezone
 
 from app.routers import generate, database, ai, shortcuts, export, stats, admin
+from app.routers.admin import warn_if_admin_passcode_weak
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
 from app.services.db_url_guard import sqlite_connection_enabled
@@ -76,6 +77,7 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI):
     """Setup saat startup, cleanup saat shutdown"""
     logger.info("MSF-APP Backend starting up...")
+    warn_if_admin_passcode_weak()
 
     # Background task: cleanup job lama setiap 15 menit
     async def cleanup_loop():
@@ -178,6 +180,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     logger.error("HTTP error occurred", status_code=exc.status_code, detail=exc.detail)
     return JSONResponse(
         status_code=exc.status_code,
+        headers=getattr(exc, "headers", None),
         content={
             "detail": exc.detail,
             "error_code": f"HTTP_{exc.status_code}",

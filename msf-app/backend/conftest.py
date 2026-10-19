@@ -24,3 +24,12 @@ async def async_client():
     from app.main import app
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+
+
+@pytest.fixture(autouse=True)
+def reset_admin_lockout():
+    """State lockout admin global; reset agar kegagalan satu test tidak mengunci test lain."""
+    from app.routers.admin import admin_lockout
+    admin_lockout.reset()
+    yield
+    admin_lockout.reset()

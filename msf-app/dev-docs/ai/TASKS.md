@@ -18,8 +18,8 @@ Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan back
 | T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | DONE (cf35763, belum push) |
 | T-027 | Batch 6: API key server-side via Next.js middleware + fix URL admin `localhost:3001` | High | TODO |
 | T-028 | Batch 7: Rate limit per IP + whitelist model + kuota AI harian | High | TODO |
-| T-029 | Batch 8: Security headers + matikan `/docs` di produksi | Medium | DONE (belum push) |
-| T-030 | Batch 9: Hardening admin — `compare_digest` + lockout | Medium | TODO |
+| T-029 | Batch 8: Security headers + matikan `/docs` di produksi | Medium | DONE (87cf304, belum push) |
+| T-030 | Batch 9: Hardening admin — `compare_digest` + lockout | Medium | DONE (belum push) |
 | T-031 | Batch 10: Sanitasi pesan error + `X-Request-ID` | Medium | TODO |
 | T-032 | Batch 11: Kode akses job 64-bit + cleanup baris SQLite | Medium | TODO |
 | T-033 | Batch 12: Coding standards — pecah `schemas.py`, hapus dead code, dedup | Low | TODO |

@@ -109,7 +109,7 @@ msf-app/
 Lihat `.env` di root `msf-app/` untuk nilai aktual. Key yang wajib ada:
 
 - `MSF_API_KEY` — Kunci keamanan API (backend + frontend harus sama)
-- `ADMIN_PASSCODE` — Password halaman admin
+- `ADMIN_PASSCODE` — Password halaman admin, minimal 16 karakter (lebih pendek = admin nonaktif). Lockout 5x salah / 15 menit per IP
 - `NEXT_PUBLIC_MSF_API_KEY` — API key di sisi frontend
 - `OLLAMA_BASE_URL` — URL Ollama dari dalam Docker (`http://host.docker.internal:11434`)
 - `ALLOW_PRIVATE_DB_HOSTS` — `false` di production (default). `true` hanya dev lokal agar bisa konek ke DB di localhost/docker

@@ -7,7 +7,7 @@
 
 ## 1. Status Pengujian (Test Coverage & Health)
 
-*   **Kasus Uji Backend (Pytest)**: **104 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB, 7 test redaksi log, 10 test anti-DoS, 11 test security headers).
+*   **Kasus Uji Backend (Pytest)**: **112 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB, 7 test redaksi log, 10 test anti-DoS, 11 test security headers, 8 test hardening admin).
 *   **Keamanan Linter**: **Markdownlint lulus 100% (0 errors)** berkat konfigurasi berkas `.markdownlint.json` di root repositori.
 *   **Audit Dependensi**: `pip-audit -r requirements.txt` → **0 kerentanan** (sebelumnya 48 di 7 package). Dicek otomatis di CI `.github/workflows/backend-security.yml`.
 *   **Status Dependensi**: Stabil (semua image docker-compose berhasil dibuat dan berjalan normal).
@@ -22,6 +22,7 @@
 
 | Task ID | Fitur | Tanggal |
 |---------|-------|---------|
+| T-030 | Security Batch 9: admin passcode `compare_digest`, lockout 5x/15 menit per IP (X-Forwarded-For paling kanan), passcode < 16 karakter = admin nonaktif | 2026-10-19 |
 | T-029 | Security Batch 8: security headers (HSTS, CSP, nosniff, X-Frame-Options, Referrer-Policy, no-store), `/docs` mati default (`ENABLE_DOCS`), CORS tanpa credentials | 2026-10-19 |
 | T-026 | Security Batch 5: export/parser via `asyncio.to_thread`, batas ukuran field, batas body global 2 MB (413) | 2026-10-19 |
 | T-025 | Security Batch 4: upgrade 7 package rentan (FastAPI 0.146 / Starlette 1.9, dll), `requirements-dev.txt`, CI `pip-audit` + pytest | 2026-10-19 |
