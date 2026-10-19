@@ -21,6 +21,7 @@ from app.services.db_url_guard import sqlite_connection_enabled
 from app.utils.errors import AppDetailedException
 from app.utils.logger import setup_logger
 from app.utils.body_limit import BodySizeLimitMiddleware
+from app.utils.security_headers import SecurityHeadersMiddleware
 
 setup_logger()
 logger = structlog.get_logger()
@@ -122,6 +123,13 @@ async def lifespan(app: FastAPI):
 # APP SETUP
 # ================================================================
 
+def api_docs_config() -> dict:
+    """Swagger/ReDoc/OpenAPI hanya aktif jika ENABLE_DOCS=true (default mati di produksi)."""
+    if os.getenv("ENABLE_DOCS", "false").strip().lower() in ("1", "true", "yes"):
+        return {"docs_url": "/docs", "redoc_url": "/redoc", "openapi_url": "/openapi.json"}
+    return {"docs_url": None, "redoc_url": None, "openapi_url": None}
+
+
 app = FastAPI(
     title="MSF-APP API",
     description=(
@@ -129,9 +137,8 @@ app = FastAPI(
         "Generate dokumentasi database dari SQL DDL atau koneksi langsung ke DB."
     ),
     version="2.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
     lifespan=lifespan,
+    **api_docs_config(),
 )
 
 # Batas ukuran body (anti-DoS). Didaftarkan sebelum CORS supaya respons 413
@@ -147,11 +154,14 @@ cors_origins = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in cors_origins],
-    allow_credentials=True,
+    allow_credentials=False,  # frontend tidak memakai cookie ke backend
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key", "X-Admin-Passcode"],
 )
 app.add_middleware(APIKeyMiddleware)
+
+# Header keamanan paling luar supaya ikut di semua respons (termasuk 401/413).
+app.add_middleware(SecurityHeadersMiddleware)
 
 # ================================================================
 # EXCEPTION HANDLERS
@@ -265,6 +275,6 @@ async def root():
     return {
         "name": "MSF-APP API",
         "version": "2.0.0",
-        "docs": "/docs",
+        "docs": app.docs_url,
         "health": "/health",
     }

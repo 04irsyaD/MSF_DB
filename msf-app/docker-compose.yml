@@ -59,6 +59,7 @@ services:
       - TZ=Asia/Jakarta
       - SECRET_KEY=${SECRET_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENABLE_DOCS=${ENABLE_DOCS:-true}    # dev lokal: Swagger aktif; production default mati
       - CORS_ORIGINS=http://localhost:3001,http://localhost:3000,http://frontend:3000,http://127.0.0.1:3001,https://msf-db.my.id
     volumes:
       - backend_outputs:/app/outputs    # Hasil file DOCX/PDF

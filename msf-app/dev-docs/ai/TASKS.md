@@ -15,10 +15,10 @@ Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan back
 | T-023 | Batch 2: Tutup SSRF koneksi DB + nonaktifkan SQLite live di produksi | Critical | DONE (ef2115c, belum push) |
 | T-024 | Batch 3: Redaksi `connection_string`/SQL dari log | Critical | DONE (2b2ebac, belum push) |
 | T-025 | Batch 4: Upgrade dependency rentan + pisah requirements-dev | High | DONE (1b883d9, belum push) |
-| T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | DONE (belum push) |
+| T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | DONE (cf35763, belum push) |
 | T-027 | Batch 6: API key server-side via Next.js middleware + fix URL admin `localhost:3001` | High | TODO |
 | T-028 | Batch 7: Rate limit per IP + whitelist model + kuota AI harian | High | TODO |
-| T-029 | Batch 8: Security headers + matikan `/docs` di produksi | Medium | TODO |
+| T-029 | Batch 8: Security headers + matikan `/docs` di produksi | Medium | DONE (belum push) |
 | T-030 | Batch 9: Hardening admin — `compare_digest` + lockout | Medium | TODO |
 | T-031 | Batch 10: Sanitasi pesan error + `X-Request-ID` | Medium | TODO |
 | T-032 | Batch 11: Kode akses job 64-bit + cleanup baris SQLite | Medium | TODO |

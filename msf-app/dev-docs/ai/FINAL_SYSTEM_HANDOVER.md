@@ -99,6 +99,7 @@ msf-app/
 | Diagram Canvas | `frontend/src/components/diagram/DiagramCanvas.tsx` | ERD viewer custom SVG + 7 layout algorithms |
 | API Security | `backend/app/main.py` | X-API-Key middleware |
 | DB Connection Guard | `backend/app/services/db_url_guard.py` | Anti-SSRF koneksi DB live: whitelist driver/param, tolak IP non-publik, pin IP |
+| Security Headers | `backend/app/utils/security_headers.py` | HSTS, CSP, nosniff, X-Frame-Options, Referrer-Policy; `no-store` untuk admin/job |
 | Log Redaction | `backend/app/utils/redact.py` | Processor structlog global: samarkan password/connection string/API key |
 
 ---
@@ -114,6 +115,7 @@ Lihat `.env` di root `msf-app/` untuk nilai aktual. Key yang wajib ada:
 - `ALLOW_PRIVATE_DB_HOSTS` — `false` di production (default). `true` hanya dev lokal agar bisa konek ke DB di localhost/docker
 - `ALLOW_SQLITE_CONNECTION` — `false` di production (default). `true` hanya dev lokal
 - `MAX_REQUEST_BODY_BYTES` — batas ukuran body request, default 2 MB (respons 413 jika lewat)
+- `ENABLE_DOCS` — Swagger `/docs`, `/redoc`, `/openapi.json`. `false` di production (default), `true` di docker-compose lokal
 
 ---
 
