@@ -1,0 +1,3967 @@
+{
+ "blog": [
+  {
+   "name": "users",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "SERIAL",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "username",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "email",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "created_at",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": "CURRENT_TIMESTAMP",
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "posts",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "SERIAL",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "title",
+     "data_type": "VARCHAR(200)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 200,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "content",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "user_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "created_at",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": "CURRENT_TIMESTAMP",
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "user_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": "CASCADE",
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "comments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "SERIAL",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "post_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "author_name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "comment_text",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "created_at",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": "CURRENT_TIMESTAMP",
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "post_id",
+     "references_table": "posts",
+     "references_column": "id",
+     "on_delete": "CASCADE",
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "ecommerce": [
+  {
+   "name": "customers",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "full_name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "email",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "phone",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "categories",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "products",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(150)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 150,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "price",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "category_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "category_id",
+     "references_table": "categories",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "orders",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "customer_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "order_date",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": "CURRENT_TIMESTAMP",
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "total_amount",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "customer_id",
+     "references_table": "customers",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "order_items",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "order_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "product_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "quantity",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "price",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "order_id",
+     "references_table": "orders",
+     "references_column": "id",
+     "on_delete": "CASCADE",
+     "on_update": null
+    },
+    {
+     "column": "product_id",
+     "references_table": "products",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "payments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "order_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "payment_method",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "order_id",
+     "references_table": "orders",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "hr": [
+  {
+   "name": "departments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "location",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "jobs",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "title",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "min_salary",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "employees",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "first_name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "last_name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "department_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "job_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "department_id",
+     "references_table": "departments",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "job_id",
+     "references_table": "jobs",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "salaries",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "employee_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "amount",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "payment_date",
+     "data_type": "DATE",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "employee_id",
+     "references_table": "employees",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "attendances",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "employee_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "date",
+     "data_type": "DATE",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "employee_id",
+     "references_table": "employees",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "leave_requests",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "employee_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "start_date",
+     "data_type": "DATE",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "end_date",
+     "data_type": "DATE",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "employee_id",
+     "references_table": "employees",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "projects",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "budget",
+     "data_type": "DECIMAL(12,2)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "employee_projects",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "employee_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "project_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "role",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "employee_id",
+    "project_id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "employee_id",
+     "references_table": "employees",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "project_id",
+     "references_table": "projects",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "branches",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "address",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "academic": [
+  {
+   "name": "teachers",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "specialization",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "students",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "dob",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "courses",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "teacher_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "teacher_id",
+     "references_table": "teachers",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "classes",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "academic_year",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "enrollments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "student_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "class_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "enroll_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "student_id",
+    "class_id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "student_id",
+     "references_table": "students",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "class_id",
+     "references_table": "classes",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "grades",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "student_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "course_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "score",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "student_id",
+     "references_table": "students",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "course_id",
+     "references_table": "courses",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "parents",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "student_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "phone",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "student_id",
+     "references_table": "students",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "social": [
+  {
+   "name": "users",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "username",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "password_hash",
+     "data_type": "VARCHAR(255)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 255,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "profiles",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "user_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "bio",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "avatar_url",
+     "data_type": "VARCHAR(255)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 255,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "user_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": "CASCADE",
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "friend_requests",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "sender_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "receiver_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "sender_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "receiver_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "posts",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "user_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "content",
+     "data_type": "TEXT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "created_at",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "user_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "comments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "post_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "user_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "content",
+     "data_type": "TEXT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "post_id",
+     "references_table": "posts",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "user_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "likes",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "user_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "post_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "user_id",
+    "post_id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "user_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "post_id",
+     "references_table": "posts",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "messages",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "sender_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "receiver_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "content",
+     "data_type": "TEXT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "sender_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "receiver_id",
+     "references_table": "users",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "groups",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "description",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "saas": [
+  {
+   "name": "accounts",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "company_name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "owner_email",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "billing_plans",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "price_monthly",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "subscriptions",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "account_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "plan_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "account_id",
+     "references_table": "accounts",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "plan_id",
+     "references_table": "billing_plans",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "invoices",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "subscription_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "amount",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "due_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "subscription_id",
+     "references_table": "subscriptions",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "usage_logs",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "account_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "resource_type",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "quantity_used",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "account_id",
+     "references_table": "accounts",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "coupons",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "code",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "discount_percent",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "expiry_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "code"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "booking": [
+  {
+   "name": "theaters",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "city",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "movies",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "title",
+     "data_type": "VARCHAR(150)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 150,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "duration",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "showtimes",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "theater_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "movie_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "start_time",
+     "data_type": "TIMESTAMP",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "theater_id",
+     "references_table": "theaters",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "movie_id",
+     "references_table": "movies",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "seats",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "theater_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "row_num",
+     "data_type": "VARCHAR(5)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 5,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "col_num",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "theater_id",
+     "references_table": "theaters",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "customers",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "email",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "bookings",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "customer_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "showtime_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "booking_date",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "customer_id",
+     "references_table": "customers",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "showtime_id",
+     "references_table": "showtimes",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "tickets",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "booking_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "seat_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "booking_id",
+     "references_table": "bookings",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "seat_id",
+     "references_table": "seats",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "reviews",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "movie_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "customer_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "rating",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "comment",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "movie_id",
+     "references_table": "movies",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "customer_id",
+     "references_table": "customers",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "warehouse": [
+  {
+   "name": "suppliers",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "company_name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "contact_name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "warehouses",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "location",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "items",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "sku",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(150)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 150,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "stock_levels",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "warehouse_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "item_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "quantity_on_hand",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "warehouse_id",
+    "item_id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "warehouse_id",
+     "references_table": "warehouses",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "item_id",
+     "references_table": "items",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "stock_movements",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "item_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "source_warehouse_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "dest_warehouse_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "quantity",
+     "data_type": "INT",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "item_id",
+     "references_table": "items",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "source_warehouse_id",
+     "references_table": "warehouses",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "dest_warehouse_id",
+     "references_table": "warehouses",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "dispatch_orders",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "warehouse_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "dispatch_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "warehouse_id",
+     "references_table": "warehouses",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "inventory_audits",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "warehouse_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "audit_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "auditor_name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "warehouse_id",
+     "references_table": "warehouses",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "library": [
+  {
+   "name": "authors",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "bio",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "genres",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "books",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "title",
+     "data_type": "VARCHAR(150)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 150,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "author_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "genre_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "author_id",
+     "references_table": "authors",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "genre_id",
+     "references_table": "genres",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "members",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "membership_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "loans",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "book_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "member_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "loan_date",
+     "data_type": "DATE",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "return_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "book_id",
+     "references_table": "books",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "member_id",
+     "references_table": "members",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "fines",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "loan_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "amount",
+     "data_type": "DECIMAL(8,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "loan_id",
+     "references_table": "loans",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ],
+ "hospital": [
+  {
+   "name": "departments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "location",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "doctors",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "specialization",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "department_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "department_id",
+     "references_table": "departments",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "patients",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "dob",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "gender",
+     "data_type": "VARCHAR(10)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 10,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "appointments",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "patient_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "doctor_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "appointment_date",
+     "data_type": "TIMESTAMP",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "patient_id",
+     "references_table": "patients",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "doctor_id",
+     "references_table": "doctors",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "medical_records",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "patient_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "doctor_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "diagnosis",
+     "data_type": "TEXT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "record_date",
+     "data_type": "TIMESTAMP",
+     "is_nullable": true,
+     "default_value": "CURRENT_TIMESTAMP",
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "patient_id",
+     "references_table": "patients",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "doctor_id",
+     "references_table": "doctors",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "prescriptions",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "medical_record_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "issued_date",
+     "data_type": "DATE",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "medical_record_id",
+     "references_table": "medical_records",
+     "references_column": "id",
+     "on_delete": "CASCADE",
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "medicines",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(100)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 100,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "type",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "prescription_items",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "prescription_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "medicine_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "dosage",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "prescription_id",
+    "medicine_id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "prescription_id",
+     "references_table": "prescriptions",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    },
+    {
+     "column": "medicine_id",
+     "references_table": "medicines",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "billings",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "patient_id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": true,
+     "column_comment": null
+    },
+    {
+     "name": "amount",
+     "data_type": "DECIMAL(10,2)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "status",
+     "data_type": "VARCHAR(20)",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": 20,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [
+    {
+     "column": "patient_id",
+     "references_table": "patients",
+     "references_column": "id",
+     "on_delete": null,
+     "on_update": null
+    }
+   ],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  },
+  {
+   "name": "wards",
+   "schema": "public",
+   "columns": [
+    {
+     "name": "id",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": true,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "name",
+     "data_type": "VARCHAR(50)",
+     "is_nullable": false,
+     "default_value": null,
+     "max_length": 50,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    },
+    {
+     "name": "capacity",
+     "data_type": "INT",
+     "is_nullable": true,
+     "default_value": null,
+     "max_length": null,
+     "is_primary_key": false,
+     "is_foreign_key": false,
+     "column_comment": null
+    }
+   ],
+   "primary_key": [
+    "id"
+   ],
+   "foreign_keys": [],
+   "indexes": [],
+   "row_count": null,
+   "table_comment": null
+  }
+ ]
+}

@@ -1,7 +1,18 @@
 # Session Notes — MSF DB
 
 Catatan handoff antar sesi. Baca ini dulu sebelum lanjut kerja.
-Terakhir diperbarui: 2026-10-15.
+Terakhir diperbarui: 2026-10-16.
+
+---
+
+## 0. Terbaru (2026-10-16) — Bugfix MSF Diagram
+
+- Branch **`feat/diagram-fix`** (dari `dev`), **belum commit / belum push**.
+- Semua bug di `dev-docs/modules/diagram-canvas/PLAN.md` dikerjakan: layout halaman, kanvas (Fit, zoom, drag, touch), fullscreen, ekspor PNG, Mermaid, dan **parser DDL backend ditulis ulang** (`showtime_id INT` dulu terbaca `TIME`).
+- Verifikasi: lint/type-check/build OK, `npm run test:diagram` 11/11, pytest 53/53, QA browser Chrome 71/72, Edge 71/72, Firefox 70/70 (gagal hanya `/favicon.ico` 404, I-012), termasuk zoom browser 125%/150%.
+- **Sisa sebelum push:** Live DB Connector (ditunda sampai Supabase siap). Isi "Gate Push" di `dev-docs/modules/diagram-canvas/QA_CHECKLIST.md`.
+- Aturan AI baru: `dev-docs/ai/CODING_RULES.md`. Laporan: `reports/task/frontend/2026-10-16-diagram-bugfix-responsive.md`.
+- Catatan: `frontend/.env.local` `BACKEND_URL` mengarah ke backend Render (parser lama). Untuk tes parser lokal jalankan dev dengan `BACKEND_URL=http://localhost:8000`.
 
 ---
 

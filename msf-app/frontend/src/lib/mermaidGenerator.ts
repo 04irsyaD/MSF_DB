@@ -43,6 +43,9 @@ const normalizeSqlType = (sqlType: string): string => {
   return (typeMap[type] ?? type.replace(/\s+/g, "_")) || "VARCHAR";
 };
 
+/** Nama entitas Mermaid hanya boleh huruf, angka, `_` dan `-`. */
+const entityName = (name: string): string => name.replace(/[^\w-]/g, "_");
+
 /**
  * Konversi array TableMetadata ke string kode Mermaid erDiagram.
  *
@@ -56,7 +59,7 @@ export const toMermaidERD = (tables: TableMetadata[]): string => {
 
   // Definisi entitas (tabel + kolom)
   for (const table of tables) {
-    lines.push(`  ${table.name} {`);
+    lines.push(`  ${entityName(table.name)} {`);
     for (const col of table.columns) {
       const type    = normalizeSqlType(col.data_type || "VARCHAR");
       const name    = col.name.replace(/\s+/g, "_");
@@ -73,10 +76,11 @@ export const toMermaidERD = (tables: TableMetadata[]): string => {
   const seenRelations = new Set<string>();
   for (const table of tables) {
     for (const fk of table.foreign_keys ?? []) {
-      const relKey = `${table.name}--${fk.references_table}`;
+      // Dedup per tabel + kolom: dua FK ke tabel yang sama (origin_id, dest_id) tetap dua relasi
+      const relKey = `${table.name}.${fk.column}--${fk.references_table}`;
       if (!seenRelations.has(relKey)) {
         seenRelations.add(relKey);
-        lines.push(`  ${table.name} }o--|| ${fk.references_table} : "${fk.column}"`);
+        lines.push(`  ${entityName(table.name)} }o--|| ${entityName(fk.references_table)} : "${fk.column}"`);
       }
     }
   }

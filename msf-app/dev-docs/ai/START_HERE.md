@@ -7,7 +7,7 @@ Selamat datang di proyek **MSF-DB**! Sebagai AI, sebelum menulis kode apa pun, A
 ---
 
 ## 1. Langkah Pertama (Onboarding Check)
-1.  **Baca Aturan Kontrak**: Pahami berkas [ai-rules/AGENTS.md](../../ai-rules/AGENTS.md).
+1.  **Baca Aturan Kontrak**: Pahami berkas [ai-rules/AGENTS.md](../../ai-rules/AGENTS.md), lalu aturan spesifik project di [CODING_RULES.md](./CODING_RULES.md) (layout UI, Tailwind 3.4, parser, gate QA).
 2.  **Verifikasi Lingkungan**: Pastikan Anda menjalankan perintah git dan docker langsung dari root directory `msf-app/`.
 3.  **Pelajari Arsitektur**: Pahami alur data Next.js ↔ FastAPI di berkas [planning/architecture.md](../../planning/architecture.md).
 

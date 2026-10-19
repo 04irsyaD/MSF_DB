@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit",
     "validate:data": "node scripts/validate-sql-helper.mjs",
     "test:sql-helper": "node --test scripts/test-sql-helper.mjs",
+    "test:diagram": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/test-diagram.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
   },
   "dependencies": {

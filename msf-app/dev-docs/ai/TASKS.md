@@ -24,6 +24,17 @@ Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan back
 | T-032 | Batch 11: Kode akses job 64-bit + cleanup baris SQLite | Medium | TODO |
 | T-033 | Batch 12: Coding standards — pecah `schemas.py`, hapus dead code, dedup | Low | TODO |
 
+Rencana lengkap: `dev-docs/modules/diagram-canvas/PLAN.md` (bug MSF Diagram, 2026-10-16). QA: `QA_CHECKLIST.md` di folder yang sama.
+
+| ID | Task | Severity | Status |
+|----|------|----------|--------|
+| T-034 | Diagram Fase 0: branch `feat/diagram-fix` + baseline screenshot/lint/test | - | DONE (belum commit) |
+| T-035 | Diagram Fase 1: layout halaman — tombol Rerender menumpuk, tinggi halaman, responsive `< lg` (D-01 s/d D-05, D-11) | High | DONE (belum commit) |
+| T-036 | Diagram Fase 2: parser DDL — deteksi tipe salah, FK `ALTER TABLE`, identifier SQL Server (P-01 s/d P-08) | Critical | DONE (belum commit) |
+| T-037 | Diagram Fase 3: viewport kanvas — tinggi hardcode, Fit, zoom berporos, drag, touch, fullscreen (C-01 s/d C-09) | Critical | DONE (belum commit) |
+| T-038 | Diagram Fase 4: pecah `DiagramCanvas.tsx` (890 baris) + layout deterministik + unit test (C-10 s/d C-16, C-21, D-06 s/d D-09) | Medium | DONE (belum commit) |
+| T-039 | Diagram Fase 5: polish — tipografi, a11y, emoji, badge maintenance (D-10, D-12, C-17 s/d C-20) | Low | DONE (belum commit) |
+
 ---
 
 ## Completed Tasks (< 1 minggu)

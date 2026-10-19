@@ -6,6 +6,7 @@ import { X, Copy, Check, GitBranch, ExternalLink } from "lucide-react";
 import { TableMetadata } from "@/lib/types";
 import { toMermaidERD } from "@/lib/mermaidGenerator";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 
 interface MermaidExportModalProps {
   tables: TableMetadata[];
@@ -25,19 +26,28 @@ export default function MermaidExportModal({ tables, onClose }: MermaidExportMod
     return () => document.removeEventListener("keydown", onEsc);
   }, [onClose]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(mermaidCode).then(() => {
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const handleCopy = async () => {
+    if (await copyToClipboard(mermaidCode)) {
       setCopied(true);
       toast.success("Kode Mermaid berhasil disalin!");
-      setTimeout(() => setCopied(false), 2000);
-    });
+    } else {
+      toast.error("Gagal menyalin. Pilih teks kode lalu salin manual (Ctrl+C).");
+    }
   };
 
-  const handleCopyWithFence = () => {
+  const handleCopyWithFence = async () => {
     const withFence = "```mermaid\n" + mermaidCode + "\n```";
-    navigator.clipboard.writeText(withFence).then(() => {
+    if (await copyToClipboard(withFence)) {
       toast.success("Disalin dengan blok kode Markdown!");
-    });
+    } else {
+      toast.error("Gagal menyalin. Pilih teks kode lalu salin manual (Ctrl+C).");
+    }
   };
 
   if (!mounted) return null;

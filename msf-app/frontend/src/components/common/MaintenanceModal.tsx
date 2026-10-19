@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Clock, Info, X } from "lucide-react";
@@ -24,27 +24,35 @@ export default function MaintenanceModal({
   useEffect(() => {
     setMounted(true);
     // Cek apakah sudah pernah ditutup dalam sesi browser ini
-    const isDismissed = sessionStorage.getItem(storageKey);
+    let isDismissed: string | null = null;
+    try {
+      isDismissed = sessionStorage.getItem(storageKey);
+    } catch {
+      // sessionStorage diblokir: tampilkan modal seperti sesi baru
+    }
     if (!isDismissed) {
       setIsOpen(true);
     }
   }, [storageKey]);
 
+  const handleClose = useCallback(() => {
+    try {
+      sessionStorage.setItem(storageKey, "true");
+    } catch {
+      // abaikan: modal tetap tertutup untuk halaman ini
+    }
+    setIsOpen(false);
+  }, [storageKey]);
+
   // Listener tombol Escape untuk menutup modal
   useEffect(() => {
+    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        handleClose();
-      }
+      if (e.key === "Escape") handleClose();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
-
-  const handleClose = () => {
-    sessionStorage.setItem(storageKey, "true");
-    setIsOpen(false);
-  };
+  }, [isOpen, handleClose]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -56,7 +64,7 @@ export default function MaintenanceModal({
     <>
       {/* Modal Overlay & Card (hanya di area konten, tidak menutupi sidebar) */}
       {isOpen && (
-        <div className="fixed inset-0 lg:left-64 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 lg:left-64 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative bg-card border border-border w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5 animate-in zoom-in-95 duration-200">
             {/* Close Icon Button */}
             <button
@@ -115,15 +123,20 @@ export default function MaintenanceModal({
 
       {/* Floating Info Pill saat modal tertutup */}
       {!isOpen && (
-        <div className="fixed bottom-5 right-5 z-40 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="fixed bottom-4 right-4 z-40 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {/* Ringkas (ikon saja) agar tidak menutupi konten; teks muncul saat hover/fokus */}
           <button
             type="button"
             onClick={handleOpen}
-            className="flex items-center gap-2 px-3.5 py-2 bg-card/95 hover:bg-card text-foreground border border-border rounded-full shadow-lg text-xs font-mono font-semibold backdrop-blur-sm transition-all hover:scale-105 cursor-pointer"
+            aria-label="Mode Maintenance - lihat info"
+            title="Mode Maintenance"
+            className="group flex items-center gap-2 px-2.5 py-2 bg-card/95 hover:bg-card text-foreground border border-border rounded-full shadow-lg text-xs font-mono font-semibold backdrop-blur-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
             <Info className="h-3.5 w-3.5 text-amber-500" />
-            <span>Mode Maintenance</span>
+            <span className="max-w-0 overflow-hidden whitespace-nowrap transition-[max-width] duration-200 group-hover:max-w-[10rem] group-focus-visible:max-w-[10rem]">
+              Mode Maintenance
+            </span>
           </button>
         </div>
       )}

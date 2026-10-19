@@ -8,7 +8,7 @@ export interface DDLTemplate {
 export const DDL_TEMPLATES: DDLTemplate[] = [
   {
     id: "blog",
-    name: "📝 Blog Sederhana (3 Tabel)",
+    name: "Blog Sederhana (3 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 1: Simple Blog System
 CREATE TABLE users (
@@ -36,7 +36,7 @@ CREATE TABLE comments (
   },
   {
     id: "ecommerce",
-    name: "🛒 Sistem E-Commerce (6 Tabel)",
+    name: "Sistem E-Commerce (6 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 2: E-Commerce System
 CREATE TABLE customers (
@@ -82,7 +82,7 @@ CREATE TABLE payments (
   },
   {
     id: "hr",
-    name: "👥 Manajemen SDM / HR (9 Tabel)",
+    name: "Manajemen SDM / HR (9 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 3: HR Management System
 CREATE TABLE departments (
@@ -148,7 +148,7 @@ CREATE TABLE branches (
   },
   {
     id: "academic",
-    name: "🏫 Akademik / Sekolah (7 Tabel)",
+    name: "Akademik / Sekolah (7 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 4: Academic / School System
 CREATE TABLE teachers (
@@ -198,7 +198,7 @@ CREATE TABLE parents (
   },
   {
     id: "social",
-    name: "💬 Jejaring Sosial (8 Tabel)",
+    name: "Jejaring Sosial (8 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 5: Social Media Network
 CREATE TABLE users (
@@ -256,7 +256,7 @@ CREATE TABLE groups (
   },
   {
     id: "saas",
-    name: "🚀 SaaS Billing & Subscription (6 Tabel)",
+    name: "SaaS Billing & Subscription (6 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 6: SaaS Billing & Subscription
 CREATE TABLE accounts (
@@ -300,7 +300,7 @@ CREATE TABLE coupons (
   },
   {
     id: "booking",
-    name: "🎟️ Pemesanan Tiket Bioskop (8 Tabel)",
+    name: "Pemesanan Tiket Bioskop (8 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 7: Ticket Booking System
 CREATE TABLE theaters (
@@ -358,7 +358,7 @@ CREATE TABLE reviews (
   },
   {
     id: "warehouse",
-    name: "📦 Gudang & Inventaris (7 Tabel)",
+    name: "Gudang & Inventaris (7 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 8: Warehouse Inventory
 CREATE TABLE suppliers (
@@ -410,7 +410,7 @@ CREATE TABLE inventory_audits (
   },
   {
     id: "library",
-    name: "📚 Manajemen Perpustakaan (6 Tabel)",
+    name: "Manajemen Perpustakaan (6 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 9: Library Management
 CREATE TABLE authors (
@@ -454,7 +454,7 @@ CREATE TABLE fines (
   },
   {
     id: "hospital",
-    name: "🏥 Sistem Layanan RS / Hospital (10 Tabel)",
+    name: "Sistem Layanan RS / Hospital (10 Tabel)",
     dialect: "postgresql",
     sql: `-- Template 10: Hospital Management System
 CREATE TABLE departments (
