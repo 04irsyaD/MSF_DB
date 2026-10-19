@@ -1,13 +1,13 @@
 # Current State — Status Kesehatan Sistem saat Ini
 
 > **Status:** PROJECT STATUS — Kondisi berkas, cakupan testing, dan technical debt.
-> **Terakhir diupdate:** 2026-10-09
+> **Terakhir diupdate:** 2026-10-19
 
 ---
 
 ## 1. Status Pengujian (Test Coverage & Health)
 
-*   **Kasus Uji Backend (Pytest)**: **32 passed** (100% passing).
+*   **Kasus Uji Backend (Pytest)**: **76 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB).
 *   **Keamanan Linter**: **Markdownlint lulus 100% (0 errors)** berkat konfigurasi berkas `.markdownlint.json` di root repositori.
 *   **Status Dependensi**: Stabil (semua image docker-compose berhasil dibuat dan berjalan normal).
 *   **TypeScript Check (Frontend)**: `npm run type-check` (`tsc --noEmit`) → **0 error** (terverifikasi pasca SQL Helper v2 Fase 4).
@@ -21,6 +21,7 @@
 
 | Task ID | Fitur | Tanggal |
 |---------|-------|---------|
+| T-023 | Security Batch 2: guard anti-SSRF koneksi DB live (`db_url_guard.py`), SQLite live nonaktif di produksi, kategori error koneksi | 2026-10-19 |
 | T-020 | SQL Helper v2 Fase 4 (Template params `{{x}}`, Favorites & Recent localStorage, Deep link `?script=`, Drawer Prev/Next) | 2026-10-09 |
 | T-019 | SQL Helper v2 Fase 3 (UI Baru: Cards preview 3 baris SQL, Table ringkas, Radix drawer, FilterChips, Shiki SqlViewer) | 2026-10-09 |
 | T-018 | SQL Helper v2 Fase 2 (Refactor Fondasi: Zod schema, riskMeta, labels, validate:data, useScriptFilters URL sync) | 2026-10-09 |

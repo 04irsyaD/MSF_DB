@@ -10,9 +10,9 @@ Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan back
 
 | ID | Task | Severity | Status |
 |----|------|----------|--------|
-| T-021 | Batch 0: Housekeeping — untrack `data/msf_jobs.db`, `.env.example` + `ADMIN_PASSCODE`, hapus default `admin123` | Medium | DONE (belum commit) |
-| T-022 | Batch 1: Tutup SSRF di PDF exporter (matikan raw HTML + `link_callback`) | Critical | DONE (belum commit) |
-| T-023 | Batch 2: Tutup SSRF koneksi DB + nonaktifkan SQLite live di produksi | Critical | TODO |
+| T-021 | Batch 0: Housekeeping — untrack `data/msf_jobs.db`, `.env.example` + `ADMIN_PASSCODE`, hapus default `admin123` | Medium | DONE (5328f54, ccd4169) |
+| T-022 | Batch 1: Tutup SSRF di PDF exporter (matikan raw HTML + `link_callback`) | Critical | DONE (ccd4169) |
+| T-023 | Batch 2: Tutup SSRF koneksi DB + nonaktifkan SQLite live di produksi | Critical | DONE (belum push) |
 | T-024 | Batch 3: Redaksi `connection_string`/SQL dari log | Critical | TODO |
 | T-025 | Batch 4: Upgrade dependency rentan + pisah requirements-dev | High | TODO |
 | T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | TODO |

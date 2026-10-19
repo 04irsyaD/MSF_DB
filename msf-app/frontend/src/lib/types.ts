@@ -109,6 +109,7 @@ export interface ShortcutsResponse {
 export interface DBTestConnectionResponse {
   success: boolean;
   message: string;
+  error_code?: string;
   engine: DBEngine;
   server_version?: string;
   tables_count?: number;

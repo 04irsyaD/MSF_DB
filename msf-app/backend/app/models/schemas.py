@@ -108,6 +108,7 @@ class DBTestConnectionRequest(BaseModel):
 class DBTestConnectionResponse(BaseModel):
     success: bool
     message: str
+    error_code: Optional[str] = None
     engine: str
     server_version: Optional[str] = None
     tables_count: Optional[int] = None

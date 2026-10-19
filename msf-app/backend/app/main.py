@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from app.routers import generate, database, ai, shortcuts, export, stats, admin
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
+from app.services.db_url_guard import sqlite_connection_enabled
 from app.utils.errors import AppDetailedException
 from app.utils.logger import setup_logger
 
@@ -242,6 +243,9 @@ async def health_check():
             "api": "up",
             "ollama": ollama_status,
             "ollama_model": ollama_model,
+        },
+        "features": {
+            "sqlite_connection": sqlite_connection_enabled(),
         },
         "version": "2.0.0",
     }
