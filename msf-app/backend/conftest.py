@@ -6,7 +6,7 @@ sehingga fixture `event_loop` custom tidak lagi diperlukan dan telah
 dihapus untuk menghindari DeprecationWarning dari pytest-asyncio.
 """
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 import pytest
 
 
@@ -22,5 +22,5 @@ def client():
 async def async_client():
     """Async test client untuk endpoint tests."""
     from app.main import app
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac

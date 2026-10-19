@@ -122,6 +122,12 @@ Lihat `.env` di root `msf-app/` untuk nilai aktual. Key yang wajib ada:
 # Backend pytest
 docker-compose exec -T backend pytest -v --tb=short
 
+# Backend lokal tanpa Docker (dependency test ada di requirements-dev.txt)
+cd backend && pip install -r requirements-dev.txt && pytest -q
+
+# Audit CVE dependency (juga jalan otomatis di CI backend-security.yml)
+cd backend && pip-audit -r requirements.txt
+
 # Markdown lint
 npx --yes markdownlint-cli2 "**/*.md" "!**/node_modules/**" "!**/.git/**"
 ```
