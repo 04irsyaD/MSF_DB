@@ -68,8 +68,9 @@ async def _run_generate_job(job, tables, settings: dict):
             
             from app.services.exporters.pdf_exporter import PdfExporter
             exporter = PdfExporter()
-            result_bytes = exporter.export(
-                markdown_content=markdown, 
+            result_bytes = await asyncio.to_thread(
+                exporter.export,
+                markdown_content=markdown,
                 project_name=settings["project_name"], 
                 author=settings.get("author")
             )
@@ -77,7 +78,8 @@ async def _run_generate_job(job, tables, settings: dict):
         else:
             logger.info("Export Engine", engine="docx_exporter")
             exporter = DocxExporter()
-            result_bytes = exporter.export(
+            result_bytes = await asyncio.to_thread(
+                exporter.export,
                 markdown_content=markdown,
                 project_name=settings["project_name"],
                 author=settings.get("author"),
@@ -105,7 +107,7 @@ async def parse_ddl_endpoint(request: ParseDDLRequest):
     Parse SQL DDL string dan kembalikan struktur TableMetadata.
     """
     try:
-        tables = SQLParser.parse(request.sql_content, dialect=request.dialect)
+        tables = await asyncio.to_thread(SQLParser.parse, request.sql_content, dialect=request.dialect)
         return tables
     except Exception as e:
         logger.error("Gagal parse DDL", error=str(e))
@@ -135,12 +137,12 @@ async def generate_from_ddl(
             detail=f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). Tunggu job sebelumnya selesai."
         )
     # Validasi SQL
-    validation = SQLParser.validate_sql(request.sql_content)
+    validation = await asyncio.to_thread(SQLParser.validate_sql, request.sql_content)
     if not validation["valid"]:
         raise HTTPException(status_code=400, detail=validation["message"])
 
     # Parse tables
-    tables = SQLParser.parse(request.sql_content)
+    tables = await asyncio.to_thread(SQLParser.parse, request.sql_content)
     
     max_tables = int(os.getenv("MAX_TABLES_PER_REQUEST", "50"))
     if len(tables) > max_tables:

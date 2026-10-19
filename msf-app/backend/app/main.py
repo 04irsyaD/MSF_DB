@@ -20,6 +20,7 @@ from app.services.ollama_provider import ollama_provider
 from app.services.db_url_guard import sqlite_connection_enabled
 from app.utils.errors import AppDetailedException
 from app.utils.logger import setup_logger
+from app.utils.body_limit import BodySizeLimitMiddleware
 
 setup_logger()
 logger = structlog.get_logger()
@@ -132,6 +133,10 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+# Batas ukuran body (anti-DoS). Didaftarkan sebelum CORS supaya respons 413
+# tetap dibungkus header CORS (middleware terakhir = paling luar).
+app.add_middleware(BodySizeLimitMiddleware)
 
 # CORS
 cors_origins = os.getenv(

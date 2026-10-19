@@ -1,5 +1,7 @@
 """Router: Export — /api/export/*"""
 
+import asyncio
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from app.models.schemas import ExportRequest
@@ -13,7 +15,9 @@ async def export_to_docx(request: ExportRequest):
     """Konversi Markdown ke Word (.docx) dan return file"""
     try:
         exporter = DocxExporter()
-        docx_bytes = exporter.export(
+        # Export sinkron (CPU-bound) dijalankan di thread agar event loop tidak beku.
+        docx_bytes = await asyncio.to_thread(
+            exporter.export,
             markdown_content=request.markdown_content,
             project_name=request.project_name,
             author=request.author,
@@ -40,7 +44,8 @@ async def export_to_pdf(request: ExportRequest):
     try:
         from app.services.exporters.pdf_exporter import PdfExporter
         exporter = PdfExporter()
-        pdf_bytes = exporter.export(
+        pdf_bytes = await asyncio.to_thread(
+            exporter.export,
             markdown_content=request.markdown_content,
             project_name=request.project_name,
             author=request.author,

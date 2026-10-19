@@ -7,7 +7,7 @@
 
 ## 1. Status Pengujian (Test Coverage & Health)
 
-*   **Kasus Uji Backend (Pytest)**: **83 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB dan 7 test redaksi log).
+*   **Kasus Uji Backend (Pytest)**: **93 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB, 7 test redaksi log, 10 test anti-DoS).
 *   **Keamanan Linter**: **Markdownlint lulus 100% (0 errors)** berkat konfigurasi berkas `.markdownlint.json` di root repositori.
 *   **Audit Dependensi**: `pip-audit -r requirements.txt` → **0 kerentanan** (sebelumnya 48 di 7 package). Dicek otomatis di CI `.github/workflows/backend-security.yml`.
 *   **Status Dependensi**: Stabil (semua image docker-compose berhasil dibuat dan berjalan normal).
@@ -22,6 +22,7 @@
 
 | Task ID | Fitur | Tanggal |
 |---------|-------|---------|
+| T-026 | Security Batch 5: export/parser via `asyncio.to_thread`, batas ukuran field, batas body global 2 MB (413) | 2026-10-19 |
 | T-025 | Security Batch 4: upgrade 7 package rentan (FastAPI 0.146 / Starlette 1.9, dll), `requirements-dev.txt`, CI `pip-audit` + pytest | 2026-10-19 |
 | T-024 | Security Batch 3: redaksi log global (`redact.py`), log generate hanya metadata, log validasi tanpa input mentah | 2026-10-19 |
 | T-023 | Security Batch 2: guard anti-SSRF koneksi DB live (`db_url_guard.py`), SQLite live nonaktif di produksi, kategori error koneksi | 2026-10-19 |

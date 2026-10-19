@@ -14,8 +14,8 @@ Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan back
 | T-022 | Batch 1: Tutup SSRF di PDF exporter (matikan raw HTML + `link_callback`) | Critical | DONE (ccd4169) |
 | T-023 | Batch 2: Tutup SSRF koneksi DB + nonaktifkan SQLite live di produksi | Critical | DONE (ef2115c, belum push) |
 | T-024 | Batch 3: Redaksi `connection_string`/SQL dari log | Critical | DONE (2b2ebac, belum push) |
-| T-025 | Batch 4: Upgrade dependency rentan + pisah requirements-dev | High | DONE (belum push) |
-| T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | TODO |
+| T-025 | Batch 4: Upgrade dependency rentan + pisah requirements-dev | High | DONE (1b883d9, belum push) |
+| T-026 | Batch 5: Anti-DoS — `asyncio.to_thread` untuk export/parser + batas ukuran input | High | DONE (belum push) |
 | T-027 | Batch 6: API key server-side via Next.js middleware + fix URL admin `localhost:3001` | High | TODO |
 | T-028 | Batch 7: Rate limit per IP + whitelist model + kuota AI harian | High | TODO |
 | T-029 | Batch 8: Security headers + matikan `/docs` di produksi | Medium | TODO |

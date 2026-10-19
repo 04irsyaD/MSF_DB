@@ -113,6 +113,7 @@ Lihat `.env` di root `msf-app/` untuk nilai aktual. Key yang wajib ada:
 - `OLLAMA_BASE_URL` — URL Ollama dari dalam Docker (`http://host.docker.internal:11434`)
 - `ALLOW_PRIVATE_DB_HOSTS` — `false` di production (default). `true` hanya dev lokal agar bisa konek ke DB di localhost/docker
 - `ALLOW_SQLITE_CONNECTION` — `false` di production (default). `true` hanya dev lokal
+- `MAX_REQUEST_BODY_BYTES` — batas ukuran body request, default 2 MB (respons 413 jika lewat)
 
 ---
 
