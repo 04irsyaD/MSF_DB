@@ -174,7 +174,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = exc.errors()
-    logger.error("Validation error occurred", errors=errors)
+    # Jangan log `input`/`ctx`: bisa berisi password atau connection string mentah.
+    logger.error(
+        "Validation error occurred",
+        errors=[{"loc": e.get("loc"), "type": e.get("type"), "msg": e.get("msg")} for e in errors],
+    )
     detail = "Input tidak valid"
     if errors:
         loc = " -> ".join(str(x) for x in errors[0]["loc"] if x != "body")

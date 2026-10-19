@@ -5,6 +5,8 @@ import os
 import re
 from logging.handlers import RotatingFileHandler
 
+from app.utils.redact import redact_sensitive_processor
+
 class DoubleWriter:
     """Writer yang menulis log ke stdout dan file secara bersamaan dengan rotasi."""
     def __init__(self, file_path: str):
@@ -55,6 +57,8 @@ def setup_logger():
             structlog.processors.StackInfoRenderer(),
             structlog.dev.set_exc_info,
             structlog.processors.TimeStamper(fmt="iso", utc=False),
+            # Jaring pengaman: samarkan password/connection_string/API key sebelum ditulis
+            redact_sensitive_processor,
             structlog.processors.JSONRenderer() if not sys.stdout.isatty() else structlog.dev.ConsoleRenderer()
         ],
         wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),

@@ -7,7 +7,7 @@
 
 ## 1. Status Pengujian (Test Coverage & Health)
 
-*   **Kasus Uji Backend (Pytest)**: **76 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB).
+*   **Kasus Uji Backend (Pytest)**: **83 passed** (100% passing, termasuk 39 test guard anti-SSRF koneksi DB dan 7 test redaksi log).
 *   **Keamanan Linter**: **Markdownlint lulus 100% (0 errors)** berkat konfigurasi berkas `.markdownlint.json` di root repositori.
 *   **Status Dependensi**: Stabil (semua image docker-compose berhasil dibuat dan berjalan normal).
 *   **TypeScript Check (Frontend)**: `npm run type-check` (`tsc --noEmit`) → **0 error** (terverifikasi pasca SQL Helper v2 Fase 4).
@@ -21,6 +21,7 @@
 
 | Task ID | Fitur | Tanggal |
 |---------|-------|---------|
+| T-024 | Security Batch 3: redaksi log global (`redact.py`), log generate hanya metadata, log validasi tanpa input mentah | 2026-10-19 |
 | T-023 | Security Batch 2: guard anti-SSRF koneksi DB live (`db_url_guard.py`), SQLite live nonaktif di produksi, kategori error koneksi | 2026-10-19 |
 | T-020 | SQL Helper v2 Fase 4 (Template params `{{x}}`, Favorites & Recent localStorage, Deep link `?script=`, Drawer Prev/Next) | 2026-10-09 |
 | T-019 | SQL Helper v2 Fase 3 (UI Baru: Cards preview 3 baris SQL, Table ringkas, Radix drawer, FilterChips, Shiki SqlViewer) | 2026-10-09 |
