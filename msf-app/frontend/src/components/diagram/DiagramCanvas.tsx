@@ -1,17 +1,24 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { TableMetadata } from "@/lib/types";
-import { Key, Link as LinkIcon, Link2, ZoomIn, ZoomOut, Maximize, Download, Loader2, GitBranch } from "lucide-react";
+import { Key, Link as LinkIcon,ZoomIn, ZoomOut, Scan, Maximize2, Minimize2, Download, Loader2, GitBranch, EyeOff } from "lucide-react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import MermaidExportModal from "@/components/diagram/MermaidExportModal";
 import VirtualRelationModal from "@/components/diagram/VirtualRelationModal";
-import { VirtualRelation, relationId, useVirtualRelations } from "@/components/diagram/useVirtualRelations";
+import {
+  VirtualRelation,
+  relationId,
+  useHiddenRelations,
+  useVirtualRelations,
+} from "@/components/diagram/useVirtualRelations";
 
 type ColumnRef = { table: string; column: string };
 
-const VIRTUAL_COLOR = "#f59e0b"; // amber-500, beda dari FK asli (accent hijau)
+// FK asli & relasi virtual tampil sama persis (warna, garis, ikon kolom)
+const RELATION_COLOR = "hsl(var(--accent))";
 
 // Satu garis di diagram: FK asli dari SQL atau relasi virtual buatan user
 interface DiagramEdge {
@@ -20,7 +27,8 @@ interface DiagramEdge {
   fromColumn: string;
   toTable: string;
   toColumn: string;
-  virtual?: VirtualRelation;
+  relation: VirtualRelation;
+  virtual: boolean;
 }
 
 interface DiagramCanvasProps {
@@ -37,14 +45,19 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
   const [hoveredTable, setHoveredTable] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<boolean>(false);
   const [showMermaid, setShowMermaid] = useState<boolean>(false);
+  // Mode layar penuh: diagram menutupi seluruh jendela (+ fullscreen browser kalau diizinkan)
+  const [expanded, setExpanded] = useState<boolean>(false);
 
-  // Relasi virtual: tarik titik di kolom tabel A ke kolom tabel B → konfirmasi → garis putus-putus
+  // Relasi virtual: tarik titik di kolom tabel A ke kolom tabel B → konfirmasi → garis relasi
   const { relations: virtualRelations, addRelation, removeRelation } = useVirtualRelations();
+  // FK asli dari SQL yang garisnya dihapus user dari diagram (hanya disembunyikan, SQL tidak berubah)
+  const { relations: hiddenRelations, addRelation: hideRelation, removeRelations: unhideRelations } =
+    useHiddenRelations();
   const [linkFrom, setLinkFrom] = useState<ColumnRef | null>(null);
   const [linkPointer, setLinkPointer] = useState<{ x: number; y: number } | null>(null);
   const [linkTarget, setLinkTarget] = useState<ColumnRef | null>(null);
   const [pendingRelation, setPendingRelation] = useState<VirtualRelation | null>(null);
-  const [relationToDelete, setRelationToDelete] = useState<VirtualRelation | null>(null);
+  const [relationToDelete, setRelationToDelete] = useState<{ relation: VirtualRelation; virtual: boolean } | null>(null);
   // Saat menarik garis, efek redup hover dimatikan supaya tabel tujuan tetap terlihat jelas
   const highlightTable = linkFrom ? null : hoveredTable;
 
@@ -90,41 +103,73 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     [virtualRelations, tables]
   );
 
-  const edges = useMemo<DiagramEdge[]>(
-    () => [
-      ...tables.flatMap((t) =>
-        (t.foreign_keys ?? []).map((fk, i) => ({
-          key: `fk:${t.name}.${fk.column}:${i}`,
-          fromTable: t.name,
-          fromColumn: fk.column,
-          toTable: fk.references_table,
-          toColumn: fk.references_column,
-        }))
+  // Semua FK dari SQL, ber-id sama formatnya dengan relasi virtual (untuk disembunyikan per garis)
+  const fkRelations = useMemo<VirtualRelation[]>(
+    () =>
+      tables.flatMap((t) =>
+        (t.foreign_keys ?? []).map((fk) => {
+          const r = {
+            fromTable: t.name,
+            fromColumn: fk.column,
+            toTable: fk.references_table,
+            toColumn: fk.references_column,
+          };
+          return { ...r, id: relationId(r) };
+        })
       ),
-      ...activeVirtualRelations.map((r) => ({ key: `v:${r.id}`, ...r, virtual: r })),
-    ],
-    [tables, activeVirtualRelations]
+    [tables]
   );
 
-  // Tabel + relasi virtual sebagai foreign_keys, dipakai algoritma layout supaya tabel terkait tetap berdekatan
+  // FK tersembunyi yang memang ada di diagram saat ini
+  const activeHiddenRelations = useMemo(
+    () => hiddenRelations.filter((h) => fkRelations.some((r) => r.id === h.id)),
+    [hiddenRelations, fkRelations]
+  );
+
+  const edges = useMemo<DiagramEdge[]>(
+    () => [
+      ...fkRelations
+        .filter((r) => !activeHiddenRelations.some((h) => h.id === r.id))
+        .map((r, i) => ({ key: `fk:${r.id}:${i}`, ...r, relation: r, virtual: false })),
+      ...activeVirtualRelations.map((r) => ({ key: `v:${r.id}`, ...r, relation: r, virtual: true })),
+    ],
+    [fkRelations, activeHiddenRelations, activeVirtualRelations]
+  );
+
+  // Garis yang tampil sebagai foreign_keys, dipakai algoritma layout supaya tabel terkait tetap berdekatan
   const graphTables = useMemo(
     () =>
       tables.map((t) => ({
         ...t,
-        foreign_keys: [
-          ...(t.foreign_keys ?? []),
-          ...activeVirtualRelations
-            .filter((r) => r.fromTable === t.name)
-            .map((r) => ({ column: r.fromColumn, references_table: r.toTable, references_column: r.toColumn })),
-        ],
+        foreign_keys: edges
+          .filter((e) => e.fromTable === t.name)
+          .map((e) => ({ column: e.fromColumn, references_table: e.toTable, references_column: e.toColumn })),
       })),
-    [tables, activeVirtualRelations]
+    [tables, edges]
   );
 
+  // Untuk ekspor Mermaid: FK yang disembunyikan ikut tidak diekspor sebagai garis
+  const visibleFkTables = useMemo(
+    () =>
+      tables.map((t) => ({
+        ...t,
+        foreign_keys: (t.foreign_keys ?? []).filter(
+          (fk) =>
+            !activeHiddenRelations.some(
+              (h) =>
+                h.fromTable === t.name &&
+                h.fromColumn === fk.column &&
+                h.toTable === fk.references_table &&
+                h.toColumn === fk.references_column
+            )
+        ),
+      })),
+    [tables, activeHiddenRelations]
+  );
+
+  // Hanya sisi asal (seperti kolom FK), supaya ikon kolom sama persis dengan FK asli
   const virtualRelationsOf = (table: string, column: string) =>
-    activeVirtualRelations.filter(
-      (r) => (r.fromTable === table && r.fromColumn === column) || (r.toTable === table && r.toColumn === column)
-    );
+    activeVirtualRelations.filter((r) => r.fromTable === table && r.fromColumn === column);
 
   const isTableConnectedToHovered = (tableName: string) => {
     if (!highlightTable) return false;
@@ -543,7 +588,57 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+    // Pasang ulang saat ganti mode layar penuh (elemen kanvas dibuat ulang lewat portal)
+  }, [expanded]);
+
+  const toggleExpanded = () => {
+    if (expanded) {
+      setExpanded(false);
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    } else {
+      setExpanded(true);
+      // Fullscreen seluruh halaman (bukan elemen diagram) supaya modal & toast tetap terlihat
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    }
+  };
+
+  // Ukuran kanvas berubah saat masuk/keluar layar penuh → fit ulang + kunci scroll halaman
+  useEffect(() => {
+    requestAnimationFrame(() => fitToView());
+    if (!expanded) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded]);
+
+  // Esc menutup layar penuh (kalau browser tidak masuk fullscreen); modal yang terbuka didahulukan
+  const hasOpenModal = !!(pendingRelation || relationToDelete || showMermaid);
+  const hasOpenModalRef = useRef(hasOpenModal);
+  hasOpenModalRef.current = hasOpenModal;
+
+  // Keluar fullscreen browser (Esc / F11) = keluar mode layar penuh juga, kecuali Esc tadi
+  // dipakai menutup modal → diagram tetap besar (overlay), Esc berikutnya baru menutupnya
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement && !hasOpenModalRef.current) setExpanded(false);
+      requestAnimationFrame(() => fitToView());
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [positions, tables]);
+
+  useEffect(() => {
+    if (!expanded || hasOpenModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpanded(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [expanded, hasOpenModal]);
 
   // Seret di area mana pun selain kartu tabel = geser kanvas
   const handleContainerMouseDown = (e: React.MouseEvent) => {
@@ -606,8 +701,19 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
           (edge.fromTable === draft.toTable && edge.fromColumn === draft.toColumn &&
             edge.toTable === draft.fromTable && edge.toColumn === draft.fromColumn)
       );
+      // Menarik ulang FK yang tadi disembunyikan = tampilkan lagi FK aslinya
+      const hiddenFk = activeHiddenRelations.find(
+        (h) =>
+          (h.fromTable === draft.fromTable && h.fromColumn === draft.fromColumn &&
+            h.toTable === draft.toTable && h.toColumn === draft.toColumn) ||
+          (h.fromTable === draft.toTable && h.fromColumn === draft.toColumn &&
+            h.toTable === draft.fromTable && h.toColumn === draft.fromColumn)
+      );
       if (alreadyLinked) {
         toast.info("Kedua kolom ini sudah terhubung.");
+      } else if (hiddenFk) {
+        unhideRelations([hiddenFk.id]);
+        toast.success("Relasi FK dari SQL ditampilkan lagi.");
       } else {
         setPendingRelation({ ...draft, id: relationId(draft) });
       }
@@ -859,7 +965,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         const arrowPointsRight = isOverlapping ? side === "left" : side === "right";
         const arrowBaseX = arrowPointsRight ? endX - 6 : endX + 6;
         const virtual = edge.virtual;
-        const color = virtual ? VIRTUAL_COLOR : "hsl(var(--accent))";
+        const color = RELATION_COLOR;
 
         paths.push(
           <g
@@ -873,18 +979,17 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
             <path
               d={pathD}
               fill="none"
-              stroke={virtual ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.18)"}
+              stroke="rgba(16, 185, 129, 0.18)"
               strokeWidth={5}
               strokeLinejoin="round"
             />
-            {/* Main connector line — relasi virtual putus-putus */}
+            {/* Main connector line */}
             <path
               d={pathD}
               fill="none"
               stroke={color}
               strokeWidth={1.5}
               strokeLinejoin="round"
-              strokeDasharray={virtual ? "6 4" : "none"}
             />
             {/* Arrowhead at target end */}
             <polygon
@@ -893,21 +998,20 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
             />
             {/* Dot at source exit */}
             <circle cx={adjustedStartX} cy={sourceY} r={3} fill={color} />
-            {/* Area klik lebar (tak terlihat) untuk menghapus relasi virtual */}
-            {virtual && (
-              <path
-                d={pathD}
-                fill="none"
-                stroke="transparent"
-                strokeWidth={12}
-                data-virtual-relation={virtual.id}
-                style={{ pointerEvents: "stroke", cursor: "pointer" }}
-                onMouseDown={(e) => e.stopPropagation()}
-                onClick={() => setRelationToDelete(virtual)}
-              >
-                <title>{`Relasi virtual: ${virtual.fromTable}.${virtual.fromColumn} → ${virtual.toTable}.${virtual.toColumn} (klik untuk hapus)`}</title>
-              </path>
-            )}
+            {/* Area klik lebar (tak terlihat) untuk menghapus garis relasi */}
+            <path
+              d={pathD}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={12}
+              data-relation={edge.relation.id}
+              data-virtual={virtual || undefined}
+              style={{ pointerEvents: "stroke", cursor: "pointer" }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={() => setRelationToDelete({ relation: edge.relation, virtual })}
+            >
+              <title>{`${virtual ? "Relasi virtual" : "Relasi FK"}: ${edge.fromTable}.${edge.fromColumn} → ${edge.toTable}.${edge.toColumn} (klik untuk hapus)`}</title>
+            </path>
           </g>
         );
     });
@@ -926,19 +1030,25 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       <g>
         <path
           d={`M ${startX} ${startY} L ${linkPointer.x} ${linkPointer.y}`}
-          stroke={VIRTUAL_COLOR}
+          stroke={RELATION_COLOR}
           strokeWidth={2}
           strokeDasharray="6 4"
           fill="none"
         />
-        <circle cx={startX} cy={startY} r={4} fill={VIRTUAL_COLOR} />
-        <circle cx={linkPointer.x} cy={linkPointer.y} r={5} fill="none" stroke={VIRTUAL_COLOR} strokeWidth={2} />
+        <circle cx={startX} cy={startY} r={4} fill={RELATION_COLOR} />
+        <circle cx={linkPointer.x} cy={linkPointer.y} r={5} fill="none" stroke={RELATION_COLOR} strokeWidth={2} />
       </g>
     );
   };
 
-  return (
-    <div className="relative w-full h-[600px] border border-border bg-gray-50 rounded-2xl overflow-hidden shadow-inner select-none">
+  const content = (
+    <div
+      className={cn(
+        "border-border overflow-hidden select-none",
+        // bg-gray-50 di dark mode semi-transparan, jadi layar penuh pakai warna dasar halaman yang solid
+        expanded ? "fixed inset-0 z-[100] bg-background" : "relative w-full h-[600px] border rounded-2xl shadow-inner bg-gray-50"
+      )}
+    >
       {/* Layout Controls */}
       <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded-xl shadow-sm">
         <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider font-mono">Layout:</span>
@@ -1008,7 +1118,17 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
           className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
           title="Pusatkan Layar (Fit)"
         >
-          <Maximize className="h-4 w-4" />
+          <Scan className="h-4 w-4" />
+        </button>
+        <div className="w-[1px] bg-border my-0.5" />
+        <button
+          type="button"
+          onClick={toggleExpanded}
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
+          title={expanded ? "Keluar Layar Penuh (Esc)" : "Layar Penuh"}
+          aria-pressed={expanded}
+        >
+          {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </button>
       </div>
 
@@ -1090,29 +1210,33 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
                         className={cn(
                           "group relative px-3.5 py-1.5 flex items-center justify-between text-[10px]",
                           isLinkTarget || isLinkSource
-                            ? "bg-amber-500/15 ring-1 ring-inset ring-amber-500"
+                            ? "bg-accent/15 ring-1 ring-inset ring-accent"
                             : linkFrom
-                              ? "hover:bg-amber-500/10"
+                              ? "hover:bg-accent/10"
                               : "hover:bg-gray-50/70"
                         )}
                       >
                         <div className="flex items-center gap-1.5 truncate">
                           {isPK && <Key className="h-3 w-3 text-amber-500 shrink-0" />}
-                          {isFK && <LinkIcon className="h-3 w-3 text-accent shrink-0" />}
-                          {isVirtual && (
+                          {/* FK asli & relasi virtual tampil sama: satu ikon link (detail relasi virtual di tooltip) */}
+                          {(isFK || isVirtual) && (
                             <span
                               className="shrink-0"
-                              title={colVirtual
-                                .map((r) => `Relasi virtual: ${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`)
-                                .join("\n")}
+                              title={
+                                isVirtual
+                                  ? colVirtual
+                                      .map((r) => `Relasi virtual: ${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`)
+                                      .join("\n")
+                                  : undefined
+                              }
                             >
-                              <Link2 className="h-3 w-3 text-amber-500" />
+                              <LinkIcon className="h-3 w-3 text-accent" />
                             </span>
                           )}
                           <span
                             className={cn(
                               "truncate",
-                              isVirtual ? "text-amber-600 dark:text-amber-400" : "text-gray-900",
+                              "text-gray-900",
                               (isPK || isFK || isVirtual) && "font-bold"
                             )}
                           >
@@ -1128,7 +1252,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
                           onMouseDown={(e) => handleLinkStart(e, { table: table.name, column: col.name })}
                           title="Tarik ke kolom tabel lain untuk membuat relasi"
                           className={cn(
-                            "absolute right-0.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-amber-500 bg-white cursor-crosshair transition-opacity",
+                            "absolute right-0.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-accent bg-white cursor-crosshair transition-opacity",
                             isLinkSource ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                           )}
                         />
@@ -1181,15 +1305,37 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         />
       )}
 
-      {/* Konfirmasi hapus relasi virtual (klik garis putus-putus) */}
+      {/* FK yang disembunyikan bisa ditampilkan lagi semuanya */}
+      {activeHiddenRelations.length > 0 && !linkFrom && (
+        <button
+          type="button"
+          onClick={() => {
+            unhideRelations(activeHiddenRelations.map((r) => r.id));
+            toast.success("Semua relasi FK ditampilkan lagi.");
+          }}
+          title={activeHiddenRelations.map((r) => `${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`).join("\n")}
+          className="absolute bottom-11 left-4 z-20 flex items-center gap-1.5 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+        >
+          <EyeOff className="h-3 w-3" />
+          {activeHiddenRelations.length} relasi FK disembunyikan · <span className="font-bold text-accent">Tampilkan</span>
+        </button>
+      )}
+
+      {/* Konfirmasi hapus garis relasi (klik garisnya): virtual dihapus, FK asli disembunyikan */}
       {relationToDelete && (
         <VirtualRelationModal
           mode="delete"
-          relation={relationToDelete}
+          source={relationToDelete.virtual ? "virtual" : "fk"}
+          relation={relationToDelete.relation}
           onCancel={() => setRelationToDelete(null)}
           onConfirm={() => {
-            removeRelation(relationToDelete.id);
-            toast.success("Relasi virtual dihapus.");
+            if (relationToDelete.virtual) {
+              removeRelation(relationToDelete.relation.id);
+              toast.success("Relasi virtual dihapus.");
+            } else {
+              hideRelation(relationToDelete.relation);
+              toast.success("Relasi FK dihapus dari diagram (SQL tidak berubah).");
+            }
             setRelationToDelete(null);
           }}
         />
@@ -1198,13 +1344,16 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       {/* Mermaid ERD Export Modal */}
       {showMermaid && (
         <MermaidExportModal
-          tables={tables}
+          tables={visibleFkTables}
           virtualRelations={activeVirtualRelations}
           onClose={() => setShowMermaid(false)}
         />
       )}
     </div>
   );
+
+  // Portal ke body: induk halaman punya animasi transform yang membuat `fixed` tidak menutupi layar
+  return expanded ? createPortal(content, document.body) : content;
 }
 
 // Simple CN utility replacement for file independence

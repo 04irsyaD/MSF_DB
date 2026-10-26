@@ -72,7 +72,8 @@ export const toMermaidERD = (
       const type    = normalizeSqlType(col.data_type || "VARCHAR");
       const name    = col.name.replace(/\s+/g, "_");
       const pk      = col.is_primary_key ? " PK" : "";
-      const fkMark  = table.foreign_keys?.some((fk) => fk.column === col.name) ? " FK" : "";
+      // is_foreign_key tetap dipakai: FK yang garisnya disembunyikan di diagram tetap FK di SQL
+      const fkMark  = col.is_foreign_key || table.foreign_keys?.some((fk) => fk.column === col.name) ? " FK" : "";
       const notNull = col.is_nullable === false && !col.is_primary_key ? ' "NOT NULL"' : "";
       lines.push(`    ${type} ${name}${pk}${fkMark}${notNull}`);
     }

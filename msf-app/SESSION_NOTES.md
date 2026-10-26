@@ -23,6 +23,21 @@ File baru: `components/diagram/useVirtualRelations.ts`, `VirtualRelationModal.ts
 `MermaidExportModal.tsx`, `lib/mermaidGenerator.ts`. Belum: export/import JSON, saran otomatis dari nama kolom, "Salin
 sebagai SQL (ALTER TABLE ADD FOREIGN KEY)".
 
+**Layar penuh diagram (2026-10-26, belum di-commit):** tombol `Maximize2`/`Minimize2` paling kanan toolbar (ikon Fit diganti
+`Scan` biar tak tertukar). Kanvas di-`createPortal` ke `body` jadi `fixed inset-0 z-[100] bg-background` (portal wajib:
+`animate-fade-in-up` di halaman meninggalkan `transform` → `fixed` terkurung) + `document.documentElement.requestFullscreen()`
+(seluruh halaman, bukan elemen, supaya modal z-[200] & toast tetap tampil). Esc mengupas satu lapis: fullscreen browser →
+modal → layar penuh. Fit ulang saat masuk/keluar, scroll body dikunci. Dites Playwright Firefox + type-check OK.
+
+**Hapus garis FK + relasi virtual jadi hijau (2026-10-26, belum di-commit):** semua garis bisa diklik → popup hapus.
+FK asli (dari SQL) cuma *disembunyikan*: localStorage `msf-diagram-hidden-relations` (hook generik `useStoredRelations`
+di `useVirtualRelations.ts`, ekspor `useHiddenRelations`), SQL tak berubah. Tombol "N relasi FK disembunyikan · Tampilkan"
+di kiri bawah kanvas; menarik ulang kolom FK yang disembunyikan = tampilkan lagi (tanpa popup). FK tersembunyi ikut tak
+dipakai layout & tak diekspor ke Mermaid (tanda `FK` kolom tetap, `mermaidGenerator` cek `col.is_foreign_key`). Relasi
+virtual sekarang tampil **sama persis** dengan FK asli (permintaan user): hijau accent, garis penuh, ikon `Link` yang
+sama hanya di kolom asal (detail "Relasi virtual" di tooltip ikon). Garis preview saat menarik tetap putus-putus. Export
+Mermaid masih membedakan (`}o..||` + "(virtual)"). Amber tersisa hanya ikon PK & kotak peringatan di modal. Dites Playwright (buat/hapus virtual, sembunyikan/tampilkan FK, reload, Mermaid) + type-check/lint OK.
+
 ---
 
 ## 00. Patch keamanan Node/PHP/Laravel (2026-10-23) — BELUM SELESAI, belum di-commit

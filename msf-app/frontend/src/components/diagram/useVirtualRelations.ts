@@ -17,6 +17,8 @@ export interface VirtualRelation {
 }
 
 const STORAGE_KEY = "msf-diagram-virtual-relations";
+// FK asli (dari SQL) yang garisnya disembunyikan user dari diagram — SQL tidak diubah
+const HIDDEN_STORAGE_KEY = "msf-diagram-hidden-relations";
 
 export const relationId = (r: Omit<VirtualRelation, "id">) =>
   `${r.fromTable}.${r.fromColumn}->${r.toTable}.${r.toColumn}`;
@@ -32,14 +34,15 @@ const isRelation = (value: unknown): value is VirtualRelation => {
   );
 };
 
-export function useVirtualRelations() {
+// Daftar relasi tersimpan di localStorage (per browser), dipakai relasi virtual & FK yang disembunyikan
+function useStoredRelations(storageKey: string) {
   const [relations, setRelations] = useState<VirtualRelation[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   // Baca setelah mount (localStorage tidak ada saat SSR)
   useEffect(() => {
     try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const parsed = JSON.parse(localStorage.getItem(storageKey) || "[]");
       if (Array.isArray(parsed)) {
         setRelations(parsed.filter(isRelation).map((r) => ({ ...r, id: relationId(r) })));
       }
@@ -47,16 +50,16 @@ export function useVirtualRelations() {
       // Storage diblokir / data rusak: mulai dari kosong
     }
     setLoaded(true);
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!loaded) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(relations));
+      localStorage.setItem(storageKey, JSON.stringify(relations));
     } catch {
       // Abaikan: relasi tetap ada selama halaman terbuka
     }
-  }, [relations, loaded]);
+  }, [relations, loaded, storageKey]);
 
   const addRelation = (r: Omit<VirtualRelation, "id">) => {
     const id = relationId(r);
@@ -67,8 +70,15 @@ export function useVirtualRelations() {
     setRelations((prev) => prev.filter((r) => r.id !== id));
   };
 
-  return { relations, addRelation, removeRelation };
+  const removeRelations = (ids: string[]) => {
+    setRelations((prev) => prev.filter((r) => !ids.includes(r.id)));
+  };
+
+  return { relations, addRelation, removeRelation, removeRelations };
 }
+
+export const useVirtualRelations = () => useStoredRelations(STORAGE_KEY);
+export const useHiddenRelations = () => useStoredRelations(HIDDEN_STORAGE_KEY);
 
 // Kelompok tipe kasar untuk peringatan "tipe data beda" (bukan validasi ketat)
 const typeFamily = (dataType: string) => {

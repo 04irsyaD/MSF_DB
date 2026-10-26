@@ -8,6 +8,8 @@ import { VirtualRelation, getRelationWarnings } from "@/components/diagram/useVi
 
 interface VirtualRelationModalProps {
   mode: "create" | "delete";
+  /** Mode delete: "fk" = FK asli dari SQL (hanya disembunyikan dari diagram) */
+  source?: "virtual" | "fk";
   relation: VirtualRelation;
   fromColumn?: ColumnMetadata;
   toColumn?: ColumnMetadata;
@@ -19,6 +21,7 @@ interface VirtualRelationModalProps {
 
 export default function VirtualRelationModal({
   mode,
+  source = "virtual",
   relation,
   fromColumn,
   toColumn,
@@ -28,6 +31,7 @@ export default function VirtualRelationModal({
 }: VirtualRelationModalProps) {
   const [mounted, setMounted] = useState(false);
   const isCreate = mode === "create";
+  const isFk = !isCreate && source === "fk";
   const warnings = isCreate ? getRelationWarnings(fromColumn, toColumn) : [];
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export default function VirtualRelationModal({
       <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Tabel</p>
       <p className="text-xs font-bold text-foreground truncate" title={table}>{table}</p>
       <p className="mt-1.5 text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Kolom</p>
-      <p className="text-xs font-bold text-amber-500 truncate" title={column}>
+      <p className="text-xs font-bold text-accent truncate" title={column}>
         {column}
         {meta && <span className="ml-1.5 font-normal text-muted-foreground">{meta.data_type.toLowerCase()}</span>}
       </p>
@@ -67,11 +71,11 @@ export default function VirtualRelationModal({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className={isCreate ? "p-1.5 rounded-lg bg-amber-500/10" : "p-1.5 rounded-lg bg-red-500/10"}>
-              {isCreate ? <Link2 className="h-4 w-4 text-amber-500" /> : <Trash2 className="h-4 w-4 text-red-500" />}
+            <div className={isCreate ? "p-1.5 rounded-lg bg-accent/10" : "p-1.5 rounded-lg bg-red-500/10"}>
+              {isCreate ? <Link2 className="h-4 w-4 text-accent" /> : <Trash2 className="h-4 w-4 text-red-500" />}
             </div>
             <h2 id="virtual-relation-title" className="text-sm font-bold text-foreground">
-              {isCreate ? "Hubungkan tabel?" : "Hapus relasi virtual?"}
+              {isCreate ? "Hubungkan tabel?" : isFk ? "Hapus relasi FK dari diagram?" : "Hapus relasi virtual?"}
             </h2>
           </div>
           <button
@@ -95,7 +99,7 @@ export default function VirtualRelationModal({
 
           <div className="flex items-center gap-2">
             {endpoint(relation.fromTable, relation.fromColumn, fromColumn)}
-            <ArrowRight className="h-4 w-4 text-amber-500 shrink-0" />
+            <ArrowRight className="h-4 w-4 text-accent shrink-0" />
             {endpoint(relation.toTable, relation.toColumn, toColumn)}
           </div>
 
@@ -115,6 +119,13 @@ export default function VirtualRelationModal({
               menghapus.
             </p>
           )}
+
+          {isFk && (
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              Relasi ini berasal dari FOREIGN KEY di SQL. Garisnya hanya disembunyikan dari diagram (SQL tidak diubah)
+              dan bisa ditampilkan lagi lewat tombol &quot;Tampilkan&quot; di pojok kiri bawah diagram.
+            </p>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2 px-5 pb-5">
@@ -122,7 +133,7 @@ export default function VirtualRelationModal({
             <button
               type="button"
               onClick={onSwap}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-[11px] font-bold text-muted-foreground hover:text-foreground hover:border-amber-500/40 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-[11px] font-bold text-muted-foreground hover:text-foreground hover:border-accent/40 transition-colors"
             >
               <ArrowLeftRight className="h-3.5 w-3.5" />
               Tukar arah
@@ -144,11 +155,11 @@ export default function VirtualRelationModal({
               onClick={onConfirm}
               className={
                 isCreate
-                  ? "px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-500/90 text-white text-[11px] font-bold transition-colors"
+                  ? "px-4 py-2 rounded-xl bg-accent hover:bg-accent/90 text-white text-[11px] font-bold transition-colors"
                   : "px-4 py-2 rounded-xl bg-red-500 hover:bg-red-500/90 text-white text-[11px] font-bold transition-colors"
               }
             >
-              {isCreate ? "Ya, hubungkan" : "Hapus"}
+              {isCreate ? "Ya, hubungkan" : isFk ? "Hapus dari diagram" : "Hapus"}
             </button>
           </div>
         </div>
