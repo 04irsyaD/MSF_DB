@@ -5,6 +5,26 @@ Terakhir diperbarui: 2026-10-23.
 
 ---
 
+## 000. Fix navigasi Diagram (2026-10-26) — belum di-commit
+
+`frontend/src/components/diagram/DiagramCanvas.tsx`: kanvas dulu tidak bisa digeser (cek target `svg-overlay` tak pernah
+kena karena SVG `pointer-events-none`), tak ada scroll mouse, auto-fit tak jalan saat rerender dgn jumlah tabel sama,
+zoom min fit 0.45, layout grid pakai tinggi tabel tertinggi → tabel ke-3 di y≈1180 (tak terlihat). Sekarang: seret area
+kosong / scroll = geser, Ctrl+scroll = zoom ke kursor, fit tiap layout dihitung (hindari toolbar), grid masonry, tinggi
+per baris/kolom, drag tabel dibagi zoom, tinggi header/baris dikunci (HEADER_HEIGHT 46, row 28) supaya titik garis pas.
+Dites Playwright (Firefox) + type-check OK.
+
+**Relasi virtual (2026-10-26, belum di-commit):** garis antar kolom tanpa FK di SQL. Hover baris kolom → titik ● di kanan
+→ tarik ke kolom tabel lain → popup "Apakah benar tabel A terhubung ke tabel B melalui kolom ini?" (Tukar arah / Batal /
+Ya, hubungkan; peringatan kalau tipe beda / tujuan bukan PK) → garis putus-putus amber + ikon `Link2` di kedua kolom.
+Klik garis → popup hapus. Disimpan di localStorage `msf-diagram-virtual-relations` (per browser, kunci nama tabel+kolom,
+tidak dibagi ke orang lain). Ikut layout, hover-highlight, PNG, dan Mermaid (`}o..||` "(virtual)").
+File baru: `components/diagram/useVirtualRelations.ts`, `VirtualRelationModal.tsx`; ubah `DiagramCanvas.tsx`,
+`MermaidExportModal.tsx`, `lib/mermaidGenerator.ts`. Belum: export/import JSON, saran otomatis dari nama kolom, "Salin
+sebagai SQL (ALTER TABLE ADD FOREIGN KEY)".
+
+---
+
 ## 00. Patch keamanan Node/PHP/Laravel (2026-10-23) — BELUM SELESAI, belum di-commit
 
 Pemicu: Node.js security release 21 Okt 2026 (10 CVE, RCE Brotli CVE-2026-111497; Node 20 EOL tanpa patch),

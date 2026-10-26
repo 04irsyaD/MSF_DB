@@ -4,19 +4,21 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Copy, Check, GitBranch, ExternalLink } from "lucide-react";
 import { TableMetadata } from "@/lib/types";
-import { toMermaidERD } from "@/lib/mermaidGenerator";
+import { toMermaidERD, MermaidVirtualRelation } from "@/lib/mermaidGenerator";
 import { toast } from "sonner";
 
 interface MermaidExportModalProps {
   tables: TableMetadata[];
+  /** Relasi virtual dari diagram, diekspor sebagai garis putus-putus */
+  virtualRelations?: MermaidVirtualRelation[];
   onClose: () => void;
 }
 
-export default function MermaidExportModal({ tables, onClose }: MermaidExportModalProps) {
+export default function MermaidExportModal({ tables, virtualRelations = [], onClose }: MermaidExportModalProps) {
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied]   = useState(false);
 
-  const mermaidCode = toMermaidERD(tables);
+  const mermaidCode = toMermaidERD(tables, virtualRelations);
 
   useEffect(() => {
     setMounted(true);

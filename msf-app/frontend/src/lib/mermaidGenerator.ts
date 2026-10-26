@@ -49,7 +49,18 @@ const normalizeSqlType = (sqlType: string): string => {
  * @param tables - Array tabel yang sudah diparsing dari DDL atau live DB
  * @returns String kode Mermaid siap pakai (termasuk blok ```mermaid)
  */
-export const toMermaidERD = (tables: TableMetadata[]): string => {
+/** Relasi yang dibuat user di diagram tanpa FOREIGN KEY di SQL */
+export interface MermaidVirtualRelation {
+  fromTable: string;
+  fromColumn: string;
+  toTable: string;
+  toColumn: string;
+}
+
+export const toMermaidERD = (
+  tables: TableMetadata[],
+  virtualRelations: MermaidVirtualRelation[] = []
+): string => {
   if (tables.length === 0) return "";
 
   const lines: string[] = ["erDiagram"];
@@ -78,6 +89,15 @@ export const toMermaidERD = (tables: TableMetadata[]): string => {
         seenRelations.add(relKey);
         lines.push(`  ${table.name} }o--|| ${fk.references_table} : "${fk.column}"`);
       }
+    }
+  }
+
+  // Relasi virtual: ".." = garis putus-putus (non-identifying) di Mermaid
+  for (const rel of virtualRelations) {
+    const relKey = `${rel.fromTable}--${rel.toTable}`;
+    if (!seenRelations.has(relKey)) {
+      seenRelations.add(relKey);
+      lines.push(`  ${rel.fromTable} }o..|| ${rel.toTable} : "${rel.fromColumn} (virtual)"`);
     }
   }
 
