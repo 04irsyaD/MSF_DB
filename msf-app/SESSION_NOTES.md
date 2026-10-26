@@ -1,7 +1,83 @@
 # Session Notes — MSF DB
 
 Catatan handoff antar sesi. Baca ini dulu sebelum lanjut kerja.
-Terakhir diperbarui: 2026-10-15.
+Terakhir diperbarui: 2026-10-23.
+
+---
+
+## 00. Patch keamanan Node/PHP/Laravel (2026-10-23) — BELUM SELESAI, belum di-commit
+
+Pemicu: Node.js security release 21 Okt 2026 (10 CVE, RCE Brotli CVE-2026-111497; Node 20 EOL tanpa patch),
+PHP "PHP2Shell" CVE-2026-109618/109619 (fix 8.3.36), Laravel TokenGuard bypass CVE-2026-114509 (fix 12.68.0;
+hanya `auth:api` + MySQL/MariaDB — project ini pgsql & tak pakai TokenGuard, jadi risiko rendah).
+
+Sudah diubah (path relatif root repo `MSF_DB/`):
+- `node:20-alpine` → `node:24-alpine`: `msf-app/frontend/Dockerfile`, `v2/msf-db/frontend/Dockerfile`, `sql-docs-generator/frontend/Dockerfile`
+- `msf-app/frontend/package.json`: `"engines": { "node": "24.x" }` (untuk Vercel)
+- `php:8.3-fpm` → `php:8.3.36-fpm`: `laravel/metod-saw/Dockerfile`, `dev_/laravel-docker/Dockerfile`
+- `laravel/framework` `^12.0` → `^12.68`: `laravel/example-app/composer.json`, `laravel/metod-saw/src/composer.json`
+
+SISA (dikerjakan di laptop lain yang punya Docker/PHP):
+1. `composer.lock` masih Laravel lama (12.33.0 / 12.40.1) → jalankan di `laravel/example-app` dan `laravel/metod-saw/src`:
+   `composer update laravel/framework -W` (tanpa PHP lokal: `docker run --rm -v "$(pwd):/app" -w /app composer:2 update laravel/framework -W --ignore-platform-reqs`)
+2. `docker compose build --pull` lalu `up -d` untuk image Node/PHP baru; `n8n/`: `docker compose pull` (`n8nio/n8n:latest`)
+3. Redeploy Vercel, cek Settings → Node.js Version = 24.x
+4. Node lokal laptop kantor masih v24.15.0 → `winget upgrade --id OpenJS.NodeJS.LTS` (butuh UAC/admin)
+
+---
+
+## 0. Linux Helper — modul baru (2026-10-20)
+
+Plan: `dev-docs/modules/linux-helper/PLAN.md`. **Fase 1 & 2 SELESAI**, belum di-commit.
+
+File di `frontend/src/features/linux-helper/`:
+- `lib/`: `schema.ts`, `labels.ts`
+- `data/`: `index.ts` (validasi Zod saat load), `level-0.json` (18 item), `level-1/2.json` (kosong), `runbooks/index.json` (kosong)
+- `hooks/`: `useLinuxFilters.ts` (level/env/distro/q ↔ URL)
+- `components/`: `LinuxHelperPage.tsx` (orkestrator), `Level0View.tsx`, `LevelStepper.tsx`, `EnvDistroFilter.tsx`,
+  `Keycap.tsx`, `ShortcutCard.tsx`, `TerminalBlock.tsx`, `SshAccessPanel.tsx`, `CommandCard.tsx`, `CommandDrawer.tsx`
+
+**REVISI DESAIN (permintaan user):** fitur "tandai hafal" DIBATALKAN (`useProgress.ts` dihapus). Command kini pakai
+**layout kartu ala SQL Helper** (badge + judul + deskripsi + preview command + Copy + "View Details" drawer); shortcut
+tetap keycap. Reuse `RiskBadge`/`CategoryBadge` dari `@/features/sql-helper/components/Badges`. `CommandSchema` dapat
+field `description` (wajib) + `note` (opsional, di drawer). Ini membatalkan sebagian G3 di PLAN (dulu "jangan pakai kartu SQL Helper").
+Lain: `src/app/linux-helper/page.tsx`, `scripts/validate-linux-helper.mjs` + script `validate:linux-helper`,
+`src/components/layout/Sidebar.tsx` (navbar "Linux Helper", ikon `SquareTerminal`, setelah Schema Compare).
+
+Keputusan desain: data per-level = objek `{ shortcuts, commands }`; runbook di `data/runbooks/index.json` (array).
+**`LinuxParamSchema` dibuat sendiri** (bukan reuse `ParamSchema` SQL Helper) + tipe `port/ip/cidr/path` —
+dari analisis: `validateParamValue` SQL Helper cuma identifier/number & tak menolak metachar shell (penting Fase 4
+anti command-injection). Reuse util SQL Helper lewat import: `copyToClipboard` (`@/lib/clipboard`), `useLocalStorage`.
+SQL Helper & `/shortcuts` tidak diubah.
+DoD lolos tiap fase: `validate:linux-helper`, `type-check`, `lint` (0 isu), `build` (route 8.7 kB). File terbesar 112 baris.
+
+**Fase 3 SELESAI (2026-10-20):** Level 1 (17 command) & Level 2 (22) aktif. Baru di `lib/`: `resolve.ts` (varian distro),
+`search.ts` (Fuse), `shiki.ts` (highlight bash lazy). Baru di `components/`: `CommandLevelView` (orkestrasi L1/L2),
+`CategoryChips`, `ShellHighlight`, `RiskBanner`. `CommandCard`/`CommandDrawer` kini distro-aware; command `high` paksa
+buka drawer + konfirmasi checkbox sebelum copy. Reuse `RiskBadge`/`CategoryBadge` SQL Helper. DoD lolos (route 15 kB).
+
+**PERLU REVIEW:** konten command Level 1–2 (`rm -rf`=high, `chmod/chown/kill/ufw/useradd`=medium) belum diverifikasi
+orang yang paham server; varian RHEL dari pengetahuan umum, belum diuji di RHEL/Rocky asli.
+
+**Fase 4 SELESAI (2026-10-20):** Level 3 Runbook aktif dengan 6 runbook (install PostgreSQL/MySQL, remote access, firewall
+port DB, backup & restore, troubleshoot DB down). Lib baru: `validateParam.ts` (whitelist anti-injection per tipe),
+`runbook.ts` (interpolasi + resolve distro), `exportScript.ts` (export `.sh` + header peringatan). Komponen: `Level3View`,
+`RunbookView`, `RunbookStepItem`, `RunbookVars`. Keamanan: hanya nilai lolos validasi yang di-interpolasi (invalid tetap
+`{{placeholder}}`); password bukan variabel (literal + catatan); export disabled bila var wajib invalid. DoD lolos.
+
+**PERLU REVIEW (makin penting):** semua konten runbook + varian RHEL ditulis dari pengetahuan umum, BELUM diuji di server
+asli. Step destruktif (`pg_hba` buka akses = high, restore DB = high) perlu dicek orang yang paham server DB.
+
+**Fase 5 + CommandPalette SELESAI (2026-10-20):** `CommandPalette` (Ctrl/⌘+K, `CommandPalette.tsx`) — cari cepat lintas
+shortcut/command/runbook (Fuse), navigasi keyboard, lompat ke level + filter item; tombol hint ⌘K di samping search.
+Dokumentasi: `dev-docs/modules/linux-helper/README.md`, entri `modules/README.md`, CHANGELOG (`[Unreleased]`), laporan task
+`reports/task/frontend/2026-10-20-linux-helper.md`. QA otomatis lolos (validate 63 item, type-check, lint, build route ~21 kB,
+dev server fresh HTTP 200). Catatan: 500 `__webpack_modules__` saat dev HMR muncul setelah banyak edit = cache korup, hilang
+setelah `rm -rf .next` + restart (build produksi selalu bersih).
+
+**SISA (butuh manusia / di luar environment):** (1) review konten command & runbook + varian RHEL oleh orang yang paham
+server; (2) QA visual + axe di browser (buka manual); (3) commit/push oleh Human Developer (AI tidak push) — belum di-commit.
+Modul fungsional Level 0–3.
 
 ---
 

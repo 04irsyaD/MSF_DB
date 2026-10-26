@@ -1,0 +1,266 @@
+[
+  {
+    "id": "rb-install-postgresql",
+    "title": "Install PostgreSQL",
+    "description": "Pasang PostgreSQL, jalankan sebagai service, lalu buat database dan user aplikasi.",
+    "vars": [
+      { "key": "db_name", "label": "Nama database", "type": "identifier", "required": true, "default": "appdb" },
+      { "key": "db_user", "label": "User database", "type": "identifier", "required": true, "default": "appuser" }
+    ],
+    "steps": [
+      {
+        "id": "pg-install",
+        "title": "Install paket PostgreSQL",
+        "commands": ["sudo apt update", "sudo apt install -y postgresql postgresql-contrib"],
+        "variants": {
+          "rhel": ["sudo dnf install -y postgresql-server postgresql-contrib", "sudo postgresql-setup --initdb"]
+        },
+        "verify": "psql --version",
+        "commonErrors": [
+          { "error": "E: Unable to locate package postgresql", "fix": "Jalankan 'sudo apt update' dulu, pastikan koneksi internet server aktif." }
+        ],
+        "risk": "medium"
+      },
+      {
+        "id": "pg-enable",
+        "title": "Aktifkan dan jalankan service",
+        "commands": ["sudo systemctl enable --now postgresql"],
+        "verify": "systemctl status postgresql",
+        "commonErrors": [
+          { "error": "Unit postgresql.service not found", "fix": "Di sebagian versi namanya postgresql@<versi>-main; cek dengan 'systemctl list-units | grep postgres'." }
+        ],
+        "risk": "low"
+      },
+      {
+        "id": "pg-create",
+        "title": "Buat database dan user",
+        "commands": [
+          "sudo -u postgres psql -c \"CREATE DATABASE {{db_name}};\"",
+          "sudo -u postgres psql -c \"CREATE USER {{db_user}} WITH ENCRYPTED PASSWORD 'ganti_password_kuat';\"",
+          "sudo -u postgres psql -c \"GRANT ALL PRIVILEGES ON DATABASE {{db_name}} TO {{db_user}};\""
+        ],
+        "verify": "sudo -u postgres psql -c \"\\l\"",
+        "note": "Ganti 'ganti_password_kuat' dengan password yang kuat. Jangan menyimpan password ini di repo atau file di dalam kode.",
+        "risk": "medium"
+      }
+    ]
+  },
+  {
+    "id": "rb-install-mysql",
+    "title": "Install MySQL / MariaDB",
+    "description": "Pasang MariaDB (kompatibel MySQL), amankan instalasi, lalu buat database dan user.",
+    "vars": [
+      { "key": "db_name", "label": "Nama database", "type": "identifier", "required": true, "default": "appdb" },
+      { "key": "db_user", "label": "User database", "type": "identifier", "required": true, "default": "appuser" }
+    ],
+    "steps": [
+      {
+        "id": "my-install",
+        "title": "Install paket MariaDB",
+        "commands": ["sudo apt update", "sudo apt install -y mariadb-server"],
+        "variants": { "rhel": ["sudo dnf install -y mariadb-server"] },
+        "verify": "mariadb --version",
+        "risk": "medium"
+      },
+      {
+        "id": "my-secure",
+        "title": "Jalankan service dan amankan instalasi",
+        "commands": ["sudo systemctl enable --now mariadb", "sudo mysql_secure_installation"],
+        "note": "mysql_secure_installation interaktif: set password root, hapus user anonim, dan larang remote root login.",
+        "verify": "systemctl status mariadb",
+        "risk": "medium"
+      },
+      {
+        "id": "my-create",
+        "title": "Buat database dan user",
+        "commands": [
+          "sudo mysql -e \"CREATE DATABASE {{db_name}};\"",
+          "sudo mysql -e \"CREATE USER '{{db_user}}'@'localhost' IDENTIFIED BY 'ganti_password_kuat';\"",
+          "sudo mysql -e \"GRANT ALL PRIVILEGES ON {{db_name}}.* TO '{{db_user}}'@'localhost';\"",
+          "sudo mysql -e \"FLUSH PRIVILEGES;\""
+        ],
+        "verify": "sudo mysql -e \"SHOW DATABASES;\"",
+        "note": "Ganti 'ganti_password_kuat' dengan password kuat. Untuk akses dari server lain, ganti 'localhost' dengan IP/subnet aplikasi.",
+        "risk": "medium"
+      }
+    ]
+  },
+  {
+    "id": "rb-remote-access-db",
+    "title": "Buka remote access PostgreSQL",
+    "description": "Izinkan koneksi dari subnet aplikasi (bukan publik) dengan mengubah listen_addresses dan pg_hba.conf.",
+    "vars": [
+      { "key": "db_name", "label": "Nama database", "type": "identifier", "required": true, "default": "appdb" },
+      { "key": "db_user", "label": "User database", "type": "identifier", "required": true, "default": "appuser" },
+      { "key": "db_port", "label": "Port database", "type": "port", "required": true, "default": "5432" },
+      { "key": "allow_cidr", "label": "Subnet yang diizinkan (CIDR)", "type": "cidr", "required": true, "default": "10.0.0.0/24", "hint": "Isi subnet aplikasi, mis. 10.0.0.0/24. Jangan 0.0.0.0/0." }
+    ],
+    "steps": [
+      {
+        "id": "ra-listen",
+        "title": "Set listen_addresses di postgresql.conf",
+        "commands": [
+          "sudo nano /etc/postgresql/*/main/postgresql.conf",
+          "# Ubah/pastikan baris berikut (hapus tanda # di depannya):",
+          "# listen_addresses = '*'"
+        ],
+        "variants": {
+          "rhel": [
+            "sudo nano /var/lib/pgsql/data/postgresql.conf",
+            "# Ubah/pastikan baris berikut:",
+            "# listen_addresses = '*'"
+          ]
+        },
+        "risk": "medium"
+      },
+      {
+        "id": "ra-hba",
+        "title": "Izinkan subnet di pg_hba.conf",
+        "commands": [
+          "sudo nano /etc/postgresql/*/main/pg_hba.conf",
+          "# Tambahkan satu baris (kolom dipisah spasi):",
+          "# host  {{db_name}}  {{db_user}}  {{allow_cidr}}  scram-sha-256"
+        ],
+        "variants": {
+          "rhel": [
+            "sudo nano /var/lib/pgsql/data/pg_hba.conf",
+            "# Tambahkan satu baris:",
+            "# host  {{db_name}}  {{db_user}}  {{allow_cidr}}  scram-sha-256"
+          ]
+        },
+        "note": "Batasi hanya ke subnet aplikasi. Membuka ke 0.0.0.0/0 berarti seluruh internet bisa mencoba konek.",
+        "risk": "high"
+      },
+      {
+        "id": "ra-restart",
+        "title": "Restart PostgreSQL dan cek port",
+        "commands": ["sudo systemctl restart postgresql"],
+        "verify": "sudo ss -tulpn | grep {{db_port}}",
+        "commonErrors": [
+          { "error": "Tidak ada output dari ss grep port", "fix": "listen_addresses belum aktif atau service belum restart. Cek postgresql.conf lalu restart lagi." }
+        ],
+        "risk": "medium"
+      }
+    ]
+  },
+  {
+    "id": "rb-firewall-db",
+    "title": "Buka port DB di firewall",
+    "description": "Izinkan hanya subnet aplikasi mengakses port database di firewall (ufw/firewalld).",
+    "vars": [
+      { "key": "db_port", "label": "Port database", "type": "port", "required": true, "default": "5432" },
+      { "key": "allow_cidr", "label": "Subnet yang diizinkan (CIDR)", "type": "cidr", "required": true, "default": "10.0.0.0/24" }
+    ],
+    "steps": [
+      {
+        "id": "fw-allow",
+        "title": "Izinkan port DB dari subnet aplikasi",
+        "commands": ["sudo ufw allow from {{allow_cidr}} to any port {{db_port}} proto tcp"],
+        "variants": {
+          "rhel": [
+            "sudo firewall-cmd --permanent --add-rich-rule=\"rule family='ipv4' source address='{{allow_cidr}}' port port='{{db_port}}' protocol='tcp' accept\"",
+            "sudo firewall-cmd --reload"
+          ]
+        },
+        "note": "Pakai 'from {{allow_cidr}}' supaya port DB tidak terbuka ke publik.",
+        "risk": "medium"
+      },
+      {
+        "id": "fw-verify",
+        "title": "Verifikasi aturan firewall",
+        "commands": ["sudo ufw status"],
+        "variants": { "rhel": ["sudo firewall-cmd --list-all"] },
+        "risk": "low"
+      }
+    ]
+  },
+  {
+    "id": "rb-backup-restore",
+    "title": "Backup & restore PostgreSQL",
+    "description": "Backup satu database ke file .sql, restore saat dibutuhkan, dan contoh jadwal cron harian.",
+    "vars": [
+      { "key": "db_name", "label": "Nama database", "type": "identifier", "required": true, "default": "appdb" },
+      { "key": "backup_dir", "label": "Folder backup", "type": "path", "required": true, "default": "/var/backups/pg" }
+    ],
+    "steps": [
+      {
+        "id": "bk-dump",
+        "title": "Backup database ke file .sql",
+        "commands": [
+          "sudo mkdir -p {{backup_dir}}",
+          "sudo -u postgres pg_dump {{db_name}} > {{backup_dir}}/{{db_name}}-$(date +%F).sql"
+        ],
+        "verify": "ls -lh {{backup_dir}}",
+        "commonErrors": [
+          { "error": "Permission denied saat menulis ke folder backup", "fix": "Pastikan {{backup_dir}} bisa ditulis user postgres, atau jalankan dump sebagai root lalu chown filenya." }
+        ],
+        "risk": "low"
+      },
+      {
+        "id": "bk-restore",
+        "title": "Restore database dari file .sql",
+        "commands": ["sudo -u postgres psql {{db_name}} < {{backup_dir}}/{{db_name}}-2026-01-01.sql"],
+        "note": "Restore menimpa data yang ada di {{db_name}}. Pastikan nama file dan database tujuan benar.",
+        "risk": "high"
+      },
+      {
+        "id": "bk-cron",
+        "title": "Jadwalkan backup harian (opsional)",
+        "commands": [
+          "sudo crontab -e",
+          "# Tambahkan baris ini untuk backup tiap jam 02:00:",
+          "0 2 * * * sudo -u postgres pg_dump {{db_name}} > {{backup_dir}}/{{db_name}}-$(date +\\%F).sql"
+        ],
+        "note": "Di crontab, tanda % harus di-escape jadi \\%.",
+        "risk": "low"
+      }
+    ]
+  },
+  {
+    "id": "rb-troubleshoot-db-down",
+    "title": "Troubleshoot database mati",
+    "description": "Langkah cepat saat database tidak bisa diakses: cek service, log, port, dan disk.",
+    "vars": [
+      { "key": "db_port", "label": "Port database", "type": "port", "required": true, "default": "5432" }
+    ],
+    "steps": [
+      {
+        "id": "ts-status",
+        "title": "Cek status service database",
+        "commands": ["sudo systemctl status postgresql"],
+        "commonErrors": [
+          { "error": "Active: inactive (dead) / failed", "fix": "Coba start: sudo systemctl start postgresql, lalu lihat log di langkah berikut." }
+        ],
+        "risk": "low"
+      },
+      {
+        "id": "ts-log",
+        "title": "Baca log terbaru",
+        "commands": ["sudo journalctl -u postgresql -n 100 --no-pager"],
+        "risk": "low"
+      },
+      {
+        "id": "ts-port",
+        "title": "Cek apakah DB listen di port",
+        "commands": ["sudo ss -tulpn | grep {{db_port}}"],
+        "commonErrors": [
+          { "error": "Tidak ada output", "fix": "DB tidak listen. Cek listen_addresses di postgresql.conf dan pastikan service running." }
+        ],
+        "risk": "low"
+      },
+      {
+        "id": "ts-disk",
+        "title": "Cek disk penuh",
+        "commands": ["df -h"],
+        "note": "Disk penuh (100%) adalah penyebab umum DB tidak mau start. Bersihkan log/backup lama bila perlu.",
+        "risk": "low"
+      },
+      {
+        "id": "ts-restart",
+        "title": "Restart service bila sudah aman",
+        "commands": ["sudo systemctl restart postgresql"],
+        "risk": "medium"
+      }
+    ]
+  }
+]

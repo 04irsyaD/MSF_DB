@@ -1,0 +1,176 @@
+{
+  "shortcuts": [
+    {
+      "id": "sc-buka-terminal",
+      "level": "0",
+      "title": "Buka terminal",
+      "keys": [["Ctrl", "Alt", "T"]],
+      "env": ["desktop"],
+      "note": "Berlaku di Ubuntu/GNOME. Desktop environment lain bisa berbeda."
+    },
+    {
+      "id": "sc-bersihkan-layar",
+      "level": "0",
+      "title": "Bersihkan layar",
+      "keys": [["Ctrl", "L"]],
+      "altCommand": "clear",
+      "env": ["desktop", "ssh"]
+    },
+    {
+      "id": "sc-hentikan-command",
+      "level": "0",
+      "title": "Hentikan command yang sedang berjalan",
+      "keys": [["Ctrl", "C"]],
+      "env": ["desktop", "ssh"]
+    },
+    {
+      "id": "sc-copy-paste",
+      "level": "0",
+      "title": "Copy / paste di terminal",
+      "keys": [["Ctrl", "Shift", "C"], ["Ctrl", "Shift", "V"]],
+      "env": ["desktop"],
+      "warning": "di terminal, Ctrl + C biasa berarti menghentikan command, bukan copy."
+    },
+    {
+      "id": "sc-auto-complete",
+      "level": "0",
+      "title": "Lengkapi otomatis (auto-complete)",
+      "keys": [["Tab"]],
+      "env": ["desktop", "ssh"],
+      "note": "Tekan Tab dua kali untuk melihat semua pilihan yang cocok."
+    },
+    {
+      "id": "sc-cari-riwayat",
+      "level": "0",
+      "title": "Cari riwayat command",
+      "keys": [["Ctrl", "R"]],
+      "env": ["desktop", "ssh"],
+      "note": "Ketik sebagian command, lalu Enter untuk menjalankannya."
+    },
+    {
+      "id": "sc-awal-akhir-baris",
+      "level": "0",
+      "title": "Lompat ke awal / akhir baris",
+      "keys": [["Ctrl", "A"], ["Ctrl", "E"]],
+      "env": ["desktop", "ssh"]
+    },
+    {
+      "id": "sc-hapus-baris",
+      "level": "0",
+      "title": "Hapus seluruh baris yang sedang diketik",
+      "keys": [["Ctrl", "U"]],
+      "env": ["desktop", "ssh"]
+    },
+    {
+      "id": "sc-keluar",
+      "level": "0",
+      "title": "Keluar dari shell / sesi SSH",
+      "keys": [["Ctrl", "D"]],
+      "altCommand": "exit",
+      "env": ["desktop", "ssh"]
+    }
+  ],
+  "commands": [
+    {
+      "id": "cmd-pwd",
+      "level": "0",
+      "category": "dasar",
+      "title": "Lihat folder saat ini",
+      "description": "Menampilkan path lengkap folder tempat kamu berada sekarang.",
+      "command": "pwd",
+      "explain": [{ "part": "pwd", "meaning": "print working directory, tampilkan path folder sekarang" }],
+      "tags": ["navigasi"]
+    },
+    {
+      "id": "cmd-ls-la",
+      "level": "0",
+      "category": "dasar",
+      "title": "Lihat isi folder (termasuk file tersembunyi)",
+      "description": "Menampilkan daftar isi folder lengkap dengan izin, pemilik, dan ukuran file.",
+      "command": "ls -la",
+      "explain": [
+        { "part": "ls", "meaning": "list isi folder" },
+        { "part": "-l", "meaning": "format detail: izin, pemilik, ukuran, tanggal" },
+        { "part": "-a", "meaning": "tampilkan juga file tersembunyi (diawali titik)" }
+      ],
+      "tags": ["navigasi"]
+    },
+    {
+      "id": "cmd-cd",
+      "level": "0",
+      "category": "dasar",
+      "title": "Pindah ke folder lain",
+      "description": "Berpindah ke folder tujuan. Pakai cd .. untuk naik satu tingkat.",
+      "command": "cd /var/www",
+      "explain": [
+        { "part": "cd", "meaning": "change directory" },
+        { "part": "/var/www", "meaning": "folder tujuan; pakai cd .. untuk naik satu tingkat" }
+      ],
+      "note": "Tanpa argumen, cd langsung kembali ke home folder kamu.",
+      "tags": ["navigasi"]
+    },
+    {
+      "id": "cmd-whoami",
+      "level": "0",
+      "category": "dasar",
+      "title": "Cek sedang login sebagai siapa",
+      "description": "Menampilkan nama user yang sedang kamu pakai di sesi ini.",
+      "command": "whoami",
+      "tags": ["info"]
+    },
+    {
+      "id": "cmd-history",
+      "level": "0",
+      "category": "dasar",
+      "title": "Lihat riwayat command",
+      "description": "Menampilkan daftar command yang pernah dijalankan di shell ini.",
+      "command": "history",
+      "note": "Jalankan ulang command nomor 42 dengan menulis !42.",
+      "tags": ["info"]
+    },
+    {
+      "id": "cmd-sudo",
+      "level": "0",
+      "category": "dasar",
+      "title": "Jalankan command sebagai root (admin)",
+      "description": "Menjalankan satu command dengan hak admin. Biasanya diminta password.",
+      "command": "sudo apt update",
+      "explain": [
+        { "part": "sudo", "meaning": "jalankan command berikutnya dengan hak admin; biasanya minta password" }
+      ],
+      "note": "Gunakan seperlunya. Command dengan sudo bisa mengubah sistem.",
+      "tags": ["admin"]
+    },
+    {
+      "id": "cmd-man",
+      "level": "0",
+      "category": "dasar",
+      "title": "Buka manual/bantuan sebuah command",
+      "description": "Membuka dokumentasi lengkap sebuah command. Tekan q untuk keluar.",
+      "command": "man ls",
+      "explain": [
+        { "part": "man", "meaning": "manual, dokumentasi command" },
+        { "part": "ls", "meaning": "command yang ingin dibaca; tekan q untuk keluar" }
+      ],
+      "tags": ["info"]
+    },
+    {
+      "id": "cmd-clear",
+      "level": "0",
+      "category": "dasar",
+      "title": "Bersihkan tampilan terminal",
+      "description": "Mengosongkan layar terminal tanpa menghapus apa pun.",
+      "command": "clear",
+      "tags": ["dasar"]
+    },
+    {
+      "id": "cmd-exit",
+      "level": "0",
+      "category": "dasar",
+      "title": "Keluar dari terminal / sesi SSH",
+      "description": "Menutup shell saat ini. Kalau lewat SSH, ini memutus koneksi ke server.",
+      "command": "exit",
+      "tags": ["dasar"]
+    }
+  ]
+}

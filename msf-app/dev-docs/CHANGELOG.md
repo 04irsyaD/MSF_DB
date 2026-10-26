@@ -7,6 +7,16 @@
 ## [Unreleased]
 
 ### Added
+- **Linux Helper — modul baru (`/linux-helper`, client standalone, Level 0–3)**:
+  - **Jalur belajar bertingkat**: Level 0 (Dasar Terminal), 1 (Navigasi & File), 2 (Sistem & Jaringan), 3 (Runbook Server DB). `LevelStepper` sebagai navigasi utama.
+  - **Level 0**: panel "Cara masuk ke server" (SSH), kartu shortcut keyboard bergaya `<kbd>` (`Keycap`), dan command dasar; filter lingkungan Desktop/SSH (`EnvDistroFilter`).
+  - **Level 1 & 2 (48 command)**: kartu bergaya SQL Helper (badge Level/kategori/risk + judul + deskripsi + preview + Copy + drawer "View Details"), filter kategori (`CategoryChips`), pencarian fuzzy **Fuse.js**, dan **varian per distro** (`apt`/`dnf`, `ufw`/`firewalld`, `adduser`/`useradd`) via `lib/resolve.ts`.
+  - **Level 3 Runbook (6 runbook)**: install PostgreSQL, install MySQL/MariaDB, remote access DB, firewall port DB, backup & restore, troubleshoot DB down. Tiap runbook punya form variabel global, langkah checklist dengan progress bar, perintah `verify`, "error umum & solusi", catatan per langkah, dan **export `.sh`** (header peringatan, `lib/exportScript.ts`).
+  - **Keamanan anti command-injection**: variabel runbook divalidasi whitelist per tipe (`identifier/number/port/ip/cidr/path/string`) di `lib/validateParam.ts`; metachar shell ditolak; hanya nilai valid yang di-interpolasi (invalid tetap `{{placeholder}}`); password bukan variabel; command `high` memaksa konfirmasi sebelum salin.
+  - **Highlight Shiki** (grammar `bash`, lazy) di drawer & runbook; label risiko + `RiskBanner` konfirmasi untuk `high`.
+  - **Command Palette (Ctrl/⌘+K)**: pencarian cepat lintas shortcut/command/runbook (Fuse.js), navigasi keyboard (panah + Enter), memilih item melompat ke level + memfilternya.
+  - Item navbar "Linux Helper" (ikon `SquareTerminal`) di `Sidebar.tsx`; skrip validasi data `npm run validate:linux-helper`. SQL Helper & `/shortcuts` tidak berubah (zero regression).
+  - Catatan: konten command Level 1–2 & runbook (termasuk varian RHEL) belum diuji di server asli dan perlu review manusia.
 - **SQL Helper v2 Differentiating Features (Fase 4)**:
   - **Parameter Template (`{{placeholder}}`)**:
     - Form dinamis `ParamForm.tsx` untuk kueri dengan placeholder, mendukung validasi tipe data (`identifier`, `number`, `string`) dan proteksi string escaping (`'` -> `''`).

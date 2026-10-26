@@ -1,0 +1,228 @@
+{
+  "shortcuts": [],
+  "commands": [
+    {
+      "id": "cmd-l1-ls-lh",
+      "level": "1",
+      "category": "navigasi",
+      "title": "Lihat isi folder dengan ukuran mudah dibaca",
+      "description": "Menampilkan isi folder lengkap dengan ukuran file dalam KB/MB/GB.",
+      "command": "ls -lh",
+      "explain": [
+        { "part": "ls", "meaning": "list isi folder" },
+        { "part": "-l", "meaning": "format detail per baris" },
+        { "part": "-h", "meaning": "human-readable, ukuran jadi KB/MB/GB" }
+      ],
+      "risk": "low",
+      "tags": ["navigasi"]
+    },
+    {
+      "id": "cmd-l1-find",
+      "level": "1",
+      "category": "navigasi",
+      "title": "Cari file berdasarkan nama",
+      "description": "Mencari file secara rekursif di sebuah folder berdasarkan pola nama.",
+      "command": "find /var/log -name \"*.log\"",
+      "explain": [
+        { "part": "find", "meaning": "cari file/folder" },
+        { "part": "/var/log", "meaning": "folder awal pencarian" },
+        { "part": "-name \"*.log\"", "meaning": "cocokkan nama yang berakhiran .log" }
+      ],
+      "risk": "low",
+      "tags": ["cari"]
+    },
+    {
+      "id": "cmd-l1-mkdir",
+      "level": "1",
+      "category": "file",
+      "title": "Buat folder (termasuk folder induk)",
+      "description": "Membuat folder baru. Dengan -p, folder induk yang belum ada ikut dibuat.",
+      "command": "mkdir -p /var/www/app/releases",
+      "explain": [
+        { "part": "mkdir", "meaning": "make directory" },
+        { "part": "-p", "meaning": "buat seluruh jalur folder yang belum ada, tanpa error" }
+      ],
+      "risk": "low",
+      "tags": ["file"]
+    },
+    {
+      "id": "cmd-l1-touch",
+      "level": "1",
+      "category": "file",
+      "title": "Buat file kosong / perbarui timestamp",
+      "description": "Membuat file baru yang kosong, atau memperbarui waktu akses file yang sudah ada.",
+      "command": "touch /var/www/app/.env",
+      "risk": "low",
+      "tags": ["file"]
+    },
+    {
+      "id": "cmd-l1-cp",
+      "level": "1",
+      "category": "file",
+      "title": "Salin file atau folder",
+      "description": "Menyalin file atau folder ke lokasi lain. Dengan -r untuk folder beserta isinya.",
+      "command": "cp -r /var/www/app /var/www/app-backup",
+      "explain": [
+        { "part": "cp", "meaning": "copy" },
+        { "part": "-r", "meaning": "rekursif, ikut menyalin isi folder" },
+        { "part": "/var/www/app", "meaning": "sumber" },
+        { "part": "/var/www/app-backup", "meaning": "tujuan" }
+      ],
+      "note": "Kalau tujuan sudah ada file dengan nama sama, isinya bisa tertimpa.",
+      "risk": "medium",
+      "tags": ["file"]
+    },
+    {
+      "id": "cmd-l1-mv",
+      "level": "1",
+      "category": "file",
+      "title": "Pindahkan atau ganti nama file",
+      "description": "Memindahkan file/folder, atau mengganti namanya bila tujuan di folder yang sama.",
+      "command": "mv /tmp/app.conf /etc/app/app.conf",
+      "note": "Kalau tujuan sudah ada, file lama akan tertimpa tanpa konfirmasi.",
+      "risk": "medium",
+      "tags": ["file"]
+    },
+    {
+      "id": "cmd-l1-rm",
+      "level": "1",
+      "category": "file",
+      "title": "Hapus file",
+      "description": "Menghapus satu atau beberapa file. File yang terhapus tidak masuk Recycle Bin.",
+      "command": "rm /var/www/app/cache.tmp",
+      "note": "Tidak ada undo. Pastikan path file sudah benar sebelum menjalankan.",
+      "risk": "medium",
+      "tags": ["file", "hapus"]
+    },
+    {
+      "id": "cmd-l1-rm-rf",
+      "level": "1",
+      "category": "file",
+      "title": "Hapus folder beserta seluruh isinya",
+      "description": "Menghapus folder dan semua isinya secara paksa dan rekursif. Sangat destruktif.",
+      "command": "rm -rf /var/www/app/old-release",
+      "explain": [
+        { "part": "rm", "meaning": "remove" },
+        { "part": "-r", "meaning": "rekursif, ikut isi folder" },
+        { "part": "-f", "meaning": "force, tanpa konfirmasi" }
+      ],
+      "note": "Salah path (mis. spasi sebelum / atau variabel kosong) bisa menghapus seluruh sistem. Periksa dua kali.",
+      "risk": "high",
+      "tags": ["file", "hapus"]
+    },
+    {
+      "id": "cmd-l1-cat",
+      "level": "1",
+      "category": "teks",
+      "title": "Tampilkan seluruh isi file",
+      "description": "Mencetak seluruh isi file ke layar. Cocok untuk file pendek.",
+      "command": "cat /etc/hostname",
+      "risk": "low",
+      "tags": ["teks"]
+    },
+    {
+      "id": "cmd-l1-less",
+      "level": "1",
+      "category": "teks",
+      "title": "Baca file panjang dengan scroll",
+      "description": "Membuka file panjang agar bisa di-scroll. Tekan q untuk keluar.",
+      "command": "less /var/log/syslog",
+      "note": "Navigasi: panah atas/bawah, spasi untuk halaman berikut, / untuk mencari, q untuk keluar.",
+      "risk": "low",
+      "tags": ["teks", "log"]
+    },
+    {
+      "id": "cmd-l1-head",
+      "level": "1",
+      "category": "teks",
+      "title": "Lihat beberapa baris awal file",
+      "description": "Menampilkan sejumlah baris pertama dari sebuah file.",
+      "command": "head -n 20 /var/log/syslog",
+      "explain": [{ "part": "-n 20", "meaning": "jumlah baris yang ditampilkan dari atas" }],
+      "risk": "low",
+      "tags": ["teks", "log"]
+    },
+    {
+      "id": "cmd-l1-tail",
+      "level": "1",
+      "category": "teks",
+      "title": "Lihat baris akhir / ikuti log real-time",
+      "description": "Menampilkan baris terakhir file. Dengan -f, mengikuti log yang terus bertambah.",
+      "command": "tail -f /var/log/nginx/error.log",
+      "explain": [
+        { "part": "tail", "meaning": "tampilkan bagian akhir file" },
+        { "part": "-f", "meaning": "follow, terus menampilkan baris baru (Ctrl+C untuk berhenti)" }
+      ],
+      "risk": "low",
+      "tags": ["teks", "log"]
+    },
+    {
+      "id": "cmd-l1-grep",
+      "level": "1",
+      "category": "teks",
+      "title": "Cari teks di dalam file",
+      "description": "Mencari baris yang mengandung kata tertentu, bisa rekursif di banyak file.",
+      "command": "grep -rn \"error\" /var/log/nginx/",
+      "explain": [
+        { "part": "grep", "meaning": "cari pola teks" },
+        { "part": "-r", "meaning": "rekursif ke subfolder" },
+        { "part": "-n", "meaning": "tampilkan nomor baris" }
+      ],
+      "risk": "low",
+      "tags": ["teks", "cari"]
+    },
+    {
+      "id": "cmd-l1-nano",
+      "level": "1",
+      "category": "teks",
+      "title": "Edit file dengan editor sederhana",
+      "description": "Membuka file di nano, editor teks ramah pemula di terminal.",
+      "command": "sudo nano /etc/app/app.conf",
+      "note": "Simpan dengan Ctrl+O lalu Enter, keluar dengan Ctrl+X.",
+      "risk": "low",
+      "tags": ["teks", "editor"]
+    },
+    {
+      "id": "cmd-l1-wc",
+      "level": "1",
+      "category": "teks",
+      "title": "Hitung jumlah baris file",
+      "description": "Menghitung berapa baris dalam sebuah file, berguna untuk log.",
+      "command": "wc -l /var/log/syslog",
+      "explain": [{ "part": "-l", "meaning": "hitung jumlah baris" }],
+      "risk": "low",
+      "tags": ["teks"]
+    },
+    {
+      "id": "cmd-l1-tar-create",
+      "level": "1",
+      "category": "arsip",
+      "title": "Buat arsip terkompres (.tar.gz)",
+      "description": "Membungkus satu folder menjadi satu file arsip terkompres gzip.",
+      "command": "tar -czf app-backup.tar.gz /var/www/app",
+      "explain": [
+        { "part": "-c", "meaning": "create, buat arsip baru" },
+        { "part": "-z", "meaning": "kompres dengan gzip" },
+        { "part": "-f", "meaning": "nama file arsip menyusul setelah flag ini" }
+      ],
+      "risk": "low",
+      "tags": ["arsip", "backup"]
+    },
+    {
+      "id": "cmd-l1-tar-extract",
+      "level": "1",
+      "category": "arsip",
+      "title": "Ekstrak arsip .tar.gz",
+      "description": "Membongkar isi file arsip .tar.gz ke folder saat ini.",
+      "command": "tar -xzf app-backup.tar.gz",
+      "explain": [
+        { "part": "-x", "meaning": "extract, keluarkan isi arsip" },
+        { "part": "-z", "meaning": "arsip terkompres gzip" },
+        { "part": "-f", "meaning": "nama file arsip" }
+      ],
+      "note": "Tambah -C /tujuan untuk mengekstrak ke folder tertentu.",
+      "risk": "low",
+      "tags": ["arsip"]
+    }
+  ]
+}

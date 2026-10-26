@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Activity, X, Circle, ShieldAlert, Layers, Database, GitCompare } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Settings, Activity, X, Circle, ShieldAlert, Layers, Database, GitCompare } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -55,6 +55,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/schema-compare",
       icon: GitCompare,
       description: "Bandingkan struktur dua DB",
+    },
+    {
+      label: "Linux Helper",
+      href: "/linux-helper",
+      icon: SquareTerminal,
+      description: "Shortcut & command server",
     },
     {
       label: "SQL Shortcuts",
