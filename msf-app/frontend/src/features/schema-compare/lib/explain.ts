@@ -1,93 +1,88 @@
 import type { Change, DiffItem, Severity } from "../core/types";
-import { OBJECT_LABELS, bySeverity } from "./view";
+import type { Strings } from "./i18n";
+import { bySeverity } from "./view";
 
 export interface Explanation {
   severity: Severity;
   text: string;
 }
 
-function show(value: unknown): string {
-  if (value === null || value === undefined) return "tanpa batas";
+type Explain = Strings["explain"];
+
+function show(value: unknown, t: Explain): string {
+  if (value === null || value === undefined) return t.unlimited;
   return Array.isArray(value) ? `(${value.join(", ")})` : String(value);
 }
 
-function explainColumnChange(name: string, change: Change, target: string): string {
-  const from = show(change.reference);
-  const to = show(change.target);
+function explainColumnChange(name: string, change: Change, target: string, t: Explain): string {
+  const from = show(change.reference, t);
+  const to = show(change.target, t);
   switch (change.field) {
     case "data_type":
-      return change.severity === "info"
-        ? `Tipe ${name} lebih lebar di ${target} (${from} → ${to})`
-        : `Tipe ${name} berbeda (${from} → ${to}) — tidak kompatibel`;
+      return change.severity === "info" ? t.typeWider(name, target, from, to) : t.typeDiffers(name, from, to);
     case "character_maximum_length":
       return change.severity === "critical"
-        ? `Panjang ${name} lebih pendek di ${target} (${from} → ${to}) — data bisa terpotong`
-        : `Panjang ${name} lebih besar di ${target} (${from} → ${to})`;
+        ? t.lengthShorter(name, target, from, to)
+        : t.lengthLonger(name, target, from, to);
     case "numeric_precision":
     case "numeric_scale": {
-      const what = change.field === "numeric_precision" ? "Presisi" : "Skala";
+      const what = change.field === "numeric_precision" ? t.precision : t.scale;
       return change.severity === "critical"
-        ? `${what} ${name} lebih kecil di ${target} (${from} → ${to}) — nilai bisa ditolak atau dibulatkan`
-        : `${what} ${name} lebih besar di ${target} (${from} → ${to})`;
+        ? t.numericSmaller(what, name, target, from, to)
+        : t.numericLarger(what, name, target, from, to);
     }
     case "is_nullable":
-      if (change.severity === "critical") {
-        return `${name} wajib isi di ${target} tanpa default — insert dari aplikasi bisa gagal`;
-      }
-      return change.target === false
-        ? `${name} wajib isi di ${target} (ada default)`
-        : `${name} boleh kosong di ${target}`;
+      if (change.severity === "critical") return t.requiredNoDefault(name, target);
+      return change.target === false ? t.requiredWithDefault(name, target) : t.nullable(name, target);
     case "default_kind":
-      return `Jenis default ${name} berbeda (${from} vs ${to})`;
+      return t.defaultKind(name, from, to);
     case "default":
-      return `Nilai default ${name} berbeda (${from} vs ${to})`;
+      return t.defaultValue(name, from, to);
     case "identity":
-      return `Jenis identity ${name} berbeda (${from} vs ${to})`;
+      return t.identity(name, from, to);
     default:
-      return `${change.field} ${name} berbeda (${from} vs ${to})`;
+      return t.genericColumn(change.field, name, from, to);
   }
 }
 
-function explainObjectChange(kind: string, name: string, change: Change): string {
-  const from = show(change.reference);
-  const to = show(change.target);
+function explainObjectChange(kind: string, name: string, change: Change, t: Explain): string {
+  const from = show(change.reference, t);
+  const to = show(change.target, t);
   switch (change.field) {
     case "name":
-      return `Nama ${kind} berbeda (${from} vs ${to}), definisinya sama`;
+      return t.rename(kind, from, to);
     case "columns":
-      return `Kolom ${kind} ${name} berbeda: ${from} vs ${to}`;
+      return t.columns(kind, name, from, to);
     case "is_unique":
-      return `${kind} ${name} unik hanya di satu sisi`;
+      return t.unique(kind, name);
     case "method":
-      return `Metode ${kind} ${name} berbeda (${from} vs ${to})`;
+      return t.method(kind, name, from, to);
     case "predicate":
-      return `Syarat WHERE ${kind} ${name} berbeda`;
+      return t.predicate(kind, name);
     case "on_delete":
-      return `Aksi ON DELETE ${name} berbeda (${from} vs ${to})`;
+      return t.onDelete(name, from, to);
     case "on_update":
-      return `Aksi ON UPDATE ${name} berbeda (${from} vs ${to})`;
+      return t.onUpdate(name, from, to);
     default:
-      return `${change.field} ${kind} ${name} berbeda (${from} vs ${to})`;
+      return t.genericObject(change.field, kind, name, from, to);
   }
 }
 
 /** Kalimat penjelasan untuk satu item diff yang tidak identik. */
-export function explainItem(item: DiffItem, referenceLabel: string, targetLabel: string): Explanation[] {
+export function explainItem(item: DiffItem, referenceLabel: string, targetLabel: string, t: Strings): Explanation[] {
   const name = item.object_name;
-  const kind = OBJECT_LABELS[item.object_type];
+  const kind = t.objects[item.object_type];
   const severity = item.severity ?? "info";
 
   if (item.status === "only_reference") {
-    return [{ severity, text: `${kind} ${name} tidak ada di ${targetLabel}` }];
+    return [{ severity, text: t.explain.missingIn(kind, name, targetLabel) }];
   }
   if (item.status === "only_target") {
     const required = item.object_type === "column" && severity === "critical";
     return [
       {
         severity,
-        text: required
-          ? `Kolom ${name} hanya ada di ${targetLabel}, wajib isi tanpa default — insert dari aplikasi bisa gagal`
-          : `${kind} ${name} hanya ada di ${targetLabel}`,
+        text: required ? t.explain.onlyInRequired(name, targetLabel) : t.explain.onlyIn(kind, name, targetLabel),
       },
     ];
   }
@@ -97,14 +92,19 @@ export function explainItem(item: DiffItem, referenceLabel: string, targetLabel:
     severity: change.severity,
     text:
       item.object_type === "column"
-        ? explainColumnChange(name, change, targetLabel)
-        : explainObjectChange(kind.toLowerCase(), name, change),
+        ? explainColumnChange(name, change, targetLabel, t.explain)
+        : explainObjectChange(kind.toLowerCase(), name, change, t.explain),
   }));
 }
 
 /** Semua penjelasan untuk isi satu tabel, yang paling berdampak di atas. */
-export function explainAll(items: readonly DiffItem[], referenceLabel: string, targetLabel: string): Explanation[] {
+export function explainAll(
+  items: readonly DiffItem[],
+  referenceLabel: string,
+  targetLabel: string,
+  t: Strings,
+): Explanation[] {
   return items
-    .flatMap((item) => explainItem(item, referenceLabel, targetLabel))
+    .flatMap((item) => explainItem(item, referenceLabel, targetLabel, t))
     .sort((a, b) => bySeverity(a.severity, b.severity));
 }

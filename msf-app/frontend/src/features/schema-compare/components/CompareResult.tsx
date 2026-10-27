@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowLeftRight, Info, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { diff } from "../core/differ";
 import type { Severity, Snapshot } from "../core/types";
+import { useT } from "../lib/i18n";
 import { buildNotices, groupByTable, summarizeTables, unsupportedTypes } from "../lib/view";
 import { ObjectDetail } from "./ObjectDetail";
 
@@ -15,17 +16,15 @@ const DOT: Record<Severity | "none", string> = {
   none: "bg-transparent",
 };
 
-const SEVERITY_LABEL: Record<Severity, string> = { critical: "kritis", warning: "peringatan", info: "info" };
-
 interface CompareResultProps {
   reference: Snapshot;
   target: Snapshot;
 }
 
-function SideHeader({ snapshot, position, role }: { snapshot: Snapshot; position: "Kiri" | "Kanan"; role: string }) {
+function SideHeader({ snapshot, position, role, alignRight }: { snapshot: Snapshot; position: string; role: string; alignRight?: boolean }) {
   const { source } = snapshot;
   return (
-    <div className={cn("min-w-0", position === "Kanan" && "text-right")}>
+    <div className={cn("min-w-0", alignRight && "text-right")}>
       <div className="text-xs text-muted-foreground">
         {position} · {role}
       </div>
@@ -38,6 +37,7 @@ function SideHeader({ snapshot, position, role }: { snapshot: Snapshot; position
 }
 
 export function CompareResult({ reference, target }: CompareResultProps) {
+  const t = useT();
   const [swapped, setSwapped] = useState(false);
   const [showIdentical, setShowIdentical] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export function CompareResult({ reference, target }: CompareResultProps) {
   const groups = useMemo(() => groupByTable(items), [items]);
   const unsupported = useMemo(() => unsupportedTypes(items), [items]);
   const summary = useMemo(() => summarizeTables(groups), [groups]);
-  const notices = useMemo(() => buildNotices(reference, target, unsupported), [reference, target, unsupported]);
+  const notices = useMemo(() => buildNotices(reference, target, unsupported, t), [reference, target, unsupported, t]);
 
   const refLabel = reference.source.label;
   const targetLabel = target.source.label;
@@ -62,20 +62,29 @@ export function CompareResult({ reference, target }: CompareResultProps) {
       {/* Kepala: dua sisi dan tombol tukar posisi */}
       <div className="flex items-center gap-4 px-6 py-5">
         <div className="flex-1 min-w-0">
-          <SideHeader snapshot={left} position="Kiri" role={swapped ? "target" : "acuan"} />
+          <SideHeader
+            snapshot={left}
+            position={t.result.left}
+            role={swapped ? t.result.roleTarget : t.result.roleReference}
+          />
         </div>
         <button
           type="button"
           onClick={() => setSwapped((value) => !value)}
           aria-pressed={swapped}
-          aria-label="Tukar posisi kiri dan kanan"
-          title="Tukar posisi kiri dan kanan. Peran acuan dan target tidak berubah."
+          aria-label={t.result.swap}
+          title={t.result.swapTitle}
           className="shrink-0 p-2.5 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           <ArrowLeftRight className="h-4 w-4" />
         </button>
         <div className="flex-1 min-w-0">
-          <SideHeader snapshot={right} position="Kanan" role={swapped ? "acuan" : "target"} />
+          <SideHeader
+            snapshot={right}
+            position={t.result.right}
+            role={swapped ? t.result.roleReference : t.result.roleTarget}
+            alignRight
+          />
         </div>
       </div>
 
@@ -101,13 +110,13 @@ export function CompareResult({ reference, target }: CompareResultProps) {
       {/* Ringkasan */}
       <div className="flex flex-wrap gap-2.5 px-6 py-4 border-t border-border">
         <span className="px-3 py-1 rounded-lg text-sm bg-red-50 text-red-800 dark:bg-red-500/10 dark:text-red-300">
-          {summary.onlyReference} hanya di {refLabel}
+          {t.result.onlyIn(summary.onlyReference, refLabel)}
         </span>
         <span className="px-3 py-1 rounded-lg text-sm bg-blue-50 text-blue-800 dark:bg-blue-500/10 dark:text-blue-300">
-          {summary.onlyTarget} hanya di {targetLabel}
+          {t.result.onlyIn(summary.onlyTarget, targetLabel)}
         </span>
         <span className="px-3 py-1 rounded-lg text-sm bg-amber-50 text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">
-          {summary.modified} beda definisi
+          {t.result.modified(summary.modified)}
         </span>
         <button
           type="button"
@@ -115,18 +124,18 @@ export function CompareResult({ reference, target }: CompareResultProps) {
           aria-pressed={showIdentical}
           className="px-3 py-1 rounded-lg text-sm bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
-          {summary.identical} identik · {showIdentical ? "ditampilkan" : "disembunyikan"}
+          {t.result.identical(summary.identical, showIdentical)}
         </button>
       </div>
 
       {/* Daftar objek dan detail */}
       <div className="grid md:grid-cols-[260px_minmax(0,1fr)] border-t border-border">
-        <nav aria-label="Objek berbeda" className="md:border-r border-border py-4">
+        <nav aria-label={t.result.navLabel} className="md:border-r border-border py-4">
           <div className="px-6 mb-2 text-xs text-muted-foreground">
-            {showIdentical ? "Semua objek" : "Objek berbeda"}
+            {showIdentical ? t.result.allObjects : t.result.changedObjects}
           </div>
           {visible.length === 0 && (
-            <p className="px-6 py-2 text-sm text-muted-foreground">Tidak ada perbedaan.</p>
+            <p className="px-6 py-2 text-sm text-muted-foreground">{t.result.noDifferences}</p>
           )}
           <ul className="max-h-[480px] overflow-y-auto">
             {visible.map((group) => {
@@ -150,7 +159,7 @@ export function CompareResult({ reference, target }: CompareResultProps) {
                     <span
                       className={cn("h-2.5 w-2.5 rounded-full shrink-0", DOT[table.severity ?? "none"])}
                       role="img"
-                      aria-label={table.severity ? SEVERITY_LABEL[table.severity] : "identik"}
+                      aria-label={table.severity ? t.severity[table.severity] : t.result.identicalLabel}
                     />
                   </button>
                 </li>
@@ -170,7 +179,7 @@ export function CompareResult({ reference, target }: CompareResultProps) {
             />
           ) : (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              Tidak ada perbedaan: semua objek yang dibandingkan identik.
+              {t.result.allIdentical}
             </p>
           )}
         </div>

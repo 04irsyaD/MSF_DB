@@ -15,8 +15,11 @@ Env:
 - ALLOW_SQLITE_CONNECTION (default false) — true hanya untuk dev lokal.
 """
 
+import hashlib
+import hmac
 import ipaddress
 import os
+import secrets
 import socket
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
@@ -93,6 +96,25 @@ def _build_url(conn: DBConnection) -> URL:
         port=conn.port,
         database=conn.database,
     )
+
+
+_FINGERPRINT_KEY = secrets.token_bytes(32)
+
+
+def target_fingerprint(conn: DBConnection) -> str:
+    """
+    Sidik tujuan koneksi (engine, host, port, database, user) untuk lockout dan log.
+
+    HMAC dengan kunci acak per proses: log tidak bisa dibalik jadi nama host,
+    dan sidik yang sama hanya bermakna selama proses berjalan.
+    """
+    try:
+        url = _build_url(conn)
+        parts = [conn.engine, url.host or "", str(url.port or ""), url.database or "", url.username or ""]
+    except ConnectionNotAllowed:
+        parts = [conn.engine, conn.connection_string or ""]
+    raw = "\x00".join(parts).lower().encode()
+    return hmac.new(_FINGERPRINT_KEY, raw, hashlib.sha256).hexdigest()[:16]
 
 
 def _is_public_ip(raw_ip: str) -> bool:

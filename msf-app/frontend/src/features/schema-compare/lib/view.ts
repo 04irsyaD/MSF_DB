@@ -8,19 +8,12 @@ import type {
   Severity,
   Snapshot,
 } from "../core/types";
+import type { Strings } from "./i18n";
 
 export interface TableGroup {
   table: DiffItem;
   children: DiffItem[];
 }
-
-export const OBJECT_LABELS: Record<ObjectType, string> = {
-  table: "Tabel",
-  column: "Kolom",
-  primary_key: "Primary key",
-  index: "Index",
-  foreign_key: "Foreign key",
-};
 
 const SEVERITY_RANK: Record<Severity, number> = { info: 1, warning: 2, critical: 3 };
 
@@ -110,7 +103,12 @@ export interface Notice {
 }
 
 /** Banner di atas hasil: migrasi tertinggal, beda versi, tabel dilewati, catatan adapter. */
-export function buildNotices(reference: Snapshot, target: Snapshot, unsupported: readonly ObjectType[]): Notice[] {
+export function buildNotices(
+  reference: Snapshot,
+  target: Snapshot,
+  unsupported: readonly ObjectType[],
+  t: Strings,
+): Notice[] {
   const notices: Notice[] = [];
   const refLabel = reference.source.label;
   const targetLabel = target.source.label;
@@ -123,49 +121,37 @@ export function buildNotices(reference: Snapshot, target: Snapshot, unsupported:
       const gap = Math.abs(refMigration.count - targetMigration.count);
       notices.push({
         tone: "warning",
-        text: `${targetBehind ? targetLabel : refLabel} tertinggal ${gap} migrasi dari ${targetBehind ? refLabel : targetLabel}`,
+        text: t.notices.migrationsBehind(targetBehind ? targetLabel : refLabel, gap, targetBehind ? refLabel : targetLabel),
       });
     } else {
       notices.push({
         tone: "warning",
-        text: `Migrasi terakhir berbeda: ${refMigration.latest ?? "-"} (${refLabel}) vs ${targetMigration.latest ?? "-"} (${targetLabel})`,
+        text: t.notices.migrationDiffers(refMigration.latest ?? "-", refLabel, targetMigration.latest ?? "-", targetLabel),
       });
     }
   }
 
   if (reference.source.engine !== target.source.engine) {
-    notices.push({
-      tone: "warning",
-      text: `Dua snapshot berasal dari engine berbeda (${reference.source.engine} vs ${target.source.engine}). Perbandingan mungkin tidak bermakna.`,
-    });
+    notices.push({ tone: "warning", text: t.notices.engineDiffers(reference.source.engine, target.source.engine) });
   } else if (
     Math.floor(reference.source.server_version_num / 10000) !== Math.floor(target.source.server_version_num / 10000)
   ) {
-    notices.push({
-      tone: "warning",
-      text: "Dua snapshot menggunakan major version PostgreSQL berbeda. Beberapa perbedaan mungkin disebabkan perubahan dialek, bukan perubahan schema sesungguhnya.",
-    });
+    notices.push({ tone: "warning", text: t.notices.majorVersionDiffers });
   }
 
   if (reference.source.schema !== target.source.schema) {
-    notices.push({
-      tone: "warning",
-      text: `Nama schema berbeda (${reference.source.schema} vs ${target.source.schema}). Perbandingan mungkin tidak bermakna.`,
-    });
+    notices.push({ tone: "warning", text: t.notices.schemaDiffers(reference.source.schema, target.source.schema) });
   }
 
   if (unsupported.length > 0) {
-    const names = unsupported.map((type) => OBJECT_LABELS[type].toLowerCase()).join(", ");
-    notices.push({ tone: "info", text: `Tidak dibandingkan: ${names}. Salah satu snapshot tidak memuatnya.` });
+    const names = unsupported.map((type) => t.objects[type].toLowerCase()).join(", ");
+    notices.push({ tone: "info", text: t.notices.unsupported(names) });
   }
 
   for (const snapshot of [reference, target]) {
     const matched = snapshot.excluded_tables.matched;
     if (matched.length > 0) {
-      notices.push({
-        tone: "info",
-        text: `${snapshot.source.label}: ${matched.length} tabel dilewati (${matched.join(", ")})`,
-      });
+      notices.push({ tone: "info", text: t.notices.skipped(snapshot.source.label, matched.length, matched.join(", ")) });
     }
     for (const note of snapshot.notes) {
       notices.push({ tone: "info", text: `${snapshot.source.label}: ${note}` });

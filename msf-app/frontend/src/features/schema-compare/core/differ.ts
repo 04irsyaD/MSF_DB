@@ -125,13 +125,13 @@ function columnChanges(reference: Column, target: Column): Change[] {
   const changes: Change[] = [];
 
   const type = typeChange(reference.data_type, target.data_type);
-  if (type) {
-    changes.push(type);
-  } else {
-    // Ukuran hanya bermakna jika tipenya sama.
+  if (type) changes.push(type);
+  // Tipe sama: semua beda ukuran dilaporkan. Tipe sekeluarga yang melebar (char(50) → varchar(10)):
+  // hanya ukuran yang mengecil, karena tipe lebih lebar belum tentu muat datanya.
+  if (!type || type.severity === 'info') {
     for (const field of ['character_maximum_length', 'numeric_precision', 'numeric_scale'] as const) {
       const limit = limitChange(field, reference[field], target[field]);
-      if (limit) changes.push(limit);
+      if (limit && (!type || limit.severity === 'critical')) changes.push(limit);
     }
   }
 

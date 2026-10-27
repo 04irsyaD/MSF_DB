@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLang, type Lang } from "@/lib/useLang";
 import {
   ArrowRight,
   Database,
@@ -26,9 +26,6 @@ import {
  */
 
 const APP_URL = "/dashboard"; // route workspace (src/app/dashboard)
-const STORAGE_KEY = "msfdb-lang";
-
-type Lang = "en" | "id";
 
 const dict = {
   en: {
@@ -127,32 +124,6 @@ const stack = [
   "PostgreSQL", "MySQL", "SQLite", "SQL Server", "Ollama",
   "DeepSeek API", "OpenAI API", "Next.js", "FastAPI", "Docker",
 ];
-
-function useLang() {
-  const [lang, setLang] = useState<Lang>("en");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === "en" || saved === "id") setLang(saved);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
-
-  // Simpan hanya saat user memilih — kalau disimpan di effect, nilai default
-  // "en" bisa menimpa pilihan tersimpan sebelum sempat dibaca (StrictMode).
-  const changeLang = (next: Lang) => {
-    setLang(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {}
-  };
-
-  return [lang, changeLang] as const;
-}
 
 function Logo() {
   return (

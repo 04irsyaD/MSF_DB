@@ -171,6 +171,10 @@ class FunctionMetadata(BaseModel):
     description: Optional[str] = None
 
 
+class SchemaCatalogRequest(BaseModel):
+    connection: DBConnection
+
+
 class DBMetadataRequest(BaseModel):
     connection: DBConnection
     schema_filter: Optional[str] = None

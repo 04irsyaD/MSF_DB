@@ -80,6 +80,49 @@ function useStoredRelations(storageKey: string) {
 export const useVirtualRelations = () => useStoredRelations(STORAGE_KEY);
 export const useHiddenRelations = () => useStoredRelations(HIDDEN_STORAGE_KEY);
 
+// Geseran garis tegak tiap relasi (px kanvas, relatif dari posisi otomatis), kunci = relationId
+const OFFSET_STORAGE_KEY = "msf-diagram-relation-offsets";
+
+export function useRelationOffsets() {
+  const [offsets, setOffsets] = useState<Record<string, number>>({});
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(OFFSET_STORAGE_KEY) || "{}");
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        setOffsets(
+          Object.fromEntries(
+            Object.entries(parsed).filter(([, v]) => typeof v === "number" && Number.isFinite(v))
+          ) as Record<string, number>
+        );
+      }
+    } catch {
+      // Storage diblokir / data rusak: semua garis di posisi otomatis
+    }
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(OFFSET_STORAGE_KEY, JSON.stringify(offsets));
+    } catch {
+      // Abaikan: geseran tetap ada selama halaman terbuka
+    }
+  }, [offsets, loaded]);
+
+  const setOffset = (id: string, value: number) => {
+    setOffsets((prev) => ({ ...prev, [id]: Math.round(value) }));
+  };
+
+  const resetOffsets = (ids: string[]) => {
+    setOffsets((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => !ids.includes(k))));
+  };
+
+  return { offsets, setOffset, resetOffsets };
+}
+
 // Kelompok tipe kasar untuk peringatan "tipe data beda" (bukan validasi ketat)
 const typeFamily = (dataType: string) => {
   const t = dataType.toLowerCase().replace(/\(.*\)/, "").trim();

@@ -7,10 +7,12 @@
 
 ## 🛑 CRITICAL: Git Location & Git Push Rules — READ FIRST
 
-**1. Git Repository berada di ROOT (`msf-app/`)**
+**1. Git Repository berada di folder induk `MSF_DB/` (satu tingkat di atas `msf-app/`)**
 
-* Semua perintah git (`git status`, `git diff`, `git add`, dll.) **wajib** dijalankan dari root directory `msf-app/`.
-* Dilarang menginisialisasi `.git` baru di dalam folder `backend/` atau `frontend/`.
+* Repo git tunggal: `MSF_DB/` (remote `04irsyaD/MSF_DB`, branch kerja `dev`). `msf-app/` adalah subfolder di dalamnya, bukan repo sendiri.
+* Jalankan perintah git dari `MSF_DB/`, atau dari mana saja dengan `git -C <path>/MSF_DB ...`. Path di output git akan berawalan `msf-app/`.
+* Contoh perintah di file ini yang memakai `cd apps` / `cd backend` + `../ai-rules` tetap berlaku: pathspec relatif dihitung dari folder saat itu, jadi `msf-app/backend/../ai-rules` = `msf-app/ai-rules`.
+* Dilarang menginisialisasi `.git` baru di dalam `msf-app/`, `backend/`, atau `frontend/`.
 
 **2. DILARANG KERAS MELAKUKAN GIT PUSH**
 
@@ -32,11 +34,12 @@ File ini adalah kontrak kerja antara **human developer** dan **AI coding agent**
 Root project MSF-DB berisi struktur berikut:
 
 ```
-msf-app/
-├── .git/                   ← REPO GIT UTAMA (Berada di root!)
-├── ai-rules/               ← IMMUTABLE — Aturan & template AI (Hanya baca)
-├── backend/                ← Kode Backend (FastAPI, Python)
-└── frontend/               ← Kode Frontend (Next.js, TypeScript)
+MSF_DB/
+├── .git/                   ← REPO GIT UTAMA (di MSF_DB/, bukan di msf-app/)
+└── msf-app/                ← Project root MSF-DB (tempat folder output dibuat)
+    ├── ai-rules/           ← IMMUTABLE — Aturan & template AI (Hanya baca)
+    ├── backend/            ← Kode Backend (FastAPI, Python)
+    └── frontend/           ← Kode Frontend (Next.js, TypeScript)
 ```
 
 ### Setelah AI Mulai Bekerja (Target Structure)
@@ -316,6 +319,16 @@ Ini adalah aturan LOKASI paling penting. Salah tempat = project kacau. AI WAJIB 
 ## 2) Preflight Wajib (Sebelum Mulai Kerja)
 
 **Selalu verifikasi folder kode sebelum menjalankan git commands!**
+
+**Khusus MSF-DB:** pengecekan `apps/.git` / `backend/.git` di bawah akan gagal karena repo ada di `MSF_DB/`. Pakai ini:
+
+```bash
+git -C ../ rev-parse --show-toplevel   # dari msf-app/ — harus berakhir di /MSF_DB
+git -C ../ status --short
+git -C ../ branch --show-current       # harus dev (atau feat/*), bukan main
+```
+
+Template umum:
 
 ```bash
 # Verifikasi folder kode (sebelum cd)
@@ -624,5 +637,5 @@ Setiap akhir task, AI WAJIB mengecek dan mengupdate file-file berikut (bila terd
 
 **Reminder:**
 * `main` harus tetap bersih & stabil. Semua kerja AI = `dev` / `feat/*`.
-* **GIT SELALU dari ROOT (`msf-app/`).** Jangan dari sub-folder!
+* **Repo git ada di `MSF_DB/` (induk `msf-app/`).** Jalankan git dari sana atau pakai `git -C`.
 * **AI-rules/ adalah IMMUTABLE** — AI HANYA membaca, TIDAK BOLEH mengubah. Output AI di `planning/` dan `dev-docs/`.

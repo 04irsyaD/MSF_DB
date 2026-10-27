@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { TableMetadata } from "@/lib/types";
-import { Key, Link as LinkIcon,ZoomIn, ZoomOut, Scan, Maximize2, Minimize2, Download, Loader2, GitBranch, EyeOff } from "lucide-react";
+import { Key, Link as LinkIcon,ZoomIn, ZoomOut, Scan, Maximize2, Minimize2, Download, Loader2, GitBranch, EyeOff, MoveHorizontal } from "lucide-react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import MermaidExportModal from "@/components/diagram/MermaidExportModal";
@@ -12,6 +12,7 @@ import {
   VirtualRelation,
   relationId,
   useHiddenRelations,
+  useRelationOffsets,
   useVirtualRelations,
 } from "@/components/diagram/useVirtualRelations";
 
@@ -58,6 +59,12 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
   const [linkTarget, setLinkTarget] = useState<ColumnRef | null>(null);
   const [pendingRelation, setPendingRelation] = useState<VirtualRelation | null>(null);
   const [relationToDelete, setRelationToDelete] = useState<{ relation: VirtualRelation; virtual: boolean } | null>(null);
+  // Garis tegak relasi bisa diseret kiri/kanan; geserannya disimpan per relasi
+  const { offsets: relationOffsets, setOffset: setRelationOffset, resetOffsets: resetRelationOffsets } =
+    useRelationOffsets();
+  const [activeDragLine, setActiveDragLine] = useState<string | null>(null);
+  const lineDragRef = useRef({ mouseX: 0, offset: 0, minOffset: -Infinity, maxOffset: Infinity, moved: false });
+  const lineClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Saat menarik garis, efek redup hover dimatikan supaya tabel tujuan tetap terlihat jelas
   const highlightTable = linkFrom ? null : hoveredTable;
 
@@ -165,6 +172,12 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         ),
       })),
     [tables, activeHiddenRelations]
+  );
+
+  // Garis di diagram saat ini yang posisinya digeser manual
+  const movedLineIds = useMemo(
+    () => Array.from(new Set(edges.map((e) => e.relation.id))).filter((id) => relationOffsets[id] !== undefined),
+    [edges, relationOffsets]
   );
 
   // Hanya sisi asal (seperti kolom FK), supaya ikon kolom sama persis dengan FK asli
@@ -730,6 +743,13 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       const target = columnRefAt(e.target);
       const isSameColumn = target && target.table === linkFrom.table && target.column === linkFrom.column;
       setLinkTarget(target && !isSameColumn ? target : null);
+    } else if (activeDragLine) {
+      const start = lineDragRef.current;
+      const dx = (e.clientX - start.mouseX) / zoom;
+      if (Math.abs(dx) > 2) start.moved = true;
+      if (start.moved) {
+        setRelationOffset(activeDragLine, Math.min(start.maxOffset, Math.max(start.minOffset, start.offset + dx)));
+      }
     } else if (isPanning) {
       setPan({
         x: e.clientX - panStartRef.current.x,
@@ -752,6 +772,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     if (linkFrom) finishLink();
     setIsPanning(false);
     setActiveDragTable(null);
+    setActiveDragLine(null);
   };
 
   // Kursor keluar kanvas saat menarik garis = batal
@@ -761,6 +782,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     setLinkTarget(null);
     setIsPanning(false);
     setActiveDragTable(null);
+    setActiveDragLine(null);
   };
 
   // Auto zoom fit layout (Dynamic Bounding Box calculation)
@@ -858,9 +880,15 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         quality: 0.95,
       });
 
-      // Trigger download link
+      // Trigger download link. Nama file pakai tanggal + jam lokal (bukan UTC) supaya
+      // unduhan di hari yang sama tidak bentrok jadi "(1)", "(2)".
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const stamp =
+        `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` +
+        `_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
       const link = document.createElement("a");
-      link.download = `msf-database-diagram-${new Date().toISOString().slice(0,10)}.png`;
+      link.download = `msf-database-diagram-${stamp}.png`;
       link.href = dataUrl;
       link.click();
       toast.success("Diagram database berhasil diunduh!");
@@ -945,17 +973,31 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         // using relationIndex so each connection gets a unique vertical lane
         const verticalTrackOffset = ((relationIndex * 17) % 5 - 2) * 12; // deterministic values from -24 to +24
 
+        // Geseran manual dari user (seret garis tegak), relatif dari posisi otomatis
+        const lineId = edge.relation.id;
+        const userOffset = relationOffsets[lineId] ?? 0;
+
         // Step/Elbow path: H → V → H (3 segments)
-        let pathD: string;
+        // Batas geser supaya garis tegak tidak masuk ke bawah kartu tabel
+        const LINE_MARGIN = 10;
+        let autoX: number;
+        let minX: number;
+        let maxX: number;
         if (!isOverlapping) {
-          const midX = (adjustedStartX + endX) / 2 + verticalTrackOffset;
-          pathD = `M ${adjustedStartX} ${sourceY} H ${midX} V ${targetY} H ${endX}`;
+          autoX = (adjustedStartX + endX) / 2 + verticalTrackOffset;
+          minX = Math.min(adjustedStartX, endX) + LINE_MARGIN;
+          maxX = Math.max(adjustedStartX, endX) - LINE_MARGIN;
         } else {
           // Same column overlap: route outward with a 20px stub first
           const stub = side === "right" ? 24 : -24;
-          const stubX = adjustedStartX + stub + (verticalTrackOffset * 0.4);
-          pathD = `M ${adjustedStartX} ${sourceY} H ${stubX} V ${targetY} H ${endX}`;
+          autoX = adjustedStartX + stub + (verticalTrackOffset * 0.4);
+          minX = side === "right" ? Math.max(adjustedStartX, endX) + LINE_MARGIN : -Infinity;
+          maxX = side === "right" ? Infinity : Math.min(adjustedStartX, endX) - LINE_MARGIN;
         }
+        if (minX > maxX) minX = maxX = (minX + maxX) / 2;
+        const verticalX = Math.min(maxX, Math.max(minX, autoX + userOffset));
+        const pathD = `M ${adjustedStartX} ${sourceY} H ${verticalX} V ${targetY} H ${endX}`;
+        const isDraggingLine = activeDragLine === lineId;
 
         const isConnectedToHovered =
           highlightTable && (edge.fromTable === highlightTable || edge.toTable === highlightTable);
@@ -1011,6 +1053,50 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
               onClick={() => setRelationToDelete({ relation: edge.relation, virtual })}
             >
               <title>{`${virtual ? "Relasi virtual" : "Relasi FK"}: ${edge.fromTable}.${edge.fromColumn} → ${edge.toTable}.${edge.toColumn} (klik untuk hapus)`}</title>
+            </path>
+            {/* Pegangan garis tegak: seret kiri/kanan untuk menggeser, dobel-klik = kembali otomatis */}
+            <path
+              d={`M ${verticalX} ${sourceY} V ${targetY}`}
+              data-line-handle={lineId}
+              fill="none"
+              strokeWidth={isDraggingLine ? 6 : 12}
+              className={
+                isDraggingLine
+                  ? "stroke-[hsl(var(--accent)/0.35)]"
+                  : "stroke-transparent hover:stroke-[hsl(var(--accent)/0.25)]"
+              }
+              style={{ pointerEvents: "stroke", cursor: "ew-resize" }}
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
+                e.stopPropagation();
+                e.preventDefault();
+                lineDragRef.current = {
+                  mouseX: e.clientX,
+                  offset: verticalX - autoX,
+                  minOffset: minX - autoX,
+                  maxOffset: maxX - autoX,
+                  moved: false,
+                };
+                setActiveDragLine(lineId);
+              }}
+              onClick={() => {
+                if (lineDragRef.current.moved) return;
+                // Tunda sebentar supaya dobel-klik (reset) tidak ikut membuka popup hapus
+                if (lineClickTimerRef.current) clearTimeout(lineClickTimerRef.current);
+                lineClickTimerRef.current = setTimeout(
+                  () => setRelationToDelete({ relation: edge.relation, virtual }),
+                  250
+                );
+              }}
+              onDoubleClick={() => {
+                if (lineClickTimerRef.current) clearTimeout(lineClickTimerRef.current);
+                if (relationOffsets[lineId] !== undefined) {
+                  resetRelationOffsets([lineId]);
+                  toast.success("Posisi garis dikembalikan otomatis.");
+                }
+              }}
+            >
+              <title>{`${edge.fromTable}.${edge.fromColumn} → ${edge.toTable}.${edge.toColumn}\nSeret kiri/kanan: geser garis · dobel-klik: posisi otomatis · klik: hapus`}</title>
             </path>
           </g>
         );
@@ -1139,7 +1225,10 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
-        className={cn("w-full h-full", linkFrom ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing")}
+        className={cn(
+          "w-full h-full",
+          linkFrom ? "cursor-crosshair" : activeDragLine ? "cursor-ew-resize" : "cursor-grab active:cursor-grabbing"
+        )}
       >
         <div
           ref={canvasRef}
@@ -1277,7 +1366,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       <div className="absolute bottom-3 left-4 z-20 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground pointer-events-none">
         {linkFrom
           ? `Lepas di kolom tabel tujuan · dari ${linkFrom.table}.${linkFrom.column}`
-          : `Seret / scroll: geser · Ctrl + scroll: zoom · tarik titik ● di kolom: buat relasi · ${Math.round(zoom * 100)}%`}
+          : `Seret / scroll: geser · Ctrl + scroll: zoom · tarik titik ● di kolom: buat relasi · seret garis: geser · ${Math.round(zoom * 100)}%`}
       </div>
 
       {/* Konfirmasi buat relasi virtual */}
@@ -1305,21 +1394,38 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         />
       )}
 
-      {/* FK yang disembunyikan bisa ditampilkan lagi semuanya */}
-      {activeHiddenRelations.length > 0 && !linkFrom && (
-        <button
-          type="button"
-          onClick={() => {
-            unhideRelations(activeHiddenRelations.map((r) => r.id));
-            toast.success("Semua relasi FK ditampilkan lagi.");
-          }}
-          title={activeHiddenRelations.map((r) => `${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`).join("\n")}
-          className="absolute bottom-11 left-4 z-20 flex items-center gap-1.5 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
-        >
-          <EyeOff className="h-3 w-3" />
-          {activeHiddenRelations.length} relasi FK disembunyikan · <span className="font-bold text-accent">Tampilkan</span>
-        </button>
-      )}
+      <div className="absolute bottom-11 left-4 z-20 flex flex-col items-start gap-1.5">
+        {/* FK yang disembunyikan bisa ditampilkan lagi semuanya */}
+        {activeHiddenRelations.length > 0 && !linkFrom && (
+          <button
+            type="button"
+            onClick={() => {
+              unhideRelations(activeHiddenRelations.map((r) => r.id));
+              toast.success("Semua relasi FK ditampilkan lagi.");
+            }}
+            title={activeHiddenRelations.map((r) => `${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`).join("\n")}
+            className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+          >
+            <EyeOff className="h-3 w-3" />
+            {activeHiddenRelations.length} relasi FK disembunyikan · <span className="font-bold text-accent">Tampilkan</span>
+          </button>
+        )}
+
+        {/* Garis yang digeser manual bisa dikembalikan ke posisi otomatis semuanya */}
+        {movedLineIds.length > 0 && !linkFrom && (
+          <button
+            type="button"
+            onClick={() => {
+              resetRelationOffsets(movedLineIds);
+              toast.success("Semua garis dikembalikan ke posisi otomatis.");
+            }}
+            className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+          >
+            <MoveHorizontal className="h-3 w-3" />
+            {movedLineIds.length} garis digeser · <span className="font-bold text-accent">Reset posisi</span>
+          </button>
+        )}
+      </div>
 
       {/* Konfirmasi hapus garis relasi (klik garisnya): virtual dihapus, FK asli disembunyikan */}
       {relationToDelete && (

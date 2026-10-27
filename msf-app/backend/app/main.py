@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 import structlog
 from datetime import datetime, timezone
 
-from app.routers import generate, database, ai, shortcuts, export, stats, admin
+from app.routers import generate, database, ai, shortcuts, export, stats, admin, schema_compare
 from app.routers.admin import warn_if_admin_passcode_weak
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
@@ -237,6 +237,7 @@ app.include_router(shortcuts.router)
 app.include_router(export.router)
 app.include_router(stats.router)
 app.include_router(admin.router)
+app.include_router(schema_compare.router)
 
 
 # ================================================================

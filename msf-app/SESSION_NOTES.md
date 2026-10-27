@@ -1,7 +1,61 @@
 # Session Notes — MSF DB
 
 Catatan handoff antar sesi. Baca ini dulu sebelum lanjut kerja.
-Terakhir diperbarui: 2026-10-23.
+Terakhir diperbarui: 2026-10-27.
+
+---
+
+## 0000b. Nama file unduhan ERD pakai jam (2026-10-27) — belum di-commit
+
+- `components/diagram/DiagramCanvas.tsx` (handler download PNG): nama file dari `toISOString().slice(0,10)` (tanggal
+  UTC saja, sering bentrok jadi "(1)", "(2)", dan sebelum jam 07.00 WIB tanggalnya kemarin) diganti jadi
+  `msf-database-diagram-YYYY-MM-DD_HHmmss.png` dengan jam lokal browser. Verifikasi: `npm run type-check` lolos.
+
+## 0000a. Schema Compare dwibahasa EN/ID (2026-10-27) — belum di-commit
+
+- Semua teks Schema Compare pindah ke `features/schema-compare/lib/i18n.ts` (`STRINGS.en/id`, `useT()` via
+  `I18nProvider` di `SchemaComparePage`). `lib/view.ts::buildNotices` dan `lib/explain.ts` menerima `t: Strings`;
+  `OBJECT_LABELS` dihapus (ganti `t.objects`). Error backend diterjemahkan dari `error_code` (`ConnectForm::describeError`);
+  error disimpan mentah supaya pesan ikut berganti saat bahasa diganti.
+- Toggle EN/ID di kanan atas halaman. Hook bahasa landing dipindah ke `src/lib/useLang.ts` (key `msfdb-lang`, default
+  `en`) dan dipakai landing + Schema Compare, jadi pilihan terbawa antar halaman. Halaman workspace lain belum dwibahasa.
+- Permintaan user: teks "Konek langsung" diganti "Koneksi database" / "Database connection"; tab ini sekarang default
+  dan di depan ("Unggah file" / "Upload file" kedua). Subjudul Header ikut diganti.
+- Verifikasi: type-check, lint, build OK; Playwright di build produksi (EN default + tab koneksi aktif, error auth
+  EN→ID, compare ID→EN, peringatan akses, pilihan bahasa terbawa ke landing).
+
+---
+
+## 0000. Schema Compare: koneksi database + 2 bug fix (2026-10-27) — belum di-commit
+
+**Koneksi langsung (PostgreSQL saja):** tiap slot Acuan/Target punya tab "Upload file" | "Konek langsung".
+- Backend `POST /api/schema-compare/catalog` (`routers/schema_compare.py`, `services/schema_catalog.py`): HANYA query
+  `pg_catalog` yang tetap (tanpa SQL dari user), tanpa SELECT/COUNT ke tabel user, tanpa baca tabel migrasi
+  (`app_migration` selalu null). `SET TRANSACTION READ ONLY` + `SET LOCAL statement_timeout 15s` (bukan startup
+  `options`, supaya jalan di pooler Supabase/Neon), `NullPool`, lewat guard anti-SSRF lama. Mengembalikan baris
+  mentah + info akses (`is_superuser`, jumlah tabel yang bisa di-SELECT via `has_any_column_privilege`).
+- Anti penyalahgunaan: rate limit 20 req/10 mnt per IP (`utils/rate_limit.py`), lockout 5 auth gagal/15 mnt **per
+  target** (host+port+db+user; penting karena lewat Vercel semua IP = IP Vercel) + 10/15 mnt per IP, maks 2 jalan
+  bersamaan. Tanpa riwayat: kredensial tak disimpan. Log audit `schema_compare_catalog` = IP, sidik target HMAC
+  (kunci acak per proses, `db_url_guard.target_fingerprint`), outcome — tanpa password/host.
+- Frontend: snapshot disusun di browser oleh `core/catalog.ts` (disalin dari `db-schema-compare`, sama dengan CLI)
+  → divalidasi `validateSnapshot`. Form `ConnectForm.tsx` (password dikosongkan setelah sukses, tak ada storage),
+  resep SQL role `schema_reader` tanpa GRANT SELECT, peringatan kuning kalau akun superuser/bisa baca data, tombol
+  unduh snapshot. `lib/live.ts`, tipe `SchemaCatalogResponse` di `lib/types.ts`, `api.fetchSchemaCatalog`.
+- Batasan: backend Render menolak host privat → DB di VPN tetap pakai CLI. MySQL belum.
+
+**Repo `db-schema-compare` (di luar MSF_DB, sumber `core/`):** penyusunan snapshot dipisah dari
+`adapters/postgres.ts` ke `src/core/catalog.ts` (murni). Fix differ: tipe sekeluarga melebar tapi panjang mengecil
+(`char(50)`→`varchar(10)`) sekarang critical (dulu info); SPEC + 2 test ditambah. Core frontend disalin ulang
+(normalizer/naming/catalog baru).
+
+**Fix upload:** file snapshot dari `> file.json` di Windows PowerShell 5.1 (UTF-16LE) dulu ditolak; sekarang
+`SnapshotSlot` decode sesuai BOM.
+
+Verifikasi: backend 125 test lolos (4 integrasi PG asli via `TEST_PG_URL`, termasuk bukti `pg_stat_user_tables`
+tak berubah = isi tabel tak disentuh); CLI 81 test lolos (termasuk integrasi `TEST_PG_HOST`); snapshot koneksi
+langsung identik dengan snapshot CLI untuk DB yang sama; e2e Playwright Firefox (password salah, konek, peringatan
+akses, password tak di DOM/storage, upload UTF-16, muat contoh); type-check, lint, build OK.
 
 ---
 
@@ -37,6 +91,14 @@ dipakai layout & tak diekspor ke Mermaid (tanda `FK` kolom tetap, `mermaidGenera
 virtual sekarang tampil **sama persis** dengan FK asli (permintaan user): hijau accent, garis penuh, ikon `Link` yang
 sama hanya di kolom asal (detail "Relasi virtual" di tooltip ikon). Garis preview saat menarik tetap putus-putus. Export
 Mermaid masih membedakan (`}o..||` + "(virtual)"). Amber tersisa hanya ikon PK & kotak peringatan di modal. Dites Playwright (buat/hapus virtual, sembunyikan/tampilkan FK, reload, Mermaid) + type-check/lint OK.
+
+**Geser garis relasi (2026-10-27, belum di-commit):** bagian tegak garis hijau (elbow H→V→H) bisa diseret kiri/kanan
+(pegangan transparan `data-line-handle`, kursor ↔). Geseran disimpan relatif dari posisi otomatis di localStorage
+`msf-diagram-relation-offsets` (hook `useRelationOffsets` di `useVirtualRelations.ts`, kunci = relationId), jadi tetap
+masuk akal kalau tabel dipindah/ganti layout. Dibatasi di celah antar tabel (margin 10px) supaya tak masuk ke bawah
+kartu. Klik = popup hapus (ditunda 250ms), dobel-klik = kembali otomatis; tombol "N garis digeser · Reset posisi" di kiri
+bawah (ditumpuk dgn tombol FK tersembunyi). Belum: geser segmen datar / tambah titik belok bebas. Dites Playwright
+Firefox (geser, batas, reload, klik, dobel-klik) + type-check OK.
 
 ---
 

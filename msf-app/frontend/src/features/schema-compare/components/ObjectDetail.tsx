@@ -4,13 +4,8 @@ import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Column, DiffItem, ObjectType, Severity } from "../core/types";
 import { explainAll, explainItem } from "../lib/explain";
-import {
-  OBJECT_LABELS,
-  TableGroup,
-  describeObject,
-  formatColumnAttributes,
-  formatColumnType,
-} from "../lib/view";
+import { useT } from "../lib/i18n";
+import { TableGroup, describeObject, formatColumnAttributes, formatColumnType } from "../lib/view";
 
 // Warna baris mengikuti letak objek, bukan sisi layar, jadi tidak berubah saat posisi ditukar.
 const ROW_TONE: Record<string, string> = {
@@ -20,10 +15,10 @@ const ROW_TONE: Record<string, string> = {
   identical: "text-muted-foreground",
 };
 
-const NOTE_ICON: Record<Severity, { icon: typeof AlertCircle; className: string; label: string }> = {
-  critical: { icon: AlertCircle, className: "text-red-600 dark:text-red-400", label: "Kritis" },
-  warning: { icon: AlertTriangle, className: "text-amber-600 dark:text-amber-400", label: "Peringatan" },
-  info: { icon: Info, className: "text-muted-foreground", label: "Info" },
+const NOTE_ICON: Record<Severity, { icon: typeof AlertCircle; className: string }> = {
+  critical: { icon: AlertCircle, className: "text-red-600 dark:text-red-400" },
+  warning: { icon: AlertTriangle, className: "text-amber-600 dark:text-amber-400" },
+  info: { icon: Info, className: "text-muted-foreground" },
 };
 
 const SECTION_ORDER: ObjectType[] = ["column", "primary_key", "index", "foreign_key"];
@@ -42,10 +37,11 @@ interface ObjectDetailProps {
 }
 
 function Cell({ item, value }: { item: DiffItem; value: Record<string, unknown> | undefined }) {
+  const t = useT();
   const tone = ROW_TONE[item.status];
   if (!value) {
     return (
-      <div className="px-3 py-1.5 font-mono text-sm text-muted-foreground" aria-label="tidak ada">
+      <div className="px-3 py-1.5 font-mono text-sm text-muted-foreground" aria-label={t.detail.missing}>
         —
       </div>
     );
@@ -72,13 +68,15 @@ function Cell({ item, value }: { item: DiffItem; value: Record<string, unknown> 
 }
 
 function Notes({ items, referenceLabel, targetLabel }: { items: DiffItem[]; referenceLabel: string; targetLabel: string }) {
-  const notes = explainAll(items, referenceLabel, targetLabel);
+  const t = useT();
+  const notes = explainAll(items, referenceLabel, targetLabel, t);
   if (notes.length === 0) return null;
 
   return (
     <ul className="mt-5 pt-4 border-t border-border space-y-2">
       {notes.map((note, i) => {
-        const { icon: Icon, className, label } = NOTE_ICON[note.severity];
+        const { icon: Icon, className } = NOTE_ICON[note.severity];
+        const label = t.severity[note.severity];
         return (
           <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
             <Icon className={cn("h-4 w-4 mt-0.5 shrink-0", className)} aria-label={label} />
@@ -91,6 +89,7 @@ function Notes({ items, referenceLabel, targetLabel }: { items: DiffItem[]; refe
 }
 
 export function ObjectDetail({ group, referenceLabel, targetLabel, swapped, unsupported }: ObjectDetailProps) {
+  const t = useT();
   const { table, children } = group;
   const reference: Side = { label: referenceLabel, role: "reference" };
   const target: Side = { label: targetLabel, role: "target" };
@@ -98,14 +97,19 @@ export function ObjectDetail({ group, referenceLabel, targetLabel, swapped, unsu
 
   if (table.status === "only_reference" || table.status === "only_target") {
     const summary = (table.reference ?? table.target ?? {}) as Record<string, unknown>;
+    const [before, where, after] = t.detail.onlyTable(
+      table.status === "only_reference" ? referenceLabel : targetLabel,
+      String(summary.column_count ?? 0),
+      String(summary.index_count ?? 0),
+      String(summary.foreign_key_count ?? 0),
+    );
     return (
       <div>
         <h3 className="text-lg font-semibold text-foreground">{table.object_name}</h3>
         <p className={cn("mt-3 px-3 py-2.5 rounded-md text-sm", ROW_TONE[table.status])}>
-          Tabel ini hanya ada di{" "}
-          <strong>{table.status === "only_reference" ? referenceLabel : targetLabel}</strong> (
-          {String(summary.column_count ?? 0)} kolom, {String(summary.index_count ?? 0)} index,{" "}
-          {String(summary.foreign_key_count ?? 0)} foreign key).
+          {before}
+          <strong>{where}</strong>
+          {after}
         </p>
         <Notes items={[table]} referenceLabel={referenceLabel} targetLabel={targetLabel} />
       </div>
@@ -128,7 +132,7 @@ export function ObjectDetail({ group, referenceLabel, targetLabel, swapped, unsu
         if (unsupported.includes(type)) {
           return (
             <p key={type} className="mt-4 px-3 py-2 rounded-md bg-muted text-xs text-muted-foreground italic">
-              {OBJECT_LABELS[type]} tidak dibandingkan: salah satu snapshot tidak memuatnya.
+              {t.detail.notCompared(t.objects[type])}
             </p>
           );
         }
@@ -136,10 +140,10 @@ export function ObjectDetail({ group, referenceLabel, targetLabel, swapped, unsu
         if (rows.length === 0) return null;
 
         return (
-          <section key={type} className="mt-3" aria-label={OBJECT_LABELS[type]}>
+          <section key={type} className="mt-3" aria-label={t.objects[type]}>
             {type !== "column" && (
               <h4 className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {OBJECT_LABELS[type]}
+                {t.objects[type]}
               </h4>
             )}
             <div className="space-y-1">
@@ -147,7 +151,7 @@ export function ObjectDetail({ group, referenceLabel, targetLabel, swapped, unsu
                 <div
                   key={`${item.object_type}:${item.object_name}`}
                   className="grid grid-cols-2 gap-x-5"
-                  title={explainItem(item, referenceLabel, targetLabel)
+                  title={explainItem(item, referenceLabel, targetLabel, t)
                     .map((note) => note.text)
                     .join("\n")}
                 >

@@ -8,6 +8,8 @@ import {
   DBMetadataResponse,
   ShortcutsResponse,
   TableMetadata,
+  DBConnection,
+  SchemaCatalogResponse,
 } from "./types";
 
 const BASE_URL = ""; // Karena kita menggunakan rewrite di next.config.js, path relative ke "/api" akan dialihkan ke backend
@@ -94,6 +96,14 @@ export const api = {
     return request<DBTestConnectionResponse>("/api/db/test-connection", {
       method: "POST",
       body: JSON.stringify({ connection: data }),
+    });
+  },
+
+  // Schema Compare: hanya struktur (pg_catalog), isi tabel tidak dibaca
+  async fetchSchemaCatalog(connection: DBConnection): Promise<SchemaCatalogResponse> {
+    return request<SchemaCatalogResponse>("/api/schema-compare/catalog", {
+      method: "POST",
+      body: JSON.stringify({ connection }),
     });
   },
 
