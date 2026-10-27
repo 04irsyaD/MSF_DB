@@ -75,3 +75,4 @@ auth.json
 # Generated output
 output/
 *.docx
+.txt
