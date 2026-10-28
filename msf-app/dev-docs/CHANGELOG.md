@@ -7,6 +7,72 @@
 ## [Unreleased]
 
 ### Added
+- **Linux Helper — modul baru (`/linux-helper`, client standalone, Level 0–3)**:
+  - **Jalur belajar bertingkat**: Level 0 (Dasar Terminal), 1 (Navigasi & File), 2 (Sistem & Jaringan), 3 (Runbook Server DB). `LevelStepper` sebagai navigasi utama.
+  - **Level 0**: panel "Cara masuk ke server" (SSH), kartu shortcut keyboard bergaya `<kbd>` (`Keycap`), dan command dasar; filter lingkungan Desktop/SSH (`EnvDistroFilter`).
+  - **Level 1 & 2 (48 command)**: kartu bergaya SQL Helper (badge Level/kategori/risk + judul + deskripsi + preview + Copy + drawer "View Details"), filter kategori (`CategoryChips`), pencarian fuzzy **Fuse.js**, dan **varian per distro** (`apt`/`dnf`, `ufw`/`firewalld`, `adduser`/`useradd`) via `lib/resolve.ts`.
+  - **Level 3 Runbook (6 runbook)**: install PostgreSQL, install MySQL/MariaDB, remote access DB, firewall port DB, backup & restore, troubleshoot DB down. Tiap runbook punya form variabel global, langkah checklist dengan progress bar, perintah `verify`, "error umum & solusi", catatan per langkah, dan **export `.sh`** (header peringatan, `lib/exportScript.ts`).
+  - **Keamanan anti command-injection**: variabel runbook divalidasi whitelist per tipe (`identifier/number/port/ip/cidr/path/string`) di `lib/validateParam.ts`; metachar shell ditolak; hanya nilai valid yang di-interpolasi (invalid tetap `{{placeholder}}`); password bukan variabel; command `high` memaksa konfirmasi sebelum salin.
+  - **Highlight Shiki** (grammar `bash`, lazy) di drawer & runbook; label risiko + `RiskBanner` konfirmasi untuk `high`.
+  - **Command Palette (Ctrl/⌘+K)**: pencarian cepat lintas shortcut/command/runbook (Fuse.js), navigasi keyboard (panah + Enter), memilih item melompat ke level + memfilternya.
+  - Item navbar "Linux Helper" (ikon `SquareTerminal`) di `Sidebar.tsx`; skrip validasi data `npm run validate:linux-helper`. SQL Helper & `/shortcuts` tidak berubah (zero regression).
+  - Catatan: konten command Level 1–2 & runbook (termasuk varian RHEL) belum diuji di server asli dan perlu review manusia.
+- **SQL Helper v2 Differentiating Features (Fase 4)**:
+  - **Parameter Template (`{{placeholder}}`)**:
+    - Form dinamis `ParamForm.tsx` untuk kueri dengan placeholder, mendukung validasi tipe data (`identifier`, `number`, `string`) dan proteksi string escaping (`'` -> `''`).
+    - Interpolasi real-time di `SqlViewer` dan penguncian tombol salin jika parameter wajib belum diisi atau format tidak valid.
+    - Persistensi nilai parameter terakhir per skrip di `localStorage` (`msfdb:sqlhelper:v1:params:<id>`).
+    - Integrasi salin cerdas pada mode Kartu dan Baris Tabel: otomatis menggunakan nilai kustom/default atau mengarahkan ke form drawer jika parameter wajib belum lengkap.
+  - **Favorit & Terakhir Dipakai (QuickAccessBar)**:
+    - Tab bar tersegmentasi (`All Scripts`, `Favorites`, `Recently Used`) dengan badge hitungan numerik.
+    - Carousel mini-cards untuk akses cepat skrip favorit dan riwayat skrip terakhir yang diakses.
+    - Persistensi status bookmark favorit (`msfdb:sqlhelper:v1:favorites`) dan riwayat akses (`msfdb:sqlhelper:v1:recent`, max 10 item) di `localStorage`.
+    - Tombol *Clear Recent* untuk membersihkan riwayat akses.
+  - **Deep Link & Browser History Sync**:
+    - Sinkronisasi URL dua arah untuk parameter `?script=<id>`.
+    - Tombol *Share Link* di drawer untuk menyalin tautan langsung ke clipboard dengan toast konfirmasi.
+    - Penggunaan `router.push` saat membuka drawer dan `router.replace` saat filter berganti, sehingga tombol *Back* pada peramban secara alami menutup drawer tanpa meninggalkan halaman.
+    - Otomatis membuka drawer skrip jika pengguna mengakses URL dengan parameter `?script=<id>`.
+  - **Navigasi Prev / Next Skrip di Drawer**:
+    - Tombol *Previous* dan *Next* di sticky footer drawer.
+    - Navigasi keyboard interaktif menggunakan tombol panah kiri (`←`) dan panah kanan (`→`) di dalam drawer.
+    - Otomatis mereset status konfirmasi risiko dan memuat parameter spesifik skrip saat berpindah skrip.
+  - **Unit Testing**:
+    - Skrip tes unit otomatis `npm run test:sql-helper` (`scripts/test-sql-helper.mjs`) untuk validasi parameter, interpolasi teks, dan escaping SQL.
+- **SQL Helper v2 New UI (Fase 3)**:
+  - Multi-select chip filters untuk database engine dan kategori dengan faceted count real-time.
+  - Toggles tingkat risiko (`Low`, `Medium`, `High`) dengan faceted count dan ikon representatif.
+  - Mode tampilan ganda: **Kartu (Cards)** dengan preview 3 baris SQL + fade overlay, dan **Tabel Ringkas (Table)** dengan fallback otomatis kartu di layar mobile (< md), tersimpan di `localStorage`.
+  - Drawer slide-over modern berbasis **Radix Dialog (`@radix-ui/react-dialog`)** dengan focus trap, navigasi keyboard (`Esc`), share link, dan aksesibilitas ARIA penuh.
+  - Komponen `SqlViewer` terpadu dengan syntax highlighting **Shiki** (`sql`, tema GitHub Dark/Light), nomor baris, tombol *Wrap/Unwrap*, *Copy*, dan unduh berkas `.sql`.
+  - Komponen peringatan risiko `RiskBanner` dan proteksi konfirmasi centang wajib untuk skrip destruktif berisiko tinggi (*High Risk*).
+  - Tampilan kosong informatif (`EmptyState`) dengan saran filter kontekstual dan tombol reset.
+  - Pencarian fuzzy berbobot menggunakan **Fuse.js** (`title`, `tags`, `description`, `sql`, `whenToUse`).
+  - Sentralisasi menyeluruh seluruh teks UI di `lib/labels.ts`.
+
+- **SQL Helper v2 Foundation Refactor (Fase 2)**:
+  - Pembentukan arsitektur fitur baru di `features/sql-helper/` (`components/`, `hooks/`, `lib/`, `data/`) dengan boundary `<Suspense>` Next.js 14.
+  - Skema data `Zod` (`schema.ts`) dengan normalisasi otomatis tingkat risiko (`low`, `medium`, `high`) dan type safety murni.
+  - Skrip validasi dataset `validate:data` (`scripts/validate-sql-helper.mjs`) untuk verifikasi integritas 27 skrip DBA.
+  - Hook sinkronisasi URL `useScriptFilters` (search `q`, `engine`, `category`, `risk`, `script`) dengan debounce 250ms tanpa page reload.
+  - Modul metadata terpadu `riskMeta.ts` dan label teknis `labels.ts` sebagai *single source of truth*.
+  - Komponen badge terpadu `<RiskBadge>`, `<CategoryBadge>`, dan `<EngineBadge>`.
+
+- **SQL Helper v2 Quick Wins (Fase 1)**:
+  - Tombol aksi **Salin Kueri (COPY)** langsung di baris tabel dengan feedback indikator *COPIED* dan toast notification.
+  - Tombol **Detail** terpisah untuk membuka panel drawer kueri.
+  - Utilitas clipboard aman dengan fallback `execCommand` di `src/lib/clipboard.ts`.
+  - Pilihan baris paginasi 10 (default), 20, dan 50.
+  - Fitur tutup (dismiss) info box panduan dengan persistensi status di `localStorage`.
+  - Dokumen rencana arsitektur dan spesifikasi teknis lengkap di `dev-docs/modules/sql-helper/PLAN.md` dan `SPEC.md`.
+
+
+### Changed
+- Perbaikan tipografi SQL Helper: judul skrip menggunakan font sans-serif 13–14px semibold agar mudah dipindai, mono dikhususkan untuk kode SQL, badge, dan label teknis.
+- Pembersihan footer metrik `SqlHelperStats` untuk mengurangi visual clutter di halaman `/sql-helper`.
+- Peningkatan aksesibilitas filter dan drawer detail (`label htmlFor`, `role="dialog"`, `aria-modal`, keyboard navigasi).
+
+### Added
 - Kurasi dan integrasi **16 skrip DBA baru** dari folder `Postgresql/` dan `Mysql/` ke dataset SQL Helper (termasuk Kill Session, Audit Primary Key, Data Dictionary, Scan Kolom NULL, Search Functions, FLUSH HOSTS, dan Max Connections Tuning) sehingga total kueri bertambah dari 11 menjadi 27 kueri.
 - Fitur **Pagination 5 Baris Default** pada tabel SQL Helper (`/sql-helper`) dengan pemilih baris (5/10/20), navigasi halaman (Prev, Number, Next), teks ringkasan, dan auto-reset saat pencarian/filter aktif.
 - Berkas spesifikasi modul SQL Helper di `dev-docs/modules/sql-helper/` (`README.md` dan `views.md`) sesuai standar `ai-rules/modules-template/`.

@@ -1,0 +1,13 @@
+# ==============================================================
+# MSF-APP Backend — Development & Testing Requirements
+# ==============================================================
+# Install: pip install -r requirements-dev.txt
+# Tidak dipakai Dockerfile (image production hanya requirements.txt).
+# ==============================================================
+-r requirements.txt
+
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0               # Coverage report
+ruff==0.8.4                     # Linter + formatter (ganti flake8 + black)
+pip-audit==2.10.1               # Audit CVE dependency: pip-audit -r requirements.txt

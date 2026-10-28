@@ -39,6 +39,42 @@
     --sidebar: 0 0% 100%;            /* #ffffff sidebar */
     --radius: 8px;
   }
+
+  .dark {
+    /* Dark Mode */
+    --background: 222 47% 8%;        /* #0d1117 — dark page bg */
+    --foreground: 210 40% 92%;       /* #e2e8f0 — text utama */
+
+    --card: 222 47% 11%;             /* #161b22 — card surface */
+    --card-foreground: 210 40% 92%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 92%;
+
+    --primary: 160 84% 39%;          /* #10b981 — emerald tetap */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 47% 14%;        /* #1f2937 */
+    --secondary-foreground: 210 40% 92%;
+
+    --muted: 222 47% 14%;            /* #1f2937 */
+    --muted-foreground: 215 20% 55%; /* #8b9ab1 */
+
+    --accent: 160 84% 39%;           /* #10b981 emerald */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;        /* #dc2626 */
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;           /* #f59e0b */
+    --warning-foreground: 0 0% 100%;
+
+    --border: 222 47% 18%;           /* #2d3748 */
+    --input: 222 47% 18%;
+    --ring: 160 84% 39%;
+
+    --sidebar: 222 47% 10%;          /* #13181f — sidebar dark */
+  }
 }
 
 @layer base {
@@ -48,6 +84,9 @@
   html {
     color-scheme: light;
   }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -55,7 +94,66 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
   }
+  html.dark select option {
+    background-color: hsl(var(--card));
+    color: hsl(var(--foreground));
+  }
+
+  /* Landing page (/) selalu gelap, apa pun tema workspace — mencegah kilatan
+     putih saat overscroll/loading. Dibatasi ke landing agar halaman lain aman. */
+  html:has([data-page="landing"]) {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    background-color: #020617; /* slate-950 */
+  }
+  html:has([data-page="landing"]) body {
+    background-color: #020617;
+  }
 }
+
+/* Dark mode compatibility fallback */
+.dark .bg-white {
+  background-color: hsl(var(--card));
+}
+.dark .bg-gray-50,
+.dark .bg-gray-50\/50 {
+  background-color: hsl(var(--muted) / 0.4);
+}
+.dark .bg-gray-100 {
+  background-color: hsl(var(--muted));
+}
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: hsl(var(--foreground));
+}
+.dark .text-gray-700 {
+  color: hsl(var(--foreground) / 0.85);
+}
+.dark .text-gray-600 {
+  color: hsl(var(--muted-foreground));
+}
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: hsl(var(--border));
+}
+
+/* Badge/alert berwarna (bg-*-50 + text-*-800) — versi gelap transparan */
+.dark .bg-red-50, .dark .bg-red-100 { background-color: rgb(239 68 68 / 0.1); }
+.dark .bg-amber-50, .dark .bg-amber-100 { background-color: rgb(245 158 11 / 0.1); }
+.dark .bg-emerald-50 { background-color: rgb(16 185 129 / 0.1); }
+.dark .bg-blue-50 { background-color: rgb(59 130 246 / 0.1); }
+.dark .bg-purple-50 { background-color: rgb(168 85 247 / 0.1); }
+.dark .border-red-100, .dark .border-red-200 { border-color: rgb(239 68 68 / 0.3); }
+.dark .border-amber-100, .dark .border-amber-200 { border-color: rgb(245 158 11 / 0.3); }
+.dark .border-emerald-100, .dark .border-emerald-200 { border-color: rgb(16 185 129 / 0.3); }
+.dark .border-blue-100, .dark .border-blue-200 { border-color: rgb(59 130 246 / 0.3); }
+.dark .border-purple-100 { border-color: rgb(168 85 247 / 0.3); }
+.dark .text-red-700, .dark .text-red-800 { color: #fca5a5; }      /* red-300 */
+.dark .text-red-900 { color: #fecaca; }                           /* red-200 */
+.dark .text-amber-700, .dark .text-amber-800, .dark .text-amber-900 { color: #fcd34d; } /* amber-300 */
+.dark .text-emerald-700, .dark .text-emerald-800 { color: #6ee7b7; } /* emerald-300 */
+.dark .text-blue-800, .dark .text-blue-900 { color: #93c5fd; }   /* blue-300 */
+.dark .text-rose-700, .dark .text-rose-800, .dark .text-rose-900 { color: #fda4af; } /* rose-300 */
 
 /* Custom Scrollbar — light style */
 ::-webkit-scrollbar {
@@ -71,6 +169,12 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+html:has([data-page="landing"]) ::-webkit-scrollbar-track {
+  background: #020617; /* slate-950 */
+}
+html:has([data-page="landing"]) ::-webkit-scrollbar-thumb {
+  background: #334155; /* slate-700 */
 }
 
 /* Card utility */

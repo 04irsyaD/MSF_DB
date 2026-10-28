@@ -1,3 +1,5 @@
+import type { CatalogRows } from "@/features/schema-compare/core/catalog";
+
 export type JobStatus = "queued" | "processing" | "done" | "error" | "cancelled";
 
 export type DetailLevel = "simple" | "detailed" | "comprehensive";
@@ -51,11 +53,28 @@ export interface DBConnection {
   connection_string?: string;
 }
 
+export interface SchemaCatalogAccess {
+  role: string | null;
+  is_superuser: boolean;
+  /** Jumlah tabel/view di schema yang isinya bisa di-SELECT oleh akun ini. */
+  readable_count: number;
+  readable_sample: string[];
+}
+
+export interface SchemaCatalogResponse {
+  /** Baris mentah pg_catalog; disusun jadi snapshot oleh `features/schema-compare/core/catalog`. */
+  catalog: CatalogRows;
+  access: SchemaCatalogAccess;
+  database: string;
+  schema: string;
+}
+
 export interface GenerateJobResponse {
   job_id: string;
   status: JobStatus;
   created_at: string;
   estimated_seconds?: number;
+  access_code?: string;
 }
 
 export interface JobStatusResponse {
@@ -72,6 +91,7 @@ export interface JobStatusResponse {
   preview_markdown?: string;
   download_url?: string;
   access_code?: string;
+  project_name?: string;
 }
 
 export interface AIModelsResponse {
@@ -107,6 +127,7 @@ export interface ShortcutsResponse {
 export interface DBTestConnectionResponse {
   success: boolean;
   message: string;
+  error_code?: string;
   engine: DBEngine;
   server_version?: string;
   tables_count?: number;

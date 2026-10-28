@@ -108,6 +108,7 @@ class DBTestConnectionRequest(BaseModel):
 class DBTestConnectionResponse(BaseModel):
     success: bool
     message: str
+    error_code: Optional[str] = None
     engine: str
     server_version: Optional[str] = None
     tables_count: Optional[int] = None
@@ -170,6 +171,10 @@ class FunctionMetadata(BaseModel):
     description: Optional[str] = None
 
 
+class SchemaCatalogRequest(BaseModel):
+    connection: DBConnection
+
+
 class DBMetadataRequest(BaseModel):
     connection: DBConnection
     schema_filter: Optional[str] = None
@@ -194,7 +199,7 @@ class GenerateSettings(BaseModel):
     language: OutputLanguage = OutputLanguage.INDONESIAN
     detail_level: DetailLevel = DetailLevel.DETAILED
     ai_provider: AIProviderType = AIProviderType.OLLAMA
-    model: str = "llama3.2"
+    model: str = Field(default="llama3.2", max_length=100)
     output_format: ExportFormat = ExportFormat.DOCX
     project_name: str = Field(default="Database Documentation", max_length=200)
     project_description: Optional[str] = Field(default=None, max_length=1000)
@@ -218,7 +223,7 @@ class GenerateFromDBRequest(GenerateSettings):
     include_views: bool = False
     include_functions: bool = False
     schema_filter: Optional[str] = None
-    table_filter: Optional[List[str]] = None
+    table_filter: Optional[List[str]] = Field(default=None, max_length=200)
 
 
 class GenerateJobResponse(BaseModel):
@@ -312,9 +317,9 @@ class ShortcutsResponse(BaseModel):
 # ================================================================
 
 class ExportRequest(BaseModel):
-    markdown_content: str = Field(..., min_length=1)
+    markdown_content: str = Field(..., min_length=1, max_length=1_000_000)
     project_name: str = Field(default="Database Documentation", max_length=200)
-    author: Optional[str] = None
+    author: Optional[str] = Field(default=None, max_length=100)
     language: OutputLanguage = OutputLanguage.INDONESIAN
 
     model_config = {"use_enum_values": True}
@@ -347,6 +352,6 @@ class ErrorResponse(BaseModel):
 
 
 class ParseDDLRequest(BaseModel):
-    sql_content: str
-    dialect: Optional[str] = "postgresql"
+    sql_content: str = Field(..., max_length=500_000)
+    dialect: Literal["postgresql", "mysql", "sqlite", "sqlserver"] = "postgresql"
 

@@ -1,21 +1,14 @@
 """
 Pytest configuration dan shared fixtures untuk MSF-APP backend tests.
-"""
-import pytest
-import asyncio
-from fastapi.testclient import TestClient
-from httpx import AsyncClient
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop untuk async tests."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield loop
-    loop.close()
+Catatan: `asyncio_mode = auto` sudah dikonfigurasi di pytest.ini,
+sehingga fixture `event_loop` custom tidak lagi diperlukan dan telah
+dihapus untuk menghindari DeprecationWarning dari pytest-asyncio.
+"""
+from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+import pytest
+
 
 @pytest.fixture
 def client():
@@ -24,9 +17,19 @@ def client():
     with TestClient(app) as c:
         yield c
 
+
 @pytest.fixture
 async def async_client():
     """Async test client untuk endpoint tests."""
     from app.main import app
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+
+
+@pytest.fixture(autouse=True)
+def reset_admin_lockout():
+    """State lockout admin global; reset agar kegagalan satu test tidak mengunci test lain."""
+    from app.routers.admin import admin_lockout
+    admin_lockout.reset()
+    yield
+    admin_lockout.reset()

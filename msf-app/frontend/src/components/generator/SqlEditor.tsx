@@ -4,6 +4,7 @@ import Editor from "@monaco-editor/react";
 import { Terminal, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 interface SqlEditorProps {
   value: string;
@@ -86,6 +87,7 @@ CREATE TABLE posts (
 
 export default function SqlEditor({ value, onChange }: SqlEditorProps) {
   const [copied, setCopied] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   const handleCopy = () => {
     if (!value) return;
@@ -101,7 +103,7 @@ export default function SqlEditor({ value, onChange }: SqlEditorProps) {
   };
 
   return (
-    <div className="flex flex-col h-[500px] border border-border rounded-2xl overflow-hidden bg-white focus-within:border-accent/50 hover:border-accent/30 transition-colors duration-150 shadow-sm">
+    <div className="flex flex-col h-full border border-border rounded-2xl overflow-hidden bg-white focus-within:border-accent/50 hover:border-accent/30 transition-colors duration-150 shadow-sm">
       {/* Editor Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-gray-50 shrink-0">
         <div className="flex items-center gap-2">
@@ -161,15 +163,15 @@ export default function SqlEditor({ value, onChange }: SqlEditorProps) {
       </div>
 
       {/* Editor Body */}
-      <div className="flex-1 min-h-0 relative bg-white">
+      <div className="flex-1 min-h-0 relative bg-card">
         <Editor
           height="100%"
           language="sql"
-          theme="vs"
+          theme={resolvedTheme === "dark" ? "vs-dark" : "vs"}
           value={value}
           onChange={onChange}
           loading={
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white gap-3">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-card gap-3">
               <div className="h-8 w-8 rounded-full border-2 border-accent/20 border-t-accent animate-spin" />
               <span className="text-xs font-mono text-muted-foreground">
                 LOADING EDITOR...

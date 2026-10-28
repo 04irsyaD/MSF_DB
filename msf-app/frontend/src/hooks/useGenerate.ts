@@ -10,6 +10,30 @@ import {
 } from "@/lib/types";
 import { toast } from "sonner";
 
+export const saveJobToHistory = (id: string, name: string, code?: string, stat: string = "queued") => {
+  if (typeof window === "undefined") return;
+  try {
+    const historyStr = localStorage.getItem("msf_jobs_history") || "[]";
+    const history = JSON.parse(historyStr);
+    const existingIdx = history.findIndex((j: any) => j.jobId === id);
+    const jobData = {
+      jobId: id,
+      projectName: name || "My Project DB",
+      accessCode: code,
+      status: stat,
+      timestamp: new Date().toISOString()
+    };
+    if (existingIdx >= 0) {
+      history[existingIdx] = { ...history[existingIdx], ...jobData };
+    } else {
+      history.unshift(jobData);
+    }
+    localStorage.setItem("msf_jobs_history", JSON.stringify(history.slice(0, 15)));
+  } catch (e) {
+    console.error("Failed to save job to history:", e);
+  }
+};
+
 export function useGenerate() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [accessCode, setAccessCode] = useState<string | undefined>(undefined);
@@ -97,17 +121,20 @@ export function useGenerate() {
           setIsGenerating(false);
           setJobId(null);
           localStorage.removeItem("msf_active_job_id");
+          saveJobToHistory(jobId, response.project_name || "My Project DB", response.access_code, "done");
           toast.success("Dokumentasi database berhasil dibuat!");
         } else if (response.status === "error") {
           setIsGenerating(false);
           setJobId(null);
           localStorage.removeItem("msf_active_job_id");
+          saveJobToHistory(jobId, response.project_name || "My Project DB", response.access_code, "error");
           toast.error(`Gagal membuat dokumentasi: ${response.error_message || "Unknown error"}`);
         } else if (response.status === "cancelled") {
           setIsGenerating(false);
           setStatus("cancelled");
           setJobId(null);
           localStorage.removeItem("msf_active_job_id");
+          saveJobToHistory(jobId, response.project_name || "My Project DB", response.access_code, "cancelled");
           toast.warning("Pembuatan dokumentasi dibatalkan.");
         }
       } catch (err: any) {
@@ -154,8 +181,10 @@ export function useGenerate() {
     try {
       const res = await api.generateFromDDL(data);
       setJobId(res.job_id);
+      setAccessCode(res.access_code);
       localStorage.setItem("msf_active_job_id", res.job_id);
-      toast.info("Proses dokumentasi DDL dimulai...");
+      saveJobToHistory(res.job_id, data.project_name || "DDL Generate", res.access_code, "queued");
+      toast.info("Proses DDL dimulai...");
       return res.job_id;
     } catch (err: any) {
       setIsGenerating(false);
@@ -178,8 +207,10 @@ export function useGenerate() {
     try {
       const res = await api.generateFromDB(data);
       setJobId(res.job_id);
+      setAccessCode(res.access_code);
       localStorage.setItem("msf_active_job_id", res.job_id);
-      toast.info("Proses dokumentasi Live DB dimulai...");
+      saveJobToHistory(res.job_id, data.project_name || "Database Generate", res.access_code, "queued");
+      toast.info("Proses Live DB dimulai...");
       return res.job_id;
     } catch (err: any) {
       setIsGenerating(false);
@@ -211,6 +242,7 @@ export function useGenerate() {
       
       // Simpan ke localStorage agar bisa dilacak terus
       localStorage.setItem("msf_active_job_id", res.job_id);
+      saveJobToHistory(res.job_id, res.project_name || "Pekerjaan Dilacak", res.access_code, res.status);
       toast.success("Pekerjaan ditemukan. Melanjutkan pelacakan...");
       return res.job_id;
     } catch (err: any) {

@@ -49,14 +49,17 @@ services:
       - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-Indonesian}
       - DEFAULT_DETAIL_LEVEL=${DEFAULT_DETAIL_LEVEL:-detailed}
       - MAX_TABLES_PER_REQUEST=${MAX_TABLES_PER_REQUEST:-50}
-      - ADMIN_PASSCODE=${ADMIN_PASSCODE:-admin123}
+      - ADMIN_PASSCODE=${ADMIN_PASSCODE:-}
+      - ALLOW_PRIVATE_DB_HOSTS=${ALLOW_PRIVATE_DB_HOSTS:-true}    # dev lokal: DB pakai hostname "postgres"
+      - ALLOW_SQLITE_CONNECTION=${ALLOW_SQLITE_CONNECTION:-true}
       - MAX_JOB_RETENTION_MINUTES=${MAX_JOB_RETENTION_MINUTES:-60}
       - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-3}
       - OUTPUT_DIR=/app/outputs
       - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-1800}
       - TZ=Asia/Jakarta
-      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - SECRET_KEY=${SECRET_KEY:-}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENABLE_DOCS=${ENABLE_DOCS:-true}    # dev lokal: Swagger aktif; production default mati
       - CORS_ORIGINS=http://localhost:3001,http://localhost:3000,http://frontend:3000,http://127.0.0.1:3001,https://msf-db.my.id
     volumes:
       - backend_outputs:/app/outputs    # Hasil file DOCX/PDF

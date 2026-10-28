@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import useSWR from "swr";
 import { DBConnection, DBEngine, DBTestConnectionResponse } from "@/lib/types";
-import { api, getFriendlyErrorMessage } from "@/lib/api";
+import { api, getFriendlyErrorMessage, swrFetcher } from "@/lib/api";
 import { Link2, Play, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,9 @@ export default function DbConnector({
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<DBTestConnectionResponse | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  // SQLite live hanya tampil jika backend mengizinkan (ALLOW_SQLITE_CONNECTION).
+  const { data: health } = useSWR("/api/health", swrFetcher);
+  const sqliteEnabled = health?.features?.sqlite_connection === true;
 
   const engines: { label: string; value: DBEngine; defaultPort: number }[] = [
     { label: "PostgreSQL", value: "postgresql", defaultPort: 5432 },
@@ -125,7 +129,7 @@ export default function DbConnector({
           DATABASE ENGINE
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {engines.map((e) => (
+          {engines.filter((e) => e.value !== "sqlite" || sqliteEnabled).map((e) => (
             <button
               key={e.value}
               type="button"

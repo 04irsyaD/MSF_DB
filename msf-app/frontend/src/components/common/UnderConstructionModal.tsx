@@ -22,12 +22,12 @@ export default function UnderConstructionModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md font-mono animate-fade-in">
-      <div className="bg-white border border-border w-full max-w-md rounded-2xl shadow-card-lg overflow-hidden relative animate-fade-in-up">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md font-mono animate-fade-in">
+      <div className="bg-card border border-border w-full max-w-md rounded-2xl shadow-card-lg overflow-hidden relative animate-fade-in-up">
         {/* Close Button */}
         <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-gray-50 text-muted-foreground hover:text-gray-900 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           <X className="h-4 w-4" />
         </button>
@@ -35,10 +35,10 @@ export default function UnderConstructionModal() {
         {/* Content */}
         <div className="p-6 space-y-6">
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 animate-bounce">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 animate-bounce">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest">
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">
               UNDER CONSTRUCTION / IN DEVELOPMENT
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -46,12 +46,12 @@ export default function UnderConstructionModal() {
             </p>
           </div>
 
-          <div className="bg-gray-50 border-l-2 border-accent p-4 rounded-r-xl space-y-3">
-            <p className="text-[10px] text-gray-700 leading-relaxed">
+          <div className="bg-muted/40 border-l-2 border-accent p-4 rounded-r-xl space-y-3">
+            <p className="text-[10px] text-foreground/80 leading-relaxed">
               Jika Anda menemukan bug, memiliki saran perbaikan, atau ingin berkolaborasi, silakan hubungi tim pengembang kami:
             </p>
             
-            <div className="space-y-2 text-[10px] font-bold text-gray-800">
+            <div className="space-y-2 text-[10px] font-bold text-foreground">
               <a 
                 href="mailto:support@msf-db.my.id" 
                 className="flex items-center gap-2 hover:text-accent transition-colors"
@@ -73,7 +73,7 @@ export default function UnderConstructionModal() {
 
           <button
             onClick={handleClose}
-            className="w-full py-2.5 bg-accent hover:bg-accent/90 text-white text-xs font-bold rounded-xl transition-all shadow-sm uppercase tracking-wider"
+            className="w-full py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-bold rounded-xl transition-all shadow-sm uppercase tracking-wider cursor-pointer"
           >
             Saya Mengerti
           </button>

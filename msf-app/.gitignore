@@ -54,3 +54,9 @@ desktop.ini
 *.log
 logs/
 npm-debug.log*
+
+# ---- Database lokal (riwayat job SQLite) ----
+data/*.db
+data/*.db-journal
+*.db-wal
+*.db-shm

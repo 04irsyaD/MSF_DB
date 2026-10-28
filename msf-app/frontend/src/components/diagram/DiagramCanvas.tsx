@@ -1,8 +1,36 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { TableMetadata, ForeignKeyMetadata } from "@/lib/types";
-import { Key, Link as LinkIcon, ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { TableMetadata } from "@/lib/types";
+import { Key, Link as LinkIcon,ZoomIn, ZoomOut, Scan, Maximize2, Minimize2, Download, Loader2, GitBranch, EyeOff, MoveHorizontal } from "lucide-react";
+import { toPng } from "html-to-image";
+import { toast } from "sonner";
+import MermaidExportModal from "@/components/diagram/MermaidExportModal";
+import VirtualRelationModal from "@/components/diagram/VirtualRelationModal";
+import {
+  VirtualRelation,
+  relationId,
+  useHiddenRelations,
+  useRelationOffsets,
+  useVirtualRelations,
+} from "@/components/diagram/useVirtualRelations";
+
+type ColumnRef = { table: string; column: string };
+
+// FK asli & relasi virtual tampil sama persis (warna, garis, ikon kolom)
+const RELATION_COLOR = "hsl(var(--accent))";
+
+// Satu garis di diagram: FK asli dari SQL atau relasi virtual buatan user
+interface DiagramEdge {
+  key: string;
+  fromTable: string;
+  fromColumn: string;
+  toTable: string;
+  toColumn: string;
+  relation: VirtualRelation;
+  virtual: boolean;
+}
 
 interface DiagramCanvasProps {
   tables: TableMetadata[];
@@ -16,29 +44,157 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
   const [activeDragTable, setActiveDragTable] = useState<string | null>(null);
   const [layoutStyle, setLayoutStyle] = useState<string>("horizontal");
   const [hoveredTable, setHoveredTable] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<boolean>(false);
+  const [showMermaid, setShowMermaid] = useState<boolean>(false);
+  // Mode layar penuh: diagram menutupi seluruh jendela (+ fullscreen browser kalau diizinkan)
+  const [expanded, setExpanded] = useState<boolean>(false);
+
+  // Relasi virtual: tarik titik di kolom tabel A ke kolom tabel B → konfirmasi → garis relasi
+  const { relations: virtualRelations, addRelation, removeRelation } = useVirtualRelations();
+  // FK asli dari SQL yang garisnya dihapus user dari diagram (hanya disembunyikan, SQL tidak berubah)
+  const { relations: hiddenRelations, addRelation: hideRelation, removeRelations: unhideRelations } =
+    useHiddenRelations();
+  const [linkFrom, setLinkFrom] = useState<ColumnRef | null>(null);
+  const [linkPointer, setLinkPointer] = useState<{ x: number; y: number } | null>(null);
+  const [linkTarget, setLinkTarget] = useState<ColumnRef | null>(null);
+  const [pendingRelation, setPendingRelation] = useState<VirtualRelation | null>(null);
+  const [relationToDelete, setRelationToDelete] = useState<{ relation: VirtualRelation; virtual: boolean } | null>(null);
+  // Garis tegak relasi bisa diseret kiri/kanan; geserannya disimpan per relasi
+  const { offsets: relationOffsets, setOffset: setRelationOffset, resetOffsets: resetRelationOffsets } =
+    useRelationOffsets();
+  const [activeDragLine, setActiveDragLine] = useState<string | null>(null);
+  const lineDragRef = useRef({ mouseX: 0, offset: 0, minOffset: -Infinity, maxOffset: Infinity, moved: false });
+  const lineClickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Saat menarik garis, efek redup hover dimatikan supaya tabel tujuan tetap terlihat jelas
+  const highlightTable = linkFrom ? null : hoveredTable;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number }>({
+    mouseX: 0,
+    mouseY: 0,
+    posX: 0,
+    posY: 0,
+  });
   const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // Nilai zoom/pan terbaru untuk handler wheel (event bisa datang beberapa kali sebelum re-render)
+  const viewRef = useRef({ zoom, pan });
+  viewRef.current = { zoom, pan };
 
   const CARD_WIDTH = 220;
+  // Tinggi ini dikunci di elemen kartu (style height) supaya titik garis relasi pas di barisnya.
+  // HEADER_HEIGHT = jarak atas kartu ke baris pertama: border 1 + header 41 + padding list 4
   const COLUMN_HEIGHT = 28;
-  const HEADER_HEIGHT = 42;
+  const HEADER_HEIGHT = 46;
+  const MIN_ZOOM = 0.15;
+  const MAX_ZOOM = 2;
 
-  const isTableConnectedToHovered = (tableName: string) => {
-    if (!hoveredTable) return false;
-    if (tableName === hoveredTable) return true;
-    
-    const hoveredMeta = tables.find((t) => t.name === hoveredTable);
-    const tableMeta = tables.find((t) => t.name === tableName);
-    
-    if (hoveredMeta?.foreign_keys?.some((fk) => fk.references_table === tableName)) return true;
-    if (tableMeta?.foreign_keys?.some((fk) => fk.references_table === hoveredTable)) return true;
-    
-    return false;
+  const getTableHeight = (table: TableMetadata) => {
+    return HEADER_HEIGHT + table.columns.length * COLUMN_HEIGHT + 10;
   };
 
-  const applyLayout = (style: string, currentTables = tables) => {
+  // Titik tengah vertikal baris kolom (koordinat kanvas), tempat garis relasi menempel
+  const rowCenterY = (tableName: string, columnName: string) => {
+    const table = tables.find((t) => t.name === tableName);
+    const idx = table ? table.columns.findIndex((c) => c.name === columnName) : -1;
+    return (positions[tableName]?.y ?? 0) + HEADER_HEIGHT + Math.max(idx, 0) * COLUMN_HEIGHT + COLUMN_HEIGHT / 2;
+  };
+
+  const findColumn = (table: string, column: string) =>
+    tables.find((t) => t.name === table)?.columns.find((c) => c.name === column);
+
+  // Relasi virtual yang tabel & kolomnya ada di diagram saat ini
+  const activeVirtualRelations = useMemo(
+    () => virtualRelations.filter((r) => findColumn(r.fromTable, r.fromColumn) && findColumn(r.toTable, r.toColumn)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [virtualRelations, tables]
+  );
+
+  // Semua FK dari SQL, ber-id sama formatnya dengan relasi virtual (untuk disembunyikan per garis)
+  const fkRelations = useMemo<VirtualRelation[]>(
+    () =>
+      tables.flatMap((t) =>
+        (t.foreign_keys ?? []).map((fk) => {
+          const r = {
+            fromTable: t.name,
+            fromColumn: fk.column,
+            toTable: fk.references_table,
+            toColumn: fk.references_column,
+          };
+          return { ...r, id: relationId(r) };
+        })
+      ),
+    [tables]
+  );
+
+  // FK tersembunyi yang memang ada di diagram saat ini
+  const activeHiddenRelations = useMemo(
+    () => hiddenRelations.filter((h) => fkRelations.some((r) => r.id === h.id)),
+    [hiddenRelations, fkRelations]
+  );
+
+  const edges = useMemo<DiagramEdge[]>(
+    () => [
+      ...fkRelations
+        .filter((r) => !activeHiddenRelations.some((h) => h.id === r.id))
+        .map((r, i) => ({ key: `fk:${r.id}:${i}`, ...r, relation: r, virtual: false })),
+      ...activeVirtualRelations.map((r) => ({ key: `v:${r.id}`, ...r, relation: r, virtual: true })),
+    ],
+    [fkRelations, activeHiddenRelations, activeVirtualRelations]
+  );
+
+  // Garis yang tampil sebagai foreign_keys, dipakai algoritma layout supaya tabel terkait tetap berdekatan
+  const graphTables = useMemo(
+    () =>
+      tables.map((t) => ({
+        ...t,
+        foreign_keys: edges
+          .filter((e) => e.fromTable === t.name)
+          .map((e) => ({ column: e.fromColumn, references_table: e.toTable, references_column: e.toColumn })),
+      })),
+    [tables, edges]
+  );
+
+  // Untuk ekspor Mermaid: FK yang disembunyikan ikut tidak diekspor sebagai garis
+  const visibleFkTables = useMemo(
+    () =>
+      tables.map((t) => ({
+        ...t,
+        foreign_keys: (t.foreign_keys ?? []).filter(
+          (fk) =>
+            !activeHiddenRelations.some(
+              (h) =>
+                h.fromTable === t.name &&
+                h.fromColumn === fk.column &&
+                h.toTable === fk.references_table &&
+                h.toColumn === fk.references_column
+            )
+        ),
+      })),
+    [tables, activeHiddenRelations]
+  );
+
+  // Garis di diagram saat ini yang posisinya digeser manual
+  const movedLineIds = useMemo(
+    () => Array.from(new Set(edges.map((e) => e.relation.id))).filter((id) => relationOffsets[id] !== undefined),
+    [edges, relationOffsets]
+  );
+
+  // Hanya sisi asal (seperti kolom FK), supaya ikon kolom sama persis dengan FK asli
+  const virtualRelationsOf = (table: string, column: string) =>
+    activeVirtualRelations.filter((r) => r.fromTable === table && r.fromColumn === column);
+
+  const isTableConnectedToHovered = (tableName: string) => {
+    if (!highlightTable) return false;
+    if (tableName === highlightTable) return true;
+    return edges.some(
+      (e) =>
+        (e.fromTable === highlightTable && e.toTable === tableName) ||
+        (e.toTable === highlightTable && e.fromTable === tableName)
+    );
+  };
+
+  const applyLayout = (style: string, currentTables = graphTables) => {
     if (currentTables.length === 0) return;
 
     const newPositions: Record<string, { x: number; y: number }> = {};
@@ -46,16 +202,22 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     const maxTableHeight = Math.max(...currentTables.map((t) => HEADER_HEIGHT + t.columns.length * COLUMN_HEIGHT + 10));
     const widthSpacing = CARD_WIDTH + 100;
     const heightSpacing = maxTableHeight + 50;
+    const heightOf = (name: string) => {
+      const table = currentTables.find((t) => t.name === name);
+      return table ? getTableHeight(table) : maxTableHeight;
+    };
 
     if (style === "grid") {
+      // Masonry: tabel masuk ke kolom yang paling pendek, jadi tabel panjang tidak menyisakan ruang kosong besar
       const cols = Math.ceil(Math.sqrt(currentTables.length));
-      currentTables.forEach((table, index) => {
-        const col = index % cols;
-        const row = Math.floor(index / cols);
+      const colHeights: number[] = Array(cols).fill(100);
+      currentTables.forEach((table) => {
+        const col = colHeights.indexOf(Math.min(...colHeights));
         newPositions[table.name] = {
           x: 100 + col * widthSpacing,
-          y: 100 + row * heightSpacing,
+          y: colHeights[col],
         };
+        colHeights[col] += getTableHeight(table) + 50;
       });
     } else if (style === "radial") {
       const center = { x: 500, y: 350 };
@@ -276,11 +438,13 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
 
       [0, 1, 2].forEach((col) => {
         const list = colRows[col] || [];
-        list.forEach((name, row) => {
+        let y = 80;
+        list.forEach((name) => {
           newPositions[name] = {
             x: 80 + col * widthSpacing,
-            y: 80 + row * heightSpacing,
+            y,
           };
+          y += heightOf(name) + 50;
         });
       });
     } else {
@@ -346,9 +510,9 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       const maxLevel = Math.max(...Object.keys(levelGroups).map(Number), 0);
 
       if (style === "vertical") {
+        let rowY = 80;
         for (let lvl = 0; lvl <= maxLevel; lvl++) {
           const group = levelGroups[lvl] || [];
-          const rowY = 80 + lvl * heightSpacing;
           const totalWidth = group.length * widthSpacing;
           const startX = Math.max(50, 500 - totalWidth / 2);
 
@@ -358,41 +522,143 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
               y: rowY,
             };
           });
+          // Tinggi baris = tabel tertinggi di level ini saja
+          rowY += (group.length ? Math.max(...group.map(heightOf)) : 0) + 50;
         }
       } else {
         // Horizontal (Left-to-Right)
         for (let lvl = 0; lvl <= maxLevel; lvl++) {
           const group = levelGroups[lvl] || [];
           const colX = 80 + lvl * widthSpacing;
-          const groupHeight = group.length * heightSpacing;
-          const startY = Math.max(50, 350 - groupHeight / 2);
+          const groupHeight = group.reduce((sum, name) => sum + heightOf(name) + 50, -50);
+          let y = Math.max(50, 350 - groupHeight / 2);
 
-          group.forEach((name, idx) => {
+          group.forEach((name) => {
             newPositions[name] = {
               x: colX,
-              y: startY + idx * heightSpacing,
+              y,
             };
+            y += heightOf(name) + 50;
           });
         }
       }
     }
 
     setPositions(newPositions);
+    // Fit ke layar setiap kali layout dihitung ulang (data baru atau ganti layout)
+    requestAnimationFrame(() => fitToView(newPositions, currentTables));
   };
 
   // Initialize table positions
   useEffect(() => {
     applyLayout(layoutStyle);
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
   }, [tables]);
 
-  // Handle container panning
-  const handleContainerMouseDown = (e: React.MouseEvent) => {
-    if (e.target === containerRef.current || (e.target as HTMLElement).classList.contains("svg-overlay")) {
-      setIsPanning(true);
-      panStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+  // Zoom ke titik (cx, cy) relatif container; titik di bawah kursor tetap diam di layar
+  const zoomAt = (nextZoom: number, cx: number, cy: number) => {
+    const { zoom: z, pan: p } = viewRef.current;
+    const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, nextZoom));
+    const nextPan = {
+      x: cx - ((cx - p.x) / z) * clamped,
+      y: cy - ((cy - p.y) / z) * clamped,
+    };
+    viewRef.current = { zoom: clamped, pan: nextPan };
+    setZoom(clamped);
+    setPan(nextPan);
+  };
+
+  const zoomFromCenter = (factor: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    zoomAt(viewRef.current.zoom * factor, el.clientWidth / 2, el.clientHeight / 2);
+  };
+
+  // Scroll = geser kanvas, Ctrl/⌘ + scroll (atau pinch trackpad) = zoom ke arah kursor.
+  // Listener manual karena onWheel React bersifat passive (tidak bisa preventDefault).
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const unit = e.deltaMode === 1 ? 16 : 1;
+      if (e.ctrlKey || e.metaKey) {
+        const rect = el.getBoundingClientRect();
+        zoomAt(
+          viewRef.current.zoom * Math.exp(-e.deltaY * unit * 0.0015),
+          e.clientX - rect.left,
+          e.clientY - rect.top
+        );
+        return;
+      }
+      // Shift + scroll = geser horizontal (untuk mouse tanpa scroll samping)
+      const horizontalFromShift = e.shiftKey && e.deltaX === 0;
+      const dx = (horizontalFromShift ? e.deltaY : e.deltaX) * unit;
+      const dy = (horizontalFromShift ? 0 : e.deltaY) * unit;
+      const { pan: p } = viewRef.current;
+      const nextPan = { x: p.x - dx, y: p.y - dy };
+      viewRef.current = { ...viewRef.current, pan: nextPan };
+      setPan(nextPan);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+    // Pasang ulang saat ganti mode layar penuh (elemen kanvas dibuat ulang lewat portal)
+  }, [expanded]);
+
+  const toggleExpanded = () => {
+    if (expanded) {
+      setExpanded(false);
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    } else {
+      setExpanded(true);
+      // Fullscreen seluruh halaman (bukan elemen diagram) supaya modal & toast tetap terlihat
+      document.documentElement.requestFullscreen?.().catch(() => {});
     }
+  };
+
+  // Ukuran kanvas berubah saat masuk/keluar layar penuh → fit ulang + kunci scroll halaman
+  useEffect(() => {
+    requestAnimationFrame(() => fitToView());
+    if (!expanded) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded]);
+
+  // Esc menutup layar penuh (kalau browser tidak masuk fullscreen); modal yang terbuka didahulukan
+  const hasOpenModal = !!(pendingRelation || relationToDelete || showMermaid);
+  const hasOpenModalRef = useRef(hasOpenModal);
+  hasOpenModalRef.current = hasOpenModal;
+
+  // Keluar fullscreen browser (Esc / F11) = keluar mode layar penuh juga, kecuali Esc tadi
+  // dipakai menutup modal → diagram tetap besar (overlay), Esc berikutnya baru menutupnya
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement && !hasOpenModalRef.current) setExpanded(false);
+      requestAnimationFrame(() => fitToView());
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [positions, tables]);
+
+  useEffect(() => {
+    if (!expanded || hasOpenModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpanded(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [expanded, hasOpenModal]);
+
+  // Seret di area mana pun selain kartu tabel = geser kanvas
+  const handleContainerMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement).closest("[data-table-card]")) return;
+    setIsPanning(true);
+    panStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
   };
 
   // Handle table card drag initiation
@@ -401,21 +667,99 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
     setActiveDragTable(tableName);
     const pos = positions[tableName] || { x: 0, y: 0 };
     dragStartRef.current = {
-      x: e.clientX - pos.x,
-      y: e.clientY - pos.y,
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      posX: pos.x,
+      posY: pos.y,
     };
+  };
+
+  // Koordinat kursor di ruang kanvas (sebelum pan/zoom)
+  const toCanvasPoint = (e: React.MouseEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    return {
+      x: (e.clientX - (rect?.left ?? 0) - pan.x) / zoom,
+      y: (e.clientY - (rect?.top ?? 0) - pan.y) / zoom,
+    };
+  };
+
+  const columnRefAt = (target: EventTarget): ColumnRef | null => {
+    const row = (target as HTMLElement).closest<HTMLElement>("[data-column-row]");
+    const { table, column } = row?.dataset ?? {};
+    return table && column ? { table, column } : null;
+  };
+
+  // Mulai tarik garis relasi dari titik di kolom
+  const handleLinkStart = (e: React.MouseEvent, from: ColumnRef) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    e.preventDefault();
+    setLinkFrom(from);
+    setLinkPointer(toCanvasPoint(e));
+    setLinkTarget(null);
+  };
+
+  const finishLink = () => {
+    if (linkFrom && linkTarget) {
+      const draft = {
+        fromTable: linkFrom.table,
+        fromColumn: linkFrom.column,
+        toTable: linkTarget.table,
+        toColumn: linkTarget.column,
+      };
+      const alreadyLinked = edges.some(
+        (edge) =>
+          (edge.fromTable === draft.fromTable && edge.fromColumn === draft.fromColumn &&
+            edge.toTable === draft.toTable && edge.toColumn === draft.toColumn) ||
+          (edge.fromTable === draft.toTable && edge.fromColumn === draft.toColumn &&
+            edge.toTable === draft.fromTable && edge.toColumn === draft.fromColumn)
+      );
+      // Menarik ulang FK yang tadi disembunyikan = tampilkan lagi FK aslinya
+      const hiddenFk = activeHiddenRelations.find(
+        (h) =>
+          (h.fromTable === draft.fromTable && h.fromColumn === draft.fromColumn &&
+            h.toTable === draft.toTable && h.toColumn === draft.toColumn) ||
+          (h.fromTable === draft.toTable && h.fromColumn === draft.toColumn &&
+            h.toTable === draft.fromTable && h.toColumn === draft.fromColumn)
+      );
+      if (alreadyLinked) {
+        toast.info("Kedua kolom ini sudah terhubung.");
+      } else if (hiddenFk) {
+        unhideRelations([hiddenFk.id]);
+        toast.success("Relasi FK dari SQL ditampilkan lagi.");
+      } else {
+        setPendingRelation({ ...draft, id: relationId(draft) });
+      }
+    }
+    setLinkFrom(null);
+    setLinkPointer(null);
+    setLinkTarget(null);
   };
 
   // Mouse move handler for drag & pan
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning) {
+    if (linkFrom) {
+      setLinkPointer(toCanvasPoint(e));
+      const target = columnRefAt(e.target);
+      const isSameColumn = target && target.table === linkFrom.table && target.column === linkFrom.column;
+      setLinkTarget(target && !isSameColumn ? target : null);
+    } else if (activeDragLine) {
+      const start = lineDragRef.current;
+      const dx = (e.clientX - start.mouseX) / zoom;
+      if (Math.abs(dx) > 2) start.moved = true;
+      if (start.moved) {
+        setRelationOffset(activeDragLine, Math.min(start.maxOffset, Math.max(start.minOffset, start.offset + dx)));
+      }
+    } else if (isPanning) {
       setPan({
         x: e.clientX - panStartRef.current.x,
         y: e.clientY - panStartRef.current.y,
       });
     } else if (activeDragTable) {
-      const x = e.clientX - dragStartRef.current.x;
-      const y = e.clientY - dragStartRef.current.y;
+      // Selisih mouse (px layar) dibagi zoom supaya tabel bergerak sejalan dengan kursor
+      const start = dragStartRef.current;
+      const x = start.posX + (e.clientX - start.mouseX) / zoom;
+      const y = start.posY + (e.clientY - start.mouseY) / zoom;
       setPositions((prev) => ({
         ...prev,
         [activeDragTable]: { x, y },
@@ -425,19 +769,138 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
 
   // Mouse up handler
   const handleMouseUp = () => {
+    if (linkFrom) finishLink();
     setIsPanning(false);
     setActiveDragTable(null);
+    setActiveDragLine(null);
   };
 
-  // Auto zoom fit layout
-  const handleResetZoom = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
+  // Kursor keluar kanvas saat menarik garis = batal
+  const handleMouseLeave = () => {
+    setLinkFrom(null);
+    setLinkPointer(null);
+    setLinkTarget(null);
+    setIsPanning(false);
+    setActiveDragTable(null);
+    setActiveDragLine(null);
   };
 
-  const getTableHeight = (table: TableMetadata) => {
-    return HEADER_HEIGHT + table.columns.length * COLUMN_HEIGHT + 10;
+  // Auto zoom fit layout (Dynamic Bounding Box calculation)
+  const fitToView = (pos = positions, list = tables) => {
+    if (list.length === 0 || !containerRef.current) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    list.forEach((table) => {
+      const p = pos[table.name];
+      if (p) {
+        const tableHeight = getTableHeight(table);
+        if (p.x < minX) minX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.x + CARD_WIDTH > maxX) maxX = p.x + CARD_WIDTH;
+        if (p.y + tableHeight > maxY) maxY = p.y + tableHeight;
+      }
+    });
+
+    if (minX === Infinity || minY === Infinity) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    // Area aman (px layar): atas dipakai toolbar layout/zoom, bawah dipakai petunjuk navigasi
+    const SAFE_TOP = 68;
+    const SAFE_BOTTOM = 44;
+    const SAFE_SIDE = 24;
+    const availWidth = containerWidth - SAFE_SIDE * 2;
+    const availHeight = containerHeight - SAFE_TOP - SAFE_BOTTOM;
+
+    let nextZoom = Math.min(availWidth / (maxX - minX), availHeight / (maxY - minY));
+    // Semua tabel harus muat; zoom maksimal 1.3 supaya diagram kecil tidak terlalu besar
+    nextZoom = Math.max(MIN_ZOOM, Math.min(1.3, nextZoom));
+
+    const boxCenterX = minX + (maxX - minX) / 2;
+    const boxCenterY = minY + (maxY - minY) / 2;
+
+    const nextPanX = SAFE_SIDE + availWidth / 2 - boxCenterX * nextZoom;
+    const nextPanY = SAFE_TOP + availHeight / 2 - boxCenterY * nextZoom;
+
+    setZoom(nextZoom);
+    setPan({ x: nextPanX, y: nextPanY });
   };
+
+  // Export diagram to PNG
+  const handleDownloadDiagram = async () => {
+    if (!canvasRef.current || tables.length === 0) return;
+    setDownloading(true);
+
+    try {
+      // Find bounding box to fit the output image size perfectly
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      tables.forEach((table) => {
+        const pos = positions[table.name];
+        if (pos) {
+          const tableHeight = getTableHeight(table);
+          if (pos.x < minX) minX = pos.x;
+          if (pos.y < minY) minY = pos.y;
+          if (pos.x + CARD_WIDTH > maxX) maxX = pos.x + CARD_WIDTH;
+          if (pos.y + tableHeight > maxY) maxY = pos.y + tableHeight;
+        }
+      });
+
+      const padding = 40;
+      const width = maxX - minX + padding * 2;
+      const height = maxY - minY + padding * 2;
+
+      // Capture canvas
+      const dataUrl = await toPng(canvasRef.current, {
+        width: width,
+        height: height,
+        style: {
+          transform: `translate(${-minX + padding}px, ${-minY + padding}px) scale(1)`,
+          transformOrigin: "top left",
+          width: `${width}px`,
+          height: `${height}px`,
+        },
+        backgroundColor: "#f9fafb", // clean background color matching user theme
+        quality: 0.95,
+      });
+
+      // Trigger download link. Nama file pakai tanggal + jam lokal (bukan UTC) supaya
+      // unduhan di hari yang sama tidak bentrok jadi "(1)", "(2)".
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const stamp =
+        `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` +
+        `_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const link = document.createElement("a");
+      link.download = `msf-database-diagram-${stamp}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast.success("Diagram database berhasil diunduh!");
+    } catch (error: any) {
+      console.error("Gagal mendownload diagram:", error);
+      toast.error("Gagal mendownload diagram database.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+
 
   // Step/Elbow connector routing — horizontal → vertical → horizontal
   const renderRelations = () => {
@@ -451,28 +914,22 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
 
     let relationIndex = 0;
 
-    tables.forEach((sourceTable) => {
-      sourceTable.foreign_keys?.forEach((fk, fkIdx) => {
-        const sourcePos = positions[sourceTable.name];
-        const targetPos = positions[fk.references_table];
+    edges.forEach((edge) => {
+        const sourcePos = positions[edge.fromTable];
+        const targetPos = positions[edge.toTable];
 
         if (!sourcePos || !targetPos) return;
 
-        const sourceTableMeta = tables.find((t) => t.name === sourceTable.name);
-        const targetTableMeta = tables.find((t) => t.name === fk.references_table);
+        const sourceTableMeta = tables.find((t) => t.name === edge.fromTable);
+        const targetTableMeta = tables.find((t) => t.name === edge.toTable);
 
         if (!sourceTableMeta || !targetTableMeta) return;
 
         relationIndex++;
 
         // FK row-level exit/entry Y positions
-        const sourceColIdx = sourceTableMeta.columns.findIndex((c) => c.name === fk.column);
-        const targetColIdx = targetTableMeta.columns.findIndex((c) => c.name === fk.references_column);
-
-        const sourceY =
-          sourcePos.y + HEADER_HEIGHT + (sourceColIdx >= 0 ? sourceColIdx : 0) * COLUMN_HEIGHT + COLUMN_HEIGHT / 2;
-        const targetY =
-          targetPos.y + HEADER_HEIGHT + (targetColIdx >= 0 ? targetColIdx : 0) * COLUMN_HEIGHT + COLUMN_HEIGHT / 2;
+        const sourceY = rowCenterY(edge.fromTable, edge.fromColumn);
+        const targetY = rowCenterY(edge.toTable, edge.toColumn);
 
         // Dynamic side selection based on horizontal position
         const sourceIsLeft = sourcePos.x + CARD_WIDTH <= targetPos.x;
@@ -507,8 +964,8 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         }
 
         // Parallel offset — small nudge so lines from same table don't overlap
-        const sideCount = exitCounts[sourceTable.name][side];
-        exitCounts[sourceTable.name][side]++;
+        const sideCount = exitCounts[edge.fromTable][side];
+        exitCounts[edge.fromTable][side]++;
         const parallelOffset = sideCount * 6;
         const adjustedStartX = side === "right" ? startX + parallelOffset : startX - parallelOffset;
 
@@ -516,28 +973,45 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         // using relationIndex so each connection gets a unique vertical lane
         const verticalTrackOffset = ((relationIndex * 17) % 5 - 2) * 12; // deterministic values from -24 to +24
 
+        // Geseran manual dari user (seret garis tegak), relatif dari posisi otomatis
+        const lineId = edge.relation.id;
+        const userOffset = relationOffsets[lineId] ?? 0;
+
         // Step/Elbow path: H → V → H (3 segments)
-        let pathD: string;
+        // Batas geser supaya garis tegak tidak masuk ke bawah kartu tabel
+        const LINE_MARGIN = 10;
+        let autoX: number;
+        let minX: number;
+        let maxX: number;
         if (!isOverlapping) {
-          const midX = (adjustedStartX + endX) / 2 + verticalTrackOffset;
-          pathD = `M ${adjustedStartX} ${sourceY} H ${midX} V ${targetY} H ${endX}`;
+          autoX = (adjustedStartX + endX) / 2 + verticalTrackOffset;
+          minX = Math.min(adjustedStartX, endX) + LINE_MARGIN;
+          maxX = Math.max(adjustedStartX, endX) - LINE_MARGIN;
         } else {
           // Same column overlap: route outward with a 20px stub first
           const stub = side === "right" ? 24 : -24;
-          const stubX = adjustedStartX + stub + (verticalTrackOffset * 0.4);
-          const targetStubX = endX + (side === "right" ? 24 : -24);
-          const midX = (stubX + targetStubX) / 2;
-          pathD = `M ${adjustedStartX} ${sourceY} H ${stubX} V ${targetY} H ${endX}`;
+          autoX = adjustedStartX + stub + (verticalTrackOffset * 0.4);
+          minX = side === "right" ? Math.max(adjustedStartX, endX) + LINE_MARGIN : -Infinity;
+          maxX = side === "right" ? Infinity : Math.min(adjustedStartX, endX) - LINE_MARGIN;
         }
+        if (minX > maxX) minX = maxX = (minX + maxX) / 2;
+        const verticalX = Math.min(maxX, Math.max(minX, autoX + userOffset));
+        const pathD = `M ${adjustedStartX} ${sourceY} H ${verticalX} V ${targetY} H ${endX}`;
+        const isDraggingLine = activeDragLine === lineId;
 
         const isConnectedToHovered =
-          hoveredTable &&
-          (sourceTable.name === hoveredTable || fk.references_table === hoveredTable);
-        const opacity = hoveredTable ? (isConnectedToHovered ? 1 : 0.15) : 1;
+          highlightTable && (edge.fromTable === highlightTable || edge.toTable === highlightTable);
+        const opacity = highlightTable ? (isConnectedToHovered ? 1 : 0.15) : 1;
+
+        // Arah datang garis ke tabel tujuan (jalur memutar datang dari luar kartu)
+        const arrowPointsRight = isOverlapping ? side === "left" : side === "right";
+        const arrowBaseX = arrowPointsRight ? endX - 6 : endX + 6;
+        const virtual = edge.virtual;
+        const color = RELATION_COLOR;
 
         paths.push(
           <g
-            key={`${sourceTable.name}-${fk.column}-${fkIdx}`}
+            key={edge.key}
             style={{
               opacity,
               transition: "opacity 0.25s ease-in-out",
@@ -555,34 +1029,114 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
             <path
               d={pathD}
               fill="none"
-              stroke="hsl(var(--accent))"
+              stroke={color}
               strokeWidth={1.5}
               strokeLinejoin="round"
-              strokeDasharray="none"
             />
             {/* Arrowhead at target end */}
             <polygon
-              points={`
-                ${side === "right" || isOverlapping ? endX - 6 : endX + 6},${targetY - 4}
-                ${side === "right" || isOverlapping ? endX - 6 : endX + 6},${targetY + 4}
-                ${endX},${targetY}
-              `}
-              fill="hsl(var(--accent))"
+              points={`${arrowBaseX},${targetY - 4} ${arrowBaseX},${targetY + 4} ${endX},${targetY}`}
+              fill={color}
             />
             {/* Dot at source exit */}
-            <circle cx={adjustedStartX} cy={sourceY} r={3} fill="hsl(var(--accent))" />
+            <circle cx={adjustedStartX} cy={sourceY} r={3} fill={color} />
+            {/* Area klik lebar (tak terlihat) untuk menghapus garis relasi */}
+            <path
+              d={pathD}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={12}
+              data-relation={edge.relation.id}
+              data-virtual={virtual || undefined}
+              style={{ pointerEvents: "stroke", cursor: "pointer" }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={() => setRelationToDelete({ relation: edge.relation, virtual })}
+            >
+              <title>{`${virtual ? "Relasi virtual" : "Relasi FK"}: ${edge.fromTable}.${edge.fromColumn} → ${edge.toTable}.${edge.toColumn} (klik untuk hapus)`}</title>
+            </path>
+            {/* Pegangan garis tegak: seret kiri/kanan untuk menggeser, dobel-klik = kembali otomatis */}
+            <path
+              d={`M ${verticalX} ${sourceY} V ${targetY}`}
+              data-line-handle={lineId}
+              fill="none"
+              strokeWidth={isDraggingLine ? 6 : 12}
+              className={
+                isDraggingLine
+                  ? "stroke-[hsl(var(--accent)/0.35)]"
+                  : "stroke-transparent hover:stroke-[hsl(var(--accent)/0.25)]"
+              }
+              style={{ pointerEvents: "stroke", cursor: "ew-resize" }}
+              onMouseDown={(e) => {
+                if (e.button !== 0) return;
+                e.stopPropagation();
+                e.preventDefault();
+                lineDragRef.current = {
+                  mouseX: e.clientX,
+                  offset: verticalX - autoX,
+                  minOffset: minX - autoX,
+                  maxOffset: maxX - autoX,
+                  moved: false,
+                };
+                setActiveDragLine(lineId);
+              }}
+              onClick={() => {
+                if (lineDragRef.current.moved) return;
+                // Tunda sebentar supaya dobel-klik (reset) tidak ikut membuka popup hapus
+                if (lineClickTimerRef.current) clearTimeout(lineClickTimerRef.current);
+                lineClickTimerRef.current = setTimeout(
+                  () => setRelationToDelete({ relation: edge.relation, virtual }),
+                  250
+                );
+              }}
+              onDoubleClick={() => {
+                if (lineClickTimerRef.current) clearTimeout(lineClickTimerRef.current);
+                if (relationOffsets[lineId] !== undefined) {
+                  resetRelationOffsets([lineId]);
+                  toast.success("Posisi garis dikembalikan otomatis.");
+                }
+              }}
+            >
+              <title>{`${edge.fromTable}.${edge.fromColumn} → ${edge.toTable}.${edge.toColumn}\nSeret kiri/kanan: geser garis · dobel-klik: posisi otomatis · klik: hapus`}</title>
+            </path>
           </g>
         );
-      });
     });
 
     return paths;
   };
 
-  return (
-    <div className="relative w-full h-[600px] border border-border bg-gray-50 rounded-2xl overflow-hidden shadow-inner select-none">
+  // Garis sementara saat user menarik dari titik kolom ke kursor
+  const renderLinkPreview = () => {
+    if (!linkFrom || !linkPointer) return null;
+    const pos = positions[linkFrom.table];
+    if (!pos) return null;
+    const startY = rowCenterY(linkFrom.table, linkFrom.column);
+    const startX = linkPointer.x >= pos.x + CARD_WIDTH / 2 ? pos.x + CARD_WIDTH : pos.x;
+    return (
+      <g>
+        <path
+          d={`M ${startX} ${startY} L ${linkPointer.x} ${linkPointer.y}`}
+          stroke={RELATION_COLOR}
+          strokeWidth={2}
+          strokeDasharray="6 4"
+          fill="none"
+        />
+        <circle cx={startX} cy={startY} r={4} fill={RELATION_COLOR} />
+        <circle cx={linkPointer.x} cy={linkPointer.y} r={5} fill="none" stroke={RELATION_COLOR} strokeWidth={2} />
+      </g>
+    );
+  };
+
+  const content = (
+    <div
+      className={cn(
+        "border-border overflow-hidden select-none",
+        // bg-gray-50 di dark mode semi-transparan, jadi layar penuh pakai warna dasar halaman yang solid
+        expanded ? "fixed inset-0 z-[100] bg-background" : "relative w-full h-[600px] border rounded-2xl shadow-inner bg-gray-50"
+      )}
+    >
       {/* Layout Controls */}
-      <div className="absolute top-4 right-36 z-20 flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded-xl shadow-sm">
+      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded-xl shadow-sm">
         <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider font-mono">Layout:</span>
         <select
           value={layoutStyle}
@@ -603,11 +1157,34 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         </select>
       </div>
 
-      {/* Zoom / Pan Controls */}
+      {/* Zoom / Pan / Download Controls */}
       <div className="absolute top-4 right-4 z-20 flex gap-1.5 bg-white border border-border p-1.5 rounded-xl shadow-sm">
         <button
           type="button"
-          onClick={() => setZoom((z) => Math.min(2, z + 0.1))}
+          onClick={() => setShowMermaid(true)}
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-1"
+          title="Ekspor Kode Mermaid.js"
+        >
+          <GitBranch className="h-4 w-4 text-purple-500" />
+        </button>
+        <div className="w-[1px] bg-border my-0.5" />
+        <button
+          type="button"
+          disabled={downloading}
+          onClick={handleDownloadDiagram}
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors flex items-center justify-center disabled:opacity-50"
+          title="Unduh Diagram (PNG)"
+        >
+          {downloading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-accent" />
+          ) : (
+            <Download className="h-4 w-4 text-accent" />
+          )}
+        </button>
+        <div className="w-[1px] bg-border my-0.5" />
+        <button
+          type="button"
+          onClick={() => zoomFromCenter(1.2)}
           className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
           title="Zoom In"
         >
@@ -615,7 +1192,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         </button>
         <button
           type="button"
-          onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+          onClick={() => zoomFromCenter(1 / 1.2)}
           className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
           title="Zoom Out"
         >
@@ -623,11 +1200,21 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         </button>
         <button
           type="button"
-          onClick={handleResetZoom}
+          onClick={() => fitToView()}
           className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
-          title="Reset Fit"
+          title="Pusatkan Layar (Fit)"
         >
-          <Maximize className="h-4 w-4" />
+          <Scan className="h-4 w-4" />
+        </button>
+        <div className="w-[1px] bg-border my-0.5" />
+        <button
+          type="button"
+          onClick={toggleExpanded}
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
+          title={expanded ? "Keluar Layar Penuh (Esc)" : "Layar Penuh"}
+          aria-pressed={expanded}
+        >
+          {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </button>
       </div>
 
@@ -637,10 +1224,14 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
         onMouseDown={handleContainerMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        onMouseLeave={handleMouseLeave}
+        className={cn(
+          "w-full h-full",
+          linkFrom ? "cursor-crosshair" : activeDragLine ? "cursor-ew-resize" : "cursor-grab active:cursor-grabbing"
+        )}
       >
         <div
+          ref={canvasRef}
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: "0 0",
@@ -648,7 +1239,7 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
           className="relative w-[5000px] h-[5000px] transition-transform duration-75 ease-out"
         >
           {/* SVG Connection Lines Overlay */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none svg-overlay z-0">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-0">
             {renderRelations()}
           </svg>
 
@@ -658,24 +1249,26 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
             return (
               <div
                 key={table.name}
+                data-table-card
                 onMouseEnter={() => setHoveredTable(table.name)}
                 onMouseLeave={() => setHoveredTable(null)}
                 style={{
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
                   width: `${CARD_WIDTH}px`,
-                  opacity: hoveredTable && hoveredTable !== table.name && !isTableConnectedToHovered(table.name) ? 0.35 : 1,
-                  transform: hoveredTable === table.name ? "scale(1.02)" : "scale(1)",
+                  opacity: highlightTable && highlightTable !== table.name && !isTableConnectedToHovered(table.name) ? 0.35 : 1,
+                  transform: highlightTable === table.name ? "scale(1.02)" : "scale(1)",
                   transition: "opacity 0.2s ease-in-out, transform 0.2s ease-in-out, border-color 0.2s, box-shadow 0.2s",
                 }}
                 className={cn(
                   "absolute bg-white border rounded-xl shadow-card font-mono overflow-hidden",
-                  hoveredTable === table.name ? "border-accent ring-2 ring-accent/15 z-25 shadow-card-hover" : "border-border z-10"
+                  highlightTable === table.name ? "border-accent ring-2 ring-accent/15 z-25 shadow-card-hover" : "border-border z-10"
                 )}
               >
                 {/* Drag Handle Table Header */}
                 <div
                   onMouseDown={(e) => handleTableMouseDown(e, table.name)}
+                  style={{ height: HEADER_HEIGHT - 5 }}
                   className="px-3.5 py-2.5 bg-accent/5 border-b border-border flex items-center justify-between cursor-move hover:bg-accent/10 transition-colors"
                 >
                   <span className="text-xs font-bold text-gray-900 truncate" title={table.name}>
@@ -691,22 +1284,67 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
                   {table.columns.map((col) => {
                     const isPK = col.is_primary_key;
                     const isFK = col.is_foreign_key;
+                    const colVirtual = virtualRelationsOf(table.name, col.name);
+                    const isVirtual = colVirtual.length > 0;
+                    const isLinkSource = linkFrom?.table === table.name && linkFrom.column === col.name;
+                    const isLinkTarget = linkTarget?.table === table.name && linkTarget.column === col.name;
 
                     return (
                       <div
                         key={col.name}
-                        className="px-3.5 py-1.5 flex items-center justify-between hover:bg-gray-50/70 text-[10px]"
+                        data-column-row
+                        data-table={table.name}
+                        data-column={col.name}
+                        style={{ height: COLUMN_HEIGHT }}
+                        className={cn(
+                          "group relative px-3.5 py-1.5 flex items-center justify-between text-[10px]",
+                          isLinkTarget || isLinkSource
+                            ? "bg-accent/15 ring-1 ring-inset ring-accent"
+                            : linkFrom
+                              ? "hover:bg-accent/10"
+                              : "hover:bg-gray-50/70"
+                        )}
                       >
                         <div className="flex items-center gap-1.5 truncate">
                           {isPK && <Key className="h-3 w-3 text-amber-500 shrink-0" />}
-                          {isFK && <LinkIcon className="h-3 w-3 text-accent shrink-0" />}
-                          <span className={cn("text-gray-900 truncate", (isPK || isFK) && "font-bold")}>
+                          {/* FK asli & relasi virtual tampil sama: satu ikon link (detail relasi virtual di tooltip) */}
+                          {(isFK || isVirtual) && (
+                            <span
+                              className="shrink-0"
+                              title={
+                                isVirtual
+                                  ? colVirtual
+                                      .map((r) => `Relasi virtual: ${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`)
+                                      .join("\n")
+                                  : undefined
+                              }
+                            >
+                              <LinkIcon className="h-3 w-3 text-accent" />
+                            </span>
+                          )}
+                          <span
+                            className={cn(
+                              "truncate",
+                              "text-gray-900",
+                              (isPK || isFK || isVirtual) && "font-bold"
+                            )}
+                          >
                             {col.name}
                           </span>
                         </div>
                         <span className="text-muted-foreground shrink-0 pl-2">
                           {col.data_type.toLowerCase()}
                         </span>
+                        {/* Titik tarik: drag ke kolom tabel lain untuk membuat relasi virtual */}
+                        <span
+                          data-link-handle
+                          onMouseDown={(e) => handleLinkStart(e, { table: table.name, column: col.name })}
+                          title="Tarik ke kolom tabel lain untuk membuat relasi"
+                          className={cn(
+                            "absolute right-0.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-accent bg-white cursor-crosshair transition-opacity",
+                            isLinkSource ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                          )}
+                        />
                       </div>
                     );
                   })}
@@ -714,10 +1352,114 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
               </div>
             );
           })}
+
+          {/* Garis preview saat menarik relasi — di atas kartu supaya terlihat sampai kolom tujuan */}
+          {linkFrom && (
+            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-30">
+              {renderLinkPreview()}
+            </svg>
+          )}
         </div>
       </div>
+
+      {/* Petunjuk navigasi + level zoom */}
+      <div className="absolute bottom-3 left-4 z-20 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground pointer-events-none">
+        {linkFrom
+          ? `Lepas di kolom tabel tujuan · dari ${linkFrom.table}.${linkFrom.column}`
+          : `Seret / scroll: geser · Ctrl + scroll: zoom · tarik titik ● di kolom: buat relasi · seret garis: geser · ${Math.round(zoom * 100)}%`}
+      </div>
+
+      {/* Konfirmasi buat relasi virtual */}
+      {pendingRelation && (
+        <VirtualRelationModal
+          mode="create"
+          relation={pendingRelation}
+          fromColumn={findColumn(pendingRelation.fromTable, pendingRelation.fromColumn)}
+          toColumn={findColumn(pendingRelation.toTable, pendingRelation.toColumn)}
+          onCancel={() => setPendingRelation(null)}
+          onSwap={() => {
+            const swapped = {
+              fromTable: pendingRelation.toTable,
+              fromColumn: pendingRelation.toColumn,
+              toTable: pendingRelation.fromTable,
+              toColumn: pendingRelation.fromColumn,
+            };
+            setPendingRelation({ ...swapped, id: relationId(swapped) });
+          }}
+          onConfirm={() => {
+            addRelation(pendingRelation);
+            toast.success(`Relasi ${pendingRelation.fromTable} → ${pendingRelation.toTable} ditambahkan.`);
+            setPendingRelation(null);
+          }}
+        />
+      )}
+
+      <div className="absolute bottom-11 left-4 z-20 flex flex-col items-start gap-1.5">
+        {/* FK yang disembunyikan bisa ditampilkan lagi semuanya */}
+        {activeHiddenRelations.length > 0 && !linkFrom && (
+          <button
+            type="button"
+            onClick={() => {
+              unhideRelations(activeHiddenRelations.map((r) => r.id));
+              toast.success("Semua relasi FK ditampilkan lagi.");
+            }}
+            title={activeHiddenRelations.map((r) => `${r.fromTable}.${r.fromColumn} → ${r.toTable}.${r.toColumn}`).join("\n")}
+            className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+          >
+            <EyeOff className="h-3 w-3" />
+            {activeHiddenRelations.length} relasi FK disembunyikan · <span className="font-bold text-accent">Tampilkan</span>
+          </button>
+        )}
+
+        {/* Garis yang digeser manual bisa dikembalikan ke posisi otomatis semuanya */}
+        {movedLineIds.length > 0 && !linkFrom && (
+          <button
+            type="button"
+            onClick={() => {
+              resetRelationOffsets(movedLineIds);
+              toast.success("Semua garis dikembalikan ke posisi otomatis.");
+            }}
+            className="flex items-center gap-1.5 bg-white border border-border px-2.5 py-1 rounded-lg shadow-sm text-[10px] font-mono text-muted-foreground hover:text-accent hover:border-accent/40 transition-colors"
+          >
+            <MoveHorizontal className="h-3 w-3" />
+            {movedLineIds.length} garis digeser · <span className="font-bold text-accent">Reset posisi</span>
+          </button>
+        )}
+      </div>
+
+      {/* Konfirmasi hapus garis relasi (klik garisnya): virtual dihapus, FK asli disembunyikan */}
+      {relationToDelete && (
+        <VirtualRelationModal
+          mode="delete"
+          source={relationToDelete.virtual ? "virtual" : "fk"}
+          relation={relationToDelete.relation}
+          onCancel={() => setRelationToDelete(null)}
+          onConfirm={() => {
+            if (relationToDelete.virtual) {
+              removeRelation(relationToDelete.relation.id);
+              toast.success("Relasi virtual dihapus.");
+            } else {
+              hideRelation(relationToDelete.relation);
+              toast.success("Relasi FK dihapus dari diagram (SQL tidak berubah).");
+            }
+            setRelationToDelete(null);
+          }}
+        />
+      )}
+
+      {/* Mermaid ERD Export Modal */}
+      {showMermaid && (
+        <MermaidExportModal
+          tables={visibleFkTables}
+          virtualRelations={activeVirtualRelations}
+          onClose={() => setShowMermaid(false)}
+        />
+      )}
     </div>
   );
+
+  // Portal ke body: induk halaman punya animasi transform yang membuat `fixed` tidak menutupi layar
+  return expanded ? createPortal(content, document.body) : content;
 }
 
 // Simple CN utility replacement for file independence

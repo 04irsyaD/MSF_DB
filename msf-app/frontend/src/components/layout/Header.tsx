@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Database, Layers, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Database, Layers, ShieldAlert, GitCompare, LucideIcon } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -10,20 +10,39 @@ interface HeaderProps {
   onMenuToggle: () => void;
 }
 
+interface PageInfo {
+  title: string;
+  desc: string;
+  icon: LucideIcon;
+}
+
+/**
+ * Peta informasi halaman berdasarkan prefix pathname.
+ * Untuk menambah rute baru, cukup tambah satu entry di sini —
+ * tidak perlu menyentuh logika getPageInfo().
+ */
+const ROUTE_MAP: Array<{ prefix: string; info: PageInfo }> = [
+  { prefix: "/dashboard",  info: { title: "Dashboard",    desc: "Ringkasan aktivitas dan statistik aplikasi",                        icon: LayoutDashboard } },
+  { prefix: "/sql-helper", info: { title: "SQL Helper",   desc: "Tabel skrip DBA & optimasi (Client Standalone)",                    icon: Database        } },
+  { prefix: "/schema-compare", info: { title: "Schema Compare", desc: "Bandingkan struktur dua database dari snapshot atau koneksi database",              icon: GitCompare      } },
+  { prefix: "/shortcuts",  info: { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi",                  icon: Terminal        } },
+  { prefix: "/diagram",    info: { title: "MSF Diagram",  desc: "Visualisasi skema & relasi database interaktif",                     icon: Layers          } },
+  { prefix: "/settings",   info: { title: "Settings",     desc: "Konfigurasi AI provider, model, dan preferensi",                     icon: Settings        } },
+  { prefix: "/admin",      info: { title: "Admin Portal", desc: "Log & kontrol sistem",                                               icon: ShieldAlert     } },
+];
+
+const DEFAULT_PAGE: PageInfo = {
+  title: "AI Generator",
+  desc: "Generate dokumentasi dari DDL atau koneksi database langsung",
+  icon: Sparkles,
+};
+
+const getPageInfo = (pathname: string): PageInfo =>
+  ROUTE_MAP.find(({ prefix }) => pathname.startsWith(prefix))?.info ?? DEFAULT_PAGE;
+
 export default function Header({ onMenuToggle }: HeaderProps) {
   const pathname = usePathname();
-
-  const getPageInfo = () => {
-    if (pathname.startsWith("/dashboard")) return { title: "Dashboard", desc: "Ringkasan aktivitas dan statistik aplikasi", icon: LayoutDashboard };
-    if (pathname.startsWith("/sql-helper")) return { title: "SQL Helper", desc: "Tabel skrip DBA & optimasi (Client Standalone)", icon: Database };
-    if (pathname.startsWith("/shortcuts")) return { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi", icon: Terminal };
-    if (pathname.startsWith("/diagram")) return { title: "MSF Diagram", desc: "Visualisasi skema & relasi database interaktif", icon: Layers };
-    if (pathname.startsWith("/settings")) return { title: "Settings", desc: "Konfigurasi AI provider, model, dan preferensi", icon: Settings };
-    if (pathname.startsWith("/admin")) return { title: "Admin Portal", desc: "Log & kontrol sistem", icon: ShieldAlert };
-    return { title: "AI Generator", desc: "Generate dokumentasi dari DDL atau koneksi database langsung", icon: Sparkles };
-  };
-
-  const { title, desc, icon: Icon } = getPageInfo();
+  const { title, desc, icon: Icon } = getPageInfo(pathname);
 
   const { data: health } = useSWR("/api/health", swrFetcher, { refreshInterval: 15000 });
 

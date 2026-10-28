@@ -6,7 +6,9 @@
 
 ## Open Issues
 
-Tidak ada issue open saat ini.
+| ID | Issue | Dampak | Ditemukan | Rencana |
+|----|-------|--------|-----------|---------|
+| I-005 | `APIKeyMiddleware` didaftarkan setelah `CORSMiddleware` (posisi paling luar), sehingga respons 401 tidak membawa header CORS | Saat `MSF_API_KEY` aktif, browser melihat error CORS alih-alih 401. Belum berdampak karena `MSF_API_KEY` kosong di production | 2026-10-19 | Perbaiki urutan middleware di Batch 6 (T-027) |
 
 ---
 

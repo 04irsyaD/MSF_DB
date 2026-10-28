@@ -1,0 +1,52 @@
+[
+  {
+    "id": "mysql-active-process",
+    "title": "Active Processlist",
+    "description": "Show all active running connections and queries. Helps spot blocking or slow queries currently running.",
+    "engine": "mysql",
+    "category": "monitoring",
+    "risk_level": "read-only",
+    "sql": "SELECT ID, USER, HOST, DB, COMMAND, TIME, STATE, INFO\nFROM information_schema.processlist\nWHERE COMMAND != 'Sleep'\n  AND INFO IS NOT NULL\nORDER BY TIME DESC;",
+    "tags": ["active", "connections", "process", "monitoring"]
+  },
+  {
+    "id": "mysql-db-size",
+    "title": "Database Sizes",
+    "description": "Calculate total size of all databases on the server, detailing data size, index size, and total size in MB.",
+    "engine": "mysql",
+    "category": "performance",
+    "risk_level": "read-only",
+    "sql": "SELECT table_schema AS database_name,\n       ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS total_size_mb,\n       ROUND(SUM(data_length) / 1024 / 1024, 2) AS data_size_mb,\n       ROUND(SUM(index_length) / 1024 / 1024, 2) AS index_size_mb\nFROM information_schema.tables\nGROUP BY table_schema\nORDER BY total_size_mb DESC;",
+    "tags": ["size", "database", "disk"]
+  },
+  {
+    "id": "mysql-table-size",
+    "title": "Table Size Breakdown",
+    "description": "Show total size, row count, and average row length for all tables in a specific database.",
+    "engine": "mysql",
+    "category": "performance",
+    "risk_level": "read-only",
+    "sql": "SELECT table_name,\n       table_rows AS row_count,\n       ROUND((data_length + index_length) / 1024 / 1024, 2) AS total_size_mb,\n       ROUND(data_length / 1024 / 1024, 2) AS data_size_mb,\n       ROUND(index_length / 1024 / 1024, 2) AS index_size_mb\nFROM information_schema.tables\nWHERE table_schema = DATABASE()\nORDER BY total_size_mb DESC\nLIMIT 20;",
+    "tags": ["size", "table", "rows"]
+  },
+  {
+    "id": "mysql-find-no-pk",
+    "title": "Tables Without Primary Key",
+    "description": "List all tables in the current database that lack a primary key, which can cause performance issues (especially in replication).",
+    "engine": "mysql",
+    "category": "maintenance",
+    "risk_level": "read-only",
+    "sql": "SELECT tab.table_schema, tab.table_name\nFROM information_schema.tables tab\nLEFT JOIN information_schema.table_constraints con\n  ON tab.table_schema = con.table_schema\n  AND tab.table_name = con.table_name\n  AND con.constraint_type = 'PRIMARY KEY'\nWHERE con.constraint_name IS NULL\n  AND tab.table_schema = DATABASE()\n  AND tab.table_type = 'BASE TABLE';",
+    "tags": ["maintenance", "primary-key", "best-practice"]
+  },
+  {
+    "id": "mysql-innodb-locks",
+    "title": "InnoDB Lock Waits",
+    "description": "Show which transactions are blocking which, along with the query details. Useful for debugging lock timeouts.",
+    "engine": "mysql",
+    "category": "monitoring",
+    "risk_level": "read-only",
+    "sql": "SELECT \n  r.trx_id waiting_trx_id,\n  r.trx_mysql_thread_id waiting_thread,\n  r.trx_query waiting_query,\n  b.trx_id blocking_trx_id,\n  b.trx_mysql_thread_id blocking_thread,\n  b.trx_query blocking_query\nFROM sys.innodb_lock_waits w\nINNER JOIN information_schema.innodb_trx b\n  ON b.trx_id = w.blocking_trx_id\nINNER JOIN information_schema.innodb_trx r\n  ON r.trx_id = w.requesting_trx_id;",
+    "tags": ["lock", "blocking", "innodb", "monitoring"]
+  }
+]

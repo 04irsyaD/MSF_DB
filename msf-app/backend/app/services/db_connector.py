@@ -5,9 +5,8 @@ Support: PostgreSQL, MySQL, SQLite (MVP). SQL Server & MongoDB di v2.1.
 
 from typing import List, Optional
 import re
-from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text, inspect
-from sqlalchemy.exc import OperationalError, SQLAlchemyError
+from sqlalchemy.engine import Engine
 import structlog
 
 from app.models.schemas import (
@@ -16,17 +15,13 @@ from app.models.schemas import (
     ViewMetadata, FunctionMetadata, DBMetadataResponse,
     DBTestConnectionResponse,
 )
+from app.services.db_url_guard import (
+    ConnectionNotAllowed,
+    categorize_connection_error,
+    validate_connection,
+)
 
 logger = structlog.get_logger()
-
-# Default ports per engine
-DEFAULT_PORTS = {
-    DBEngine.POSTGRESQL: 5432,
-    DBEngine.MYSQL: 3306,
-    DBEngine.SQLITE: None,
-    DBEngine.SQLSERVER: 1433,
-    DBEngine.MONGODB: 27017,
-}
 
 
 class DBConnector:
@@ -35,38 +30,10 @@ class DBConnector:
     """
 
     @staticmethod
-    def build_connection_url(conn: DBConnection) -> str:
-        """Buat SQLAlchemy connection URL dari DBConnection model"""
-        if conn.connection_string:
-            return conn.connection_string
-
-        engine = conn.engine
-        port = conn.port or DEFAULT_PORTS.get(engine)
-        username_enc = quote_plus(conn.username) if conn.username else ""
-        password_enc = quote_plus(conn.password) if conn.password else ""
-
-        if engine == DBEngine.POSTGRESQL or engine == "postgresql":
-            return (
-                f"postgresql+psycopg2://{username_enc}:{password_enc}"
-                f"@{conn.host}:{port}/{conn.database}"
-            )
-        elif engine == DBEngine.MYSQL or engine == "mysql":
-            return (
-                f"mysql+pymysql://{username_enc}:{password_enc}"
-                f"@{conn.host}:{port}/{conn.database}"
-                f"?charset=utf8mb4"
-            )
-        elif engine == DBEngine.SQLITE or engine == "sqlite":
-            # Untuk SQLite, database adalah path file
-            return f"sqlite:///{conn.database}"
-        elif engine == DBEngine.SQLSERVER or engine == "sqlserver":
-            return (
-                f"mssql+pyodbc://{username_enc}:{password_enc}"
-                f"@{conn.host}:{port}/{conn.database}"
-                f"?driver=ODBC+Driver+17+for+SQL+Server"
-            )
-        else:
-            raise ValueError(f"Engine tidak didukung: {engine}")
+    def _create_engine(conn: DBConnection) -> Engine:
+        """Buat SQLAlchemy engine lewat guard anti-SSRF (raise ConnectionNotAllowed)."""
+        guarded = validate_connection(conn)
+        return create_engine(guarded.url, connect_args=guarded.connect_args)
 
     @classmethod
     async def test_connection(cls, conn: DBConnection) -> DBTestConnectionResponse:
@@ -78,15 +45,7 @@ class DBConnector:
     def test_connection_sync(cls, conn: DBConnection) -> DBTestConnectionResponse:
         """Test apakah koneksi ke database berhasil (blocking sync)"""
         try:
-            url = cls.build_connection_url(conn)
-            connect_args = {}
-            if conn.engine == DBEngine.POSTGRESQL or conn.engine == "postgresql":
-                connect_args = {"connect_timeout": 10}
-            elif conn.engine == DBEngine.MYSQL or conn.engine == "mysql":
-                connect_args = {"connect_timeout": 10}
-            elif conn.engine == DBEngine.SQLSERVER or conn.engine == "sqlserver":
-                connect_args = {"timeout": 10}
-            engine = create_engine(url, connect_args=connect_args)
+            engine = cls._create_engine(conn)
 
             with engine.connect() as connection:
                 # Cek versi server
@@ -131,22 +90,22 @@ class DBConnector:
                 tables_by_schema=tables_by_schema,
             )
 
-        except OperationalError as e:
-            cleaned_err = cls._clean_error(str(e))
-            logger.error("DB connection failed", error=cleaned_err)
-            return DBTestConnectionResponse(
-                success=False,
-                message=f"Gagal konek: {cleaned_err}",
-                engine=conn.engine,
-            )
+        except ConnectionNotAllowed as e:
+            logger.warning("DB connection rejected by guard", error_code=e.code)
+            return cls._failed_response(conn, e)
         except Exception as e:
-            cleaned_err = cls._clean_error(str(e))
-            logger.error("Unexpected DB error", error=cleaned_err)
-            return DBTestConnectionResponse(
-                success=False,
-                message=f"Error: {cleaned_err}",
-                engine=conn.engine,
-            )
+            # Detail mentah hanya ke log; user menerima kategori umum.
+            logger.error("DB connection failed", error=cls._clean_error(str(e)))
+            return cls._failed_response(conn, categorize_connection_error(str(e)))
+
+    @staticmethod
+    def _failed_response(conn: DBConnection, err: ConnectionNotAllowed) -> DBTestConnectionResponse:
+        return DBTestConnectionResponse(
+            success=False,
+            message=err.message,
+            error_code=err.code,
+            engine=conn.engine,
+        )
 
     @classmethod
     def _filter_system_schemas(cls, schemas: List[str], engine: str) -> List[str]:
@@ -200,11 +159,10 @@ class DBConnector:
         include_functions: bool = False,
     ) -> DBMetadataResponse:
         """Ambil metadata lengkap dari database (blocking sync)"""
-        url = cls.build_connection_url(conn)
         schema = schema_filter or conn.schema_name or "public"
         db_name = conn.database or "main"
 
-        db_engine = create_engine(url)
+        db_engine = cls._create_engine(conn)
         inspector = inspect(db_engine)
 
         try:

@@ -1,0 +1,303 @@
+{
+  "shortcuts": [],
+  "commands": [
+    {
+      "id": "cmd-l2-systemctl-status",
+      "level": "2",
+      "category": "service",
+      "title": "Cek status sebuah layanan",
+      "description": "Melihat apakah layanan (service) sedang berjalan, beserta log singkat terakhir.",
+      "command": "systemctl status nginx",
+      "explain": [
+        { "part": "systemctl", "meaning": "pengelola layanan systemd" },
+        { "part": "status", "meaning": "tampilkan kondisi layanan" },
+        { "part": "nginx", "meaning": "nama layanan; ganti sesuai kebutuhan" }
+      ],
+      "risk": "low",
+      "tags": ["service"]
+    },
+    {
+      "id": "cmd-l2-systemctl-restart",
+      "level": "2",
+      "category": "service",
+      "title": "Restart layanan",
+      "description": "Menghidupkan ulang layanan. Koneksi aktif akan terputus sesaat.",
+      "command": "sudo systemctl restart nginx",
+      "note": "Gunakan reload (bukan restart) bila layanan mendukung, agar tidak memutus koneksi.",
+      "risk": "medium",
+      "tags": ["service"]
+    },
+    {
+      "id": "cmd-l2-systemctl-enable",
+      "level": "2",
+      "category": "service",
+      "title": "Aktifkan layanan agar jalan saat boot",
+      "description": "Mengatur layanan supaya otomatis dijalankan setiap server menyala.",
+      "command": "sudo systemctl enable --now postgresql",
+      "explain": [
+        { "part": "enable", "meaning": "aktifkan otomatis saat boot" },
+        { "part": "--now", "meaning": "sekalian jalankan sekarang juga" }
+      ],
+      "risk": "low",
+      "tags": ["service"]
+    },
+    {
+      "id": "cmd-l2-journalctl",
+      "level": "2",
+      "category": "log",
+      "title": "Lihat log sebuah layanan",
+      "description": "Menampilkan log dari satu layanan melalui journald systemd.",
+      "command": "journalctl -u nginx -n 100",
+      "explain": [
+        { "part": "-u nginx", "meaning": "filter log milik unit/layanan nginx" },
+        { "part": "-n 100", "meaning": "tampilkan 100 baris terakhir" }
+      ],
+      "risk": "low",
+      "tags": ["log"]
+    },
+    {
+      "id": "cmd-l2-journalctl-follow",
+      "level": "2",
+      "category": "log",
+      "title": "Ikuti log layanan secara real-time",
+      "description": "Menampilkan log layanan yang terus bertambah, mirip tail -f.",
+      "command": "journalctl -u nginx -f",
+      "explain": [{ "part": "-f", "meaning": "follow, tampilkan baris baru terus (Ctrl+C untuk berhenti)" }],
+      "risk": "low",
+      "tags": ["log"]
+    },
+    {
+      "id": "cmd-l2-df",
+      "level": "2",
+      "category": "disk",
+      "title": "Lihat sisa kapasitas disk",
+      "description": "Menampilkan pemakaian dan sisa ruang tiap partisi dalam ukuran mudah dibaca.",
+      "command": "df -h",
+      "explain": [{ "part": "-h", "meaning": "human-readable, ukuran dalam GB/MB" }],
+      "risk": "low",
+      "tags": ["disk"]
+    },
+    {
+      "id": "cmd-l2-du",
+      "level": "2",
+      "category": "disk",
+      "title": "Lihat ukuran sebuah folder",
+      "description": "Menghitung total ukuran yang dipakai sebuah folder.",
+      "command": "du -sh /var/log",
+      "explain": [
+        { "part": "-s", "meaning": "summary, total saja (bukan rincian per file)" },
+        { "part": "-h", "meaning": "ukuran mudah dibaca" }
+      ],
+      "risk": "low",
+      "tags": ["disk"]
+    },
+    {
+      "id": "cmd-l2-free",
+      "level": "2",
+      "category": "disk",
+      "title": "Lihat penggunaan RAM",
+      "description": "Menampilkan total, terpakai, dan sisa memori (RAM) dan swap.",
+      "command": "free -h",
+      "risk": "low",
+      "tags": ["memori"]
+    },
+    {
+      "id": "cmd-l2-top",
+      "level": "2",
+      "category": "proses",
+      "title": "Pantau proses dan beban sistem",
+      "description": "Menampilkan proses yang paling banyak memakai CPU/RAM secara real-time.",
+      "command": "top",
+      "note": "Tekan q untuk keluar. Kalau tersedia, htop lebih nyaman dibaca.",
+      "risk": "low",
+      "tags": ["proses"]
+    },
+    {
+      "id": "cmd-l2-ps",
+      "level": "2",
+      "category": "proses",
+      "title": "Lihat daftar proses yang berjalan",
+      "description": "Menampilkan seluruh proses beserta PID, pemakaian CPU dan memori.",
+      "command": "ps aux",
+      "note": "Gabungkan dengan grep, mis. ps aux | grep postgres.",
+      "risk": "low",
+      "tags": ["proses"]
+    },
+    {
+      "id": "cmd-l2-kill",
+      "level": "2",
+      "category": "proses",
+      "title": "Hentikan proses berdasarkan PID",
+      "description": "Mengirim sinyal berhenti ke sebuah proses. -9 memaksa berhenti.",
+      "command": "sudo kill -9 1234",
+      "explain": [
+        { "part": "kill", "meaning": "kirim sinyal ke proses" },
+        { "part": "-9", "meaning": "SIGKILL, paksa berhenti (tidak sempat cleanup)" },
+        { "part": "1234", "meaning": "PID proses; cek dulu dengan ps aux" }
+      ],
+      "note": "Pastikan PID benar. Mematikan proses yang salah bisa mengganggu layanan lain.",
+      "risk": "medium",
+      "tags": ["proses"]
+    },
+    {
+      "id": "cmd-l2-chmod",
+      "level": "2",
+      "category": "izin",
+      "title": "Ubah izin akses file",
+      "description": "Mengatur siapa boleh baca/tulis/eksekusi sebuah file atau folder.",
+      "command": "chmod 640 /etc/app/app.conf",
+      "explain": [
+        { "part": "6 (owner)", "meaning": "baca + tulis" },
+        { "part": "4 (group)", "meaning": "baca saja" },
+        { "part": "0 (other)", "meaning": "tidak ada akses" }
+      ],
+      "note": "Hati-hati pada file sistem. Izin terlalu longgar (mis. 777) berbahaya.",
+      "risk": "medium",
+      "tags": ["izin"]
+    },
+    {
+      "id": "cmd-l2-chown",
+      "level": "2",
+      "category": "izin",
+      "title": "Ubah pemilik file/folder",
+      "description": "Mengubah user dan grup pemilik file, sering dipakai untuk folder web.",
+      "command": "sudo chown -R www-data:www-data /var/www/app",
+      "explain": [
+        { "part": "-R", "meaning": "rekursif, seluruh isi folder" },
+        { "part": "www-data:www-data", "meaning": "user:grup pemilik baru" }
+      ],
+      "note": "Di RHEL/Rocky, user web biasanya nginx atau apache, bukan www-data.",
+      "risk": "medium",
+      "tags": ["izin"]
+    },
+    {
+      "id": "cmd-l2-adduser",
+      "level": "2",
+      "category": "user",
+      "title": "Buat user baru",
+      "description": "Menambahkan user Linux baru beserta home folder dan password.",
+      "command": "sudo adduser budi",
+      "variants": {
+        "ubuntu": "sudo adduser budi",
+        "rhel": "sudo useradd -m budi && sudo passwd budi"
+      },
+      "note": "Di Ubuntu/Debian adduser interaktif (langsung tanya password). Di RHEL pakai useradd lalu passwd.",
+      "risk": "medium",
+      "tags": ["user"]
+    },
+    {
+      "id": "cmd-l2-usermod-sudo",
+      "level": "2",
+      "category": "user",
+      "title": "Beri user hak sudo (admin)",
+      "description": "Menambahkan user ke grup admin agar bisa menjalankan sudo.",
+      "command": "sudo usermod -aG sudo budi",
+      "variants": {
+        "ubuntu": "sudo usermod -aG sudo budi",
+        "rhel": "sudo usermod -aG wheel budi"
+      },
+      "explain": [
+        { "part": "-aG", "meaning": "append ke grup tambahan (tanpa menghapus grup lain)" },
+        { "part": "sudo / wheel", "meaning": "grup admin: sudo di Ubuntu, wheel di RHEL" }
+      ],
+      "note": "User harus logout-login lagi agar keanggotaan grup berlaku.",
+      "risk": "medium",
+      "tags": ["user", "akses"]
+    },
+    {
+      "id": "cmd-l2-ip-addr",
+      "level": "2",
+      "category": "jaringan",
+      "title": "Lihat alamat IP server",
+      "description": "Menampilkan IP address di setiap network interface.",
+      "command": "ip addr",
+      "note": "Singkatnya: ip -brief addr untuk tampilan ringkas.",
+      "risk": "low",
+      "tags": ["jaringan"]
+    },
+    {
+      "id": "cmd-l2-ss",
+      "level": "2",
+      "category": "jaringan",
+      "title": "Lihat port yang sedang listening",
+      "description": "Menampilkan port TCP/UDP yang terbuka dan proses yang memakainya.",
+      "command": "sudo ss -tulpn",
+      "explain": [
+        { "part": "-t", "meaning": "TCP" },
+        { "part": "-u", "meaning": "UDP" },
+        { "part": "-l", "meaning": "hanya yang listening" },
+        { "part": "-p", "meaning": "tampilkan proses pemilik port" },
+        { "part": "-n", "meaning": "tampilkan nomor port (tanpa resolve nama)" }
+      ],
+      "risk": "low",
+      "tags": ["jaringan", "port"]
+    },
+    {
+      "id": "cmd-l2-ping",
+      "level": "2",
+      "category": "jaringan",
+      "title": "Tes koneksi ke sebuah host",
+      "description": "Mengecek apakah server bisa menjangkau host lain di jaringan/internet.",
+      "command": "ping -c 4 8.8.8.8",
+      "explain": [{ "part": "-c 4", "meaning": "kirim 4 paket lalu berhenti" }],
+      "risk": "low",
+      "tags": ["jaringan"]
+    },
+    {
+      "id": "cmd-l2-curl",
+      "level": "2",
+      "category": "jaringan",
+      "title": "Tes endpoint HTTP",
+      "description": "Mengambil respons dari sebuah URL, berguna mengecek service web/API.",
+      "command": "curl -I http://localhost:8000/health",
+      "explain": [{ "part": "-I", "meaning": "ambil header saja (HEAD), tidak seluruh body" }],
+      "risk": "low",
+      "tags": ["jaringan", "http"]
+    },
+    {
+      "id": "cmd-l2-firewall-status",
+      "level": "2",
+      "category": "firewall",
+      "title": "Lihat status firewall",
+      "description": "Menampilkan aturan firewall yang sedang aktif.",
+      "command": "sudo ufw status verbose",
+      "variants": {
+        "ubuntu": "sudo ufw status verbose",
+        "rhel": "sudo firewall-cmd --list-all"
+      },
+      "note": "Ubuntu memakai ufw, RHEL/Rocky memakai firewalld.",
+      "risk": "low",
+      "tags": ["firewall"]
+    },
+    {
+      "id": "cmd-l2-firewall-allow-db",
+      "level": "2",
+      "category": "firewall",
+      "title": "Buka port database di firewall",
+      "description": "Mengizinkan koneksi masuk ke port database (contoh PostgreSQL 5432).",
+      "command": "sudo ufw allow 5432/tcp",
+      "variants": {
+        "ubuntu": "sudo ufw allow 5432/tcp",
+        "rhel": "sudo firewall-cmd --add-port=5432/tcp --permanent && sudo firewall-cmd --reload"
+      },
+      "note": "Jangan membuka port DB ke publik. Batasi ke IP aplikasi, mis. ufw allow from 10.0.0.5 to any port 5432.",
+      "risk": "medium",
+      "tags": ["firewall", "database"]
+    },
+    {
+      "id": "cmd-l2-pkg-install",
+      "level": "2",
+      "category": "service",
+      "title": "Install paket software",
+      "description": "Memasang paket baru lewat package manager distro.",
+      "command": "sudo apt install -y nginx",
+      "variants": {
+        "ubuntu": "sudo apt update && sudo apt install -y nginx",
+        "rhel": "sudo dnf install -y nginx"
+      },
+      "note": "Ubuntu/Debian pakai apt, RHEL/Rocky pakai dnf.",
+      "risk": "medium",
+      "tags": ["paket"]
+    }
+  ]
+}

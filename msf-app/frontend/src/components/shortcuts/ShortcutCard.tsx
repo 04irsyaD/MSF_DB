@@ -80,10 +80,10 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
               className={cn(
                 "px-1.5 py-0.5 rounded-[2px] text-[8px] font-mono font-bold uppercase tracking-wider border",
                 shortcut.engine === "postgresql"
-                  ? "bg-purple-50 text-purple-700 border-purple-200"
+                  ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
                   : shortcut.engine === "mysql"
-                  ? "bg-sky-50 text-sky-700 border-sky-200"
-                  : "bg-gray-50 text-gray-600 border-gray-200"
+                  ? "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
+                  : "bg-muted text-muted-foreground border-border"
               )}
             >
               {shortcut.engine}
@@ -94,7 +94,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
             </span>
           </div>
 
-          <h4 className="text-sm font-bold text-gray-900 leading-tight">
+          <h4 className="text-sm font-bold text-foreground leading-tight">
             {shortcut.title}
           </h4>
           
@@ -107,7 +107,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
             {shortcut.tags.map((t) => (
               <span
                 key={t}
-                className="text-[9px] font-mono font-bold text-muted-foreground/60 bg-gray-50 border border-border/60 px-1.5 py-0.5 rounded-[2px]"
+                className="text-[9px] font-mono font-bold text-muted-foreground/80 bg-muted/60 border border-border/60 px-1.5 py-0.5 rounded-[2px]"
               >
                 #{t.toUpperCase()}
               </span>
@@ -116,7 +116,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
         </div>
 
         {/* SQL Inline Preview (Dense, Mono snippet) */}
-        <div className="hidden lg:block w-80 shrink-0 font-mono text-[10px] text-gray-400 bg-gray-50 border border-border/60 rounded-[2px] px-2.5 py-2 truncate select-none">
+        <div className="hidden lg:block w-80 shrink-0 font-mono text-[10px] text-muted-foreground bg-muted/50 border border-border/60 rounded-[2px] px-2.5 py-2 truncate select-none">
           {shortcut.sql.replace(/\s+/g, " ")}
         </div>
 
@@ -134,7 +134,7 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
 
           <button
             onClick={handleCopy}
-            className="p-1.5 rounded-[4px] bg-gray-50 hover:bg-gray-100 border border-border hover:border-accent/40 text-muted-foreground hover:text-gray-900 transition-colors duration-150"
+            className="p-1.5 rounded-[4px] bg-muted hover:bg-muted/80 border border-border hover:border-accent/40 text-muted-foreground hover:text-foreground transition-colors duration-150"
             title="Copy SQL Query"
           >
             {copied ? (
@@ -158,13 +158,13 @@ export default function ShortcutCard({ shortcut }: ShortcutCardProps) {
       {expanded && (
         <div
           onClick={(e) => e.stopPropagation()} // Prevent collapse when clicking code box
-          className="border-t border-border bg-gray-50/50 p-4 space-y-3"
+          className="border-t border-border bg-muted/30 p-4 space-y-3"
         >
           <div className="flex justify-between items-center text-[9px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
             <span>SQL SCRIPT PREVIEW</span>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] bg-white hover:bg-gray-50 border border-border hover:border-accent/40 text-gray-700 transition-colors duration-150 font-mono font-bold text-[9px]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] bg-card hover:bg-muted border border-border hover:border-accent/40 text-foreground transition-colors duration-150 font-mono font-bold text-[9px]"
             >
               {copied ? (
                 <>

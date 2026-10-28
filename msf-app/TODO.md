@@ -36,10 +36,15 @@
 - [ ] Implementasi driver koneksi dan parser metadata untuk **MongoDB** (menggunakan `pymongo`)
 
 ### User Experience & UI (v2.2)
-- [ ] Tambahkan toggle Dark/Light Mode di Sidebar menggunakan `next-themes`
-- [ ] Hasilkan diagram ERD (Entity Relationship Diagram) visual secara otomatis dari skema DDL menggunakan `mermaid.js`
-- [ ] Simpan riwayat dokumentasi terakhir di `localStorage` browser pengguna agar tidak hilang saat refresh
-- [ ] Buat agar riwayat status pekerjaan tersimpan secara persistent di database lokal (SQLite) alih-alih hanya di memori server
+- [x] Tambahkan toggle Dark/Light Mode di Sidebar menggunakan `next-themes` *(selesai: 2026-10-01, T-012)*
+- [x] Hasilkan diagram ERD (Entity Relationship Diagram) visual secara otomatis dari skema DDL menggunakan `mermaid.js` *(selesai: 2026-10-02, T-016 — ekspor kode Mermaid erDiagram, kompatibel GitHub/Notion/GitLab)*
+- [x] Simpan riwayat dokumentasi terakhir di `localStorage` browser pengguna agar tidak hilang saat refresh *(sudah ada di useGenerate.ts, dilengkapi tombol Hapus Semua: 2026-10-02, T-014)*
+- [x] Buat agar riwayat status pekerjaan tersimpan secara persistent di database lokal (SQLite) alih-alih hanya di memori server *(selesai: 2026-10-02, T-015)*
+
+### Code Quality & Technical Debt
+- [x] Refactor `Header.tsx` `getPageInfo()` dari if-else chain ke `ROUTE_MAP` object pattern (scalability) *(selesai: 2026-10-02, TD-005)*
+- [ ] Migrasi hardcoded Tailwind color utilities (`bg-white`, `text-gray-900`) ke semantic tokens (`bg-card`, `text-foreground`) di seluruh komponen agar dark mode tidak butuh CSS override fallback
+- [x] Fix `pytest_asyncio` deprecated `event_loop` fixture di `conftest.py` → hapus custom fixture, `asyncio_mode = auto` di `pytest.ini` sudah cukup *(selesai: 2026-10-02, TD-004)*
 
 ---
 

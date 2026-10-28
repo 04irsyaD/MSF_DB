@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "../styles/globals.css";
 import AppLayout from "@/components/layout/AppLayout";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MSF DB — AI Database Documentation",
   description:
-    "Generate dokumentasi database secara otomatis menggunakan AI lokal. Support PostgreSQL, MySQL, SQLite, dan SQL Server.",
+    "Turn a SQL schema or a live database connection into complete documentation with local AI. Supports PostgreSQL, MySQL, SQLite, and SQL Server.",
 };
 
 export default function RootLayout({
@@ -26,14 +27,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background text-foreground antialiased`}
       >
-        <AppLayout>{children}</AppLayout>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <AppLayout>{children}</AppLayout>
 
-        {/* Sonner Toast Notifications */}
-        <Toaster position="bottom-right" theme="light" closeButton richColors />
+          {/* Sonner Toast Notifications */}
+          <Toaster position="bottom-right" closeButton richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -60,7 +60,7 @@ export default function ShortcutFilter({ onFilterChange, engines, categories }: 
   ];
 
   return (
-    <div className="bg-white border border-border p-5 rounded-2xl shadow-sm space-y-4">
+    <div className="bg-card border border-border p-5 rounded-2xl shadow-sm space-y-4">
       {/* Search & Reset */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -70,13 +70,13 @@ export default function ShortcutFilter({ onFilterChange, engines, categories }: 
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="CARI SHORTCUT SCRIPTS..."
-            className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 pl-7 pr-4 text-xs text-gray-900 placeholder-muted-foreground/60 focus:outline-none transition-colors duration-150 font-mono"
+            className="w-full bg-muted/40 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 pl-7 pr-4 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none transition-colors duration-150 font-mono"
           />
         </div>
 
         <button
           onClick={handleReset}
-          className="px-4 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-border hover:border-accent/40 text-muted-foreground hover:text-gray-900 transition-colors duration-150 text-xs font-mono font-bold flex items-center justify-center gap-2 uppercase"
+          className="px-4 py-2 rounded-xl bg-card hover:bg-muted border border-border hover:border-accent/40 text-muted-foreground hover:text-foreground transition-colors duration-150 text-xs font-mono font-bold flex items-center justify-center gap-2 uppercase cursor-pointer"
         >
           <RefreshCw className="h-4 w-4" />
           <span>RESET FILTER</span>
@@ -93,11 +93,11 @@ export default function ShortcutFilter({ onFilterChange, engines, categories }: 
           <select
             value={engine}
             onChange={(e) => setEngine(e.target.value)}
-            className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+            className="w-full bg-card border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-foreground focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
           >
-            <option value="" className="bg-white text-gray-900">ALL ENGINES</option>
+            <option value="" className="bg-card text-foreground">ALL ENGINES</option>
             {engines.map((eng) => (
-              <option key={eng} value={eng} className="bg-white text-gray-900">
+              <option key={eng} value={eng} className="bg-card text-foreground">
                 {eng.toUpperCase()}
               </option>
             ))}
@@ -112,11 +112,11 @@ export default function ShortcutFilter({ onFilterChange, engines, categories }: 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+            className="w-full bg-card border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-foreground focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
           >
-            <option value="" className="bg-white text-gray-900">ALL CATEGORIES</option>
+            <option value="" className="bg-card text-foreground">ALL CATEGORIES</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat} className="bg-white text-gray-900">
+              <option key={cat} value={cat} className="bg-card text-foreground">
                 {cat.toUpperCase()}
               </option>
             ))}
@@ -131,10 +131,10 @@ export default function ShortcutFilter({ onFilterChange, engines, categories }: 
           <select
             value={riskLevel}
             onChange={(e) => setRiskLevel(e.target.value)}
-            className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+            className="w-full bg-card border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-foreground focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
           >
             {riskLevels.map((lvl) => (
-              <option key={lvl.value} value={lvl.value} className="bg-white text-gray-900">
+              <option key={lvl.value} value={lvl.value} className="bg-card text-foreground">
                 {lvl.label.toUpperCase()}
               </option>
             ))}

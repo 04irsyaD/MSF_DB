@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { GeneratorSettings, AIProvider, OutputLanguage, DetailLevel, ExportFormat } from "@/lib/types";
 import { useAIModels } from "@/hooks/useOllamaModels";
-import { Sparkles, Globe, FileText, BarChart, Settings, Loader2 } from "lucide-react";
+import { Sparkles, FileText, Loader2, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GeneratePanelProps {
@@ -12,6 +12,9 @@ interface GeneratePanelProps {
   onSubmit: () => void;
   disabled: boolean;
   loading: boolean;
+  trackJob?: (code: string) => Promise<any>;
+  inputCode?: string;
+  onInputCodeChange?: (code: string) => void;
 }
 
 export default function GeneratePanel({
@@ -20,8 +23,12 @@ export default function GeneratePanel({
   onSubmit,
   disabled,
   loading,
+  trackJob,
+  inputCode = "",
+  onInputCodeChange,
 }: GeneratePanelProps) {
   const [provider, setProvider] = useState<AIProvider>(settings.ai_provider);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // Load models for current provider
   const { models, isAvailable, isLoading: modelsLoading } = useAIModels(provider);
@@ -95,10 +102,11 @@ export default function GeneratePanel({
   ];
 
   return (
-    <div className="space-y-6 bg-white border border-border p-6 rounded-2xl flex flex-col h-full justify-between shadow-sm">
-      <div className="space-y-5">
+    <div className="flex flex-col h-full bg-white border border-border rounded-2xl shadow-sm overflow-hidden">
+      {/* Scrollable config area */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-4">
         <div>
-          <h3 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest mb-1">
+          <h3 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest mb-0.5">
             AI & DOCUMENTATION CONFIG
           </h3>
           <p className="text-xs text-muted-foreground leading-normal">
@@ -106,50 +114,7 @@ export default function GeneratePanel({
           </p>
         </div>
 
-        {/* Project Metadata */}
-        <div className="grid grid-cols-2 gap-3.5">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              PROJECT NAME
-            </label>
-            <input
-              type="text"
-              value={settings.project_name}
-              onChange={(e) => handleFieldChange("project_name", e.target.value)}
-              placeholder="E-Commerce DB"
-              className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              AUTHOR
-            </label>
-            <input
-              type="text"
-              value={settings.author}
-              onChange={(e) => handleFieldChange("author", e.target.value)}
-              placeholder="Developer"
-              className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
-            />
-          </div>
-        </div>
-
-        {/* Business Context */}
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-            BUSINESS CONTEXT & DESCRIPTION
-          </label>
-          <textarea
-            value={settings.business_context}
-            onChange={(e) => handleFieldChange("business_context", e.target.value)}
-            rows={2}
-            placeholder="Sistem e-commerce B2B dengan fitur multi-vendor, payment gateway, dan inventory management..."
-            className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono resize-none leading-relaxed"
-          />
-        </div>
-
-        {/* Language & Detail */}
+        {/* Language & Format */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
@@ -198,103 +163,194 @@ export default function GeneratePanel({
           </div>
         </div>
 
-        {/* Detail Level */}
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-            DETAIL LEVEL
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {levels.map((l) => (
-              <button
-                key={l.value}
-                type="button"
-                onClick={() => handleFieldChange("detail_level", l.value)}
-                className={cn(
-                  "p-2.5 rounded-xl border text-left flex flex-col transition-colors duration-150",
-                  settings.detail_level === l.value
-                    ? "bg-emerald-50/50 border-accent text-accent"
-                    : "bg-gray-50 border-border hover:border-accent/40 text-muted-foreground"
-                )}
-              >
-                <span className={cn(
-                  "font-mono font-bold text-[10px] leading-none",
-                  settings.detail_level === l.value ? "text-accent" : "text-gray-900"
-                )}>
-                  {l.label.toUpperCase()}
-                </span>
-                <span className="text-[9px] text-muted-foreground mt-1 leading-normal font-medium">
-                  {l.desc}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Provider & Model */}
-        <div className="border-t border-border pt-4 grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              AI PROVIDER
-            </label>
-            <select
-              value={provider}
-              onChange={(e) => {
-                const newProvider = e.target.value as AIProvider;
-                setProvider(newProvider);
-                onChange({
-                  ...settings,
-                  ai_provider: newProvider,
-                });
-              }}
-              className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
-            >
-              {providers.map((p) => (
-                <option key={p.value} value={p.value} className="bg-white text-gray-900">
-                  {p.label.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
-              AI MODEL
-            </label>
-            {modelsLoading ? (
-              <div className="w-full bg-gray-50 border border-border rounded-xl py-2 px-3 text-xs text-muted-foreground flex items-center gap-2">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" />
-                <span className="font-mono">LOADING...</span>
-              </div>
-            ) : models.length > 0 ? (
-              <select
-                value={settings.model}
-                onChange={(e) => handleFieldChange("model", e.target.value)}
-                className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
-              >
-                {models.map((m) => (
-                  <option key={m.name} value={m.name} className="bg-white text-gray-900">
-                    {m.name.toUpperCase()} {m.size ? `(${m.size})` : ""}
-                  </option>
-                ))}
-              </select>
+        {/* Collapsible Advanced Options Section */}
+        <div className="border-t border-border/60 pt-3">
+          <button
+            type="button"
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="flex items-center justify-between w-full py-1.5 text-[10px] font-mono font-bold text-gray-500 hover:text-accent transition-colors uppercase tracking-wider"
+          >
+            <span>Opsi Lanjutan (Opsional)</span>
+            {isAdvancedOpen ? (
+              <ChevronUp className="h-3.5 w-3.5" />
             ) : (
-              <div className="w-full bg-red-50 border border-red-200 rounded-xl py-2 px-3 text-xs text-red-600 font-mono font-bold">
-                NO MODEL FOUND
-              </div>
+              <ChevronDown className="h-3.5 w-3.5" />
             )}
-          </div>
+          </button>
+
+          {isAdvancedOpen && (
+            <div className="space-y-4 pt-3 border-t border-dashed border-border/80 mt-2 animate-fade-in">
+              {/* Project Metadata */}
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    PROJECT NAME
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.project_name}
+                    onChange={(e) => handleFieldChange("project_name", e.target.value)}
+                    placeholder="E-Commerce DB"
+                    className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    AUTHOR
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.author}
+                    onChange={(e) => handleFieldChange("author", e.target.value)}
+                    placeholder="Developer"
+                    className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Business Context */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                  BUSINESS CONTEXT & DESCRIPTION
+                </label>
+                <textarea
+                  value={settings.business_context}
+                  onChange={(e) => handleFieldChange("business_context", e.target.value)}
+                  rows={2}
+                  placeholder="Sistem e-commerce B2B dengan fitur multi-vendor..."
+                  className="w-full bg-gray-50/50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* Detail Level */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                  DETAIL LEVEL
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {levels.map((l) => (
+                    <button
+                      key={l.value}
+                      type="button"
+                      onClick={() => handleFieldChange("detail_level", l.value)}
+                      className={cn(
+                        "p-2.5 rounded-xl border text-left flex flex-col transition-colors duration-150",
+                        settings.detail_level === l.value
+                          ? "bg-emerald-50/50 border-accent text-accent"
+                          : "bg-gray-50 border-border hover:border-accent/40 text-muted-foreground"
+                      )}
+                    >
+                      <span className={cn(
+                        "font-mono font-bold text-[10px] leading-none",
+                        settings.detail_level === l.value ? "text-accent" : "text-gray-900"
+                      )}>
+                        {l.label.toUpperCase()}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground mt-1 leading-normal font-medium">
+                        {l.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Provider & Model (Collapsible) */}
+              <div className="border-t border-border/50 pt-4 grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    AI PROVIDER
+                  </label>
+                  <select
+                    value={provider}
+                    onChange={(e) => {
+                      const newProvider = e.target.value as AIProvider;
+                      setProvider(newProvider);
+                      onChange({
+                        ...settings,
+                        ai_provider: newProvider,
+                      });
+                    }}
+                    className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+                  >
+                    {providers.map((p) => (
+                      <option key={p.value} value={p.value} className="bg-white text-gray-900">
+                        {p.label.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest block">
+                    AI MODEL
+                  </label>
+                  {modelsLoading ? (
+                    <div className="w-full bg-gray-50 border border-border rounded-xl py-2 px-3 text-xs text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" />
+                      <span className="font-mono">LOADING...</span>
+                    </div>
+                  ) : models.length > 0 ? (
+                    <select
+                      value={settings.model}
+                      onChange={(e) => handleFieldChange("model", e.target.value)}
+                      className="w-full bg-white border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-2 px-3 text-xs text-gray-900 focus:outline-none transition-colors duration-150 font-mono cursor-pointer font-bold"
+                    >
+                      {models.map((m) => (
+                        <option key={m.name} value={m.name} className="bg-white text-gray-900">
+                          {m.name.toUpperCase()} {m.size ? `(${m.size})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="w-full bg-red-50 border border-red-200 rounded-xl py-2 px-3 text-xs text-red-600 font-mono font-bold">
+                      NO MODEL FOUND
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Warning if Ollama is selected but offline */}
         {provider === "ollama" && !modelsLoading && models.length === 0 && (
           <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-[10.5px] leading-relaxed font-mono font-semibold">
-            ⚠️ OLLAMA LOKAL TIDAK TERDETEKSI ATAU TIDAK MEMILIKI MODEL YANG SIAP. SILAKAN JALANKAN OLLAMA DI SERVER LOKAL ANDA ATAU BERALIH KE PROVIDER API DEEPSEEK/OPENAI.
+            OLLAMA TIDAK TERDETEKSI. JALANKAN OLLAMA DI LOKAL ATAU GUNAKAN DEEPSEEK/OPENAI.
           </div>
         )}
       </div>
 
-      {/* Submit Generate Button */}
-      <div className="pt-4 border-t border-border mt-4">
+      {/* Sticky bottom: Job Tracker + Generate button */}
+      <div className="shrink-0 border-t border-border p-4 space-y-3 bg-white">
+        {/* Job Tracker */}
+        {trackJob && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="text-[10px] font-mono font-bold text-gray-700 uppercase tracking-widest">Lacak Job Aktif</span>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="MSF-A1B2C3D4..."
+                value={inputCode}
+                onChange={(e) => onInputCodeChange?.(e.target.value)}
+                className="flex-1 bg-gray-50 border-l-2 border-b border-t-0 border-r-0 border-border focus:border-l-accent focus:border-b-accent rounded-none py-1.5 px-3 text-xs text-gray-900 placeholder-muted-foreground/40 focus:outline-none transition-colors duration-150 font-mono tracking-wider uppercase"
+              />
+              <button
+                type="button"
+                onClick={() => trackJob(inputCode).then(() => onInputCodeChange?.(""))}
+                className="px-3 py-1.5 bg-gray-100 hover:bg-accent hover:text-white text-gray-600 text-xs font-bold rounded-xl transition-all shadow-sm uppercase shrink-0 font-mono flex items-center gap-1"
+              >
+                <Search className="h-3 w-3" />
+                <span>Lacak</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Generate Button */}
         <button
           type="button"
           disabled={disabled || loading || (provider === "ollama" && models.length === 0)}

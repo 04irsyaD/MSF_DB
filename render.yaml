@@ -1,0 +1,41 @@
+# ==============================================================
+# Render Blueprint — MSF DB Backend (FastAPI)
+# Panduan: msf-app/SESSION_NOTES.md (bagian "Rencana deploy backend")
+# ==============================================================
+services:
+  - type: web
+    name: msf-db-backend
+    runtime: docker
+    plan: free                 # WAJIB "free" supaya tidak ada biaya compute
+    region: singapore          # region terdekat ke Indonesia
+    branch: dev
+    dockerfilePath: ./msf-app/backend/Dockerfile
+    dockerContext: ./msf-app/backend
+    healthCheckPath: /health
+    # Hanya build ulang kalau kode backend berubah (hemat 500 build minutes)
+    buildFilter:
+      paths:
+        - msf-app/backend/**
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: OUTPUT_DIR            # SQLite job store + file DOCX/PDF (ephemeral di free plan)
+        value: /app/outputs
+      - key: LOG_FILE_PATH
+        value: /app/outputs/app.log
+      - key: SHORTCUTS_DIR
+        value: /app/shortcuts_data
+      - key: TEMPLATES_DIR
+        value: /app/templates
+      - key: TZ
+        value: Asia/Jakarta
+      - key: LOG_LEVEL
+        value: INFO
+      - key: MAX_CONCURRENT_JOBS   # RAM free plan cuma 512 MB
+        value: "1"
+      - key: CORS_ORIGINS          # isi di dashboard: https://msf-db.my.id,https://<project>.vercel.app
+        sync: false
+      - key: ADMIN_PASSCODE        # dibuat acak oleh Render; lihat nilainya di tab Environment
+        generateValue: true
+      - key: DEEPSEEK_API_KEY      # opsional; kosongkan kalau belum ada (fitur AI cloud mati)
+        sync: false

@@ -22,6 +22,17 @@ logger = structlog.get_logger()
 router = APIRouter(prefix="/api", tags=["Generate"])
 
 
+def _settings_log_fields(request) -> dict:
+    """Metadata request yang aman di-log (tanpa SQL, business context, atau kredensial)."""
+    return {
+        "ai_provider": request.ai_provider,
+        "model": request.model,
+        "language": request.language,
+        "output_format": request.output_format,
+        "has_business_context": bool(request.business_context),
+    }
+
+
 async def _run_generate_job(job, tables, settings: dict):
     """Task yang berjalan di background untuk generate dokumentasi"""
     try:
@@ -57,8 +68,9 @@ async def _run_generate_job(job, tables, settings: dict):
             
             from app.services.exporters.pdf_exporter import PdfExporter
             exporter = PdfExporter()
-            result_bytes = exporter.export(
-                markdown_content=markdown, 
+            result_bytes = await asyncio.to_thread(
+                exporter.export,
+                markdown_content=markdown,
                 project_name=settings["project_name"], 
                 author=settings.get("author")
             )
@@ -66,7 +78,8 @@ async def _run_generate_job(job, tables, settings: dict):
         else:
             logger.info("Export Engine", engine="docx_exporter")
             exporter = DocxExporter()
-            result_bytes = exporter.export(
+            result_bytes = await asyncio.to_thread(
+                exporter.export,
                 markdown_content=markdown,
                 project_name=settings["project_name"],
                 author=settings.get("author"),
@@ -94,7 +107,7 @@ async def parse_ddl_endpoint(request: ParseDDLRequest):
     Parse SQL DDL string dan kembalikan struktur TableMetadata.
     """
     try:
-        tables = SQLParser.parse(request.sql_content, dialect=request.dialect)
+        tables = await asyncio.to_thread(SQLParser.parse, request.sql_content, dialect=request.dialect)
         return tables
     except Exception as e:
         logger.error("Gagal parse DDL", error=str(e))
@@ -110,7 +123,11 @@ async def generate_from_ddl(
     Generate dokumentasi dari SQL DDL yang di-paste.
     Return job_id — gunakan GET /api/jobs/{job_id} untuk cek status.
     """
-    logger.info("Menerima request generate_from_ddl", payload=request.model_dump() if hasattr(request, 'model_dump') else request.dict())
+    logger.info(
+        "Menerima request generate_from_ddl",
+        sql_length=len(request.sql_content),
+        **_settings_log_fields(request),
+    )
     # Rate limiting: cek jumlah job aktif
     max_concurrent = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
     active_jobs = [j for j in job_queue.list_jobs() if j["status"] in ("queued", "processing")]
@@ -120,12 +137,12 @@ async def generate_from_ddl(
             detail=f"Terlalu banyak job aktif ({len(active_jobs)}/{max_concurrent}). Tunggu job sebelumnya selesai."
         )
     # Validasi SQL
-    validation = SQLParser.validate_sql(request.sql_content)
+    validation = await asyncio.to_thread(SQLParser.validate_sql, request.sql_content)
     if not validation["valid"]:
         raise HTTPException(status_code=400, detail=validation["message"])
 
     # Parse tables
-    tables = SQLParser.parse(request.sql_content)
+    tables = await asyncio.to_thread(SQLParser.parse, request.sql_content)
     
     max_tables = int(os.getenv("MAX_TABLES_PER_REQUEST", "50"))
     if len(tables) > max_tables:
@@ -166,7 +183,7 @@ async def generate_from_ddl(
         estimated_seconds=estimated,
         access_code=job.access_code,
     )
-    logger.info("Mengirim response generate_from_ddl", response=response.model_dump() if hasattr(response, 'model_dump') else response.dict())
+    logger.info("Mengirim response generate_from_ddl", job_id=response.job_id)
     return response
 
 
@@ -178,12 +195,12 @@ async def generate_from_db(
     """
     Generate dokumentasi dari koneksi database langsung.
     """
-    payload_dict = request.model_dump() if hasattr(request, 'model_dump') else request.dict()
-    if "connection" in payload_dict and isinstance(payload_dict["connection"], dict):
-        if "password" in payload_dict["connection"] and payload_dict["connection"]["password"]:
-            payload_dict["connection"] = payload_dict["connection"].copy()
-            payload_dict["connection"]["password"] = "***"
-    logger.info("Menerima request generate_from_db", payload=payload_dict)
+    logger.info(
+        "Menerima request generate_from_db",
+        db_engine=request.connection.engine,
+        table_filter_count=len(request.table_filter or []),
+        **_settings_log_fields(request),
+    )
     # Rate limiting: cek jumlah job aktif
     max_concurrent = int(os.getenv("MAX_CONCURRENT_JOBS", "3"))
     active_jobs = [j for j in job_queue.list_jobs() if j["status"] in ("queued", "processing")]
@@ -253,7 +270,7 @@ async def generate_from_db(
         estimated_seconds=60,
         access_code=job.access_code,
     )
-    logger.info("Mengirim response generate_from_db", response=response.model_dump() if hasattr(response, 'model_dump') else response.dict())
+    logger.info("Mengirim response generate_from_db", job_id=response.job_id)
     return response
 
 

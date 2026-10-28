@@ -1,6 +1,10 @@
 """
 In-memory background job queue untuk MSF-APP.
 Menyimpan status job generate dokumentasi.
+
+Update v2.2: Ditambahkan SQLite persistence layer (job_store.py)
+sehingga status job tidak hilang saat backend restart.
+Interface publik tidak berubah — fully backward compatible.
 """
 
 import asyncio
@@ -11,6 +15,7 @@ import secrets
 from datetime import datetime, timezone
 from typing import Dict, Optional, Callable, Any
 from app.models.schemas import JobStatus
+from app.background import job_store
 
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", tempfile.gettempdir())
 if OUTPUT_DIR != tempfile.gettempdir():
@@ -85,6 +90,12 @@ class Job:
                 setattr(self, key, value)
         self.updated_at = datetime.now(timezone.utc).isoformat()
 
+        # Sync perubahan ke SQLite (fire-and-forget, non-blocking)
+        try:
+            job_store.upsert_job(self._to_store_dict())
+        except Exception:
+            pass  # Persistence gagal tidak boleh mengganggu alur utama
+
     def cleanup_file(self):
         """Hapus file dari disk jika ada"""
         if self.result_filepath and os.path.exists(self.result_filepath):
@@ -93,11 +104,35 @@ class Job:
             except Exception:
                 pass
 
+    def _to_store_dict(self) -> dict:
+        """Konversi ke dict untuk disimpan ke SQLite."""
+        return {
+            "job_id":           self.job_id,
+            "project_name":     self.project_name,
+            "access_code":      self.access_code,
+            "status":           self.status.value if hasattr(self.status, 'value') else str(self.status),
+            "progress":         self.progress,
+            "tables_total":     self.tables_total,
+            "tables_processed": self.tables_processed,
+            "current_table":    self.current_table,
+            "error_message":    self.error_message,
+            "preview_markdown": self.preview_markdown,
+            "result_filepath":  self.result_filepath,
+            "result_filename":  self.result_filename,
+            "output_format":    self.output_format,
+            "ai_provider":      self.ai_provider,
+            "db_engine":        self.db_engine,
+            "created_at":       self.created_at,
+            "updated_at":       self.updated_at,
+            "completed_at":     self.completed_at,
+        }
+
 
 class JobQueue:
     """
-    In-memory job queue.
-    Di production bisa diganti dengan Redis/Celery,
+    Job queue dengan SQLite persistence layer.
+    Status job dipertahankan di SQLite sehingga tidak hilang saat restart.
+    Di production dapat diganti dengan Redis/Celery,
     tapi untuk personal use ini sudah cukup.
     """
 
@@ -106,11 +141,46 @@ class JobQueue:
         self._max_retention_minutes = max_retention_minutes
         self._lock = asyncio.Lock()
 
+        # Inisialisasi DB schema
+        job_store.init_db()
+
+        # Restore in-flight jobs dari SQLite saat startup
+        self._restore_inflight_jobs()
+
+    def _restore_inflight_jobs(self) -> None:
+        """
+        Load jobs dengan status queued/processing dari SQLite saat startup.
+        Job-job ini ditandai ulang sebagai ERROR karena proses yang sebelumnya
+        berjalan sudah mati bersama backend — tidak ada cara melanjutkannya.
+        Ini mencegah job stuck di status 'processing' selamanya.
+        """
+        try:
+            rows = job_store.get_inflight_jobs()
+            for row in rows:
+                job = Job(job_id=row["job_id"], project_name=row.get("project_name", "Database Documentation"))
+                job.access_code = row.get("access_code", job.access_code)
+                job.created_at = row.get("created_at", job.created_at)
+                # Tandai sebagai ERROR — tidak bisa dilanjutkan setelah restart
+                job.status = JobStatus.ERROR
+                job.error_message = "Pekerjaan ini tidak selesai karena backend di-restart. Silakan ulangi."
+                job.updated_at = datetime.now(timezone.utc).isoformat()
+                job.completed_at = datetime.now(timezone.utc).isoformat()
+                self._jobs[job.job_id] = job
+                # Update status di SQLite
+                job_store.upsert_job(job._to_store_dict())
+        except Exception:
+            pass  # Jika restore gagal, lanjut dengan queue kosong
+
     def create_job(self, project_name: str = "Database Documentation") -> Job:
-        """Buat job baru dan return job object"""
+        """Buat job baru, simpan ke memory dan SQLite, return job object"""
         job_id = str(uuid.uuid4())
         job = Job(job_id=job_id, project_name=project_name)
         self._jobs[job_id] = job
+        # Persist ke SQLite
+        try:
+            job_store.upsert_job(job._to_store_dict())
+        except Exception:
+            pass
         return job
 
     def get_job(self, job_id: str) -> Optional[Job]:
@@ -129,11 +199,15 @@ class JobQueue:
         return [job.to_dict() for job in self._jobs.values()]
 
     def delete_job(self, job_id: str) -> bool:
-        """Hapus job dari memory dan hapus filenya"""
+        """Hapus job dari memory, SQLite, dan hapus filenya"""
         if job_id in self._jobs:
             job = self._jobs[job_id]
             job.cleanup_file()
             del self._jobs[job_id]
+            try:
+                job_store.delete_job_row(job_id)
+            except Exception:
+                pass
             return True
         return False
 

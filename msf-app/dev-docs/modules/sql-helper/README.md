@@ -15,6 +15,8 @@ Modul **SQL Helper** menyediakan konsol referensi dan template skrip DBA kueri s
 ## Quick Links
 
 - Views & Komponen UI → [views.md](./views.md)
+- Rencana pengembangan v2 → [PLAN.md](./PLAN.md)
+- Spesifikasi teknis & UX v2 → [SPEC.md](./SPEC.md)
 - Data Shortcuts Lokal → `frontend/src/data/shortcuts/`
 - Halaman Rute → `frontend/src/app/sql-helper/page.tsx`
 

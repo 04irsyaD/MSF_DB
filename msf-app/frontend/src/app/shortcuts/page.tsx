@@ -57,11 +57,11 @@ export default function ShortcutsPage() {
       />
 
       {/* Intro info bar */}
-      <div className="p-5 bg-white border border-border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+      <div className="p-5 bg-card border border-border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-start gap-3">
           <Terminal className="h-5 w-5 text-accent mt-0.5 shrink-0 animate-pulse" />
           <div>
-            <h3 className="text-xs font-mono font-bold text-gray-900 uppercase tracking-widest">
+            <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-widest">
               DIAGNOSTIC & ADMINISTRATION SCRIPTS
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
@@ -70,7 +70,7 @@ export default function ShortcutsPage() {
           </div>
         </div>
 
-        <div className="text-[11px] font-bold text-muted-foreground bg-gray-50 px-3 py-1.5 rounded-lg border border-border shrink-0 self-start md:self-auto font-mono">
+        <div className="text-[11px] font-bold text-muted-foreground bg-muted px-3 py-1.5 rounded-lg border border-border shrink-0 self-start md:self-auto font-mono">
           TOTAL: {total} SCRIPTS
         </div>
       </div>
@@ -88,35 +88,35 @@ export default function ShortcutsPage() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-20 border border-border bg-white rounded-lg animate-pulse flex items-center justify-between p-4"
+              className="h-20 border border-border bg-card rounded-lg animate-pulse flex items-center justify-between p-4"
             >
               <div className="space-y-2 flex-1">
-                <div className="h-3.5 w-16 bg-gray-150 rounded-[2px]" />
-                <div className="h-4 w-1/3 bg-gray-100 rounded-[2px]" />
+                <div className="h-3.5 w-16 bg-muted rounded-[2px]" />
+                <div className="h-4 w-1/3 bg-muted/60 rounded-[2px]" />
               </div>
-              <div className="h-6 w-20 bg-gray-50 rounded-[2px]" />
+              <div className="h-6 w-20 bg-muted/40 rounded-[2px]" />
             </div>
           ))}
         </div>
       ) : error ? (
-        <div className="p-10 border border-red-200 bg-red-50 rounded-2xl flex flex-col items-center text-center gap-3">
+        <div className="p-10 border border-red-500/20 bg-red-500/10 rounded-2xl flex flex-col items-center text-center gap-3">
           <AlertCircle className="h-8 w-8 text-red-500" />
-          <h4 className="text-sm font-mono font-bold text-red-700 uppercase tracking-wider">GAGAL MEMUAT SCRIPT</h4>
-          <p className="text-xs text-red-600 max-w-sm">
+          <h4 className="text-sm font-mono font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">GAGAL MEMUAT SCRIPT</h4>
+          <p className="text-xs text-red-600/90 dark:text-red-400/90 max-w-sm">
             Terjadi masalah saat mengambil data SQL shortcuts dari server backend.
           </p>
           <button
             onClick={() => mutate()}
-            className="px-4 py-2 bg-white rounded-xl text-xs font-mono font-bold hover:bg-gray-50 border border-red-200 hover:border-red-400 flex items-center gap-2 text-red-700 transition-colors duration-150 shadow-sm"
+            className="px-4 py-2 bg-card rounded-xl text-xs font-mono font-bold hover:bg-muted border border-border flex items-center gap-2 text-foreground transition-colors duration-150 shadow-sm cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             COBA LAGI
           </button>
         </div>
       ) : shortcuts.length === 0 ? (
-        <div className="p-16 border border-border bg-white rounded-2xl flex flex-col items-center text-center gap-3 shadow-sm">
+        <div className="p-16 border border-border bg-card rounded-2xl flex flex-col items-center text-center gap-3 shadow-sm">
           <Terminal className="h-10 w-10 text-muted-foreground/50" />
-          <h4 className="text-sm font-mono font-bold text-gray-900 uppercase tracking-wider">TIDAK ADA SCRIPT DITEMUKAN</h4>
+          <h4 className="text-sm font-mono font-bold text-foreground uppercase tracking-wider">TIDAK ADA SCRIPT DITEMUKAN</h4>
           <p className="text-xs text-muted-foreground max-w-xs leading-relaxed font-mono">
             Tidak ada script yang cocok dengan filter atau kata kunci pencarian Anda. Coba reset filter.
           </p>

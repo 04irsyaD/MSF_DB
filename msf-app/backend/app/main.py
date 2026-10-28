@@ -14,11 +14,15 @@ from fastapi.responses import JSONResponse
 import structlog
 from datetime import datetime, timezone
 
-from app.routers import generate, database, ai, shortcuts, export, stats, admin
+from app.routers import generate, database, ai, shortcuts, export, stats, admin, schema_compare
+from app.routers.admin import warn_if_admin_passcode_weak
 from app.background.job_queue import job_queue
 from app.services.ollama_provider import ollama_provider
+from app.services.db_url_guard import sqlite_connection_enabled
 from app.utils.errors import AppDetailedException
 from app.utils.logger import setup_logger
+from app.utils.body_limit import BodySizeLimitMiddleware
+from app.utils.security_headers import SecurityHeadersMiddleware
 
 setup_logger()
 logger = structlog.get_logger()
@@ -73,6 +77,7 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI):
     """Setup saat startup, cleanup saat shutdown"""
     logger.info("MSF-APP Backend starting up...")
+    warn_if_admin_passcode_weak()
 
     # Background task: cleanup job lama setiap 15 menit
     async def cleanup_loop():
@@ -120,6 +125,13 @@ async def lifespan(app: FastAPI):
 # APP SETUP
 # ================================================================
 
+def api_docs_config() -> dict:
+    """Swagger/ReDoc/OpenAPI hanya aktif jika ENABLE_DOCS=true (default mati di produksi)."""
+    if os.getenv("ENABLE_DOCS", "false").strip().lower() in ("1", "true", "yes"):
+        return {"docs_url": "/docs", "redoc_url": "/redoc", "openapi_url": "/openapi.json"}
+    return {"docs_url": None, "redoc_url": None, "openapi_url": None}
+
+
 app = FastAPI(
     title="MSF-APP API",
     description=(
@@ -127,10 +139,13 @@ app = FastAPI(
         "Generate dokumentasi database dari SQL DDL atau koneksi langsung ke DB."
     ),
     version="2.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
     lifespan=lifespan,
+    **api_docs_config(),
 )
+
+# Batas ukuran body (anti-DoS). Didaftarkan sebelum CORS supaya respons 413
+# tetap dibungkus header CORS (middleware terakhir = paling luar).
+app.add_middleware(BodySizeLimitMiddleware)
 
 # CORS
 cors_origins = os.getenv(
@@ -141,11 +156,14 @@ cors_origins = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in cors_origins],
-    allow_credentials=True,
+    allow_credentials=False,  # frontend tidak memakai cookie ke backend
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept", "X-API-Key", "X-Admin-Passcode"],
 )
 app.add_middleware(APIKeyMiddleware)
+
+# Header keamanan paling luar supaya ikut di semua respons (termasuk 401/413).
+app.add_middleware(SecurityHeadersMiddleware)
 
 # ================================================================
 # EXCEPTION HANDLERS
@@ -162,6 +180,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     logger.error("HTTP error occurred", status_code=exc.status_code, detail=exc.detail)
     return JSONResponse(
         status_code=exc.status_code,
+        headers=getattr(exc, "headers", None),
         content={
             "detail": exc.detail,
             "error_code": f"HTTP_{exc.status_code}",
@@ -173,7 +192,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = exc.errors()
-    logger.error("Validation error occurred", errors=errors)
+    # Jangan log `input`/`ctx`: bisa berisi password atau connection string mentah.
+    logger.error(
+        "Validation error occurred",
+        errors=[{"loc": e.get("loc"), "type": e.get("type"), "msg": e.get("msg")} for e in errors],
+    )
     detail = "Input tidak valid"
     if errors:
         loc = " -> ".join(str(x) for x in errors[0]["loc"] if x != "body")
@@ -214,6 +237,7 @@ app.include_router(shortcuts.router)
 app.include_router(export.router)
 app.include_router(stats.router)
 app.include_router(admin.router)
+app.include_router(schema_compare.router)
 
 
 # ================================================================
@@ -243,6 +267,9 @@ async def health_check():
             "ollama": ollama_status,
             "ollama_model": ollama_model,
         },
+        "features": {
+            "sqlite_connection": sqlite_connection_enabled(),
+        },
         "version": "2.0.0",
     }
 
@@ -252,6 +279,6 @@ async def root():
     return {
         "name": "MSF-APP API",
         "version": "2.0.0",
-        "docs": "/docs",
+        "docs": app.docs_url,
         "health": "/health",
     }
