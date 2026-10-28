@@ -5,6 +5,49 @@ Terakhir diperbarui: 2026-10-27.
 
 ---
 
+## 0000d. Audit keamanan dependensi + header (2026-10-28) — belum di-commit
+
+- Backend (`pip-audit`): venv lokal punya pillow 12.3.0 (38 CVE), pypdf 6.19.0 (11), certifi lama — semuanya turunan
+  xhtml2pdf/httpx yang tidak dipin. `requirements.txt` diberi batas minimum `pillow>=13.0.0`, `pypdf>=6.21.2`,
+  `certifi>=2026.10.19` (juga memaksa layer pip Docker di Render di-build ulang). Setelahnya pip-audit
+  requirements.txt + requirements-dev.txt + venv: 0 vuln. pytest 126 passed.
+- Frontend: `npm audit fix` (tanpa --force) -> zod 4.6.7, postcss-selector-parser 6.1.5 (hanya package-lock).
+- `frontend/next.config.js`: header keamanan semua halaman (X-Frame-Options DENY, CSP `frame-ancestors 'none'`,
+  nosniff, Referrer-Policy, Permissions-Policy) + `poweredByHeader: false`. CSP penuh belum (perlu uji Monaco/CDN).
+- [x] Upgrade (disetujui user) Next 14.2.18 -> **15.5.28** (pin persis), React 18 -> **19**, `@types/react(-dom)` 19,
+  `eslint-config-next` 15.5.28, `"overrides": {"postcss": "$postcss"}` (postcss bawaan Next yang rentan). Next 14 EOL
+  dan kena 3 critical RCE. Tanpa perubahan kode. Hasil: npm audit 0 vuln (termasuk dev), type-check/lint/build lolos,
+  smoke test Playwright Firefox+Chrome (semua halaman, Monaco, diagram+PNG, schema compare, tema, menu mobile, header,
+  rewrite /api) lolos. Lint: 5 warning exhaustive-deps lama. Satu error blob NS_BINDING_ABORTED Firefox sekali saat uji
+  coba, tidak bisa diulang (0/12, juga di Next 14 live) -> timing worker Monaco.
+- Node lokal laptop kantor TIDAK perlu di-upgrade (keputusan user 2026-10-28, tanpa admin); yang penting runtime Vercel 24.x.
+
+## 0000c. QA situs live msf-db.my.id (2026-10-28) — sebagian diperbaiki, belum di-commit
+
+Script QA (Playwright, Firefox + Chrome sistem) ada di scratchpad sesi; temuan diverifikasi langsung di produksi.
+Perbaikan diverifikasi di build produksi lokal (frontend :3100 -> backend lokal :8765), Firefox + Chrome.
+
+- [x] TINGGI `backend/app/services/sql_parser.py::_parse_column` — dulu `DATA_TYPE_PATTERN.search(line)` mencari di
+  seluruh baris (nama kolom ikut), jadi `updated_by_id uuid`→DATE, `timestamptz`/`TIMESTAMP`→TIME, `settings JSONB`→SET,
+  dst. Sekarang `COLUMN_TYPE_PATTERN.match(line, name_match.end())`: tipe dibaca tepat setelah nama kolom, apa adanya
+  (`TIMESTAMPTZ(6)`, `INT4`, `TIMESTAMP WITH TIME ZONE`, `TEXT[]`, `public.enum`). `max_length` dibaca dari tipe.
+  Test: `tests/test_sql_parser.py::TestSQLParserColumnTypes` (5 test). pytest 126 passed.
+- [x] TINGGI Unduh PNG diagram gagal di Firefox (`html-to-image` 1.11.13 `e is undefined` saat embed font).
+  `DiagramCanvas.tsx::getFontEmbedCss` menyusun @font-face sendiri (font next/font same-origin -> data URL, di-cache)
+  dan dioper via `fontEmbedCSS`; kalau gagal tetap unduh dengan `skipFonts`.
+- [x] SEDANG Teks dashboard: "100% Data Lokal" -> "Kredensial Tidak Disimpan"; "Pemrosesan Lokal" -> "Hanya Struktur"
+  (jujur soal server MSF DB + DeepSeek/OpenAI bila dipilih); kartu koneksi -> "PostgreSQL atau MySQL yang dapat diakses
+  dari internet" (SQL Server tidak didukung, SQLite hanya dev).
+- [x] SEDANG Lacak kode tidak ada -> "Kode pelacakan tidak ditemukan atau sudah kedaluwarsa" (`hooks/useGenerate.ts::trackJob`,
+  hanya bila 404 berisi JSON backend; pesan umum `getFriendlyErrorMessage` tidak diubah).
+- [x] SEDANG Drawer mobile menutup setelah pilih halaman (`Sidebar.tsx` Link `onClick={onClose}`, tombol X diberi aria-label).
+- [x] SEDANG Menu "Settings" dihapus dari sidebar (halaman `/settings` tetap redirect untuk link lama). `Header.tsx`:
+  ROUTE_MAP + `/generate`, `/linux-helper`; default rute tak dikenal (404) jadi "MSF DB", bukan "AI Generator".
+- [ ] SEDANG Frontend Vercel tanpa X-Frame-Options/CSP/nosniff (backend sudah lengkap).
+- [ ] RENDAH Diagram diam-diam membuang FK ke tabel di luar DDL; mobile Generate toolbar terpotong; pill "Mode Maintenance"
+  menutupi konten mobile; favicon 404; judul tab sama semua halaman; tombol ikon tanpa aria-label.
+- Info: AI Generator di produksi selalu disabled (Ollama offline di Render). Nama file PNG berjam sudah live.
+
 ## 0000b. Nama file unduhan ERD pakai jam (2026-10-27) — belum di-commit
 
 - `components/diagram/DiagramCanvas.tsx` (handler download PNG): nama file dari `toISOString().slice(0,10)` (tanggal
@@ -119,7 +162,7 @@ SISA (dikerjakan di laptop lain yang punya Docker/PHP):
    `composer update laravel/framework -W` (tanpa PHP lokal: `docker run --rm -v "$(pwd):/app" -w /app composer:2 update laravel/framework -W --ignore-platform-reqs`)
 2. `docker compose build --pull` lalu `up -d` untuk image Node/PHP baru; `n8n/`: `docker compose pull` (`n8nio/n8n:latest`)
 3. Redeploy Vercel, cek Settings → Node.js Version = 24.x
-4. Node lokal laptop kantor masih v24.15.0 → `winget upgrade --id OpenJS.NodeJS.LTS` (butuh UAC/admin)
+4. ~~Node lokal laptop kantor~~ — tidak perlu (keputusan user 2026-10-28: laptop kantor tanpa admin, v24.15.0 cukup)
 
 ---
 

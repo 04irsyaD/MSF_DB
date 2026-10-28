@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, Settings, Cpu, Menu, Database, Layers, ShieldAlert, GitCompare, LucideIcon } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Cpu, Menu, Database, Layers, ShieldAlert, GitCompare, LucideIcon } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -23,18 +23,20 @@ interface PageInfo {
  */
 const ROUTE_MAP: Array<{ prefix: string; info: PageInfo }> = [
   { prefix: "/dashboard",  info: { title: "Dashboard",    desc: "Ringkasan aktivitas dan statistik aplikasi",                        icon: LayoutDashboard } },
+  { prefix: "/generate",   info: { title: "AI Generator", desc: "Generate dokumentasi dari DDL atau koneksi database langsung",       icon: Sparkles        } },
+  { prefix: "/linux-helper", info: { title: "Linux Helper", desc: "Shortcut & command server, bertingkat dari dasar",                icon: SquareTerminal  } },
   { prefix: "/sql-helper", info: { title: "SQL Helper",   desc: "Tabel skrip DBA & optimasi (Client Standalone)",                    icon: Database        } },
   { prefix: "/schema-compare", info: { title: "Schema Compare", desc: "Bandingkan struktur dua database dari snapshot atau koneksi database",              icon: GitCompare      } },
   { prefix: "/shortcuts",  info: { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi",                  icon: Terminal        } },
   { prefix: "/diagram",    info: { title: "MSF Diagram",  desc: "Visualisasi skema & relasi database interaktif",                     icon: Layers          } },
-  { prefix: "/settings",   info: { title: "Settings",     desc: "Konfigurasi AI provider, model, dan preferensi",                     icon: Settings        } },
   { prefix: "/admin",      info: { title: "Admin Portal", desc: "Log & kontrol sistem",                                               icon: ShieldAlert     } },
 ];
 
+// Rute yang tidak terdaftar (misal halaman 404) tidak boleh mengaku sebagai halaman lain
 const DEFAULT_PAGE: PageInfo = {
-  title: "AI Generator",
-  desc: "Generate dokumentasi dari DDL atau koneksi database langsung",
-  icon: Sparkles,
+  title: "MSF DB",
+  desc: "AI Docs Platform",
+  icon: Database,
 };
 
 const getPageInfo = (pathname: string): PageInfo =>

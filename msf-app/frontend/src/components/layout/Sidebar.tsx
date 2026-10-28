@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Settings, Activity, X, Circle, ShieldAlert, Layers, Database, GitCompare } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Activity, X, Circle, ShieldAlert, Layers, Database, GitCompare } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -69,12 +69,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       description: "Skrip DBA & optimasi",
     },
     {
-      label: "Settings",
-      href: "/settings",
-      icon: Settings,
-      description: "Konfigurasi AI & koneksi",
-    },
-    {
       label: "Admin Portal",
       href: "/admin",
       icon: ShieldAlert,
@@ -111,6 +105,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Tutup menu"
             className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground lg:hidden"
           >
             <X className="h-4 w-4" />
@@ -129,6 +124,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                // Drawer mobile ikut tertutup setelah pindah halaman
+                onClick={onClose}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-all duration-150",
                   isActive
