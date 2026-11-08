@@ -42,6 +42,14 @@ xhtml2pdf==0.2.17              # PDF generation (pure python/html based)
 markdown==3.11.1              # Parse Markdown ke HTML (untuk PDF)
 
 # --------------------------------------------------------------
+# BATAS MINIMUM DEPENDENSI TURUNAN (CVE, lihat pip-audit 2026-10-28)
+# Tidak dipakai langsung; dipin supaya build/cached layer lama tidak memakai versi rentan.
+# --------------------------------------------------------------
+pillow>=13.0.0                  # via xhtml2pdf/reportlab/svglib — < 13.0.0 punya 38 CVE
+pypdf>=6.21.2                   # via xhtml2pdf — < 6.21.2 punya 11 CVE
+certifi>=2026.10.19             # via httpx — bundle CA lama
+
+# --------------------------------------------------------------
 # UTILITIES
 # --------------------------------------------------------------
 python-dotenv==1.2.4            # Load .env file

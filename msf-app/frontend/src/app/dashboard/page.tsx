@@ -90,13 +90,13 @@ export default function DashboardPage() {
           <div className="space-y-1">
             <h2 className="text-lg font-bold text-foreground">Mulai Dokumentasi Database</h2>
             <p className="text-xs text-muted-foreground">
-              Pilih sumber skema database Anda untuk mulai menghasilkan dokumentasi otomatis bertenaga AI lokal.
+              Pilih sumber skema database Anda untuk mulai menghasilkan dokumentasi otomatis bertenaga AI.
             </p>
           </div>
           {/* Trust Signal Badge */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium self-start md:self-auto shrink-0">
             <Shield className="h-3.5 w-3.5 text-emerald-500" />
-            <span>100% Data Lokal &amp; Aman</span>
+            <span>Kredensial Tidak Disimpan</span>
           </div>
         </div>
 
@@ -133,7 +133,7 @@ export default function DashboardPage() {
                 <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Hubungkan langsung ke PostgreSQL, MySQL, SQLite, atau SQL Server lokal untuk menarik skema otomatis.
+                Hubungkan ke PostgreSQL atau MySQL yang dapat diakses dari internet untuk menarik skema otomatis.
               </p>
             </div>
           </Link>
@@ -266,7 +266,7 @@ export default function DashboardPage() {
             <ul className="space-y-2 text-[10.5px] text-muted-foreground leading-relaxed font-medium">
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold">✓</span>
-                <span><strong className="text-foreground">Pemrosesan Lokal:</strong> Skema database tidak pernah diunggah ke server cloud eksternal.</span>
+                <span><strong className="text-foreground">Hanya Struktur:</strong> Yang diproses hanya skema (tabel, kolom &amp; jumlah baris), bukan isi data. Skema dikirim ke server MSF DB, dan ke DeepSeek/OpenAI hanya jika Anda memilih AI cloud.</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 font-bold">✓</span>

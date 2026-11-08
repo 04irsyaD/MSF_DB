@@ -22,21 +22,24 @@ class SQLParser:
         re.IGNORECASE | re.MULTILINE,
     )
 
-    # Pattern untuk tipe data umum
-    DATA_TYPE_PATTERN = re.compile(
-        r"(SERIAL|BIGSERIAL|SMALLSERIAL|INTEGER|INT|BIGINT|SMALLINT|TINYINT|"
-        r"NUMERIC|DECIMAL|FLOAT|DOUBLE\s+PRECISION|REAL|"
-        r"VARCHAR|CHARACTER\s+VARYING|CHAR|TEXT|CLOB|"
-        r"BOOLEAN|BOOL|BIT|"
-        r"DATE|TIME|TIMESTAMP|DATETIME|YEAR|"
-        r"UUID|JSON|JSONB|XML|"
-        r"BLOB|BYTEA|BINARY|VARBINARY|"
-        r"ENUM|SET|"
-        r"MONEY|"
-        r"INET|CIDR|MACADDR)"
-        r"(?:\s*\([^)]*\))?",
+    # Tipe data = teks tepat setelah nama kolom (bukan dicari di seluruh baris, supaya
+    # nama kolom seperti "updated_by_id" tidak terbaca DATE). Mencakup tipe custom
+    # (schema.nama), parameter (n)/(p,s), sufiks multi-kata yang umum, dan array [].
+    COLUMN_TYPE_PATTERN = re.compile(
+        r"(?:[\w]+\.)?[A-Za-z_]\w*"
+        r"(?:\s+(?:VARYING|PRECISION))?"
+        r"(?:\s*\([^)]*\))?"
+        r"(?:\s+(?:WITH|WITHOUT)\s+TIME\s+ZONE)?"
+        r"(?:\s+(?:UNSIGNED|ZEROFILL))*"
+        r"(?:\s*\[\s*\d*\s*\])*",
         re.IGNORECASE,
     )
+
+    # Kata pertama setelah nama kolom yang berarti kolom tanpa tipe (dibolehkan SQLite).
+    NOT_A_TYPE = {
+        "NOT", "NULL", "PRIMARY", "REFERENCES", "DEFAULT", "UNIQUE", "CHECK",
+        "CONSTRAINT", "GENERATED", "COLLATE", "AUTOINCREMENT", "AUTO_INCREMENT",
+    }
 
     @classmethod
     def parse(cls, sql: str, dialect: str = "postgresql") -> List[TableMetadata]:
@@ -219,11 +222,13 @@ class SQLParser:
         if col_name.upper() in reserved:
             return None
 
-        # Cari tipe data
+        # Tipe data tepat setelah nama kolom
         data_type = "TEXT"  # default
-        type_match = cls.DATA_TYPE_PATTERN.search(line)
+        type_match = cls.COLUMN_TYPE_PATTERN.match(line, name_match.end())
         if type_match:
-            data_type = type_match.group(0).strip().upper()
+            candidate = re.sub(r"\s+", " ", type_match.group(0)).upper()
+            if candidate.split(" ")[0].split("(")[0] not in cls.NOT_A_TYPE:
+                data_type = candidate
 
         # Cek NULL/NOT NULL
         is_nullable = True
@@ -236,9 +241,9 @@ class SQLParser:
         if default_match:
             default_value = default_match.group(1)
 
-        # Max length (dari VARCHAR(n))
+        # Max length (dari VARCHAR(n)), dibaca dari tipe saja, bukan seluruh baris
         max_length = None
-        len_match = re.search(r"(?:VARCHAR|CHAR|CHARACTER\s+VARYING)\s*\((\d+)\)", line, re.IGNORECASE)
+        len_match = re.match(r"(?:N?VARCHAR2?|N?CHAR|CHARACTER(?: VARYING)?|BPCHAR)\s*\((\d+)\)", data_type)
         if len_match:
             max_length = int(len_match.group(1))
 

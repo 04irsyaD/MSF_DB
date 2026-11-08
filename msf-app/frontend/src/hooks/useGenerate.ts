@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { api, getFriendlyErrorMessage } from "@/lib/api";
+import { api, ApiError, getFriendlyErrorMessage } from "@/lib/api";
 import {
   GenerateFromDDLRequest,
   GenerateFromDBRequest,
@@ -247,7 +247,11 @@ export function useGenerate() {
       return res.job_id;
     } catch (err: any) {
       setIsGenerating(false);
-      const msg = getFriendlyErrorMessage(err);
+      // 404 berisi JSON dari backend = kodenya yang tidak ada, bukan API URL yang salah
+      const codeNotFound = err instanceof ApiError && err.status === 404 && err.info?.detail;
+      const msg = codeNotFound
+        ? "Kode pelacakan tidak ditemukan atau sudah kedaluwarsa. Periksa lagi kodenya."
+        : getFriendlyErrorMessage(err);
       toast.error(msg);
       throw err;
     }

@@ -21,6 +21,53 @@ type ColumnRef = { table: string; column: string };
 // FK asli & relasi virtual tampil sama persis (warna, garis, ikon kolom)
 const RELATION_COLOR = "hsl(var(--accent))";
 
+// html-to-image 1.11.x gagal menyematkan font di Firefox ("e is undefined": CSSFontFaceRule
+// tidak punya style.fontFamily di sana). CSS @font-face disusun sendiri lalu dioper lewat
+// fontEmbedCSS. Font next/font di-host sendiri (same-origin), jadi url() bisa di-fetch.
+let fontEmbedCssCache: Promise<string> | null = null;
+
+const toDataUrl = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+
+const getFontEmbedCss = () => {
+  fontEmbedCssCache ??= (async () => {
+    const rules: { css: string; base: string }[] = [];
+    for (const sheet of Array.from(document.styleSheets)) {
+      let cssRules: CSSRuleList;
+      try {
+        cssRules = sheet.cssRules;
+      } catch {
+        continue; // stylesheet lintas origin tidak bisa dibaca
+      }
+      for (const rule of Array.from(cssRules)) {
+        if (rule instanceof CSSFontFaceRule) rules.push({ css: rule.cssText, base: sheet.href ?? document.baseURI });
+      }
+    }
+    const inlined = await Promise.all(
+      rules.map(async ({ css, base }) => {
+        let out = css;
+        for (const [, url] of Array.from(css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g))) {
+          if (url.startsWith("data:")) continue;
+          const res = await fetch(new URL(url, base));
+          if (!res.ok) throw new Error(`font ${res.status}`);
+          out = out.split(url).join(await toDataUrl(await res.blob()));
+        }
+        return out;
+      }),
+    );
+    return inlined.join("\n");
+  })().catch((error) => {
+    fontEmbedCssCache = null; // coba lagi di unduhan berikutnya
+    throw error;
+  });
+  return fontEmbedCssCache;
+};
+
 // Satu garis di diagram: FK asli dari SQL atau relasi virtual buatan user
 interface DiagramEdge {
   key: string;
@@ -866,8 +913,16 @@ export default function DiagramCanvas({ tables }: DiagramCanvasProps) {
       const width = maxX - minX + padding * 2;
       const height = maxY - minY + padding * 2;
 
+      // Font gagal disusun -> tetap unduh dengan font bawaan browser daripada gagal total
+      const fontEmbedCSS = await getFontEmbedCss().catch((error) => {
+        console.warn("Font diagram tidak bisa disematkan:", error);
+        return undefined;
+      });
+
       // Capture canvas
       const dataUrl = await toPng(canvasRef.current, {
+        fontEmbedCSS,
+        skipFonts: fontEmbedCSS === undefined,
         width: width,
         height: height,
         style: {
