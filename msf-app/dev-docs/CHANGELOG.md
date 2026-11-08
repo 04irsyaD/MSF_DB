@@ -66,7 +66,6 @@
   - Fitur tutup (dismiss) info box panduan dengan persistensi status di `localStorage`.
   - Dokumen rencana arsitektur dan spesifikasi teknis lengkap di `dev-docs/modules/sql-helper/PLAN.md` dan `SPEC.md`.
 
-
 ### Changed
 - Perbaikan tipografi SQL Helper: judul skrip menggunakan font sans-serif 13–14px semibold agar mudah dipindai, mono dikhususkan untuk kode SQL, badge, dan label teknis.
 - Pembersihan footer metrik `SqlHelperStats` untuk mengurangi visual clutter di halaman `/sql-helper`.

@@ -214,8 +214,8 @@ Ikon `Terminal` sudah dipakai "SQL Shortcuts", jadi pakai `SquareTerminal` agar 
 
 **REVISI DESAIN (2026-10-20, atas permintaan user) — membatalkan sebagian G3:**
 - **Fitur "tandai hafal" DIBATALKAN** → `useProgress.ts` dihapus, tombol di kartu dibuang.
-- **Command pakai layout kartu ala SQL Helper** (badge Level/kategori/risk + judul + deskripsi + preview + tombol Copy
-  + "View Details" → drawer). Shortcut **tetap** pakai keycap. Komponen: `CommandCard`, `CommandDrawer` (radix Dialog).
+- **Command pakai layout kartu ala SQL Helper** (badge Level/kategori/risk + judul + deskripsi + preview + tombol Copy +
+  "View Details" → drawer). Shortcut **tetap** pakai keycap. Komponen: `CommandCard`, `CommandDrawer` (radix Dialog).
 - Reuse presentasional `RiskBadge` & `CategoryBadge` dari `@/features/sql-helper/components/Badges` (kopling ringan, dicatat).
 - `CommandSchema` ditambah `description` (wajib, dicek validate) + `note` (opsional, tampil di drawer).
 - **Pagination** 6 item/halaman (grid 2 kolom) per section (shortcut & command punya halaman sendiri). Komponen

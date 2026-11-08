@@ -57,7 +57,6 @@ Perubahan kecil, risiko rendah, dampak langsung terasa.
 - [x] A11y dasar: `label htmlFor`, tombol judul di baris, `focus-visible`
 - [x] Perbaiki cleanup `setTimeout` & restore `body.overflow`
 
-
 ### Fase 2 — Refactor Fondasi (1–2 hari)
 
 - [x] Zod schema `Script` + skrip `validate:data` + migrasi nilai risiko ke `low|medium|high`
@@ -66,7 +65,6 @@ Perubahan kecil, risiko rendah, dampak langsung terasa.
 - [x] `useScriptFilters` (state ↔ URL) + debounce search
 - [x] Pindah ke `features/sql-helper/` (lihat SPEC §2)
 - [x] Unit test `filter`, `search`, validasi data
-
 
 ### Fase 3 — UI Baru (2–3 hari)
 

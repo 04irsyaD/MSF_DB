@@ -51,8 +51,6 @@ Rencana lengkap: `dev-docs/ai/SECURITY_REMEDIATION_PLAN.md` (audit keamanan back
 | T-019 | SQL Helper v2 Fase 3 (UI Baru): Cards preview 3 baris SQL, Table ringkas, Radix drawer, FilterChips faceted count, RiskToggle, SqlViewer (Shiki), dan RiskBanner confirmation | DONE | 2026-10-09 |
 | T-020 | SQL Helper v2 Fase 4 (Fitur Pembeda): Parameter template {{placeholder}} + ParamForm + real-time preview, Favorit & Terakhir dipakai (localStorage), Deep link ?script=<id> + Share link + browser history sync, dan navigasi prev/next di drawer | DONE | 2026-10-09 |
 
-
-
 ---
 
 ## Backlog
