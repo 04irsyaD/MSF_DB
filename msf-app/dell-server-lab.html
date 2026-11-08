@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Dell PowerEdge</title>
+<style>
+:root{
+  --bg:#f5f6f8;--surface:#ffffff;--surface2:#eef1f4;--ink:#15191e;--muted:#59626d;--line:#dbe0e6;
+  --accent:#0a66c2;--accent-ink:#ffffff;--accent-soft:#e3eefa;
+  --ok:#1d7f46;--ok-soft:#e2f3e9;--warn:#a86a09;--warn-soft:#fbf0dc;--bad:#b42318;--bad-soft:#fbe4e1;
+  --term-bg:#0e1217;--term-ink:#cfe0ea;--term-dim:#7d8f9c;
+  --chassis:#2b3036;--chassis2:#3a4048;--bay:#1c2025;
+  --radius:12px;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1115;--surface:#161a20;--surface2:#1d222a;--ink:#e6eaee;--muted:#9aa3ad;--line:#2a313a;
+    --accent:#4c9cf0;--accent-ink:#0b1117;--accent-soft:#16283d;
+    --ok:#45c07a;--ok-soft:#14291d;--warn:#e0a33a;--warn-soft:#2d2312;--bad:#f06a5d;--bad-soft:#2f1714;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1115;--surface:#161a20;--surface2:#1d222a;--ink:#e6eaee;--muted:#9aa3ad;--line:#2a313a;
+  --accent:#4c9cf0;--accent-ink:#0b1117;--accent-soft:#16283d;
+  --ok:#45c07a;--ok-soft:#14291d;--warn:#e0a33a;--warn-soft:#2d2312;--bad:#f06a5d;--bad-soft:#2f1714;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 64px}
+header h1{font-size:24px;line-height:1.25;margin:4px 0 6px}
+header p{margin:0;color:var(--muted)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn-soft);color:var(--warn)}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 0 10px;margin:8px 0 8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5;scrollbar-width:thin}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
+.tab .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--surface2);font-size:12px;margin-right:6px;font-weight:600}
+.tab.done .n{background:var(--ok-soft);color:var(--ok)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab.active .n{background:rgba(255,255,255,.25);color:inherit}
+section.page{display:none}
+section.page.show{display:block}
+h2{font-size:20px;margin:18px 0 6px}
+h3{font-size:16px;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 16px;max-width:70ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:0 0 14px}
+.grid{display:grid;gap:12px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+button.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+button.btn:hover{border-color:var(--accent)}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0}
+.note.warn{border-color:var(--warn);background:var(--warn-soft)}
+.note.bad{border-color:var(--bad);background:var(--bad-soft)}
+.note.ok{border-color:var(--ok);background:var(--ok-soft)}
+.note p{margin:0}
+ul.clean{margin:6px 0 0;padding-left:20px}
+ul.clean li{margin:3px 0}
+kbd{font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:3px 6px;background:var(--surface2)}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--surface2);padding:1px 5px;border-radius:4px}
+.pager{display:flex;justify-content:space-between;gap:8px;margin-top:18px}
+
+/* model decoder */
+.decoder input{font:600 18px ui-monospace,Menlo,Consolas,monospace;width:150px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);text-transform:uppercase}
+.decode-out{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:12px}
+.dpart{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface2)}
+.dpart b{display:block;font:700 20px ui-monospace,Menlo,Consolas,monospace;color:var(--accent)}
+
+/* server svg */
+.viewtoggle{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.viewtoggle button{font:inherit;font-size:14px;border:0;background:var(--surface);color:var(--ink);padding:7px 14px;cursor:pointer}
+.viewtoggle button.on{background:var(--accent);color:var(--accent-ink)}
+.svgbox{width:100%;overflow-x:auto}
+.svgbox svg{width:100%;min-width:560px;height:auto;display:block}
+.hs{cursor:pointer;outline:none}
+.hs .hit{fill:transparent;stroke:transparent;stroke-width:3}
+.hs:hover .hit,.hs:focus .hit{stroke:#8cc4ff;stroke-dasharray:5 4}
+.hs.sel .hit{stroke:#4c9cf0;stroke-dasharray:none}
+.svglbl{font:600 11px system-ui,sans-serif;fill:#b8c0c9;pointer-events:none}
+.info h3{font-size:17px}
+.info dl{margin:8px 0 0}
+.info dt{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:10px}
+.info dd{margin:2px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:4px 10px;border-radius:999px;cursor:pointer}
+.chip.on{border-color:var(--accent);background:var(--accent-soft)}
+
+/* boot monitor */
+.monitor{background:#05070a;border:10px solid #22272e;border-radius:12px;min-height:290px;padding:14px 16px;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c8d3dc;position:relative;overflow:hidden}
+.monitor .logo{font:700 22px system-ui,sans-serif;color:#e9eef2;letter-spacing:.06em;margin-bottom:8px}
+.monitor .hint{position:absolute;left:0;right:0;bottom:0;background:#11161c;color:#9fd0ff;padding:8px 14px;font-size:12px}
+.monitor .bar{height:4px;background:#1b222a;border-radius:2px;margin:10px 0 0;overflow:hidden}
+.monitor .bar i{display:block;height:100%;width:0;background:#3d8bfd;transition:width .2s linear}
+.monitor.bios{background:#dfe5ea;color:#10161c}
+.monitor.bios .title{background:#0b4f8a;color:#fff;margin:-14px -16px 12px;padding:8px 16px;font-weight:700}
+.bios-items{display:grid;gap:6px;max-width:420px}
+.bios-items button{text-align:left;font:13px ui-monospace,Menlo,Consolas,monospace;border:1px solid #9fb0bf;background:#f4f7f9;color:#10161c;padding:7px 10px;border-radius:4px;cursor:pointer}
+.bios-items button.on{background:#0b4f8a;color:#fff;border-color:#0b4f8a}
+.bios-desc{margin-top:12px;padding:10px;border:1px dashed #8a9aa8;border-radius:6px;background:#eef2f5;min-height:44px}
+.keys{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.keys button{font:700 15px ui-monospace,Menlo,Consolas,monospace;min-width:64px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);border-bottom-width:3px;background:var(--surface);color:var(--ink);cursor:pointer}
+.keys button:active{transform:translateY(1px)}
+.keys button small{display:block;font:500 11px system-ui,sans-serif;color:var(--muted)}
+.keytable{width:100%;border-collapse:collapse;font-size:14px}
+.keytable th,.keytable td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.keytable th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.show{opacity:1}
+
+/* idrac */
+.idrac{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.idrac-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:#1f2933;color:#e8edf1;padding:10px 14px}
+.idrac-top b{font-size:15px}
+.idrac-top span{font-size:12px;color:#a9b6c1}
+.itabs{display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto;background:var(--surface2)}
+.itabs button{font:inherit;font-size:14px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--ink);padding:9px 14px;cursor:pointer;white-space:nowrap}
+.itabs button.on{border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
+.ibody{padding:14px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.tile .st{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;margin-top:4px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.d-ok{background:var(--ok)}.d-warn{background:var(--warn)}.d-bad{background:var(--bad)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left}
+.tbl th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-bad{background:var(--bad-soft);color:var(--bad)}
+.front-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--chassis);padding:10px;border-radius:10px;margin-top:8px}
+.front-mini button{position:relative;height:54px;background:var(--bay);border:1px solid #4a5159;border-radius:5px;color:#b8c0c9;font:600 12px system-ui,sans-serif;cursor:pointer;text-align:left;padding:6px 8px 6px 26px}
+.front-mini button:hover{border-color:#8cc4ff}
+.led{position:absolute;left:9px;width:8px;height:8px;border-radius:50%;background:#30363d}
+.led.a{top:12px}.led.s{top:30px}
+.led.green{background:#3ad06b;box-shadow:0 0 6px #3ad06b}
+.led.amber{background:#ffae1a;box-shadow:0 0 6px #ffae1a}
+.led.blink{animation:blink .7s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.steps li{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.steps li .ck{flex:0 0 22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+.steps li.ok .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.progress{height:10px;background:var(--surface2);border-radius:6px;overflow:hidden;margin-top:6px}
+.progress i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s linear}
+.term{background:var(--term-bg);color:var(--term-ink);border-radius:10px;padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+.term .dim{color:var(--term-dim)}
+.term .err{color:#ff8a7a}
+.term .wrn{color:#ffc861}
+.term .okc{color:#7be0a0}
+.term-in{display:flex;gap:6px;margin-top:8px}
+.term-in input{flex:1;min-width:0;font:14px ui-monospace,Menlo,Consolas,monospace;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+
+/* raid */
+.raidctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
+.raidctl label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.raidctl select,.raidctl input[type=range]{width:100%;font:inherit;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.disks{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+.disk{width:64px;height:76px;border-radius:8px;border:2px solid var(--line);background:var(--surface2);font:600 11px system-ui,sans-serif;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px}
+.disk .t{font-size:10px;font-weight:500;color:var(--muted)}
+.disk.data{border-color:var(--accent);background:var(--accent-soft)}
+.disk.par{border-color:var(--warn);background:var(--warn-soft)}
+.disk.mir{border-color:var(--ok);background:var(--ok-soft)}
+.disk.fail{border-color:var(--bad);background:var(--bad-soft);text-decoration:line-through}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface)}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:2px solid}
+
+/* do dont + quiz */
+.dd h3{display:flex;align-items:center;gap:8px}
+.q{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface)}
+.q p{margin:0 0 8px;font-weight:600}
+.q label{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:8px;cursor:pointer}
+.q label:hover{background:var(--surface2)}
+.q label.right{background:var(--ok-soft)}
+.q label.wrong{background:var(--bad-soft)}
+.q .exp{font-size:14px;margin-top:6px;display:none}
+.q.answered .exp{display:block}
+.score{font-weight:700;font-size:18px}
+@media (max-width:520px){
+  header h1{font-size:21px}
+  .monitor{min-height:310px;font-size:12px;border-width:7px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">Simulasi · semua data fiktif</span>
+    <h1>Lab Interaktif: Dell PowerEdge Server</h1>
+    <p>Belajar dari dasar: kenali servernya, bagian-bagiannya, tombol saat boot, iDRAC, RAID, lalu hal yang wajib diperhatikan.</p>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Bagian materi"></nav>
+
+  <!-- 1 KENALAN -->
+  <section class="page" data-title="Kenalan">
+    <h2>Apa itu Dell PowerEdge?</h2>
+    <p class="lead">PowerEdge adalah lini server Dell. Bentuknya mirip PC, tapi dibuat untuk menyala 24 jam, punya komponen cadangan (redundan), dan bisa dikelola dari jauh lewat <b>iDRAC</b>. Di data center, server inilah yang menjalankan OS, hypervisor (mis. VMware ESXi) dan aplikasi.</p>
+
+    <div class="grid g3">
+      <div class="card"><h3>Rack (R)</h3><p class="muted small" style="margin:0">Dipasang di rak data center. Tingginya diukur dalam <b>U</b> (1U ≈ 4,45 cm). Paling sering kamu temui.</p></div>
+      <div class="card"><h3>Tower (T)</h3><p class="muted small" style="margin:0">Berdiri seperti PC besar. Biasanya di kantor cabang atau ruangan kecil.</p></div>
+      <div class="card"><h3>Modular (MX)</h3><p class="muted small" style="margin:0">Banyak server tipis (sled) dalam satu chassis, berbagi power dan jaringan.</p></div>
+    </div>
+
+    <div class="card decoder">
+      <h3>Coba: baca nama model</h3>
+      <p class="muted small" style="margin:0 0 10px">Ketik model seperti <code>R760</code>, <code>R650</code>, <code>T550</code> atau <code>R7525</code>.</p>
+      <div class="row">
+        <input id="modelIn" value="R760" maxlength="6" aria-label="Nama model">
+        <span class="chips" id="modelChips"></span>
+      </div>
+      <div class="decode-out" id="modelOut"></div>
+      <p class="muted small" style="margin:10px 0 0">Ini hanya patokan umum. Yang pasti selalu: <b>Service Tag</b> di server, untuk cek spesifikasi dan garansi.</p>
+    </div>
+
+    <div class="note"><p><b>Analogi untuk programmer:</b> server = mesin production tempat aplikasi di-deploy. iDRAC = "remote console + monitoring" bawaan mesin itu, tetap hidup walau OS crash.</p></div>
+  </section>
+
+  <!-- 2 KOMPONEN -->
+  <section class="page" data-title="Bagian server">
+    <h2>Bagian-bagian server</h2>
+    <p class="lead">Klik bagian di gambar (atau pilih dari daftar) untuk melihat fungsinya, cara pakai, dan yang perlu diperhatikan. Gambar ini ilustrasi umum 2U, bukan model tertentu.</p>
+    <div class="card">
+      <div class="viewtoggle" role="tablist">
+        <button id="vFront" class="on" type="button">Tampak depan</button>
+        <button id="vRear" type="button">Tampak belakang</button>
+      </div>
+      <div class="svgbox" id="svgbox"></div>
+      <div class="chips" id="partChips"></div>
+    </div>
+    <div class="card info" id="partInfo" aria-live="polite"></div>
+  </section>
+
+  <!-- 3 TOMBOL BOOT -->
+  <section class="page" data-title="Tombol saat boot">
+    <h2>Tombol (key) saat boot</h2>
+    <p class="lead">Saat server menyala, ada beberapa detik di layar awal (POST) untuk menekan tombol khusus. Klik <b>Nyalakan</b>, lalu tekan salah satu tombol sebelum bar penuh.</p>
+
+    <div class="card">
+      <div class="monitor" id="monitor" tabindex="0" aria-live="polite"></div>
+      <div class="keys" id="keys"></div>
+      <div class="row">
+        <button class="btn primary" id="bootBtn" type="button">Nyalakan server</button>
+        <span class="muted small">Di keyboard juga bisa (F11/F12 kadang dipakai browser, jadi klik tombolnya saja).</span>
+      </div>
+    </div>
+    <div class="card" id="keyExplain"></div>
+
+    <div class="card">
+      <h3>Ringkasan tombol</h3>
+      <div style="overflow-x:auto">
+      <table class="keytable">
+        <thead><tr><th>Tombol</th><th>Membuka</th><th>Dipakai untuk</th></tr></thead>
+        <tbody id="keySummary"></tbody>
+      </table>
+      </div>
+      <div class="note"><p><b>Tips:</b> tombol ini bisa ditekan lewat keyboard fisik (crash cart) atau lewat <b>Virtual Console iDRAC</b> dari jauh. Supaya tidak berlomba dengan waktu, di iDRAC ada opsi <b>Next Boot</b> untuk memilih boot sekali ke BIOS Setup atau Lifecycle Controller.</p></div>
+    </div>
+  </section>
+
+  <!-- 4 IDRAC -->
+  <section class="page" data-title="iDRAC">
+    <h2>Simulasi iDRAC: ganti disk rusak</h2>
+    <p class="lead">iDRAC dibuka lewat browser di IP-nya sendiri. Di simulasi ini ada alert disk. Tugasmu: temukan disk yang rusak, nyalakan <b>Blink</b>, ganti disk di bay yang benar, lalu tunggu rebuild.</p>
+
+    <div class="grid g2" style="align-items:start">
+      <div class="card">
+        <h3>Langkah tugas</h3>
+        <ol class="steps" id="steps"></ol>
+        <div class="row" style="margin-top:12px"><button class="btn" id="resetSim" type="button">Ulangi simulasi</button></div>
+      </div>
+      <div class="card" id="simMsg"><h3>Status</h3><p class="muted" style="margin:0">Mulai dari tab <b>Dashboard</b>.</p></div>
+    </div>
+
+    <div class="idrac">
+      <div class="idrac-top"><b>iDRAC · SRV-DEMO-01</b><span>https://192.0.2.10 · Service Tag DEMO123 · simulasi</span></div>
+      <div class="itabs" id="itabs"></div>
+      <div class="ibody" id="ibody"></div>
+    </div>
+  </section>
+
+  <!-- 5 RAID -->
+  <section class="page" data-title="RAID">
+    <h2>Kalkulator dan simulasi RAID</h2>
+    <p class="lead">Pilih level RAID dan jumlah disk. Lalu klik disk untuk "merusaknya" dan lihat apakah data masih aman.</p>
+    <div class="card">
+      <div class="raidctl">
+        <div><label for="rLevel">Level RAID</label>
+          <select id="rLevel"><option value="0">RAID 0</option><option value="1">RAID 1</option><option value="5" selected>RAID 5</option><option value="6">RAID 6</option><option value="10">RAID 10</option></select></div>
+        <div><label for="rN">Jumlah disk: <span id="rNv">6</span></label><input type="range" id="rN" min="2" max="12" value="6"></div>
+        <div><label for="rSize">Ukuran per disk</label>
+          <select id="rSize"><option value="0.96">960 GB</option><option value="1.92" selected>1,92 TB</option><option value="3.84">3,84 TB</option><option value="8">8 TB</option></select></div>
+      </div>
+      <div class="disks" id="disks"></div>
+      <div class="legend"><span><i style="border-color:var(--accent);background:var(--accent-soft)"></i>data</span><span><i style="border-color:var(--warn);background:var(--warn-soft)"></i>porsi paritas</span><span><i style="border-color:var(--ok);background:var(--ok-soft)"></i>mirror</span><span><i style="border-color:var(--bad);background:var(--bad-soft)"></i>rusak</span></div>
+      <div class="stats" id="rStats"></div>
+      <div id="rState"></div>
+    </div>
+  </section>
+
+  <!-- 6 PERHATIAN -->
+  <section class="page" data-title="Perhatian & kuis">
+    <h2>Yang wajib diperhatikan</h2>
+    <p class="lead">Aturan yang paling sering menyelamatkan dari outage saat pegang server.</p>
+    <div class="grid g2 dd">
+      <div class="card"><h3><span class="dot d-ok"></span>Lakukan</h3>
+        <ul class="clean">
+          <li>Cek <b>iDRAC Dashboard dan log</b> sebelum menyimpulkan apa pun.</li>
+          <li><b>Blink</b> komponen dan cocokkan nomor bay/slot sebelum mencabut.</li>
+          <li>Catat <b>Service Tag</b>, waktu kejadian, dan kumpulkan <b>TSR</b> saat buka tiket ke Dell.</li>
+          <li>Pastikan RAID <b>selesai rebuild</b> sebelum pekerjaan lain di server yang sama.</li>
+          <li>Update firmware dan reboot hanya di <b>maintenance window</b> dengan MOP.</li>
+          <li>Pakai <b>ESD strap</b> saat menyentuh komponen di dalam server.</li>
+        </ul></div>
+      <div class="card"><h3><span class="dot d-bad"></span>Jangan</h3>
+        <ul class="clean">
+          <li>Mencabut disk "kira-kira" tanpa Blink, apalagi di RAID yang sudah degraded.</li>
+          <li>Menahan tombol power (force off) server production tanpa izin.</li>
+          <li>Mencabut kedua PSU atau kabel di jalur listrik yang salah.</li>
+          <li>Mengubah BIOS, boot mode, atau RAID tanpa MOP.</li>
+          <li>Membiarkan PSU atau disk rusak "karena server masih nyala": redundansinya sudah hilang.</li>
+          <li>Menyimpan password iDRAC di catatan atau chat biasa.</li>
+        </ul></div>
+    </div>
+
+    <h2>Kuis singkat</h2>
+    <div id="quiz"></div>
+    <div class="card row" style="justify-content:space-between"><span class="score" id="score">Skor: 0 / 0</span><button class="btn" id="quizReset" type="button">Ulangi kuis</button></div>
+  </section>
+
+  <div class="pager"><button class="btn" id="prevBtn" type="button">← Sebelumnya</button><button class="btn primary" id="nextBtn" type="button">Berikutnya →</button></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var toastT;
+function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},2600)}
+
+/* ---------- navigation ---------- */
+var pages=$$("section.page"), cur=0, visited={};
+var tabs=$("#tabs");
+pages.forEach(function(p,i){
+  var b=document.createElement("button");b.className="tab";b.type="button";
+  b.innerHTML='<span class="n">'+(i+1)+'</span>'+esc(p.dataset.title);
+  b.addEventListener("click",function(){go(i)});tabs.appendChild(b);
+});
+function go(i){
+  cur=Math.max(0,Math.min(pages.length-1,i));visited[cur]=true;
+  pages.forEach(function(p,k){p.classList.toggle("show",k===cur)});
+  $$(".tab").forEach(function(t,k){t.classList.toggle("active",k===cur);t.classList.toggle("done",!!visited[k]&&k!==cur)});
+  $("#prevBtn").disabled=cur===0;
+  $("#nextBtn").textContent=cur===pages.length-1?"Selesai ✓":"Berikutnya →";
+  try{localStorage.setItem("dellLabPage",String(cur))}catch(e){}
+  var t=$$(".tab")[cur];if(t&&t.scrollIntoView)t.scrollIntoView({block:"nearest",inline:"center"});
+}
+$("#prevBtn").addEventListener("click",function(){go(cur-1);window.scrollTo(0,0)});
+$("#nextBtn").addEventListener("click",function(){if(cur===pages.length-1){toast("Mantap! Modul Dell selesai.");return}go(cur+1);window.scrollTo(0,0)});
+
+/* ---------- 1. model decoder ---------- */
+var shapes={R:"Rack, dipasang di rak",T:"Tower, berdiri sendiri",M:"Modular (blade)",C:"Cloud / high-density",X:"Modular (sled MX)"};
+var gens={"3":"13th Gen","4":"14th Gen","5":"15th Gen","6":"16th Gen","7":"17th Gen"};
+function decode(m){
+  m=(m||"").toUpperCase().replace(/\s/g,"");
+  var out=$("#modelOut");
+  var mm=m.match(/^(MX|[RTMC])(\d{3,4})$/);
+  if(!mm){out.innerHTML='<div class="dpart" style="grid-column:1/-1"><span class="muted">Format belum dikenali. Contoh: R760, T550, R7525.</span></div>';return}
+  var L=mm[1],d=mm[2],parts=[];
+  parts.push({k:L,v:shapes[L==="MX"?"X":L]||"Bentuk lain"});
+  var cls=d[0];
+  parts.push({k:cls,v:L==="R"?(cls==="6"?"Kelas 6xx, umumnya tipis (1U)":cls==="7"?"Kelas 7xx, umumnya 2U, muat lebih banyak disk":"Kelas "+cls+"xx"):"Kelas/ukuran "+cls+"xx"});
+  parts.push({k:d[1],v:gens[d[1]]?"Generasi: "+gens[d[1]]:"Generasi tidak dikenal"});
+  if(d.length===3){parts.push({k:d[2],v:d[2]==="0"?"Prosesor Intel":d[2]==="5"?"Prosesor AMD":"Varian "+d[2]})}
+  else{parts.push({k:d.slice(2),v:d[3]==="5"?"Model 4 digit, umumnya prosesor AMD":"Varian khusus"})}
+  out.innerHTML=parts.map(function(p){return '<div class="dpart"><b>'+esc(p.k)+'</b>'+esc(p.v)+'</div>'}).join("");
+}
+var mi=$("#modelIn");mi.addEventListener("input",function(){decode(mi.value)});
+["R760","R660","R750","T550","R7525"].forEach(function(m){var c=document.createElement("button");c.className="chip";c.type="button";c.textContent=m;c.addEventListener("click",function(){mi.value=m;decode(m)});$("#modelChips").appendChild(c)});
+decode(mi.value);
+
+/* ---------- 2. server parts ---------- */
+var parts={
+  power:{v:"front",n:"Tombol power",f:"Menyalakan dan mematikan server. Biasanya ada lampu di sekelilingnya yang menyala saat server hidup.",c:["Tekan sekali saat server mati = menyala.","Tekan sekali saat server hidup = minta OS shutdown dengan sopan (graceful).","Tahan beberapa detik = mati paksa, seperti mencabut listrik."],w:"Jangan pernah menahan tombol power di server production tanpa izin dan MOP. Mati paksa bisa merusak data aplikasi."},
+  health:{v:"front",n:"Indikator status / health",f:"Lampu yang memberi tahu kondisi server. Di beberapa model ada panel LCD kecil yang menampilkan pesan error.",c:["Biru atau hijau = normal.","Amber (oranye), terutama berkedip = ada masalah hardware.","Lihat pesan di LCD, lalu cek detailnya di iDRAC."],w:"Lampu amber bukan berarti server mati, tapi jangan diabaikan. Selalu cari penyebabnya di log iDRAC."},
+  tag:{v:"front",n:"Service Tag (tag tarik)",f:"Tag yang bisa ditarik dari bagian depan, berisi Service Tag (kode 7 karakter) dan info awal iDRAC.",c:["Tarik tag-nya untuk membaca Service Tag.","Pakai Service Tag untuk cek garansi, spesifikasi asli, dan buka tiket ke Dell Support.","Di server baru, password awal iDRAC sering tercetak di sini."],w:"Foto Service Tag boleh untuk tiket, tapi jangan sebarkan info password awal iDRAC."},
+  drives:{v:"front",n:"Drive bay (slot disk)",f:"Tempat disk HDD/SSD/NVMe dipasang. Tiap bay punya nomor dan dua lampu: aktivitas dan status.",c:["Disk bisa dicabut saat server menyala (hot-swap).","Lampu status amber berkedip = disk rusak atau akan rusak (predictive failure).","Nyalakan Blink di iDRAC supaya lampu disk yang dituju berkedip."],w:"Kesalahan paling klasik: salah hitung nomor bay lalu mencabut disk sehat. Di RAID yang sudah degraded, ini bisa menghilangkan data."},
+  frontio:{v:"front",n:"Port depan (USB & VGA)",f:"Untuk menyambung monitor dan keyboard langsung ke server (sering disebut crash cart).",c:["Sambung monitor ke VGA dan keyboard ke USB.","Berguna saat jaringan dan iDRAC tidak bisa diakses."],w:"Jangan colok flashdisk sembarangan ke server production; bisa berisi malware atau memicu boot dari USB."},
+  idracdirect:{v:"front",n:"iDRAC Direct",f:"Port USB khusus untuk menyambung laptop langsung ke iDRAC, tanpa lewat jaringan.",c:["Sambung kabel USB dari laptop ke port ini.","Buka browser ke alamat iDRAC Direct sesuai panduan model.","Dipakai saat setup awal atau saat IP iDRAC belum diketahui."],w:"Pastikan kamu tahu kredensial iDRAC yang berlaku dan catat aktivitasmu."},
+  rearports:{v:"rear",n:"Port belakang (VGA, serial, USB)",f:"Port tambahan di belakang untuk monitor, keyboard, atau kabel serial.",c:["Fungsinya sama dengan port depan, hanya letaknya di belakang rak."],w:"Rapikan kabel kembali setelah selesai; kabel menggantung bisa tercabut orang lain."},
+  sysid:{v:"rear",n:"Tombol System ID",f:"Menyalakan lampu biru di depan dan belakang server supaya mudah ditemukan di antara banyak server di rak.",c:["Tekan tombolnya, atau nyalakan Identify dari iDRAC secara remote.","Rekan di data center tinggal mencari server yang berkedip biru."],w:"Biasakan Identify server dulu sebelum mencabut kabel apa pun di belakang rak."},
+  idrac:{v:"rear",n:"Port iDRAC (dedicated)",f:"Port jaringan khusus iDRAC. Tersambung ke jaringan manajemen (out-of-band), terpisah dari jaringan aplikasi.",c:["Akses lewat browser: https://<IP-iDRAC>.","Bisa juga SSH ke IP iDRAC untuk memakai perintah racadm."],w:"Jangan tertukar dengan port NIC biasa. Kalau kabel iDRAC dicabut, tim kehilangan akses remote ke server."},
+  pcie:{v:"rear",n:"Slot PCIe (riser)",f:"Tempat kartu tambahan: NIC tambahan, HBA Fibre Channel untuk storage, GPU, atau RAID controller.",c:["Catat kartu apa ada di slot berapa (lihat di iDRAC > System > Network/Storage)."],w:"Menambah atau melepas kartu butuh server dimatikan dan MOP."},
+  nic:{v:"rear",n:"Port jaringan (LOM/OCP)",f:"Port Ethernet utama yang tersambung ke switch Cisco untuk trafik aplikasi dan storage (mis. iSCSI/NFS).",c:["Lampu link menyala = kabel tersambung. Lampu kedip = ada trafik.","Cocokkan label kabel dengan dokumen: port server mana ke port switch mana."],w:"Mencabut kabel NIC bisa memutus layanan aplikasi. Pastikan kabel yang benar dan ada izin."},
+  psu1:{v:"rear",n:"Power supply 1 (PSU)",f:"Sumber daya listrik server. Biasanya ada dua PSU (redundan) yang masing-masing ke jalur listrik berbeda (A dan B).",c:["Lampu hijau = normal. Amber = rusak atau tidak dapat listrik.","PSU bisa diganti saat server menyala (hot-swap)."],w:"Sebelum mencabut PSU yang rusak, pastikan PSU lainnya hijau. Jangan pernah mencabut keduanya."},
+  psu2:{v:"rear",n:"Power supply 2 (PSU)",f:"PSU cadangan. Kalau PSU 1 mati, server tetap menyala dari PSU ini.",c:["Cek status kedua PSU di iDRAC > Dashboard atau System > Power."],w:"Server tetap nyala dengan satu PSU, tapi redundansi hilang. Tetap buka tiket dan ganti sesuai SOP."}
+};
+function hs(id,x,y,w,h,inner){return '<g class="hs" data-id="'+id+'" tabindex="0" role="button" aria-label="'+esc(parts[id].n)+'">'+inner+'<rect class="hit" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6"/></g>'}
+function frontSVG(){
+  var s='<svg viewBox="0 0 800 190" role="img" aria-label="Tampak depan server">';
+  s+='<rect x="5" y="15" width="790" height="160" rx="8" fill="var(--chassis)"/>';
+  s+='<rect x="5" y="15" width="78" height="160" rx="8" fill="var(--chassis2)"/><rect x="650" y="15" width="145" height="160" rx="8" fill="var(--chassis2)"/>';
+  s+=hs("power",20,33,44,44,'<circle cx="42" cy="55" r="14" fill="#111" stroke="#6bb6ff" stroke-width="2.5"/><path d="M42 47v8M36 51a8 8 0 1 0 12 0" stroke="#cfe6ff" stroke-width="2" fill="none" stroke-linecap="round"/>');
+  s+=hs("health",24,84,36,50,'<rect x="30" y="88" width="24" height="42" rx="4" fill="#111"/><circle cx="42" cy="99" r="4" fill="#4c9cf0"/><circle cx="42" cy="110" r="4" fill="#30363d"/><circle cx="42" cy="121" r="4" fill="#30363d"/>');
+  s+=hs("tag",17,138,50,28,'<rect x="20" y="141" width="44" height="22" rx="3" fill="#d9dde2"/><text x="42" y="156" text-anchor="middle" font-size="10" font-weight="700" fill="#2b3036">TAG</text>');
+  var bays='';
+  for(var i=0;i<8;i++){var c=i%4,r=Math.floor(i/4),x=92+c*139,y=26+r*72;
+    bays+='<rect x="'+x+'" y="'+y+'" width="133" height="66" rx="5" fill="var(--bay)" stroke="#4a5159"/>';
+    bays+='<circle cx="'+(x+14)+'" cy="'+(y+16)+'" r="3.5" fill="#3ad06b"/><circle cx="'+(x+14)+'" cy="'+(y+30)+'" r="3.5" fill="'+(i===5?'#ffae1a':'#30363d')+'"/>';
+    bays+='<text class="svglbl" x="'+(x+28)+'" y="'+(y+21)+'">Bay '+i+'</text>';
+    for(var g=0;g<5;g++){bays+='<rect x="'+(x+60+g*12)+'" y="'+(y+44)+'" width="7" height="12" rx="1.5" fill="#2c3238"/>'}}
+  s+=hs("drives",88,22,560,146,bays);
+  s+=hs("frontio",664,30,112,36,'<rect x="672" y="40" width="30" height="14" rx="2" fill="#111" stroke="#8a939c"/><rect x="714" y="37" width="52" height="20" rx="4" fill="#24476b" stroke="#8a939c"/><text class="svglbl" x="672" y="78">USB · VGA</text>');
+  s+=hs("idracdirect",664,96,74,36,'<rect x="672" y="104" width="24" height="12" rx="3" fill="#111" stroke="#8a939c"/><text class="svglbl" x="702" y="114">iDRAC</text><text class="svglbl" x="672" y="130">Direct</text>');
+  s+='<text class="svglbl" x="44" y="185" text-anchor="middle" style="fill:var(--muted)">kiri</text><text class="svglbl" x="722" y="185" text-anchor="middle" style="fill:var(--muted)">kanan</text>';
+  return s+'</svg>';
+}
+function rearSVG(){
+  var s='<svg viewBox="0 0 800 190" role="img" aria-label="Tampak belakang server">';
+  s+='<rect x="5" y="15" width="790" height="160" rx="8" fill="var(--chassis)"/>';
+  s+=hs("rearports",16,30,100,62,'<rect x="24" y="38" width="46" height="18" rx="4" fill="#24476b" stroke="#8a939c"/><rect x="24" y="64" width="46" height="18" rx="4" fill="#3b3f45" stroke="#8a939c"/><rect x="80" y="38" width="26" height="12" rx="2" fill="#111" stroke="#8a939c"/><rect x="80" y="56" width="26" height="12" rx="2" fill="#111" stroke="#8a939c"/>');
+  s+=hs("sysid",22,102,38,38,'<circle cx="41" cy="121" r="11" fill="#2d6cdf"/><text x="41" y="125" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">ID</text>');
+  s+=hs("idrac",64,102,48,56,'<rect x="72" y="110" width="32" height="26" rx="3" fill="#111" stroke="#b8c0c9"/><text class="svglbl" x="88" y="152" text-anchor="middle">iDRAC</text>');
+  var p='';for(var i=0;i<3;i++){var y=28+i*28;p+='<rect x="130" y="'+y+'" width="300" height="22" rx="3" fill="var(--bay)" stroke="#4a5159"/><text class="svglbl" x="140" y="'+(y+15)+'">PCIe slot '+(i+1)+'</text>'}
+  s+=hs("pcie",124,22,312,86,p);
+  var n='<rect x="130" y="118" width="300" height="44" rx="4" fill="#20252b" stroke="#4a5159"/>';
+  for(var k=0;k<4;k++){var x=146+k*68;n+='<rect x="'+x+'" y="126" width="40" height="28" rx="2" fill="#111" stroke="#8a939c"/><circle cx="'+(x+8)+'" cy="131" r="2.5" fill="#3ad06b"/><circle cx="'+(x+32)+'" cy="131" r="2.5" fill="#ffae1a"/>'}
+  s+=hs("nic",124,112,312,56,n);
+  function psu(id,x,label,led){var g='<rect x="'+x+'" y="28" width="150" height="132" rx="5" fill="#464d56" stroke="#5b636d"/>';
+    for(var r=0;r<6;r++){g+='<line x1="'+(x+14)+'" y1="'+(44+r*14)+'" x2="'+(x+106)+'" y2="'+(44+r*14)+'" stroke="#353b42" stroke-width="5" stroke-linecap="round"/>'}
+    g+='<rect x="'+(x+118)+'" y="44" width="20" height="74" rx="4" fill="#2b3036"/><circle cx="'+(x+128)+'" cy="138" r="5" fill="'+led+'"/><text class="svglbl" x="'+(x+14)+'" y="146">'+label+'</text>';
+    return hs(id,x-4,24,158,140,g)}
+  s+=psu("psu1",462,"PSU 1","#3ad06b");s+=psu("psu2",632,"PSU 2","#3ad06b");
+  return s+'</svg>';
+}
+var view="front",selPart="drives";
+function renderServer(){
+  $("#svgbox").innerHTML=view==="front"?frontSVG():rearSVG();
+  $("#vFront").classList.toggle("on",view==="front");$("#vRear").classList.toggle("on",view==="rear");
+  $$("#svgbox .hs").forEach(function(g){
+    g.classList.toggle("sel",g.dataset.id===selPart);
+    g.addEventListener("click",function(){pick(g.dataset.id)});
+    g.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(g.dataset.id)}});
+  });
+  var ch=$("#partChips");ch.innerHTML="";
+  Object.keys(parts).filter(function(k){return parts[k].v===view}).forEach(function(k){
+    var b=document.createElement("button");b.type="button";b.className="chip"+(k===selPart?" on":"");b.textContent=parts[k].n;
+    b.addEventListener("click",function(){pick(k)});ch.appendChild(b);
+  });
+  renderInfo();
+}
+function pick(id){selPart=id;if(parts[id].v!==view){view=parts[id].v}renderServer()}
+function renderInfo(){
+  var p=parts[selPart];
+  $("#partInfo").innerHTML='<h3>'+esc(p.n)+'</h3><dl><dt>Fungsinya</dt><dd>'+esc(p.f)+'</dd><dt>Cara pakai</dt><dd><ul class="clean">'+p.c.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></dd></dl><div class="note warn"><p><b>Perhatikan:</b> '+esc(p.w)+'</p></div>';
+}
+$("#vFront").addEventListener("click",function(){view="front";selPart="drives";renderServer()});
+$("#vRear").addEventListener("click",function(){view="rear";selPart="psu1";renderServer()});
+renderServer();
+
+/* ---------- 3. boot keys ---------- */
+var KEYS={
+  F2:{name:"System Setup",short:"BIOS, iDRAC, RAID",what:"Pengaturan dasar server: BIOS, pengaturan iDRAC, dan perangkat seperti RAID controller dan NIC.",
+    when:["Mengatur IP iDRAC saat server baru dipasang","Mengubah urutan boot atau boot mode (UEFI/BIOS)","Mengaktifkan fitur virtualization untuk hypervisor"],
+    caution:["Perubahan BIOS bisa membuat OS gagal boot, misalnya mengganti boot mode.","Catat nilai lama sebelum mengubah, dan ubah hanya sesuai MOP.","Keluar lewat Finish lalu konfirmasi simpan atau batalkan."],
+    items:[["System BIOS","Pengaturan prosesor, memori, boot mode, urutan boot, dan keamanan."],["iDRAC Settings","Atur IP, user, dan jaringan iDRAC. Sering dipakai saat setup awal."],["Device Settings","Masuk ke konfigurasi perangkat: RAID controller (PERC), NIC, dan lainnya."]]},
+  F10:{name:"Lifecycle Controller",short:"Wizard OS, firmware, RAID",what:"Tool bawaan dengan wizard untuk install OS, update firmware, konfigurasi RAID, dan diagnostik, tanpa media tambahan.",
+    when:["Install OS dengan driver yang sudah disiapkan","Update firmware dari file atau repository","Membuat RAID lewat wizard","Menjalankan diagnostik hardware"],
+    caution:["Membuat RAID baru menghapus data di disk yang dipakai.","Update firmware butuh reboot dan bisa lama: lakukan di maintenance window.","Jangan matikan server saat update sedang berjalan."],
+    items:[["OS Deployment","Wizard install OS, termasuk menyiapkan driver."],["Firmware Update","Update BIOS, iDRAC, PERC, NIC, dan lainnya."],["Hardware Configuration","Konfigurasi RAID dan perangkat lewat wizard."],["Hardware Diagnostics","Tes hardware untuk mencari komponen bermasalah."],["Lifecycle Log","Riwayat perubahan dan kejadian di server."]]},
+  F11:{name:"Boot Manager",short:"Pilih boot sekali jalan",what:"Memilih perangkat boot untuk sekali jalan, tanpa mengubah urutan boot permanen.",
+    when:["Boot dari file ISO yang di-mount lewat Virtual Media iDRAC","Boot dari USB untuk tool tertentu"],
+    caution:["Pastikan memilih perangkat yang benar. Boot dari installer bisa berlanjut ke proses install yang memformat disk.","Pilihan ini hanya untuk sekali boot; boot berikutnya kembali normal."],
+    items:[["Integrated RAID Controller 1: VMware ESXi","Disk lokal berisi OS. Boot normal."],["Virtual Optical Drive (iDRAC)","ISO dari laptop yang di-mount lewat Virtual Media."],["Front USB","Flashdisk yang dicolok di depan."],["NIC Slot 1 Port 1 (PXE)","Boot dari jaringan."]]},
+  F12:{name:"PXE Boot",short:"Boot dari jaringan",what:"Server boot dari jaringan: mencari server DHCP/PXE untuk mengambil image OS atau tool.",
+    when:["Install OS massal secara otomatis","Menjalankan tool diagnostik lewat jaringan"],
+    caution:["Kalau di jaringan ada server PXE dengan instalasi otomatis, server bisa langsung terinstal ulang dan disknya terhapus.","Tanpa server PXE, proses akan timeout lalu lanjut ke perangkat boot berikutnya."],
+    items:null}
+};
+var bootState="off",bootTimers=[],bootStart=0,raf;
+var mon=$("#monitor");
+function clearBoot(){bootTimers.forEach(clearTimeout);bootTimers=[];cancelAnimationFrame(raf)}
+function monOff(){mon.className="monitor";mon.innerHTML='<div class="muted" style="color:#5e6b77">[ layar mati ]<br><br>Klik "Nyalakan server" untuk memulai.</div>'}
+function startBoot(){
+  clearBoot();bootState="posting";mon.className="monitor";
+  mon.innerHTML='<div class="logo">DELL</div><div id="postLines"></div><div class="bar"><i id="postBar"></i></div><div class="hint"><b>F2</b> System Setup · <b>F10</b> Lifecycle Controller · <b>F11</b> Boot Manager · <b>F12</b> PXE Boot</div>';
+  var lines=["Memeriksa memori... 256 GB OK","Inisialisasi iDRAC... IP 192.0.2.10","Inisialisasi PERC... VD0 RAID 5 Optimal","Inisialisasi NIC... 4 port terdeteksi","Menunggu input tombol..."];
+  lines.forEach(function(l,i){bootTimers.push(setTimeout(function(){if(bootState!=="posting")return;var d=document.createElement("div");d.textContent=l;$("#postLines").appendChild(d)},500+i*1300))});
+  var dur=8500;bootStart=performance.now();
+  (function tick(){if(bootState!=="posting")return;var p=Math.min(1,(performance.now()-bootStart)/dur);var b=$("#postBar");if(b)b.style.width=(p*100)+"%";if(p<1){raf=requestAnimationFrame(tick)}else{bootOS()}})();
+  $("#bootBtn").textContent="Restart server";mon.focus({preventScroll:true});
+  renderExplain(null);
+}
+function bootOS(){
+  bootState="os";clearBoot();
+  mon.className="monitor";
+  mon.innerHTML='<div class="logo">DELL</div><div>Tidak ada tombol ditekan.</div><div>Booting dari Integrated RAID Controller 1...</div><div>Memuat VMware ESXi...</div><br><div style="color:#ffc861">Terlewat? Klik "Restart server" lalu tekan tombol lebih cepat.</div>';
+}
+function pressKey(k){
+  if(bootState!=="posting"){toast(bootState==="menu"?"Kamu sudah di dalam menu. Klik Restart untuk mencoba tombol lain.":"Nyalakan atau restart server dulu, lalu tekan tombol saat layar awal muncul.");return}
+  bootState="menu";clearBoot();
+  var K=KEYS[k];
+  mon.className="monitor";mon.innerHTML='<div class="logo">DELL</div><div style="color:#9fd0ff">'+k+' ditekan. Memasuki '+esc(K.name)+'...</div>';
+  bootTimers.push(setTimeout(function(){renderMenu(k)},800));
+}
+function renderMenu(k){
+  var K=KEYS[k];
+  if(!K.items){
+    mon.className="monitor";
+    mon.innerHTML='<div class="logo">PXE</div><div>Booting dari NIC Slot 1 Port 1...</div><div>Mencari server DHCP / PXE...</div><div>DHCP... DHCP... DHCP...</div><div style="color:#ffc861">Tidak ada respons PXE (timeout). Lanjut ke perangkat boot berikutnya.</div>';
+  }else{
+    mon.className="monitor bios";
+    mon.innerHTML='<div class="title">'+esc(K.name)+' <span style="font-weight:400;opacity:.8">· simulasi</span></div><div class="bios-items">'+K.items.map(function(it,i){return '<button type="button" data-i="'+i+'">'+esc(it[0])+'</button>'}).join("")+'</div><div class="bios-desc" id="biosDesc">Klik salah satu menu untuk melihat isinya.</div>';
+    $$(".bios-items button",mon).forEach(function(b){b.addEventListener("click",function(){
+      $$(".bios-items button",mon).forEach(function(x){x.classList.remove("on")});b.classList.add("on");
+      $("#biosDesc").textContent=K.items[+b.dataset.i][1]+(k==="F11"&&b.dataset.i!=="0"?" (Simulasi: pilihan ini hanya untuk satu kali boot.)":"");
+    })});
+  }
+  renderExplain(k);
+}
+function renderExplain(k){
+  var box=$("#keyExplain");
+  if(!k){box.innerHTML='<h3>Penjelasan tombol</h3><p class="muted" style="margin:0">Tekan salah satu tombol saat layar awal untuk melihat penjelasannya di sini.</p>';return}
+  var K=KEYS[k];
+  box.innerHTML='<h3><kbd>'+k+'</kbd> &nbsp;'+esc(K.name)+'</h3><p style="margin:0 0 6px">'+esc(K.what)+'</p><b class="small">Kapan dipakai</b><ul class="clean">'+K.when.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul><div class="note warn"><p><b>Perhatikan:</b></p><ul class="clean">'+K.caution.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>';
+}
+Object.keys(KEYS).forEach(function(k){
+  var b=document.createElement("button");b.type="button";b.innerHTML=k+'<small>'+esc(KEYS[k].name)+'</small>';
+  b.addEventListener("click",function(){pressKey(k)});$("#keys").appendChild(b);
+  var tr=document.createElement("tr");tr.innerHTML='<td><kbd>'+k+'</kbd></td><td>'+esc(KEYS[k].name)+'</td><td>'+esc(KEYS[k].short)+'</td>';$("#keySummary").appendChild(tr);
+});
+$("#bootBtn").addEventListener("click",startBoot);
+document.addEventListener("keydown",function(e){
+  if(!pages[cur]||pages[cur].dataset.title!=="Tombol saat boot")return;
+  if(KEYS[e.key]){e.preventDefault();pressKey(e.key)}
+});
+monOff();renderExplain(null);
+
+/* ---------- 4. iDRAC sim ---------- */
+var FAILED=5,S;
+function resetSim(){S={tab:"dash",dash:false,logs:false,blink:null,blinkedFailed:false,replaced:false,rebuild:0,done:false,lost:false,msg:null};renderI()}
+var STEP_TXT=["Lihat alert di Dashboard","Baca log di tab Logs","Nyalakan Blink pada disk yang rusak","Ganti disk di bay yang benar","Tunggu rebuild selesai"];
+function stepFlags(){return [S.dash,S.logs,S.blinkedFailed,S.replaced,S.done]}
+function diskState(i){if(S.lost)return i===FAILED||i===S.lostBay?"Failed":"Offline";if(i!==FAILED)return "Online";if(S.done)return "Online";if(S.replaced)return "Rebuilding";return "Failed"}
+function vdState(){if(S.lost)return ["Failed","p-bad"];if(S.done)return ["Optimal","p-ok"];if(S.replaced)return ["Rebuilding","p-warn"];return ["Degraded","p-warn"]}
+function logs(){
+  var L=[["2026-11-08 02:14:07","Critical","Disk 5 di bay depan terdeteksi gagal (Failed)."],["2026-11-08 02:14:09","Warning","Virtual Disk 0 (RAID 5) berstatus Degraded."],["2026-11-07 22:01:33","Info","Login iDRAC berhasil oleh user ops-demo."],["2026-11-06 09:12:50","Warning","Disk 5 melaporkan predictive failure."]];
+  if(S.replaced)L.unshift([nowStr(),"Info","Disk baru terpasang di bay 5. Rebuild dimulai."]);
+  if(S.done)L.unshift([nowStr(),"Info","Rebuild selesai. Virtual Disk 0 kembali Optimal."]);
+  if(S.lost)L.unshift([nowStr(),"Critical","Virtual Disk 0 gagal. Dua disk hilang dari RAID 5."]);
+  return L;
+}
+function nowStr(){var d=new Date();function p(n){return (n<10?"0":"")+n}return "2026-11-08 "+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds())}
+function renderI(){
+  var tabsDef=[["dash","Dashboard"],["storage","Storage"],["logs","Logs"],["term","Terminal racadm"]];
+  $("#itabs").innerHTML=tabsDef.map(function(t){return '<button type="button" data-t="'+t[0]+'" class="'+(S.tab===t[0]?"on":"")+'">'+t[1]+'</button>'}).join("");
+  $$("#itabs button").forEach(function(b){b.addEventListener("click",function(){S.tab=b.dataset.t;if(S.tab==="dash")S.dash=true;if(S.tab==="logs")S.logs=true;renderI()})});
+  if(S.tab==="dash")S.dash=true;
+  var body=$("#ibody");
+  if(S.tab==="dash")body.innerHTML=dashHTML();
+  else if(S.tab==="storage")body.innerHTML=storageHTML();
+  else if(S.tab==="logs")body.innerHTML=logsHTML();
+  else body.innerHTML=termHTML();
+  bindI();
+  var f=stepFlags();
+  $("#steps").innerHTML=STEP_TXT.map(function(t,i){return '<li class="'+(f[i]?"ok":"")+'"><span class="ck">'+(f[i]?"✓":i+1)+'</span><span>'+esc(t)+'</span></li>'}).join("");
+  renderMsg();
+}
+function renderMsg(){
+  var m=$("#simMsg");
+  if(S.msg){m.innerHTML='<h3>Status</h3><div class="note '+S.msg[0]+'"><p>'+S.msg[1]+'</p></div>'+(S.replaced&&!S.done&&!S.lost?'<div class="small muted">Rebuild: <span id="rbPct">'+S.rebuild+'</span>%</div><div class="progress"><i id="rbBar" style="width:'+S.rebuild+'%"></i></div>':'');return}
+  m.innerHTML='<h3>Status</h3><p class="muted" style="margin:0">Mulai dari tab <b>Dashboard</b>, lalu cari tahu komponen mana yang bermasalah.</p>';
+}
+function tile(name,st,cls,go){return '<button type="button" class="tile" '+(go?'data-go="'+go+'"':'')+'><span class="small muted">'+name+'</span><span class="st"><span class="dot '+cls+'"></span>'+st+'</span></button>'}
+function dashHTML(){
+  var bad=!S.done;var sto=S.lost?["Critical","d-bad"]:S.done?["OK","d-ok"]:S.replaced?["Rebuilding","d-warn"]:["Critical","d-bad"];
+  return '<div class="tiles">'+tile("System",bad?"Warning":"Healthy",bad?"d-warn":"d-ok")+tile("Storage",sto[0],sto[1],"storage")+tile("Power Supplies","OK","d-ok")+tile("Fans","OK","d-ok")+tile("Temperatures","OK","d-ok")+tile("Memory","OK","d-ok")+'</div>'+
+  '<table class="tbl" style="margin-top:12px"><tbody><tr><th>Host name</th><td>SRV-DEMO-01</td></tr><tr><th>Model</th><td>PowerEdge R760 (simulasi)</td></tr><tr><th>Service Tag</th><td>DEMO123</td></tr><tr><th>Power</th><td>ON</td></tr><tr><th>iDRAC IP</th><td>192.0.2.10</td></tr></tbody></table>'+
+  (bad?'<div class="note warn"><p>Ada alert di <b>Storage</b>. Klik tile Storage atau buka tab Logs untuk detailnya.</p></div>':'<div class="note ok"><p>Semua komponen sehat.</p></div>');
+}
+function storageHTML(){
+  var vd=vdState();
+  var rows="";for(var i=0;i<8;i++){var st=diskState(i);var cls=st==="Online"?"p-ok":st==="Rebuilding"?"p-warn":"p-bad";
+    rows+='<tr><td>Disk '+i+'</td><td>SSD 1,92 TB</td><td><span class="pill '+cls+'">'+st+'</span></td><td><button type="button" class="btn small" data-blink="'+i+'" style="padding:4px 10px">'+(S.blink===i?"Stop Blink":"Blink")+'</button></td></tr>'}
+  var bays="";for(var j=0;j<8;j++){var s2=diskState(j);var stat=s2==="Failed"||s2==="Offline"?"amber":"";var act=s2==="Online"||s2==="Rebuilding"?"green":"";
+    bays+='<button type="button" data-bay="'+j+'" aria-label="Cabut dan ganti disk di bay '+j+'"><span class="led a '+act+'"></span><span class="led s '+stat+(S.blink===j?" amber blink":"")+'"></span>Bay '+j+'</button>'}
+  return '<p style="margin:0 0 8px"><b>Virtual Disk 0</b> · RAID 5 · <span class="pill '+vd[1]+'">'+vd[0]+'</span></p>'+
+  '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Disk</th><th>Tipe</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<h3 style="margin-top:16px">Tampak depan server (di data center)</h3><p class="small muted" style="margin:0">Klik bay untuk <b>mencabut dan mengganti</b> disk di slot itu.</p><div class="front-mini">'+bays+'</div>';
+}
+function logsHTML(){
+  return '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Waktu</th><th>Severity</th><th>Pesan</th></tr></thead><tbody>'+logs().map(function(l){var c=l[1]==="Critical"?"p-bad":l[1]==="Warning"?"p-warn":"p-ok";return '<tr><td class="small">'+l[0]+'</td><td><span class="pill '+c+'">'+l[1]+'</span></td><td>'+esc(l[2])+'</td></tr>'}).join("")+'</tbody></table></div><div class="note"><p>Ini gabungan SEL dan Lifecycle Log. Catat waktu dan pesan error untuk laporan dan tiket ke Dell.</p></div>';
+}
+var termBuf=[["dim","Terhubung ke iDRAC 192.0.2.10 (simulasi). Ketik help untuk daftar perintah."]];
+function termHTML(){
+  var cmds=["racadm getsysinfo","racadm getsel","racadm storage get pdisks","racadm getversion","racadm techsupreport collect","racadm serveraction powercycle"];
+  return '<div class="term" id="term">'+termBuf.map(function(l){return '<div class="'+l[0]+'">'+esc(l[1])+'</div>'}).join("")+'</div><form class="term-in" id="termForm"><input id="termIn" autocomplete="off" spellcheck="false" placeholder="ketik perintah, mis. racadm getsysinfo" aria-label="Perintah racadm"><button class="btn primary" type="submit">Jalankan</button></form><div class="chips">'+cmds.map(function(c){return '<button type="button" class="chip" data-cmd="'+esc(c)+'">'+esc(c)+'</button>'}).join("")+'</div>';
+}
+function runCmd(raw){
+  var c=raw.trim().replace(/\s+/g," ");if(!c)return;
+  termBuf.push(["okc","racadm> "+c]);
+  var low=c.toLowerCase();
+  function out(cls,t){t.split("\n").forEach(function(x){termBuf.push([cls,x])})}
+  if(low==="clear"){termBuf=[];}
+  else if(low==="help"||low==="racadm help"){out("","Perintah yang tersedia di simulasi:\n  racadm getsysinfo            info sistem\n  racadm getversion            versi firmware\n  racadm getsel                System Event Log\n  racadm lclog view            Lifecycle Log\n  racadm storage get pdisks    status disk fisik\n  racadm serveraction powerstatus\n  racadm serveraction graceshutdown | powercycle | hardreset\n  racadm techsupreport collect kumpulkan TSR\n  clear")}
+  else if(low.indexOf("racadm")!==0){out("err","Perintah harus diawali 'racadm'. Contoh: racadm getsysinfo")}
+  else if(low==="racadm getsysinfo"){out("","RAC Information:\n  iDRAC IP Address   = 192.0.2.10\n  Firmware Version   = x.yy.zz (contoh)\nSystem Information:\n  System Model       = PowerEdge R760 (simulasi)\n  Service Tag        = DEMO123\n  Host Name          = SRV-DEMO-01\n  Power Status       = ON")}
+  else if(low==="racadm getversion"){out("","BIOS Version                = a.b.c (contoh)\niDRAC Version               = x.yy.zz (contoh)\nLifecycle Controller Version = x.yy.zz (contoh)")}
+  else if(low==="racadm getsel"||low==="racadm lclog view"){S.logs=true;logs().forEach(function(l){out(l[1]==="Critical"?"err":l[1]==="Warning"?"wrn":"",l[0]+"  "+l[1].toUpperCase()+"  "+l[2])})}
+  else if(low==="racadm storage get pdisks"){for(var i=0;i<8;i++){var st=diskState(i);out(st==="Online"?"":st==="Rebuilding"?"wrn":"err","Disk.Bay."+i+"   State = "+st)}}
+  else if(low==="racadm serveraction powerstatus"){out("","Server power status: ON")}
+  else if(low==="racadm serveraction graceshutdown"){out("wrn","DITAHAN (simulasi): shutdown mematikan layanan di server ini.\nDi production hanya boleh sesuai MOP dan maintenance window.")}
+  else if(/^racadm serveraction (powercycle|hardreset|powerdown)$/.test(low)){out("err","DITOLAK (simulasi): perintah ini mematikan server secara paksa.\nRisiko: aplikasi down, data yang belum tersimpan rusak.\nHanya dengan MOP + approval + pendampingan senior.")}
+  else if(low==="racadm techsupreport collect"){out("okc","Mengumpulkan Technical Support Report (TSR)... selesai (simulasi).\nTSR ini dilampirkan saat membuka tiket ke Dell Support.")}
+  else{out("err","Perintah tidak dikenal di simulasi. Ketik help.")}
+  renderI();var t=$("#term");if(t)t.scrollTop=t.scrollHeight;var i2=$("#termIn");if(i2)i2.focus();
+}
+var rbTimer;
+function bindI(){
+  $$("#ibody [data-go]").forEach(function(b){b.addEventListener("click",function(){S.tab=b.dataset.go;renderI()})});
+  $$("#ibody [data-blink]").forEach(function(b){b.addEventListener("click",function(){
+    var i=+b.dataset.blink;S.blink=S.blink===i?null:i;
+    if(S.blink===FAILED&&!S.replaced&&!S.lost){S.blinkedFailed=true;S.msg=["ok","Lampu disk di <b>bay "+FAILED+"</b> sekarang berkedip. Di data center, cocokkan lampu ini dengan nomor bay, lalu ganti disknya."]}
+    else if(S.blink!==null&&S.blink!==FAILED){S.msg=["warn","Kamu menyalakan Blink pada <b>disk "+S.blink+"</b>, padahal statusnya Online. Cek lagi tabel: disk mana yang Failed?"]}
+    renderI()})});
+  $$("#ibody [data-bay]").forEach(function(b){b.addEventListener("click",function(){
+    var i=+b.dataset.bay;if(S.lost||S.replaced)return toast("Klik 'Ulangi simulasi' untuk mencoba lagi.");
+    if(i!==FAILED){S.lost=true;S.lostBay=i;S.blink=null;S.msg=["bad","<b>Salah cabut!</b> Disk di bay "+i+" masih sehat. RAID 5 sudah kehilangan disk "+FAILED+", jadi sekarang 2 disk hilang dan <b>Virtual Disk gagal, data hilang</b>. Di dunia nyata ini incident besar. Pelajaran: selalu Blink dan cocokkan bay sebelum mencabut."];renderI();return}
+    S.replaced=true;S.blink=null;
+    S.msg=S.blinkedFailed?["ok","Benar. Disk di bay "+FAILED+" diganti. Rebuild berjalan; selama rebuild RAID masih rentan, jadi hindari pekerjaan berat di server ini."]:["warn","Bay-nya benar, tapi kamu belum menyalakan <b>Blink</b>. Kali ini beruntung. Di lapangan, biasakan Blink dulu supaya tidak salah slot."];
+    if(!S.blinkedFailed)S.blinkedFailed=true;
+    renderI();clearInterval(rbTimer);
+    rbTimer=setInterval(function(){S.rebuild=Math.min(100,S.rebuild+5);var p=$("#rbPct"),bar=$("#rbBar");if(p)p.textContent=S.rebuild;if(bar)bar.style.width=S.rebuild+"%";
+      if(S.rebuild>=100){clearInterval(rbTimer);S.done=true;S.msg=["ok","<b>Selesai!</b> Rebuild 100%, Virtual Disk kembali Optimal. Langkah terakhir di dunia nyata: cek Dashboard sehat, catat di tiket, dan tutup pekerjaan sesuai SOP."];renderI()}},300);
+  })});
+  var f=$("#termForm");if(f){f.addEventListener("submit",function(e){e.preventDefault();runCmd($("#termIn").value)});var t=$("#term");if(t)t.scrollTop=t.scrollHeight}
+  $$("#ibody [data-cmd]").forEach(function(b){b.addEventListener("click",function(){runCmd(b.dataset.cmd)})});
+}
+$("#resetSim").addEventListener("click",function(){clearInterval(rbTimer);termBuf=[["dim","Terhubung ke iDRAC 192.0.2.10 (simulasi). Ketik help untuk daftar perintah."]];resetSim()});
+resetSim();
+
+/* ---------- 5. RAID ---------- */
+var R={failed:{}};
+function raidInfo(lv,n){
+  if(lv===0)return {min:2,ok:true,usable:n,tol:"0 disk",note:"Cepat, tapi satu disk rusak = semua data hilang. Hampir tidak dipakai di production.",use:"Data sementara"};
+  if(lv===1)return {min:2,ok:n===2,usable:1,tol:"1 disk",note:"Dua disk saling mirror. Di PERC, RAID 1 memakai tepat 2 disk; untuk lebih banyak pakai RAID 10.",use:"Disk OS"};
+  if(lv===5)return {min:3,ok:n>=3,usable:n-1,tol:"1 disk",note:"Paritas tersebar di semua disk. Hemat kapasitas, tapi rebuild disk besar lama dan berisiko.",use:"Data umum"};
+  if(lv===6)return {min:4,ok:n>=4,usable:n-2,tol:"2 disk",note:"Seperti RAID 5 dengan dua paritas. Lebih aman untuk disk besar.",use:"Data besar / arsip"};
+  return {min:4,ok:n>=4&&n%2===0,usable:n/2,tol:"1 per pasangan",note:"Gabungan mirror dan stripe. Performa tulis bagus, kapasitas 50%. Butuh jumlah disk genap.",use:"Database, VM"};
+}
+function renderRaid(){
+  var lv=+$("#rLevel").value,n=+$("#rN").value,sz=+$("#rSize").value;$("#rNv").textContent=n;
+  Object.keys(R.failed).forEach(function(k){if(+k>=n)delete R.failed[k]});
+  var info=raidInfo(lv,n),dk="";
+  for(var i=0;i<n;i++){var role="data",t="data";
+    if(lv===1||lv===10){role="mir";t=lv===1?"mirror":"pasangan "+(Math.floor(i/2)+1)}
+    else if(lv===5||lv===6){role=i>=n-(lv===5?1:2)?"par":"data";t=role==="par"?"setara paritas":"data"}
+    if(R.failed[i]){role="fail";t="rusak"}
+    dk+='<button type="button" class="disk '+role+'" data-d="'+i+'" aria-pressed="'+(!!R.failed[i])+'">Disk '+i+'<span class="t">'+t+'</span></button>'}
+  $("#disks").innerHTML=dk;
+  $$("#disks .disk").forEach(function(b){b.addEventListener("click",function(){var i=+b.dataset.d;if(R.failed[i])delete R.failed[i];else R.failed[i]=true;renderRaid()})});
+  var usableTB=(info.usable*sz),raw=n*sz;
+  $("#rStats").innerHTML=info.ok?
+    '<div class="stat"><b>'+fmt(usableTB)+' TB</b><span>kapasitas terpakai</span></div><div class="stat"><b>'+fmt(raw)+' TB</b><span>total mentah</span></div><div class="stat"><b>'+Math.round(usableTB/raw*100)+'%</b><span>efisiensi</span></div><div class="stat"><b>'+info.tol+'</b><span>tahan rusak</span></div>':
+    '<div class="stat" style="grid-column:1/-1"><b style="font-size:16px;color:var(--bad)">Konfigurasi tidak valid</b><span>'+(lv===1?"RAID 1 di PERC memakai tepat 2 disk.":lv===10?"RAID 10 butuh minimal 4 disk dan jumlahnya genap.":"RAID "+lv+" butuh minimal "+info.min+" disk.")+'</span></div>';
+  var f=Object.keys(R.failed).map(Number),cnt=f.length,state;
+  if(!info.ok)state="";
+  else if(cnt===0)state=["ok","<b>Optimal.</b> Klik disk untuk mensimulasikan disk rusak."];
+  else{
+    var lost=false;
+    if(lv===0)lost=true;else if(lv===1)lost=cnt>=2;else if(lv===5)lost=cnt>=2;else if(lv===6)lost=cnt>=3;
+    else{var pairs={};f.forEach(function(i){var p=Math.floor(i/2);pairs[p]=(pairs[p]||0)+1});lost=Object.keys(pairs).some(function(p){return pairs[p]>=2})}
+    state=lost?["bad","<b>Data hilang.</b> "+cnt+" disk rusak melebihi toleransi RAID "+lv+(lv===10?" (dua disk dalam satu pasangan mirror rusak).":".")]:
+      ["warn","<b>Degraded.</b> Data masih bisa diakses, tapi perlindungan berkurang. Segera ganti disk rusak dan tunggu rebuild."];
+  }
+  $("#rState").innerHTML=(state?'<div class="note '+state[0]+'"><p>'+state[1]+'</p></div>':'')+'<p class="small muted" style="margin:8px 0 0"><b>RAID '+lv+':</b> '+esc(info.note)+' Cocok untuk: '+esc(info.use)+'.</p>';
+}
+function fmt(x){return (Math.round(x*100)/100).toString().replace(".",",")}
+["rLevel","rN","rSize"].forEach(function(id){$("#"+id).addEventListener("input",function(){if(id!=="rSize")R.failed={};renderRaid()})});
+renderRaid();
+
+/* ---------- 6. quiz ---------- */
+var QZ=[
+ {q:"Lampu status di depan server berkedip amber. Apa langkah pertama yang tepat?",o:["Langsung restart server","Cek Dashboard dan log di iDRAC untuk tahu komponen yang bermasalah","Cabut semua disk satu per satu","Abaikan, server masih menyala"],a:1,e:"Amber berarti ada masalah hardware. Cari tahu komponennya dulu lewat iDRAC sebelum mengambil tindakan."},
+ {q:"Tombol apa yang ditekan saat boot untuk masuk System Setup (BIOS)?",o:["F2","F10","F11","F12"],a:0,e:"F2 = System Setup. F10 Lifecycle Controller, F11 Boot Manager, F12 PXE."},
+ {q:"Kamu harus mengganti disk rusak. Apa yang dilakukan sebelum mencabut disk?",o:["Matikan server dulu","Nyalakan Blink di iDRAC dan cocokkan nomor bay","Cabut disk yang paling panas","Format disk lewat F10"],a:1,e:"Disk hot-swap, jadi server tidak perlu mati. Yang penting: pastikan slot yang benar dengan Blink."},
+ {q:"RAID 5 dengan 6 disk @ 1,92 TB. Berapa kapasitas terpakainya?",o:["11,52 TB","9,6 TB","5,76 TB","7,68 TB"],a:1,e:"RAID 5 = (n − 1) disk. (6 − 1) × 1,92 TB = 9,6 TB."},
+ {q:"Satu PSU mati, server masih menyala. Tindakan yang benar?",o:["Biarkan saja karena server masih normal","Cabut PSU yang masih hidup untuk tes","Buka tiket dan ganti PSU sesuai SOP, karena redundansi sudah hilang","Restart server"],a:2,e:"Server berjalan tanpa cadangan. Kalau PSU kedua ikut mati, server langsung down."},
+ {q:"Port iDRAC dedicated terhubung ke jaringan apa?",o:["Jaringan aplikasi","Jaringan manajemen (out-of-band)","Jaringan storage iSCSI","Internet publik"],a:1,e:"iDRAC berada di jaringan manajemen terpisah, supaya server tetap bisa dikelola walau jaringan aplikasi atau OS bermasalah."},
+ {q:"Kenapa F12 (PXE boot) perlu hati-hati di production?",o:["Bisa merusak keyboard","Kalau ada server PXE dengan instalasi otomatis, server bisa terinstal ulang dan disk terhapus","PXE mematikan iDRAC","F12 menghapus BIOS"],a:1,e:"PXE mengambil image dari jaringan. Di lingkungan dengan auto-install, efeknya bisa menghapus OS yang ada."}
+];
+var ans={};
+function renderQuiz(){
+  $("#quiz").innerHTML=QZ.map(function(q,i){
+    var a=ans[i];
+    return '<div class="q'+(a!==undefined?" answered":"")+'"><p>'+(i+1)+'. '+esc(q.q)+'</p>'+q.o.map(function(o,j){
+      var cls=a===undefined?"":(j===q.a?"right":(j===a?"wrong":""));
+      return '<label class="'+cls+'"><input type="radio" name="q'+i+'" value="'+j+'" '+(a!==undefined?"disabled":"")+' '+(a===j?"checked":"")+'><span>'+esc(o)+'</span></label>'}).join("")+
+      '<div class="exp note '+(a===q.a?"ok":"bad")+'"><p><b>'+(a===q.a?"Benar.":"Belum tepat.")+'</b> '+esc(q.e)+'</p></div></div>'}).join("");
+  $$("#quiz input").forEach(function(r){r.addEventListener("change",function(){ans[+r.name.slice(1)]=+r.value;renderQuiz()})});
+  var done=Object.keys(ans).length,right=Object.keys(ans).filter(function(k){return ans[k]===QZ[k].a}).length;
+  $("#score").textContent="Skor: "+right+" / "+QZ.length+(done===QZ.length?(right===QZ.length?" · Sempurna!":" · Coba ulangi yang salah"):"");
+}
+$("#quizReset").addEventListener("click",function(){ans={};renderQuiz()});
+renderQuiz();
+
+/* start */
+var start=0;try{start=parseInt(localStorage.getItem("dellLabPage")||"0",10)||0}catch(e){}
+go(start);
+})();
+</script>
+</body>
+</html>

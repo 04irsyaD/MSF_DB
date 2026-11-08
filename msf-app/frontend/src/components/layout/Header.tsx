@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Cpu, Menu, Database, Layers, ShieldAlert, GitCompare, LucideIcon } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Cpu, Menu, Database, Layers, ShieldAlert, GitCompare, Server, LucideIcon } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ const ROUTE_MAP: Array<{ prefix: string; info: PageInfo }> = [
   { prefix: "/dashboard",  info: { title: "Dashboard",    desc: "Ringkasan aktivitas dan statistik aplikasi",                        icon: LayoutDashboard } },
   { prefix: "/generate",   info: { title: "AI Generator", desc: "Generate dokumentasi dari DDL atau koneksi database langsung",       icon: Sparkles        } },
   { prefix: "/linux-helper", info: { title: "Linux Helper", desc: "Shortcut & command server, bertingkat dari dasar",                icon: SquareTerminal  } },
+  { prefix: "/infra-lab",  info: { title: "Infra Lab",    desc: "Simulasi & materi perangkat data center",                            icon: Server          } },
   { prefix: "/sql-helper", info: { title: "SQL Helper",   desc: "Tabel skrip DBA & optimasi (Client Standalone)",                    icon: Database        } },
   { prefix: "/schema-compare", info: { title: "Schema Compare", desc: "Bandingkan struktur dua database dari snapshot atau koneksi database",              icon: GitCompare      } },
   { prefix: "/shortcuts",  info: { title: "SQL Shortcuts", desc: "Skrip database siap pakai untuk DBA dan optimasi",                  icon: Terminal        } },

@@ -1,9 +1,52 @@
 # Session Notes — MSF DB
 
 Catatan handoff antar sesi. Baca ini dulu sebelum lanjut kerja.
-Terakhir diperbarui: 2026-10-27.
+Terakhir diperbarui: 2026-11-08.
 
 ---
+
+## 0000f. Infra Lab: modul Cisco, NetApp, Palo Alto (2026-11-08) — belum di-commit
+
+Atas permintaan user, ketiga modul "segera hadir" diaktifkan. Tidak ada referensi: SEMUA materinya draf baru
+(perlu review user). Data fiktif (RFC 5737, host *-DEMO-01, serial DEMO*). Tanpa dependency baru.
+
+- Komponen bersama baru di `features/infra-lab/components/`: `PartsExplorer` (SVG + chip + info), `device/Hotspot`
+  (hotspot SVG + warna perangkat), `Quiz` (`Quiz` + `DoDont`), `TaskPanel` (langkah + status), `ConceptExplorer`.
+  `lib/cli.ts::cliMatch` = pencocok singkatan gaya Cisco ("sh|ow ip int|erface br|ief"). Dell di-refactor memakai
+  komponen ini (perilaku sama; regresi 59/59 lolos).
+- `modules/cisco-switch/` (route `/infra-lab/cisco`, 6 bagian): `data/ios.ts` = mesin CLI IOS murni (mode
+  user/priv/config/if, do, shut/no shut, err-disabled, write memory, sesi SSH putus kalau uplink Te1/1/1 di-shutdown).
+- `modules/netapp-ontap/` (`/infra-lab/netapp-ontap`): `data/ontap.ts` = mesin CLI ONTAP (parameter `-nama nilai`,
+  singkatan), simulasi volume vol_app 95%, snapshot SnapMirror busy, kalkulator snapshot reserve.
+- `modules/palo-alto/` (`/infra-lab/palo-alto`): `data/policy.ts` = evaluator policy (first match, interzone-default),
+  dipakai simulasi (urutan rule, candidate vs running, commit) dan `test security-policy-match` di konsol.
+- `InfraLabPage`: isi modul jadi `<details>` (terbuka otomatis kalau modul pernah dibuka).
+- Prettier (config repo) dijalankan untuk `src/features/infra-lab` dan `src/app/infra-lab`.
+- Verifikasi: type-check OK, lint OK (5 warning lama), build OK (salinan scratchpad; `next dev` user di :3000).
+  Playwright Firefox build produksi: modul baru 61/61 (alur simulasi, salah langkah, kuis, 375px light/dark untuk
+  4 modul), Dell 59/59. Ditemukan & diperbaiki: daftar rule Palo Alto dan daftar VLAN Cisco terjepit di 375px.
+
+## 0000e. Menu baru Infra Lab + modul Dell PowerEdge (2026-11-08) — belum di-commit
+
+Porting prototipe `msf-app/dell-server-lab.html` (untracked, dibiarkan di tempatnya) menjadi halaman asli. Desain
+disetujui user lewat mockup kanvas; semua client-side, tanpa API, tanpa dependency baru, data fiktif (192.0.2.x, DEMO123).
+
+- Route: `/infra-lab` (pilih modul) dan `/infra-lab/dell-poweredge`. Menu sidebar "Infra Lab" (ikon `Server`) setelah
+  Linux Helper (`components/layout/Sidebar.tsx`) + entri `ROUTE_MAP` di `Header.tsx`. Tidak ada halaman lain diubah.
+- `features/infra-lab/`: `modules.ts` (daftar modul; NetApp/Cisco/Palo Alto status "soon"), `lib/` (types, kelas UI
+  bersama, progres localStorage `msfdb:infralab:v1:<id>` dengan try/catch), `components/` (LabShell + LabStepper,
+  Note, StatusPill, DeviceScreen, `terminal/` CommandConsole generik), `modules/dell-poweredge/` (data + 7 bagian).
+- Modul Dell 7 bagian (atas permintaan user, tambah "Perintah racadm" setelah iDRAC): Kenalan, Bagian server (SVG
+  hotspot keyboard), Tombol saat boot, iDRAC (ganti disk, salah cabut, rebuild), Perintah racadm, RAID, Perhatian & kuis.
+- `data/commands.ts::runRacadm` = satu sumber output untuk Terminal iDRAC dan bagian Perintah. Teks "Kapan dipakai",
+  "Cara baca", deskripsi kartu modul "segera hadir" = draf baru (bukan dari referensi) — minta user review.
+- Menambah modul: folder `modules/<id>/` + entri `modules.ts` + `app/infra-lab/<id>/page.tsx`. Pola layar perintah
+  (`CommandConsole`) siap dipakai Cisco (`show ip interface brief`) dkk.
+- Verifikasi: type-check OK, lint OK (5 warning exhaustive-deps lama), `next build` OK (dijalankan di salinan scratchpad
+  karena `next dev` user aktif di :3000). Playwright Firefox 59/59 cek lolos di build produksi :3100: semua bagian &
+  simulasi, keyboard F10/Enter hotspot, progres tersimpan + localStorage rusak, 375px light/dark tanpa scroll horizontal.
+- Sisa: review teks draf; modul NetApp/Cisco/Palo Alto; teks Infra Lab belum dwibahasa EN/ID (hanya Indonesia, sesuai
+  permintaan).
 
 ## 0000d. Audit keamanan dependensi + header (2026-10-28) — belum di-commit
 

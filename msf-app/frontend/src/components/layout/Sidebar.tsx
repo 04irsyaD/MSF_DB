@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Activity, X, Circle, ShieldAlert, Layers, Database, GitCompare } from "lucide-react";
+import { LayoutDashboard, Sparkles, Terminal, SquareTerminal, Activity, X, Circle, ShieldAlert, Layers, Database, GitCompare, Server } from "lucide-react";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/linux-helper",
       icon: SquareTerminal,
       description: "Shortcut & command server",
+    },
+    {
+      label: "Infra Lab",
+      href: "/infra-lab",
+      icon: Server,
+      description: "Simulasi & materi device DC",
     },
     {
       label: "SQL Shortcuts",
